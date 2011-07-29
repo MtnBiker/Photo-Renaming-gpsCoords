@@ -1,0 +1,103 @@
+RUBY_DESCRIPTION: ruby 1.8.7 (2009-06-12 patchlevel 174) [universal-darwin10.0]
+Fine naming and moving started: Wed Jul 20 21:31:17 -0700 2011
+scr:       /Volumes/Knobby Aperture II/_Download folder/ Drag Photos HERE/
+destPhoto: /Volumes/Knobby Aperture II/_Download folder/Latest Download/
+srcGPX: /Users/gscar/Documents/GPS-Maps-docs/   Garmin gpx daily logs/2011 Download//
+time offsets: 0 seconds camera error, 2400 seconds (40 minutes) max. time difference between points, and photos were taken in time zone 0.0 GMT, but they are time stamped in UTC.
+25m max. distance between points
+
+Intialization complete. File renaming and copying/moving beginning...
+
+1. perlOutput: 
+City(geotag)=auto
+City(nogeotag)=auto
+Province-State(geotag)=guess
+Province-State(nogeotag)=guess
+Country-PrimaryLocationName(geotag)=guess
+Country-PrimaryLocationName(nogeotag)=guess
+Found 0 total gps file names.
+Processed 0 coordinates.
+Found 1 total image file name.
+/Volumes/Knobby Aperture II/_Download folder/Latest Download/2010.10.14-15.31.22.gs.L.jpgCould not find a coordinate.
+Found coordinates for 0 images out of 1 images ... done.
+1. End of perlOutput ================
+
+2. perlOutput: 
+City(geotag)=auto
+City(nogeotag)=auto
+Province-State(geotag)=guess
+Province-State(nogeotag)=guess
+Country-PrimaryLocationName(geotag)=guess
+Country-PrimaryLocationName(nogeotag)=guess
+Found 0 total gps file names.
+Processed 0 coordinates.
+Found 1 total image file name.
+/Volumes/Knobby Aperture II/_Download folder/Latest Download/2010.10.14-15.31.22.gs.L.rw2Could not find a coordinate.
+Found coordinates for 0 images out of 1 images ... done.
+2. End of perlOutput ================
+
+3. perlOutput: 
+City(geotag)=auto
+City(nogeotag)=auto
+Province-State(geotag)=guess
+Province-State(nogeotag)=guess
+Country-PrimaryLocationName(geotag)=guess
+Country-PrimaryLocationName(nogeotag)=guess
+Found 0 total gps file names.
+Processed 0 coordinates.
+Found 1 total image file name.
+/Volumes/Knobby Aperture II/_Download folder/Latest Download/2010.10.14-15.31.41.gs.L.jpgCould not find a coordinate.
+Found coordinates for 0 images out of 1 images ... done.
+3. End of perlOutput ================
+
+4. perlOutput: 
+City(geotag)=auto
+City(nogeotag)=auto
+Province-State(geotag)=guess
+Province-State(nogeotag)=guess
+Country-PrimaryLocationName(geotag)=guess
+Country-PrimaryLocationName(nogeotag)=guess
+Found 0 total gps file names.
+Processed 0 coordinates.
+Found 1 total image file name.
+/Volumes/Knobby Aperture II/_Download folder/Latest Download/2010.10.14-15.31.41.gs.L.rw2Could not find a coordinate.
+Found coordinates for 0 images out of 1 images ... done.
+4. End of perlOutput ================
+
+5. perlOutput: 
+City(geotag)=auto
+City(nogeotag)=auto
+Province-State(geotag)=guess
+Province-State(nogeotag)=guess
+Country-PrimaryLocationName(geotag)=guess
+Country-PrimaryLocationName(nogeotag)=guess
+Found 2 total gps file names.
+Parsing GPX file "/Users/gscar/Documents/GPS-Maps-docs/   Garmin gpx daily logs/2011 Download/20110607.gpx": 12 1318 983 920 points.
+Parsing GPX file "/Users/gscar/Documents/GPS-Maps-docs/   Garmin gpx daily logs/2011 Download/20110606.gpx": 2 276 1 100 392 3 38 4 1284 658 points.
+Processed 5991 coordinates.
+Found 1 total image file name.
+/Volumes/Knobby Aperture II/_Download folder/Latest Download/2011.06.07-09.18.24.gs.L.rw2, 2011-06-07T15:18:24Z, timediff=9016
+Could not find a coordinate.
+Found coordinates for 0 images out of 1 images ... done.
+5. End of perlOutput ================
+
+====================================================================
+Summary of relabeling and geo-coding results:
+5 photos of 5 files were copied to /Volumes/Knobby Aperture II/_Download folder/Latest Download/ and renamed, and the originals remain untouched. And 0 thumbnails were deleted.
+
+
+0 photos did not have coordinates added because the gpx file was missing.
+Coordinates and location were found for 0 photos and 
+ 0 photos were not annotated because of a "Problem getting geoinfo for point" failure. 
+Coordinates were NOT found for 5 photos; 5 photos total.
+
+Problem Report Details:
+
+1. Coordinates NOT found for 2010.10.14-15.31.22.gs.L.jpg by the gpsPhoto.pl and was moved to Latest Download—no coordinates.  (Original file is P1040199.JPG. Try again to add for reprocessing. Test: Found coordinates for 0
+2. Coordinates NOT found for 2010.10.14-15.31.22.gs.L.rw2 by the gpsPhoto.pl and was moved to Latest Download—no coordinates.  (Original file is P1040199.RW2. Try again to add for reprocessing. Test: Found coordinates for 0
+3. Coordinates NOT found for 2010.10.14-15.31.41.gs.L.jpg by the gpsPhoto.pl and was moved to Latest Download—no coordinates.  (Original file is P1040200.JPG. Try again to add for reprocessing. Test: Found coordinates for 0
+4. Coordinates NOT found for 2010.10.14-15.31.41.gs.L.rw2 by the gpsPhoto.pl and was moved to Latest Download—no coordinates.  (Original file is P1040200.RW2. Try again to add for reprocessing. Test: Found coordinates for 0
+5. Coordinates NOT found for 2011.06.07-09.18.24.gs.L.rw2 by the gpsPhoto.pl and was moved to Latest Download—no coordinates.  (Original file is P1120684.RW2. Try again to add for reprocessing. Test: Found coordinates for 0
+
+Success Report Details:
+=============================================================
