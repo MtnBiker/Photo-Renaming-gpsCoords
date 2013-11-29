@@ -1,5 +1,7 @@
 #  Created by Greg Scarich on 2007-07-30.  
-require 'Pashua' # for GUI
+# require 'Pashua' # for GUI
+require File.expand_path(File.join(File.dirname(__FILE__), 'Pashua'))
+
 include Pashua
 
 # This code is based on that contributed by Mike Hall to Pashua. It uses a module
@@ -9,7 +11,8 @@ include Pashua
 # http://www.bluem.net/downloads/pashua_en/
 
 
-def geoGUI(srcPhoto,destPhoto,gpsPhotoLoc,srcGPX,tzoLoc,tzoGPSr,timeOffset,maxTimeDiff,maxDistance,kmzFile)  
+def geoGUI(gpsPhotoLoc,srcGPX,tzoLoc,tzoGPSr,timeOffset,maxTimeDiff,maxDistance,kmzFile)  
+# def geoGUI(srcPhoto,destPhoto,gpsPhotoLoc,srcGPX,tzoLoc,tzoGPSr,timeOffset,maxTimeDiff,maxDistance,kmzFile)  
           
   # Need a symlink to Pashua in this folder too, include and require moved to top
 
@@ -30,13 +33,12 @@ txt.width = 310
 txt.x = 270
 txt.y = 160
 
-# Photo folder select
-# FIX put in just mounted card when get app to detect mounted cards
-srcSelect.type = openbrowser
-srcSelect.label = Select the folder containing the photos (reconfirming that selected previously):
-srcSelect.width=550
-# presumably can use a variable
-srcSelect.default = #{srcPhoto}
+# # Photo folder select
+# # FIX put in just mounted card when get app to detect mounted cards
+# srcSelect.type = openbrowser
+# srcSelect.label = Select the folder containing the photos (reconfirming that selected previously):
+# srcSelect.width=550
+# # presumably can use a variable
 
 
 # Time Zone Camera

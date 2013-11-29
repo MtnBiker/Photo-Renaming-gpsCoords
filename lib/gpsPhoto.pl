@@ -1,7 +1,9 @@
 #!/usr/bin/perl -w
+
 BEGIN { unshift @INC, "/usr/bin/lib/" }
-# $Id: gpsPhoto.pl,v 1.149 2008/09/13 07:33:12 girlich Exp $
-# current version as of 2009.10.28
+# The above line was in a previous version. Couldn't find Exif.pm without this line.
+
+# $Id: gpsPhoto.pl,v 1.160 2012/10/10 19:51:46 girlich Exp $ #Still current as of 2013.07.08
 
 #Copyright (C) 2005 Peter Sykora, Andreas Neumann
 
@@ -32,6 +34,7 @@ package util;
 use strict;
 use POSIX qw(floor);
 use File::Basename qw(fileparse);
+use Time::Local;
 
 sub dd2dms {
 	my $dd = shift;
@@ -78,6 +81,36 @@ sub dtcombine($$)
 	return sprintf("%sT%sZ", $d, $t);
 }
 
+sub DateTimeOriginal_to_dt_UTC($)
+{
+	my ($DateTimeOriginal) = @_;
+	return undef unless defined $DateTimeOriginal;
+	
+	#print "DateTimeOriginal: ".$DateTimeOriginal."\n";
+
+	# take apart the DateTimeOriginal in local time...
+	$DateTimeOriginal=~/(\d{4}):(\d{1,2}):(\d{1,2})\s+(\d{1,2}):(\d{1,2}):(\d{1,2})/;
+
+	my $g_sec_l = $6;
+	my $g_min_l = $5;
+	my $g_hour_l = $4;
+	my $g_mday_l = $3;
+	my $g_mon_l = $2;
+	my $g_year_l = $1;
+
+	my $local_s = timelocal($g_sec_l,$g_min_l,$g_hour_l,$g_mday_l,$g_mon_l,$g_year_l);
+
+	# rebuild in GMT...
+	my ($g_sec,$g_min,$g_hour,$g_mday,$g_mon,$g_year,$g_wday,$g_yday,$g_isdst) = gmtime($local_s);
+	
+	my $dt = sprintf("%04d-%02d-%02dT%02d:%02d:%02dZ", 1900+$g_year, $g_mon, $g_mday, $g_hour, $g_min, $g_sec);
+
+	#print "rebuilt in GMT: ".$dt."\n";
+
+	return $dt;
+}
+
+
 sub DateTimeOriginal_to_dt($)
 {
 	my ($DateTimeOriginal) = @_;
@@ -116,7 +149,10 @@ sub dest_to_temp($)
 	my ($dest) = @_;
 
 	my ($base, $dir, $ext) = fileparse($dest,qr/\.[^.]*/);
-	return File::Spec->join($dir, "${base}_1$ext");
+	return File::Temp->new(
+		TEMPLATE => "${base}_XXXXXX",
+		DIR => $dir,
+		SUFFIX => $ext)->filename;
 }
 
 
@@ -156,9 +192,9 @@ sub imgInfo($)
 sub SetNewValue($$$$)
 {
 	my $self = shift;
-	my ($tag, $value, $group) = @_;
+	my ($tag, $value, $group, @opts) = @_;
 
-	my ($success, $errStr) = $self->exifTool->SetNewValue($tag,$value,Group=>$group);
+	my ($success, $errStr) = $self->exifTool->SetNewValue($tag,$value,Group=>$group, @opts);
 	die "Problem writing out '$tag'='$value' for file '$self->{metaFile}'. Error: $errStr\n" if $success != 1; 
 }
 
@@ -180,8 +216,14 @@ sub _is_geotagged($$)
 sub getDateTimeOriginal($)
 {
 	my $self = shift;
-	my $dt = util::DateTimeOriginal_to_dt($self->imgInfo->{DateTimeOriginal});
-	return $dt;
+	my $time = $self->imgInfo->{DateTimeOriginal};
+	if (!defined $time) {
+		$time = $self->imgInfo->{DateTimeDigitized};
+	}
+	if (!defined $time) {
+		$time = $self->imgInfo->{CreateDate};
+	}
+	return util::DateTimeOriginal_to_dt($time);
 }
 
 
@@ -562,7 +604,7 @@ sub kml_write_photo_header($);
 sub kml_write_folder_start($$);
 sub kml_write_folder_end($);
 sub kml_write_image($$$);
-sub kml_write_image_placemark($$$$$$);
+sub kml_write_image_placemark($$$$$$$);
 sub kml_write_image_screenoverlay($$$$);
 sub kml_write_image_groundoverlay($$$$$);
 sub kml_write_image_photooverlay($$$$$$);
@@ -682,7 +724,7 @@ my @IPTC=( # IPTC options definition.
 	IPTC->new( 'opt'=>'caption', 'tag'=>'Caption-Abstract', 'len'=>2000, 'list'=>0, ),
 );
 
-(my $source_release = q$Id: gpsPhoto.pl,v 1.149 2008/09/13 07:33:12 girlich Exp $) =~ s/^Id: gpsPhoto.pl,v //;
+(my $source_release = q$Id: gpsPhoto.pl,v 1.160 2012/10/10 19:51:46 girlich Exp $) =~ s/^Id: gpsPhoto.pl,v //;
 $source_release =~ s/(:\d{2})\s*.*/$1/;
 (my $program = $0) =~ s,.*/,,;
 
@@ -877,9 +919,16 @@ my %gpsTracks=();
 for my $gpsfile (@gpsfiles) {
 	print "Parsing GPX file \"$gpsfile\":";
 	my $parser = XML::Parser->new(Style => 'Tree');
-	my $doc = $parser->parsefile($gpsfile);
-	Parser_process_node($gpsfile,@$doc);
-	print " points.\n";
+	my $doc;
+	eval {
+		$doc = $parser->parsefile($gpsfile);
+	};
+	if ($@) {
+		print " Error in file. Ignore it.\n";
+	} else {
+		Parser_process_node($gpsfile,@$doc);
+		print " points.\n";
+	}
 }
 
 print "Processed $lineCounter coordinates.\n";
@@ -1020,7 +1069,7 @@ for my $dir (@dir) {
 		$file = File::Spec->rel2abs(File::Spec->join($dir,$file));
 		# First check if it is an image file.
 		my ($base, $dir, $ext) = fileparse($file,qr/\.[^.]*/);
-		if ($ext =~ /^\.(jpg|jpeg|nef|cr2|crw|mrw|jpe|tif|tiff|rw2)$/i) {
+		if ($ext =~ /^\.(jpg|jpeg|nef|cr2|crw|mrw|jpe|tif|tiff|dng)$/i) {
 			push @images, $file;
 			$count++;
 		}
@@ -1200,6 +1249,7 @@ sub image_action_correlate($$$)
 
 	my @dateTime;
 	my $point = undef;
+	my $method = undef;
 
 	if ($do_track_correlation) {
 
@@ -1324,7 +1374,12 @@ sub image_action_correlate($$$)
 
 		}
 		else {
-			print " - no EXIF tag DateTimeOriginal available.\n";
+			print " - neither EXIF tag DateTimeOriginal nor DateTimeDigitized available.\n";
+		}
+
+		if (defined $point) {
+			# found a valid track point
+			$method = "GPS";	# GPSProcessingMethod = GPS
 		}
 	} # End track correlation.
 
@@ -1335,14 +1390,33 @@ sub image_action_correlate($$$)
 
 		print ", get geotag from meta info.\n";
 		$point = $meta_in->get_point();
+
+		# lat/lon/alt from reading previously set meta tags
+		# we dont know how this data got there, so we cant
+		# set GPSProcessingMethod - just leave it as is.
+		$method = undef;
 	} # End geotag source 'exif'.
 
 	if (!defined $point &&
 		defined $geotag_source{'option'} && defined $opt_geotag) {
 		if ($opt_geotag =~ /^([^,]+),([^,]+),([^,]+)/) {
 			($point->{y},$point->{x},$point->{z}) = ($1, $2, $3);
-			$point->{dt} = $meta_in->getDateTimeOriginal();
+
+			#NOTE: GPSTimeStamp is supposed to be in UTC.
+			#      So this only works out correctly, if DateTimeOriginal is in UTC.
+			#      Usually this isn't the case. It's better to assume local time 
+			#      and adjust it accordingly.
+			#$point->{dt} = $meta_in->getDateTimeOriginal();
+		
+			# get DateTimeOriginal...
+			my $DateTimeOriginal = $meta_in->exifTool->GetValue('DateTimeOriginal');
+			# ...and convert it to UTC... 
+			$point->{dt} = util::DateTimeOriginal_to_dt_UTC($DateTimeOriginal);
+
 			($point->{d}, $point->{t}) = util::dtexpand($point->{dt});
+		
+			# lat/lon/alt given on the command line
+			$method = "MANUAL";	# GPSProcessingMethod = MANUAL
 		}
 		else {
 			die "Cannot understand value of option --geotag='$opt_geotag'.\n";
@@ -1375,8 +1449,22 @@ sub image_action_correlate($$$)
 
 	# This part only applies, if we have GPS data.
 	if ($point) {
+		my $bearing = undef;
+		my $instructions = "";
+	
+		# NOTE: we could use the track direction (course) for the GPSImgDirection tag,
+		#       but there will be times when this will not be the correct direction
+		#       (when you turn on the spot and take a picture) unless the GPS logger has
+		#       a magnetic compass.
+		#if (exists($point->{course}) ) {
+		#	$bearing = $point->{course};
+		#}
 
-		my $instructions = "Lat ".$point->{y}.", Lon ".$point->{x}." - Bearing: 0 - Altitude: ".$point->{z}."m";
+		if (defined $bearing) {
+			$instructions = "Lat ".$point->{y}.", Lon ".$point->{x}." - Bearing: ".$bearing."Â° - Altitude: ".$point->{z}."m";
+		} else {
+			$instructions = "Lat ".$point->{y}.", Lon ".$point->{x}." - Bearing: unknown - Altitude: ".$point->{z}."m";
+		}
 		print $instructions."\n";
 		#write coordinates to IPTC field "SpecialInstructions"
 		$meta_out->SetNewValue('SpecialInstructions',$instructions,$IPTC);
@@ -1404,9 +1492,56 @@ sub image_action_correlate($$$)
 		# Write map datum to WGS84.
 		$meta_out->SetNewValue('GPSMapDatum','WGS-84',$GPS);
 
+		# Write track direction of movement (if available)
+		if (exists($point->{course})) {
+			$meta_out->SetNewValue('GPSTrackRef','T',$GPS);
+			$meta_out->SetNewValue('GPSTrack',$point->{course},$GPS);
+		}
+
+		# Write speed (if available)
+		if (exists($point->{speed})) {	# do we want to smooth/cutoff this value?
+			# write as km/h
+			$meta_out->SetNewValue('GPSSpeedRef','km/h',$GPS);
+			# value in gpx file is (usually) in m/s 
+			$meta_out->SetNewValue('GPSSpeed',($point->{speed} * 3.6),$GPS);	
+		}
+			
+		# Write type of fix + dop (if available)
+		if (exists($point->{fix})) {
+			# <not set>, none, 2d, 3d, dgps, pps
+			if ($point->{fix} eq "2d") {
+				$meta_out->SetNewValue('GPSMeasureMode','2',$GPS);
+				$meta_out->SetNewValue('GPSStatus','Active',$GPS);
+			
+				# hdop during 2-dimensional measurement
+				if (exists($point->{hdop})) {
+					$meta_out->SetNewValue('GPSDOP',$point->{hdop},$GPS);
+				}
+			} elsif (($point->{fix} eq "3d") or ($point->{fix} eq "dgps") or ($point->{fix} eq "pps") ) {
+				$meta_out->SetNewValue('GPSMeasureMode','3',$GPS);
+				$meta_out->SetNewValue('GPSStatus','Active',$GPS);
+
+				# pdop during 3-dimensional measurement
+				if (exists($point->{pdop})) {
+					$meta_out->SetNewValue('GPSDOP',$point->{pdop},$GPS);
+				}
+			} elsif ($point->{fix} eq "none") {
+				$meta_out->SetNewValue('GPSStatus','Void',$GPS);
+			}
+		}
+
+		# Write location data source type
+		if (defined $method) {
+			$meta_out->SetNewValue('GPSProcessingMethod',$method,$GPS);
+		}
+
+		# NOTE: GPSImgDirection is not a required tag. There is no need to set it
+		#       unless we actually have the information.
 		# Write destination bearing.
-		$meta_out->SetNewValue('GPSImgDirection',0,$GPS);
-		$meta_out->SetNewValue('GPSImgDirectionRef','T',$GPS);
+		if (defined $bearing) {
+			$meta_out->SetNewValue('GPSImgDirection',$bearing,$GPS);
+			$meta_out->SetNewValue('GPSImgDirectionRef','T',$GPS);
+		}
 
 		$writeFile = 1;
 		$pictureCounterCoordinate++;
@@ -1464,6 +1599,14 @@ sub image_action_delete_geotag($$$)
 		'GPSImgDirection',
 		'GPSImgDirectionRef',
 		'SpecialInstructions',
+		'GPSStatus',
+		'GPSMeasureMode',
+		'GPSDOP',
+		'GPSSpeedRef',
+		'GPSSpeed',
+		'GPSTrackRef',
+		'GPSTrack',
+		'GPSProcessingMethod',
 	);
 	foreach my $tag (@geotags) {
 		if (exists $meta_in->imgInfo->{$tag}) {
@@ -1691,11 +1834,11 @@ sub kml_write_image($$$)
 	if (exists $kml_image_type{'placemark'}) {
 		if ($kml) {
 			kml_write_image_placemark($kml_fh, $fn, $kml_image_file_name, $kml_thumb_file_name,
-				$point, $image_landscape);
+				$point, $image_landscape, $image_ratio);
 		}
 		if ($kmz) {
 			kml_write_image_placemark($kmz_temp_kml_fh, $fn, $kmz_image_file_name, $kmz_thumb_file_name,
-				$point, $image_landscape);
+				$point, $image_landscape, $image_ratio);
 			$kmz_embed_image++;
 			$kmz_embed_thumb++;
 		}
@@ -1773,18 +1916,22 @@ sub kml_write_image($$$)
 	}
 }
 
-sub kml_write_image_placemark($$$$$$)
+sub kml_write_image_placemark($$$$$$$)
 {
-	my ($fh, $_fn, $_file, $_thumb, $_point, $_landscape) = @_;
+	my ($fh, $_fn, $_file, $_thumb, $_point, $_landscape, $_ratio) = @_;
 
 	my $thumb_scale;
+	my $width;
+	my $height;
 	# The longer side is fixed to $opt_kml_placemark_thumbnail_size.
 	if ($_landscape) {
-		$thumb_scale="width=\"$opt_kml_placemark_thumbnail_size\"";
+		$width = $opt_kml_placemark_thumbnail_size;
+		$height = $width * $_ratio;
+	} else {
+		$height = $opt_kml_placemark_thumbnail_size;
+		$width = $height / $_ratio;
 	}
-	else {
-		$thumb_scale="height=\"$opt_kml_placemark_thumbnail_size\"";
-	}
+	$thumb_scale=sprintf("width=\"%d\" height=\"%d\"", $width, $height);
 
 	print $fh qq(
     <Placemark>
@@ -1953,13 +2100,17 @@ sub kml_write_image_photooverlay($$$$$$)
 	if ($_image_ratio>1) {
 		# Portrait mode.
 	 	# print "Portrait\n";
-		$thumb_scale="height=\"$opt_kml_placemark_thumbnail_size\"";
+		my $height = $opt_kml_placemark_thumbnail_size;
+		my $width = $height / $_image_ratio;
+		$thumb_scale=sprintf("width=\"%d\" height=\"%d\"", $width, $height);
 		$av = 25.0;
 		$ah = rad2deg(atan(tan(deg2rad($av) / $_image_ratio), 1));
 	} else {
 		# Landscape mode.
 	 	# print "Landscape\n";
-		$thumb_scale="width=\"$opt_kml_placemark_thumbnail_size\"";
+		my $width = $opt_kml_placemark_thumbnail_size;
+		my $height = $width * $_image_ratio;
+		$thumb_scale=sprintf("width=\"%d\" height=\"%d\"", $width, $height);
 		$ah = 25.0;
 		$av = rad2deg(atan(tan(deg2rad($ah) * $_image_ratio), 1));
 	}
@@ -2585,6 +2736,16 @@ sub Parser_process_node($@)
 		$cur_point->{z}=int($content->[2] + 0.5);
 	} elsif ($type eq 'time') {
 		$cur_point->{dt} = $content->[2];
+	} elsif ($type eq 'course') {	# direction of movement
+		$cur_point->{course} = ($content->[2] * 1.0);
+	} elsif ($type eq 'speed') {	# speed (assumed to be in km/h)
+		$cur_point->{speed} = ($content->[2] * 1.0);
+	} elsif ($type eq 'fix') {	# 2d or 3d 
+		$cur_point->{fix} = $content->[2];
+	} elsif ($type eq 'hdop') {	# used when fix is 2d
+		$cur_point->{hdop} = ($content->[2] * 1.0);
+	} elsif ($type eq 'pdop') {	# used when fix is 3d
+		$cur_point->{pdop} = ($content->[2] * 1.0);
 	}
 }
 
@@ -2599,7 +2760,9 @@ sub store_segment($@)
 		# printf STDERR "d %s t %s\n", $point->{d}, $point->{t};
 		my ($year,$month,$day) = split(/-/,$point->{d});
 		my ($hour,$minute,$second) = split(/:/,$point->{t});
-		my $secs = timegm($second,$minute,$hour,$day,$month-1,$year);
+		my $second_int = int($second);
+		my $second_frac = $second - $second_int;
+		my $secs = timegm($second_int,$minute,$hour,$day,$month-1,$year) + $second_frac;
 		$point->{s} = $secs;
 	}
 
@@ -2634,7 +2797,7 @@ sub tz_guess_15deg($)
 		$tz .= $hour;
 	}
 	my $offset = -3600 * $hour;
-	printf "Guess TZ from Longitude=%f°:\nTZ=%s --timeoffset=%d\n", $lon_deg, $tz, $offset;
+	printf "Guess TZ from Longitude=%fÂ°:\nTZ=%s --timeoffset=%d\n", $lon_deg, $tz, $offset;
 	return $offset;
 }
 
@@ -2736,7 +2899,7 @@ sub tz_guess_zone_tab($)
 
 	my $offset = $local_s - $point->{s};
 
-	printf "Guess TZ from Pos=(%f°,%f°) at %s %s\nClosest=(%f°,%f°) Dist=%fkm\nTZ=%s, --timeoffset=%d\n",
+	printf "Guess TZ from Pos=(%fÂ°,%fÂ°) at %s %s\nClosest=(%fÂ°,%fÂ°) Dist=%fkm\nTZ=%s, --timeoffset=%d\n",
 		$sourcelatdec, $sourcelondec,
 		$point->{d}, $point->{t},
 		$closelatdec, $closelondec,
@@ -3094,24 +3257,26 @@ sub get_geoinfo_wikipedia($$$)
 		$url .= "\&lang=$opt_language";
 	}
 	$text = $geturl->($url);
-	my $wikidistance = undef;
-	if ($text =~ m,<distance>([^<]+)</distance>,) {
-		$wikidistance = $1;
-	}
-	if ( defined $wikidistance && defined $distance && $wikidistance < $distance ) {
-		delete $geo_info->{target_lat};
-		delete $geo_info->{target_lon};
-		if ($text =~ m,<lat>([^<]+)</lat>,) {
-			$geo_info->{target_lat} = $1;
+        if (defined $text) {
+		my $wikidistance = undef;
+		if ($text =~ m,<distance>([^<]+)</distance>,) {
+			$wikidistance = $1;
 		}
-		if ($text =~ m,<lng>([^<]+)</lng>,) {
-			$geo_info->{target_lon} = $1;
-		}
-		if ($text =~ m,<title>([^<]+)</title>,) {
-			fill_city($geo_info, $1, $wikidistance);
-		}
-		if ($text =~ m,<summary>([^<]+)</summary>,) {
-			$geo_info->{caption} = $1;
+		if ( defined $wikidistance && defined $distance && $wikidistance < $distance ) {
+			delete $geo_info->{target_lat};
+			delete $geo_info->{target_lon};
+			if ($text =~ m,<lat>([^<]+)</lat>,) {
+				$geo_info->{target_lat} = $1;
+			}
+			if ($text =~ m,<lng>([^<]+)</lng>,) {
+				$geo_info->{target_lon} = $1;
+			}
+			if ($text =~ m,<title>([^<]+)</title>,) {
+				fill_city($geo_info, $1, $wikidistance);
+			}
+			if ($text =~ m,<summary>([^<]+)</summary>,) {
+				$geo_info->{caption} = $1;
+			}
 		}
 	}
 
@@ -3305,7 +3470,7 @@ sub image_file_time_exif($$$)
 	my ($file, $meta_in, $meta_out) = @_;
 	my $DateTimeOriginal = $meta_in->exifTool->GetValue('DateTimeOriginal');
 	# printf STDERR "got date: %s\n", $DateTimeOriginal;
-	$meta_out->SetNewValue('FileModifyDate', $DateTimeOriginal);
+	$meta_out->SetNewValue('FileModifyDate', $DateTimeOriginal, '', Protected =>  1);
 }
 
 
@@ -4079,4 +4244,3 @@ Project Page at L<http://sourceforge.net/projects/gps2photo>.
  Uwe Girlich (Uwe.Girlich@philosys.de)
 
 =cut
-

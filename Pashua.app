@@ -1,1 +1,0 @@
-/Applications/Utilities/Pashua/Pashua.app

@@ -1,5 +1,7 @@
 #  Created by Greg Scarich on 2007-07-30.  
-require 'Pashua' # for GUI
+# require 'Pashua' # for GUI
+require File.expand_path(File.join(File.dirname(__FILE__), 'Pashua'))
+
 include Pashua
 
 # This code is based on that contributed by Mike Hall to Pashua. It uses a module
