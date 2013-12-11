@@ -1,64 +1,34 @@
 #!/usr/bin/env ruby
+# does not work with 1.9.3-p429 on iMac nor Laptop. make sure "rbenv local system" for the folder
+
 require 'rubygems' # # Needed by rbosa, mini_exiftool, and maybe by appscript. Not needed if correct path set somewhere.
-require 'mini_exiftool' # a wrapper for the Perl ExifTool
+require 'mini_exiftool' # Requires Ruby ≥1.9. A wrapper for the Perl ExifTool
 require 'fileutils'
 include FileUtils
 require 'find'
 require 'yaml'
 require "time"
 # The following require's are my Ruby scripts. The one's above are available online or part of the ruby installation
-# require 'SDorHD'
-require File.expand_path(File.join(File.dirname(__FILE__), 'SDorHD'))
-require 'Photo_Naming_Pashua-SD'
-require 'Photo_Naming_Pashua–HD'
-require 'gpsYesPashua'
+# require '/lib/SDorHD'
+# require './lib/Photo_Naming_Pashua-SD'
+# require './lib/Photo_Naming_Pashua–HD'
+# require './lib/gpsYesPashua'
+
+# Can get rid of this unless when upgrade to ruby v2 or is it v1.9
+# unless Kernel.respond_to?(:require_relative)
+#   module Kernel
+#     def require_relative(path)
+#       require File.join(File.dirname(caller.first), path.to_str)
+#     end
+#   end
+# end
+require_relative 'lib/SDorHD'
+require_relative 'lib/Photo_Naming_Pashua-SD'
+require_relative 'lib/Photo_Naming_Pashua–HD'
+require_relative 'lib/gpsYesPashua'
 
 puts "RUBY_DESCRIPTION: #{RUBY_DESCRIPTION}\n\n" # 2013.06.09 v1.8.7
 
-# NOTE: As of v. l, files not annotated are put in a folder. Move those to downloads (or anywhere else) and reprocess
-
-#  First version created by Greg Scarich on 2007-07-09.  Copyright (©) 2013. All rights reserved.
-## GPS annotation doesn't always happen when it should. Doing it later seems to work. Should debug this. May be because of the order of the files. How is the gFile used?
-### reporting of files process was flawed. Still needs work
-
-### NEED TO KEEP MAC AWAKE, AS SCRIPT STOPS WHEN COMPUTER SLEEPS
-# version e: dded option for iPhone gps tracks to be used after a few weeks of using. Only changed two lines. I DOUBT THIS WILL WORK IF THERE ARE TWO FILES FOR THE SAME DAY. DOES gpsphoto.pl KNOW TO LOOK TWICE FOR THE SAME TIME? DOUBTFUL and fixed adding TEMP files which probably wasn't working right. Removed srcGPX as it wasn't being used and was confusing me
-# version f: making sure works with gpx only. Seems to be working. version g got working from Panasonic card well. Deleted movie related stuff since no longer using. A
-# version g & h: Cleaning up version i
-# version i: Put in the filename in Aperture and copy from card newer files. Challenges: folder name changes, Note that the original filename, e.g. P1190894 is not stored in ApertureData.xml. Must be in photo file only
-# version j: started on but gave up, so i is based on k
-# version k: Option to move originals to another folder (typically "already imported"). Also reprocessing of photos for which geo info could not be found. At the moment stopping after 100 photos. Nothing I can imagine changing should have done this.. 2012.03.06 Working OK, but v. j is not, need to fix
-# version l:TBD  Deal with files that had a gpsFile, but geo info not found or coordinates not found.
-# version m: Some fixes. Will find correct year folder for gpx. Allow large timediff for nights. Rely on distance diff to capture errors. This will add some erroneous data if went out for a day without gps, but returned to same spot at night. timediff written to photo if large 
-# version n: Determine time zone from file of time zone changes, so not fed in by hand at each running of the script. Some major errors that were fixed in v. l. Haven't cleaned up the interface yet. But much of that is in Pashua. Really don't need the interface now as really not changing any of the parameters
-# version o: Try to deal with apparent error in gpsfile when UTC is tomorrow. Maybe be looking for that file, but if I smash them together maybe it will work. So need gpsFiles to be day, and the day before and the day after. Maybe do manually before scripting.
-# version p: Option to just add gps coordinates and location information, i.e., no renaming, in preparation for v. o.
-# version q: Cleaning up
-# version r: Using Dir.foreach to get files in logical order. Needed to change from File.find which is backwards to creating an array of the file
-# version s: Clean up old destDups and used Beatify module. Cleaned up reporting. Add better sequencing?
-# version t: Error capture enhanced and duplicate handling fixes (could have continued with u/v, but made enough changes and don't have versioning down). Not quite working, but minor clean up in s got it going. Time duplicates now being handled. Numbering a bit odd, maybe a, b, c, d better.
-# version u: Was changing the original file which isn't a great idea, so fixed that (pushed what was originally planned to t<em>).</em>
-# version v: Error capture.
-# version w: add GPS info one file at a time to can collect errors. Works but not capturing errors XXXXXXXXXXXXXXXXXXXXX
-# version x: If select no GPS, files just get moved out of the way.
-# version y: Fix more than one per second shots. Eliminate hmsNumbering
-# version z: Was "File naming and moving.z" Adding non-integer time zones, because of Nepal and India. Maybe handle dups differently since can shoot more than one per second
-# version a writes the original file name and date to comments (couldn't see it in Aperture) and instructions (but may be wiped out by GPS portion of script)—so do both. Added to the renaming of the file
-# version b adds handling of photo files/camera set-up that is local time
-# version c add Panasonic Lumix including allowing same basename for RAW and JPG. Later added rw2 to gpsPhoto.pl list. See its website for info. Not sure if worked before since looking at jpg pairs, but works now
-# version d removes middle frame making since Aperture takes movies now. And puts movies and photos in same folder.
-# version e correcting for omission of timeOffset consideration (got the value, but hadn't been using it.)
-# version f adds error handling for files with bad filedate, i.e., often corrupt files
-# version g created from i with goal to move duplicates to another folder (first round will anly allow one dup)
-# version h was crashing so need to go find out what was trying to do.
-# version i option to delete small files. Needed because disk recovery program found thumbnails and zero length files and gave them .jpg tags.
-# version j adds mods for PhotoRescue numbering. Ignoring sequence number and using H:M:S+
-# version k was a fully functioning version and may be reverted back to if this doesn't work
-# version o is bug fixing
-# version p adds two GUI windows and finishes parsing (ugly) results
-### If files by the name being created already exist in the downloads folder, nothing happens (a good thing since files aresn't destroyed, but there should be a warning)
-# Version s works to add gps photo linking and it works as a stand alone script
-# version r adds GUI
 
 # prefs. Most of these could be eliminated as they are always done
 lastPhotoFilename = ""
@@ -71,26 +41,20 @@ srcHD = "/Volumes/Knobby Aperture II/_Download folder/ Drag Photos HERE/"  # tra
 #  srcHD is where photos copied to from SD card, might need to make this a different variable
 #  the two above are set to src when select in first Pashua window
 # $srcPhoto = src # to bring variable into Pashua ### Change to mounted card when get detection built in FIX
-thisScript = "/Users/gscar/Dropbox/scriptsEtc/Photo renaming, movie, gps-Current/" # needed because the Pashua script calling a file seemed to need the directory.
-# thisScript = "/Users/gscar/Documents/Ruby/NumberMovieEtc/Photo renaming, movie, gps-Current/" # needed because the Pashua script calling a file seemed to need the directory. 
+thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
+# thisScript = "/Users/gscar/Dropbox/scriptsEtc/Photo renaming, movie, gps-Current/" # needed because the Pashua script calling a file seemed to need the directory.
 #  also use thisScript to give explicit path for other files
-destPhoto = "/Volumes/Knobby Aperture II/_Download folder/Latest Download/" # maybe add a folder with todays date FIX. Aperture will import from here. These are relabeled and GPSed files.
-destDup = "/Volumes/Knobby Aperture II/_Download folder/Latest Download dups/" # Shouldn't be needed, but might if rerun
+destPhoto = "/Volumes/Knobby Aperture II/_Download folder/Latest Download/" #  These are relabeled and GPSed files.
+destOrig = "/Volumes/Knobby Aperture II/_Download folder/_already imported/" # folder to move originals to if not done in destDup = "/Volumes/Knobby Aperture II/_Download folder/Latest Download dups/" # Shouldn't be needed, but might if rerun
 destNoCoords = "/Volumes/Knobby Aperture II/_Download folder/Latest Download no coordinates/"
 destOrig = "/Volumes/Knobby Aperture II/_Download folder/_already imported/" # folder to move originals to if not done in place or deleted
 destMovie = destPhoto
 # destMovie = "/Volumes/Knobby Aperture Disk/Photos-digital/_Download folder/Latest Movie Download/" # final folder for movies. Mar. 2010: same folder as photos since Aperture 3 can handle
-#  destPhoto = destMovie # In general the middle frame of the movie wants to be in the same folder
-# as the downloaded photos (and original location of the movie)
-# so that it (jpg of middle frame) gets imported into Aperture with all the photos
-## But for TESTING another folder may simplify debugging
-destPhoto = destPhoto #   Where middle frame goes. Generally into the photo download photo, but possibilty to change her
-gpsPhotoLoc = "gpsPhoto.pl" # Perl script that puts gps locations into the photos
+geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wikipedia—most general and osm—maybe better for cities
+gpsPhotoLoc = "gpsPhoto.pl" # Perl script that puts gps locations into the photos. SEEMS TO WORK WITHOUT ./lib ????
 timeZonesFile = "Greg camera time zones.yml" # Kept in Dropbox so can update on the road..
-lastPhotoReadTextFile = "lastPhotoRead.txt"
-sdFolderFile = "SDfolder.txt"
-# The second line of the script for Snow Leopard needs to be: BEGIN { unshift @INC, "/usr/bin/lib/" }
-
+lastPhotoReadTextFile = "currentData/lastPhotoRead.txt"
+sdFolderFile = "/Users/gscar/Documents/Ruby/Photo handling/currentData/SDfolder.txt" # shouldn't need full path
 # gpsPhoto.pl related. Only written to work with daily files stored by units such as Garmin 60CSx
 # location of gpx files
 folderGPX = "/Users/gscar/Documents/GPS-Maps-docs/   Garmin gpx daily logs/" # Inside this folder are folders "YYYY Download" with GPX daily files named YYYYMMDD.gpx
@@ -145,7 +109,8 @@ fileSDbasename = "" # if not initialized this variable stays localized in its lo
 whichOneLong= "" # 
 ## end ititialization
 
-def fileDateUTC(fn)
+def fileDateUTC(fn) # Except for the first two lines, this seems to be only for Minolta movies, so isn't doing much anymore. In other words if not called much just use the first two active lines
+  puts "fn: #{fn}. line ~ 166"
   fileEXIF = MiniExiftool.new(fn)
   fileDateUTC = fileEXIF.dateTimeOriginal # class time
   # puts "\nfileDateUTC: #{fileDateUTC}. fileDateUTC.class: #{fileDateUTC.class}. "
@@ -166,7 +131,7 @@ end # fileDateUTC
 def fileAnnotate(fn,fnp,fileDateUTC,tzoLoc)  
   # writing original filename and dateTimeOrig to the photo file.
   fileEXIF = MiniExiftool.new(fnp)
-  if fileEXIF.comment.to_s.length < 2 # if exist then don't write. If avoid rewriting, then can eliminate this test
+  if fileEXIF.comment.to_s.length < 2 # if exists then don't write. If avoid rewriting, then can eliminate this test
     fileEXIF.comment = fileEXIF.instructions = "Original filename: #{File.basename(fn)} and date: #{fileDateUTC}. Time zone GMT #{tzoLoc}. Zone shown with date is incorrect."
     fileEXIF.save
   end
@@ -196,9 +161,9 @@ def userCamCode(fn)
   ## not very well thought out and the order of the tests matters
   case fileEXIF.model
   when "DMC-G2"
-    userCamCode = ".gs.L"
+    userCamCode = ".gs.L" # gs for photographer. L for Panasonic *L*umix
   when "Canon PowerShot S100"
-    userCamCode = ".lb"
+    userCamCode = ".lb" # initials of the photographer who usually shoots with the S100
   else
     userCamCode = ".xx"
   end # case
@@ -221,7 +186,7 @@ def fileExistsAlready(fn,fnpm,dest,fileCount)
   end
 end # fileExistsAlready
 
-def fnpName(fn, fileBaseName, dest) # called twice from def photo
+def fnpName(fn, fileBaseName, dest) # called twice from def photo. The test was for sequences which I don't have any more, so shouldn't need a method, jsut the last statement
   if File.basename(fn)[0,2].downcase == 'st'
     # for Canon pano. Putting the sequence number first
     fnp = dest+File.basename(fn)[0,8]+'-'+fileBaseName[0,10]+fileBaseName[-5,5]+File.extname(fn).downcase
@@ -296,13 +261,13 @@ def timeZone(fileDateUTC, timeZonesFile)
   return theTimeZone
 end # timeZone
 
-def gpsFileConcatenate(gFiles, gpxFile)
+def gpsFileConcatenate(gFiles, gpxFile) # is this called more than once?
   gpsfile = "--gpsfile \""  
   dqs="\" " # dqs double quote space
   gFiles<<(gpsfile+gpxFile+dqs)
 end
 
-def gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFile, fn, fileBaseName, gpsPhotoLoc, maxTimeDiff,maxDistance, fileCount, destNoCoords, problemReport, noProblemReport, photoCoordsFound, gpxFileNo, locFailCount, photoCoordsNotFound, locationFail)
+def gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFile, fn, fileBaseName, gpsPhotoLoc, maxTimeDiff,maxDistance, fileCount, destNoCoords, problemReport, noProblemReport, photoCoordsFound, gpxFileNo, locFailCount, photoCoordsNotFound, locationFail, geoInfoMethod)
   #puts "gpxDate: #{gpxDate}"
   if tzoFile # true if Camera setting/photo file is UTC.
     geoOffset = camError.to_f
@@ -381,7 +346,7 @@ def gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFil
   # puts "#{fileCount}. gFiles: #{gFiles}"
   # puts "\n#{fileCount}. imageFile: #{imageFile}. "
   if gFiles.to_s.length > 10 # Some way of checking if any of the gpx files found
-    perlOutput = `perl \"#{gpsPhotoLoc}\"   --image \"#{imageFile}\" #{gFiles} --timeoffset #{geoOffset} --maxtimediff #{maxTimeDiff} --maxdistance #{maxDistance}  --geoinfo wikipedia --city auto --state guess --country guess  2>&1`
+    perlOutput = `perl \"#{gpsPhotoLoc}\"   --image \"#{imageFile}\" #{gFiles} --timeoffset #{geoOffset} --maxtimediff #{maxTimeDiff} --maxdistance #{maxDistance}  --geoinfo #{geoInfoMethod} --city auto --state guess --country guess  2>&1`
     puts "\n#{fileCount}. perlOutput: \n#{perlOutput}#{fileCount}. End of perlOutput ================" # This didn't seem to be happening with 2>&1 appended? But w/o it, error not captured
     perlOutput =~ /timediff\=([0-9]+)/
     timediff = $1 # class string
@@ -463,7 +428,8 @@ def summary(photoHandling,filesMovedCount,fileCount,thmCount,destPhoto,gpxFlag, 
   end
 end # summary
 
-def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript, photoHandling, cardCount, cardCountCopied) # some of these counter variables could be set at the beginning of this script and used locally
+def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript, photoHandling, cardCount, cardCountCopied) 
+  # some of the above counter variables could be set at the beginning of this script and used locally
   puts "Begin moving or copying photos from SD card. List includes photos skipped. photoHandling: #{photoHandling}\n"
   doAgain = true # name isn't great, now means do it.
   timesThrough = 1
@@ -495,12 +461,13 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
       end # case
       end # Dir.glob("P*") do |item| 
     # write the number of the last photo copied or moved
-    puts "\nfileSDbasename: #{fileSDbasename}"
+    puts "\nThe last file processed. fileSDbasename, #{fileSDbasename}, written to  #{lastPhotoReadTextFile}."
       # if fileSDbasename ends in 999, we need to move on to the next folder, and the while should allow another go around.
       if fileSDbasename[-3,3]=="999" # and NEXT PAIRED FILE DOES NOT EXIST, then can uncomment the two last lines of this if, but may also have to start the loop over, but it seems to be OK with mid calculation change.
           nextFolderNum = fileSDbasename[-7,3].to_i + 1 # getting first three digits of filename since that is also part of the folder name
           nextFolderName = nextFolderNum.to_s + "_PANA"
           begin
+            # puts "thisScript + sdFolderFile #{thisScript + sdFolderFile}"
             fileNow = File.open(thisScript + sdFolderFile, "w")
             fileNow.write(nextFolderName) 
           rescue IOError => e
@@ -541,7 +508,7 @@ end # copySD
 ## The "program" #################
 puts "Fine naming and moving started: #{Time.now}" # for trial runs
 
-# get current folder for photos on Greg's SD card
+# get current folder for photos on Greg's SD card, new folder every 1000 photos
 begin
   file = File.new(sdFolderFile, "r")
   sdFolder = file.gets
@@ -552,7 +519,7 @@ end
 srcSD = srcSDfolder + sdFolder
 # puts "Current folder for photos on SD card (srcSD): #{srcSD}"
 
-whereFrom = whichLoc() # from dialog window
+whereFrom = whichLoc() # from dialog window SAY WHAT
 whichOne = whereFrom["whichDrive"][0].chr # only using the first character
 if whichOne=="S"
   whichOne = "SD"
@@ -596,8 +563,10 @@ else # whichOne=="HD"
   photoHandling = prefsPhoto["photoHandle"][0].chr # only using the first character 
   photoHandling = "A"  # since options not given, but could add back in
   case prefsPhoto["geoOnly"]
-  when "1" : geoOnly = true
-  when "0" : geoOnly = false
+   when "1"
+     geoOnly = true
+  when "0"
+    geoOnly = false
   else puts "We've got a problem determining geoOnly"
   end
 end # whichOne=="SD"
@@ -611,10 +580,8 @@ end # whichOne=="SD"
 # end
 
 case prefsPhoto["geoOnly"]
-when "1"
-  geoOnly = true
-when "0"
-  geoOnly = false
+when "1" then geoOnly = true
+when "0" then geoOnly = false
 else puts "We've got a problem determining geoOnly"
 end
 
@@ -641,8 +608,8 @@ if addGPS2photos
   maxDistance = prefsGPX["maxDistanceP"].to_i
   camError = prefsGPX["toP"]
   case prefsGPX["kmlYN"]
-  when "1" : kmlFile = true
-  when "0" : kmlFile = false
+  when "1" then kmlFile = true
+  when "0" then kmlFile = false
   end
   tzoLoc = prefsGPX["tzcP"].to_f # needed or get error timeChange. Took the hint from the .to_f for camError
 end # if addGPSphotos
@@ -677,7 +644,7 @@ end # if SD
 src = srcHD # switching since next part works from copied files on hard drive. No longer need reference to SD card. COULD OPTION TO DELETE RATHER THAN MOVE TO already imported. Might not be needed if src stays local to copySD
 
 photoHandling = "A" # photoHandling was referring to how to handle files on card, now switching to how to handle the files in the DRAG photos here folder. Could add back options to move
-puts "\nNow add GPS information to photos.........."
+puts "\nUsing #{geoInfoMethod} as a source, GPS information will be added to photos.........."
 #  Now working from hard drive whether or not originals were copied by hand or the program.
 if !File.exists?(src) # 1. didn't think this should be necessary, but weird errors if not. Need to put in better fault tolerance FIX, but runs once
   puts "Photo directory is missing. src: #{src}"
@@ -693,7 +660,7 @@ else
       imageFile = fn # in this case fn (original name) and imageFile (new name) are the same since no renaming going on
       fileDateUTC = fileDateUTC(fn)
       fileCount += 1
-      output = gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFile, fn, fileBaseName="", gpsPhotoLoc, maxTimeDiff,maxDistance, fileCount, destNoCoords, problemReport, noProblemReport, photoCoordsFound, gpxFileNo, locFailCount, photoCoordsNotFound, locationFail)
+      output = gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFile, fn, fileBaseName="", gpsPhotoLoc, maxTimeDiff,maxDistance, fileCount, destNoCoords, problemReport, noProblemReport, photoCoordsFound, gpxFileNo, locFailCount, photoCoordsNotFound, locationFail, geoInfoMethod)
       problemReport = output[0]
       noProblemReport = output[1]
       photoCoordsFound = output[2]
@@ -775,7 +742,7 @@ else
           end # case
           if addGPS2photos
             # puts "\n#{fileCount}.fileDateUTC: #{fileDateUTC}. Time Zone showing is computer time zone. Need to fix someday."
-            output = gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFile, fn, fileBaseName, gpsPhotoLoc, maxTimeDiff,maxDistance, fileCount, destNoCoords, problemReport, noProblemReport, photoCoordsFound, gpxFileNo, locFailCount, photoCoordsNotFound, locationFail)
+            output = gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFile, fn, fileBaseName, gpsPhotoLoc, maxTimeDiff,maxDistance, fileCount, destNoCoords, problemReport, noProblemReport, photoCoordsFound, gpxFileNo, locFailCount, photoCoordsNotFound, locationFail, geoInfoMethod)
             problemReport = output[0]
             noProblemReport = output[1]
             photoCoordsFound = output[2]
@@ -797,4 +764,4 @@ summary(photoHandling,filesMovedCount,fileCount,thmCount,destPhoto,gpxFlag,addGP
 puts "\nProblem Report Details:\n#{problemReport}"  if problemReport != "" # This wasn't working right
 puts "\nSuccess Report Details:\n#{noProblemReport}"
 puts "============================================================="
-# puts "locationFail array: #{locationFail}
+# puts "locationFail array: #{locationFail}=======
