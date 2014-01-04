@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 # does not work with 1.9.3-p429 on iMac nor Laptop. make sure "rbenv local system" for the folder
+# Works partially with 2.0 2013.12.27 Initial transfer, 
 
 require 'rubygems' # # Needed by rbosa, mini_exiftool, and maybe by appscript. Not needed if correct path set somewhere.
 require 'mini_exiftool' # Requires Ruby ≥1.9. A wrapper for the Perl ExifTool
@@ -432,10 +433,10 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
   # some of the above counter variables could be set at the beginning of this script and used locally
   puts "Begin moving or copying photos from SD card. List includes photos skipped. photoHandling: #{photoHandling}\n"
   doAgain = true # name isn't great, now means do it.
-  timesThrough = 1
+  timesThrough = 1 
   fileSDbasename = "" # got an error at puts fileSDbasename
   cardCountMoved = ""
-  while doAgain==true and timesThrough<=2 
+  while doAgain==true # and timesThrough<=2 
     Dir.chdir(src) # needed for glob
     Dir.glob("P*") do |item| 
     # Dir.foreach(src) do |item| 
@@ -460,9 +461,11 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
         puts "photoHandling not L or M. It's #{photoHandling}"
       end # case
       end # Dir.glob("P*") do |item| 
-    # write the number of the last photo copied or moved
-    puts "\nThe last file processed. fileSDbasename, #{fileSDbasename}, written to  #{lastPhotoReadTextFile}."
+      # write the number of the last photo copied or moved
+      puts "\n465. The last file processed. fileSDbasename, #{fileSDbasename}, written to  #{lastPhotoReadTextFile}."
       # if fileSDbasename ends in 999, we need to move on to the next folder, and the while should allow another go around.
+      puts "467. fileSDbasename[-3,3]: #{fileSDbasename[-3,3]}."
+      doAgain = false
       if fileSDbasename[-3,3]=="999" # and NEXT PAIRED FILE DOES NOT EXIST, then can uncomment the two last lines of this if, but may also have to start the loop over, but it seems to be OK with mid calculation change.
           nextFolderNum = fileSDbasename[-7,3].to_i + 1 # getting first three digits of filename since that is also part of the folder name
           nextFolderName = nextFolderNum.to_s + "_PANA"
@@ -485,7 +488,7 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
           puts "Moving to #{src} because the folder we started in was full.\n"
       end
       timesThrough += 1
-      # puts "timesThrough #{timesThrough}. doAgain #{doAgain}"
+      puts "491. timesThrough: #{timesThrough}. doAgain: #{doAgain}"
   end # if doAgain…
     begin
       fileNow = File.open(thisScript + lastPhotoReadTextFile, "w") # must use explicit path, otherwise will use wherever we are are on the SD card
@@ -518,8 +521,7 @@ rescue Exception => err
 end
 srcSD = srcSDfolder + sdFolder
 # puts "Current folder for photos on SD card (srcSD): #{srcSD}"
-
-whereFrom = whichLoc() # from dialog window SAY WHAT
+whereFrom = whichLoc() # from dialog window SAY WHAT. This is pulling in first Pashua window, SDorHD.rb which has been required
 whichOne = whereFrom["whichDrive"][0].chr # only using the first character
 if whichOne=="S"
   whichOne = "SD"
@@ -535,14 +537,13 @@ puts "Will process original photos from #{src}, #{whichOneLong}."
 if whichOne=="SD" # otherwise it's HD, probably should be case to be cleaner coding
   # read in last filename copied from card previously
   begin
-    file = File.new(lastPhotoReadTextFile, "r")
+    file = File.new(thisScript + lastPhotoReadTextFile, "r")
     lastPhotoFilename = file.gets # apparently grabbing a return. maybe not the best reading method.
-    puts "lastPhotoFilename: #{lastPhotoFilename}. Read from #{lastPhotoReadTextFile}. Value can be changed by user, so this may not be the final value."
+    puts "540. lastPhotoFilename: #{lastPhotoFilename}. Read from #{lastPhotoReadTextFile}. Value can be changed by user, so this may not be the final value."
     file.close
   rescue Exception => err
     puts "Exception: #{err}. Not critical as value can be entered manually by user."
   end
-  
   prefsPhoto = pPashua(src,lastPhotoFilename,destPhoto,destOrig,photoHandling,addGPS2photos) # is this only sending values in? 
   # to get a value use prefsPhoto("theNameInFileNamingEtcPashue.rb"), nothing to do with the name above
   # puts "Prefs as set by pPashua"
