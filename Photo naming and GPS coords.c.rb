@@ -46,7 +46,8 @@ thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script call
 # thisScript = "/Users/gscar/Dropbox/scriptsEtc/Photo renaming, movie, gps-Current/" # needed because the Pashua script calling a file seemed to need the directory.
 #  also use thisScript to give explicit path for other files
 destPhoto = "/Volumes/Knobby Aperture II/_Download folder/Latest Download/" #  These are relabeled and GPSed files.
-destOrig = "/Volumes/Knobby Aperture II/_Download folder/_already imported/" # folder to move originals to if not done in destDup = "/Volumes/Knobby Aperture II/_Download folder/Latest Download dups/" # Shouldn't be needed, but might if rerun
+destOrig  = "/Volumes/Knobby Aperture II/_Download folder/_already imported/" # folder to move originals to if not done in 
+destDup   = "/Volumes/Knobby Aperture II/_Download folder/Latest Download dups/" # Shouldn't be needed, but might if rerun
 destNoCoords = "/Volumes/Knobby Aperture II/_Download folder/Latest Download no coordinates/"
 destOrig = "/Volumes/Knobby Aperture II/_Download folder/_already imported/" # folder to move originals to if not done in place or deleted
 destMovie = destPhoto
@@ -397,7 +398,7 @@ def gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFil
       problemReport = problemReport + report
     end
   else
-    report = "\n#{fileCount}. #{File.basename(imageFile)} didn't have gps coordinates added because #{File.basename(gpxFile)} is missing."
+    report = "\n401. #{fileCount}. #{File.basename(imageFile)} didn't have gps coordinates added because #{File.basename(gpxFile)} is missing."
     photoCoordsNotFound += 1
     # puts "** #{report}"
     problemReport = problemReport + report
@@ -462,9 +463,7 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
       end # case
       end # Dir.glob("P*") do |item| 
       # write the number of the last photo copied or moved
-      puts "\n465. The last file processed. fileSDbasename, #{fileSDbasename}, written to  #{lastPhotoReadTextFile}."
       # if fileSDbasename ends in 999, we need to move on to the next folder, and the while should allow another go around.
-      puts "467. fileSDbasename[-3,3]: #{fileSDbasename[-3,3]}."
       doAgain = false
       if fileSDbasename[-3,3]=="999" # and NEXT PAIRED FILE DOES NOT EXIST, then can uncomment the two last lines of this if, but may also have to start the loop over, but it seems to be OK with mid calculation change.
           nextFolderNum = fileSDbasename[-7,3].to_i + 1 # getting first three digits of filename since that is also part of the folder name
@@ -490,16 +489,18 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
       timesThrough += 1
       puts "491. timesThrough: #{timesThrough}. doAgain: #{doAgain}"
   end # if doAgain…
-    begin
+  begin
       fileNow = File.open(thisScript + lastPhotoReadTextFile, "w") # must use explicit path, otherwise will use wherever we are are on the SD card
       fileNow.puts fileSDbasename
+      fileNow.close
+      puts "\n494. The last file processed. fileSDbasename, #{fileSDbasename}, written to  #{fileNow}."
     rescue IOError => e
-      puts "Something went wrong. Could not write last photo read (#{fileSDbasename}) to #{lastPhotoReadTextFile}"
+      puts "Something went wrong. Could not write last photo read (#{fileSDbasename}) to #{fileNow}"
     # ensure
     #   fileNow.close unless fileNow == nil
     end # begin
-    puts "\nOf the #{cardCount} photos on the SD card, #{cardCountCopied} were copied and #{cardCountMoved} were moved." # Could get rid of the and with an if somewhere since only copying or moving is done.
-    puts "Done moving or copying photos from SD card. src switched from card to folder holder moved or copied photos: #{src}"  
+    puts "\n502. Of the #{cardCount} photos on the SD card, #{cardCountCopied} were copied and #{cardCountMoved} were moved." # Could get rid of the and with an if somewhere since only copying or moving is done.
+    puts "503. Done moving or copying photos from SD card. src switched from card to folder holder moved or copied photos: #{src}"  
 end # copySD
 
 
@@ -645,7 +646,7 @@ end # if SD
 src = srcHD # switching since next part works from copied files on hard drive. No longer need reference to SD card. COULD OPTION TO DELETE RATHER THAN MOVE TO already imported. Might not be needed if src stays local to copySD
 
 photoHandling = "A" # photoHandling was referring to how to handle files on card, now switching to how to handle the files in the DRAG photos here folder. Could add back options to move
-puts "\nUsing #{geoInfoMethod} as a source, GPS information will be added to photos.........."
+puts "\n 649. Photos will now be copied and renamed. \nUsing #{geoInfoMethod} as a source, GPS information will be added to photos.........."
 #  Now working from hard drive whether or not originals were copied by hand or the program.
 if !File.exists?(src) # 1. didn't think this should be necessary, but weird errors if not. Need to put in better fault tolerance FIX, but runs once
   puts "Photo directory is missing. src: #{src}"
