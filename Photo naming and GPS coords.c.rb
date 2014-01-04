@@ -45,18 +45,19 @@ srcHD = "/Volumes/Knobby Aperture II/_Download folder/ Drag Photos HERE/"  # tra
 thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
 # thisScript = "/Users/gscar/Dropbox/scriptsEtc/Photo renaming, movie, gps-Current/" # needed because the Pashua script calling a file seemed to need the directory.
 #  also use thisScript to give explicit path for other files
-destPhoto = "/Volumes/Knobby Aperture II/_Download folder/Latest Download/" #  These are relabeled and GPSed files.
-destOrig  = "/Volumes/Knobby Aperture II/_Download folder/_already imported/" # folder to move originals to if not done in 
-destDup   = "/Volumes/Knobby Aperture II/_Download folder/Latest Download dups/" # Shouldn't be needed, but might if rerun
-destNoCoords = "/Volumes/Knobby Aperture II/_Download folder/Latest Download no coordinates/"
-destOrig = "/Volumes/Knobby Aperture II/_Download folder/_already imported/" # folder to move originals to if not done in place or deleted
+downloadsFolders = "/Volumes/Knobby Aperture II/_Download folder/"
+destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
+destOrig  = downloadsFolders + "_already imported/" # folder to move originals to if not done in 
+destDup   = downloadsFolders + "Latest Download dups/" # Shouldn't be needed, but might if rerun
+destNoCoords = downloadsFolders + "Latest Download no coordinates/"
+destOrig = downloadsFolders + "_already imported/" # folder to move originals to if not done in place or deleted
 destMovie = destPhoto
 # destMovie = "/Volumes/Knobby Aperture Disk/Photos-digital/_Download folder/Latest Movie Download/" # final folder for movies. Mar. 2010: same folder as photos since Aperture 3 can handle
 geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wikipedia—most general and osm—maybe better for cities
-gpsPhotoLoc = "gpsPhoto.pl" # Perl script that puts gps locations into the photos. SEEMS TO WORK WITHOUT ./lib ????
+gpsPhotoLoc = "./lib/gpsPhoto.pl" # Perl script that puts gps locations into the photos. SEEMS TO WORK WITHOUT ./lib ????
 timeZonesFile = "Greg camera time zones.yml" # Kept in Dropbox so can update on the road..
-lastPhotoReadTextFile = "currentData/lastPhotoRead.txt"
-sdFolderFile = "/Users/gscar/Documents/Ruby/Photo handling/currentData/SDfolder.txt" # shouldn't need full path
+lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
+sdFolderFile = thisScript + "currentData/SDfolder.txt" # shouldn't need full path
 # gpsPhoto.pl related. Only written to work with daily files stored by units such as Garmin 60CSx
 # location of gpx files
 folderGPX = "/Users/gscar/Dropbox/   GPX daily logs/" # Inside this folder are folders "YYYY Download" with GPX daily files named YYYYMMDD.gpx
@@ -263,9 +264,11 @@ def timeZone(fileDateUTC, timeZonesFile)
   return theTimeZone
 end # timeZone
 
-def gpsFileConcatenate(gFiles, gpxFile) # is this called more than once?
-  gpsfile = "--gpsfile \""  
-  dqs="\" " # dqs double quote space
+def gpsFileConcatenate(gFiles, gpxFile) 
+  # gpsfile = "--gpsfile \""  
+  gpsfile = "" # changing how this method works, will add this back at end since it was getting duplicated
+  # dqs="\" " # dqs double quote space
+  dqs = ""
   gFiles<<(gpsfile+gpxFile+dqs)
 end
 
@@ -282,24 +285,26 @@ def gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFil
   #  need quotes around file locations since I have blanks in many of them and they don't pass through without the quotes
   #   puts "\n   folderGPX method. gpxFile: #{gpxFile}. "
   gpxFile = folderGPX +  fileDateUTC.strftime("%Y") + " Download/" + fileDateUTC.strftime("%Y%m%d") + ".gpx"
-  puts "285. folderGPX method. gpxFile: #{gpxFile}. "
+  puts "\n285. folderGPX method. gpxFile: #{gpxFile}. "
  
   #  Initialize
   gFiles=[] # a collection of daily files (days before and after as needed) for gpsPhoto.pl
 
   # First, i.e. the day (letting gps photo find if the file exists, see if this works)
   if File.exists?(gpxFile)
-    gpsFileConcatenate(gFiles, gpxFile)
+    gpsFileConcatenate(gFiles, gpxFile) # return not used
   end
   
   gpxFileTEMP = folderGPX +  fileDateUTC.strftime("%Y") + " Download/" + fileDateUTC.strftime("%Y%m%d") + ".TEMP"+ ".gpx" # so can access file for today created by Garmin Log Renaming
   if File.exists?(gpxFileTEMP)
     gFiles = gpsFileConcatenate(gFiles, gpxFileTEMP)
+    puts "298. gFiles: #{gFiles}."
   end
   
   gpxFileI = folderGPX +  fileDateUTC.strftime("%Y") + " Download/" + fileDateUTC.strftime("%Y%m%d") + ".i"+ ".gpx" # so can access file for today created by iPhone using MotionGPX (or other?)
   if File.exists?(gpxFileI)
     gFiles = gpsFileConcatenate(gFiles, gpxFileI)
+    puts "303. gFiles: #{gFiles}."
   end
   
   
@@ -311,17 +316,20 @@ def gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFil
     
     gpxFile = folderPlus + ".gpx"
     if File.exists?(gpxFile)
-      gpsFileConcatenate(gFiles, gpxFile)
+      gFiles = gpsFileConcatenate(gFiles, gpxFile)
+      puts "317. gFiles: #{gFiles}."
     end
     
     gpxFileTEMP = folderPlus + ".TEMP"+ ".gpx" # so can access file for previous day created by Garmin Log Renaming
     if File.exists?(gpxFileTEMP)
       gFiles = gpsFileConcatenate(gFiles, gpxFileTEMP)
+      puts "323. gFiles: #{gFiles}."
     end
     
     gpxFileI = folderPlus + ".i"+ ".gpx" # so can access file for previous day created by iPhone using MotionGPX (or other?)
     if File.exists?(gpxFileI)
       gFiles = gpsFileConcatenate(gFiles, gpxFileI)
+      puts "329. gFiles: #{gFiles}."
     end
 
   else
@@ -332,7 +340,8 @@ def gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFil
     
     gpxFile =folderPlus + ".gpx"
     if File.exists?(gpxFile)
-      gpsFileConcatenate(gFiles, gpxFile)
+      gFiles = gpsFileConcatenate(gFiles, gpxFile)
+      puts "341. gFiles: #{gFiles}."
     end
     
     gpxFileTEMP = folderPlus + ".TEMP"+ ".gpx" # so can access file for next day created by Garmin Log Renaming
@@ -343,13 +352,17 @@ def gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFil
     gpxFileI = folderPlus + ".i"+ ".gpx" # so can access file for next day created by iPhone using MotionGPX (or other?)
     if File.exists?(gpxFileI)
       gFiles = gpsFileConcatenate(gFiles, gpxFileI)
+      puts "352. gFiles: #{gFiles}."
     end
    end # tzoLoc
   # puts "#{fileCount}. gFiles: #{gFiles}"
   # puts "\n#{fileCount}. imageFile: #{imageFile}. "
+  # gFiles = "--gpsfile \"" + gFiles
   if gFiles.to_s.length > 10 # Some way of checking if any of the gpx files found
-    perlOutput = `perl \"#{gpsPhotoLoc}\"   --image \"#{imageFile}\" #{gFiles} --timeoffset #{geoOffset} --maxtimediff #{maxTimeDiff} --maxdistance #{maxDistance}  --geoinfo #{geoInfoMethod} --city auto --state guess --country guess  2>&1`
-    puts "\n#{fileCount}. perlOutput: \n#{perlOutput}#{fileCount}. End of perlOutput ================" # This didn't seem to be happening with 2>&1 appended? But w/o it, error not captured
+    puts "\n353. gFiles: #{gFiles}."
+    # puts "\n351. call to the gpsphoto.pl script \nperl #{gpsPhotoLoc}   --image #{imageFile} #{gFiles} --timeoffset #{geoOffset} --maxtimediff #{maxTimeDiff} --maxdistance #{maxDistance}  --geoinfo wikipedia --city auto --state guess --country guess"
+    perlOutput = `perl \"#{gpsPhotoLoc}\"   --image \"#{imageFile}\" --gpsfile #{gFiles} --timeoffset #{geoOffset} --maxtimediff #{maxTimeDiff} --maxdistance #{maxDistance}  --geoinfo #{geoInfoMethod} --city auto --state guess --country guess  2>&1`
+    puts "\n361. #{fileCount}. perlOutput: \n#{perlOutput}#{fileCount}. End of perlOutput ================\n" # This didn't seem to be happening with 2>&1 appended? But w/o it, error not captured
     perlOutput =~ /timediff\=([0-9]+)/
     timediff = $1 # class string
     # puts"\n 453 timediff: #{timediff}. timediff.class: #{timediff.class}. "
@@ -447,14 +460,13 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
       fnp = srcHD + "/" + item # using srcHD as the put files here place, might cause problems later
       # get filename and make select later than already downloaded
       fileSDbasename = File.basename(item,".*")
-      puts "#{cardCount}. item: #{item}. fileSDbasename: #{fileSDbasename}, fn: #{fn}"
+      puts "450. #{cardCount}. item: #{item}. fileSDbasename: #{fileSDbasename}, fn: #{fn}"
       next if item == '.' or item == '..' or fileSDbasename <= lastPhotoFilename # don't need the first two with Dir.glob, but doesn't slow things down much overall for this script
       # move or copy from card
       case photoHandling
       when "L"
         FileUtils.copy(fn, fnp)
         cardCountCopied += 1
-        # cardCountCopied = cardCountCopied + 1 # += gave an error
       when "M"
         FileUtils.move(fn, fnp)
         cardCountMoved = cardCountMoved + 1
@@ -487,13 +499,13 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
           puts "Moving to #{src} because the folder we started in was full.\n"
       end
       timesThrough += 1
-      puts "491. timesThrough: #{timesThrough}. doAgain: #{doAgain}"
+      puts "\n489. timesThrough: #{timesThrough}. doAgain: #{doAgain}"
   end # if doAgain…
   begin
-      fileNow = File.open(thisScript + lastPhotoReadTextFile, "w") # must use explicit path, otherwise will use wherever we are are on the SD card
+      fileNow = File.open(lastPhotoReadTextFile, "w") # must use explicit path, otherwise will use wherever we are are on the SD card
       fileNow.puts fileSDbasename
       fileNow.close
-      puts "\n494. The last file processed. fileSDbasename, #{fileSDbasename}, written to  #{fileNow}."
+      puts "\n495. The last file processed. fileSDbasename, #{fileSDbasename}, written to  #{fileNow}."
     rescue IOError => e
       puts "Something went wrong. Could not write last photo read (#{fileSDbasename}) to #{fileNow}"
     # ensure
@@ -538,7 +550,7 @@ puts "Will process original photos from #{src}, #{whichOneLong}."
 if whichOne=="SD" # otherwise it's HD, probably should be case to be cleaner coding
   # read in last filename copied from card previously
   begin
-    file = File.new(thisScript + lastPhotoReadTextFile, "r")
+    file = File.new(lastPhotoReadTextFile, "r")
     lastPhotoFilename = file.gets # apparently grabbing a return. maybe not the best reading method.
     puts "540. lastPhotoFilename: #{lastPhotoFilename}. Read from #{lastPhotoReadTextFile}. Value can be changed by user, so this may not be the final value."
     file.close
@@ -646,7 +658,7 @@ end # if SD
 src = srcHD # switching since next part works from copied files on hard drive. No longer need reference to SD card. COULD OPTION TO DELETE RATHER THAN MOVE TO already imported. Might not be needed if src stays local to copySD
 
 photoHandling = "A" # photoHandling was referring to how to handle files on card, now switching to how to handle the files in the DRAG photos here folder. Could add back options to move
-puts "\n 649. Photos will now be copied and renamed. \nUsing #{geoInfoMethod} as a source, GPS information will be added to photos.........."
+puts "\n 648. Photos will now be copied and renamed. \n........Using #{geoInfoMethod} as a source, GPS information will be added to photos..........\n"
 #  Now working from hard drive whether or not originals were copied by hand or the program.
 if !File.exists?(src) # 1. didn't think this should be necessary, but weird errors if not. Need to put in better fault tolerance FIX, but runs once
   puts "Photo directory is missing. src: #{src}"
