@@ -59,7 +59,7 @@ lastPhotoReadTextFile = "currentData/lastPhotoRead.txt"
 sdFolderFile = "/Users/gscar/Documents/Ruby/Photo handling/currentData/SDfolder.txt" # shouldn't need full path
 # gpsPhoto.pl related. Only written to work with daily files stored by units such as Garmin 60CSx
 # location of gpx files
-folderGPX = "/Users/gscar/Documents/GPS-Maps-docs/   Garmin gpx daily logs/" # Inside this folder are folders "YYYY Download" with GPX daily files named YYYYMMDD.gpx
+folderGPX = "/Users/gscar/Dropbox/   GPX daily logs/" # Inside this folder are folders "YYYY Download" with GPX daily files named YYYYMMDD.gpx
 # the following are all gpsPhoto options
 camError = 0 # seconds. Positive-camera behind. Negative-camera ahead.  Minor error in camera clock
 tzoF = 1 # boolean for time zone of camera/photo file. 1 is camera is UTC.
@@ -282,7 +282,7 @@ def gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFil
   #  need quotes around file locations since I have blanks in many of them and they don't pass through without the quotes
   #   puts "\n   folderGPX method. gpxFile: #{gpxFile}. "
   gpxFile = folderGPX +  fileDateUTC.strftime("%Y") + " Download/" + fileDateUTC.strftime("%Y%m%d") + ".gpx"
-  # puts "folderGPX method. gpxFile: #{gpxFile}. "
+  puts "285. folderGPX method. gpxFile: #{gpxFile}. "
  
   #  Initialize
   gFiles=[] # a collection of daily files (days before and after as needed) for gpsPhoto.pl
