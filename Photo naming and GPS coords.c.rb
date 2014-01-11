@@ -363,8 +363,19 @@ def gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFil
     # puts "\n351. call to the gpsphoto.pl script \nperl #{gpsPhotoLoc}   --image #{imageFile} #{gFiles} --timeoffset #{geoOffset} --maxtimediff #{maxTimeDiff} --maxdistance #{maxDistance}  --geoinfo wikipedia --city auto --state guess --country guess"
     # gFiles = "\"/Users/gscar/Dropbox/   GPX daily logs/2013 Download/20131226.gpx\"" # temp for a test
 #     puts "365. gFiles: #{gFiles}"
-    # gFiles = "\"/Users/gscar/Dropbox/   GPX daily logs/2013 Download/\"" # this worked when used with --gpsdir Took forever to process the whole directory. Only did it for one photo
-    perlOutput = `perl \"#{gpsPhotoLoc}\"   --image \"#{imageFile}\" --gpsfile #{gFiles} --timeoffset #{geoOffset} --maxtimediff #{maxTimeDiff} --maxdistance #{maxDistance}  --geoinfo #{geoInfoMethod} --city auto --state guess --country guess  2>&1`
+    # gFiles = "" # this worked when used with --gpsdir Took forever to process the whole directory. Only did it for one photo
+    # perlOutput = `perl \"#{gpsPhotoLoc}\"   --image \"#{imageFile}\" --gpsfile #{gFiles} --timeoffset #{geoOffset} --maxtimediff #{maxTimeDiff} --maxdistance #{maxDistance}  --geoinfo #{geoInfoMethod} --city auto --state guess --country guess  2>&1`
+    
+    # Going to try a batch anotation. Should me more efficent, but will loose the easy ability to add timediff, but let's see what the output looks like
+    
+    # --gpsdir dir. Do for one year a time.
+    gpsdir = "\"/Users/gscar/Dropbox/   GPX daily logs/2013 Download/\"" 
+    
+    # --dir directory    Image directory. Multiple are allowed. This is destPhoto after getting them in that folder labeled but not gps coordinated which will happen if I run the script now, i.e., without gps coords being added
+    
+    perlOutput = `perl \"#{gpsPhotoLoc}\"   --dir \"#{destPhoto}\" --gpsdir #{gpsdir} --timeoffset #{geoOffset} --maxtimediff #{maxTimeDiff} --maxdistance #{maxDistance}  --geoinfo #{geoInfoMethod} --city auto --state guess --country guess  2>&1`
+    
+    
     puts "\n365. #{fileCount}. perlOutput: \n#{perlOutput}#{fileCount}. End of perlOutput ================…365\n\n" # This didn't seem to be happening with 2>&1 appended? But w/o it, error not captured
     perlOutput =~ /timediff\=([0-9]+)/
     timediff = $1 # class string
@@ -564,7 +575,7 @@ if whichOne=="SD" # otherwise it's HD, probably should be case to be cleaner cod
   # to get a value use prefsPhoto("theNameInFileNamingEtcPashue.rb"), nothing to do with the name above
   # puts "Prefs as set by pPashua"
   # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
-  src = prefsPhoto["srcSelect"] # + "/"
+  src = prefsPhoto["srcSelect"] + "/"
   lastPhotoFilename = prefsPhoto["lastPhoto"]
   destPhoto = prefsPhoto["destPhotoP"]
   destOrig  = prefsPhoto["destOrig"]
