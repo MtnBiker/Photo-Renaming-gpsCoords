@@ -15,3 +15,7 @@ require_relative 'lib/Photo_Naming_Pashua–HD'
 require_relative 'lib/gpsYesPashua'
 
 puts "RUBY_DESCRIPTION: #{RUBY_DESCRIPTION}\n\n" 
+
+class Photo
+  
+end

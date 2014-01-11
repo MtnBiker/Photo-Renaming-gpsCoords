@@ -113,7 +113,7 @@ whichOneLong= "" #
 ## end ititialization
 
 def fileDateUTC(fn) # Except for the first two lines, this seems to be only for Minolta movies, so isn't doing much anymore. In other words if not called much just use the first two active lines
-  puts "fn: #{fn}. line ~ 166"
+  puts "116. fn: #{fn}"
   fileEXIF = MiniExiftool.new(fn)
   fileDateUTC = fileEXIF.dateTimeOriginal # class time
   # puts "\nfileDateUTC: #{fileDateUTC}. fileDateUTC.class: #{fileDateUTC.class}. "
@@ -285,7 +285,7 @@ def gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFil
   #  need quotes around file locations since I have blanks in many of them and they don't pass through without the quotes
   #   puts "\n   folderGPX method. gpxFile: #{gpxFile}. "
   gpxFile = folderGPX +  fileDateUTC.strftime("%Y") + " Download/" + fileDateUTC.strftime("%Y%m%d") + ".gpx"
-  puts "\n285. folderGPX method. gpxFile: #{gpxFile}. "
+  puts "\n288. folderGPX method. gpxFile: #{gpxFile}. "
  
   #  Initialize
   gFiles=[] # a collection of daily files (days before and after as needed) for gpsPhoto.pl
@@ -298,13 +298,13 @@ def gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFil
   gpxFileTEMP = folderGPX +  fileDateUTC.strftime("%Y") + " Download/" + fileDateUTC.strftime("%Y%m%d") + ".TEMP"+ ".gpx" # so can access file for today created by Garmin Log Renaming
   if File.exists?(gpxFileTEMP)
     gFiles = gpsFileConcatenate(gFiles, gpxFileTEMP)
-    puts "298. gFiles: #{gFiles}."
+    puts "301. gFiles: #{gFiles}."
   end
   
   gpxFileI = folderGPX +  fileDateUTC.strftime("%Y") + " Download/" + fileDateUTC.strftime("%Y%m%d") + ".i"+ ".gpx" # so can access file for today created by iPhone using MotionGPX (or other?)
   if File.exists?(gpxFileI)
     gFiles = gpsFileConcatenate(gFiles, gpxFileI)
-    puts "303. gFiles: #{gFiles}."
+    puts "307. gFiles: #{gFiles}."
   end
   
   
@@ -352,17 +352,20 @@ def gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFil
     gpxFileI = folderPlus + ".i"+ ".gpx" # so can access file for next day created by iPhone using MotionGPX (or other?)
     if File.exists?(gpxFileI)
       gFiles = gpsFileConcatenate(gFiles, gpxFileI)
-      puts "352. gFiles: #{gFiles}."
+      puts "355. gFiles: #{gFiles}."
     end
    end # tzoLoc
   # puts "#{fileCount}. gFiles: #{gFiles}"
   # puts "\n#{fileCount}. imageFile: #{imageFile}. "
   # gFiles = "--gpsfile \"" + gFiles
   if gFiles.to_s.length > 10 # Some way of checking if any of the gpx files found
-    puts "\n353. gFiles: #{gFiles}."
+    puts "\n362. gFiles: #{gFiles}."
     # puts "\n351. call to the gpsphoto.pl script \nperl #{gpsPhotoLoc}   --image #{imageFile} #{gFiles} --timeoffset #{geoOffset} --maxtimediff #{maxTimeDiff} --maxdistance #{maxDistance}  --geoinfo wikipedia --city auto --state guess --country guess"
+    # gFiles = "\"/Users/gscar/Dropbox/   GPX daily logs/2013 Download/20131226.gpx\"" # temp for a test
+#     puts "365. gFiles: #{gFiles}"
+    # gFiles = "\"/Users/gscar/Dropbox/   GPX daily logs/2013 Download/\"" # this worked when used with --gpsdir Took forever to process the whole directory. Only did it for one photo
     perlOutput = `perl \"#{gpsPhotoLoc}\"   --image \"#{imageFile}\" --gpsfile #{gFiles} --timeoffset #{geoOffset} --maxtimediff #{maxTimeDiff} --maxdistance #{maxDistance}  --geoinfo #{geoInfoMethod} --city auto --state guess --country guess  2>&1`
-    puts "\n361. #{fileCount}. perlOutput: \n#{perlOutput}#{fileCount}. End of perlOutput ================\n" # This didn't seem to be happening with 2>&1 appended? But w/o it, error not captured
+    puts "\n365. #{fileCount}. perlOutput: \n#{perlOutput}#{fileCount}. End of perlOutput ================…365\n\n" # This didn't seem to be happening with 2>&1 appended? But w/o it, error not captured
     perlOutput =~ /timediff\=([0-9]+)/
     timediff = $1 # class string
     # puts"\n 453 timediff: #{timediff}. timediff.class: #{timediff.class}. "
@@ -561,7 +564,7 @@ if whichOne=="SD" # otherwise it's HD, probably should be case to be cleaner cod
   # to get a value use prefsPhoto("theNameInFileNamingEtcPashue.rb"), nothing to do with the name above
   # puts "Prefs as set by pPashua"
   # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
-  src = prefsPhoto["srcSelect"]  + "/"
+  src = prefsPhoto["srcSelect"] # + "/"
   lastPhotoFilename = prefsPhoto["lastPhoto"]
   destPhoto = prefsPhoto["destPhotoP"]
   destOrig  = prefsPhoto["destOrig"]
@@ -617,7 +620,8 @@ if addGPS2photos
   #puts "Prefs as set by geoGUI"
   # prefsGPX.each {|key,value| puts "#{key}:       #{value}"}
   # src = prefsGPX["srcSelect"] # not used after 2011.03.15. 
-  folderGPX = prefsGPX["gpxFolder"]  +'/' # fix to add trailing / needed since add file name.
+  folderGPX = prefsGPX["gpxFolder"] # +'/' # fix to add trailing / needed since add file name. 2014.01.10 getting double // but may not really be a problem. I think the problem is somewhere else. May need the trailing /
+  puts "621. folderGPX: #{folderGPX}"
   maxTimeDiff = prefsGPX["maxTimeDiffP"].to_i
   maxDistance = prefsGPX["maxDistanceP"].to_i
   camError = prefsGPX["toP"]
@@ -630,14 +634,14 @@ end # if addGPSphotos
 
 # destAnnot = destPhoto # this should be eliminated or fixed, i.e., make them the same FIX DONE 2011.07.07
 # puts "scr:       /Volumes/NO NAME/DCIM/113_PANA/  This works if manually entered"
-puts "src:       #{src}"
+puts "633. src:       #{src}"
 # puts "destAnnot: #{destAnnot}"
-puts "destOrig:  #{destOrig}"
-puts "destPhoto: #{destPhoto}\n"
+puts "     destOrig:  #{destOrig}"
+puts "     destPhoto: #{destPhoto}\n"
 # puts "destDup:   #{destDup}"
 # puts "folderGPXfolderGPX: #{folderGPX}"
-puts "folderGPX: #{folderGPX}\n"
-puts "lastPhotoFilename: #{lastPhotoFilename} for copying/moving from SD card. This is the starting point and may have been changed by user."
+puts "     folderGPX: #{folderGPX}\n"
+puts "640. lastPhotoFilename: #{lastPhotoFilename} for copying/moving from SD card. This is the starting point and may have been changed by user."
 if tzoFile # true if Camera setting/photo file is UTC. # Should make this more robust, i.e., confirm more logic
   puts "time offsets: #{camError} seconds camera error, #{maxTimeDiff} seconds (#{maxTimeDiff/60} minutes, #{maxTimeDiff/3600} hours) max. time difference between points, and photos were taken in time zone #{tzoLoc} GMT, but they are time stamped in UTC.\n#{maxDistance}m max. distance between points"
 else
