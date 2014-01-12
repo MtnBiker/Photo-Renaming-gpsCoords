@@ -266,13 +266,17 @@ end # timeZone
 
 def gpsFileConcatenate(gFiles, gpxFile) 
   # gpsfile = "--gpsfile \""  
-  gpsfile = "" # changing how this method works, will add this back at end since it was getting duplicated
-  # dqs="\" " # dqs double quote space
-  dqs = ""
-  gFiles<<(gpsfile+gpxFile+dqs)
+  # gpsfile = "" # changing how this method works, will add this back at end since it was getting duplicated
+  dqs = "\" " # dqs double quote space
+  dq  = "\""
+  gpxFile = dq + gpxFile + dq
+  # gFiles<<(gpsfile+gpxFile+dqs) # this was what I was doing when an array, below is for a string, line by line
+  gFiles = [gFiles, gpxFile].join(" ")
+  # gFiles = gpxFile # for testing only
 end
 
 def gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFile, fn, fileBaseName, gpsPhotoLoc, maxTimeDiff,maxDistance, fileCount, destNoCoords, problemReport, noProblemReport, photoCoordsFound, gpxFileNo, locFailCount, photoCoordsNotFound, locationFail, geoInfoMethod)
+  #  gps info added in this method. Is anything else done?
   #puts "gpxDate: #{gpxDate}"
   if tzoFile # true if Camera setting/photo file is UTC.
     geoOffset = camError.to_f
@@ -284,27 +288,24 @@ def gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFil
   #  --report-distance miles # messes up city with mileage
   #  need quotes around file locations since I have blanks in many of them and they don't pass through without the quotes
   #   puts "\n   folderGPX method. gpxFile: #{gpxFile}. "
+ 
   gpxFile = folderGPX +  fileDateUTC.strftime("%Y") + " Download/" + fileDateUTC.strftime("%Y%m%d") + ".gpx"
-  puts "\n288. folderGPX method. gpxFile: #{gpxFile}. "
+  # puts "\n293. folderGPX method. gpxFile: #{gpxFile}"
  
   #  Initialize
-  gFiles=[] # a collection of daily files (days before and after as needed) for gpsPhoto.pl
-
-  # First, i.e. the day (letting gps photo find if the file exists, see if this works)
-  if File.exists?(gpxFile)
-    gpsFileConcatenate(gFiles, gpxFile) # return not used
-  end
+  # gFiles=[] # a collection of daily files (days before and after as needed) for gpsPhoto.pl
+  # gFiles = "" # was an array, let's make it a string, but with an intial quote and we'll add one at the end
   
   gpxFileTEMP = folderGPX +  fileDateUTC.strftime("%Y") + " Download/" + fileDateUTC.strftime("%Y%m%d") + ".TEMP"+ ".gpx" # so can access file for today created by Garmin Log Renaming
   if File.exists?(gpxFileTEMP)
     gFiles = gpsFileConcatenate(gFiles, gpxFileTEMP)
-    puts "301. gFiles: #{gFiles}."
+    # puts "298. gFiles: #{gFiles}."
   end
   
   gpxFileI = folderGPX +  fileDateUTC.strftime("%Y") + " Download/" + fileDateUTC.strftime("%Y%m%d") + ".i"+ ".gpx" # so can access file for today created by iPhone using MotionGPX (or other?)
   if File.exists?(gpxFileI)
     gFiles = gpsFileConcatenate(gFiles, gpxFileI)
-    puts "307. gFiles: #{gFiles}."
+    # puts "304. gFiles: #{gFiles}."
   end
   
   
@@ -317,19 +318,19 @@ def gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFil
     gpxFile = folderPlus + ".gpx"
     if File.exists?(gpxFile)
       gFiles = gpsFileConcatenate(gFiles, gpxFile)
-      puts "317. gFiles: #{gFiles}."
+      # puts "317. gFiles: #{gFiles}"
     end
     
     gpxFileTEMP = folderPlus + ".TEMP"+ ".gpx" # so can access file for previous day created by Garmin Log Renaming
     if File.exists?(gpxFileTEMP)
       gFiles = gpsFileConcatenate(gFiles, gpxFileTEMP)
-      puts "323. gFiles: #{gFiles}."
+      # puts "323. gFiles: #{gFiles}"
     end
     
     gpxFileI = folderPlus + ".i"+ ".gpx" # so can access file for previous day created by iPhone using MotionGPX (or other?)
     if File.exists?(gpxFileI)
       gFiles = gpsFileConcatenate(gFiles, gpxFileI)
-      puts "329. gFiles: #{gFiles}."
+      # puts "329. gFiles: #{gFiles}"
     end
 
   else
@@ -341,7 +342,7 @@ def gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFil
     gpxFile =folderPlus + ".gpx"
     if File.exists?(gpxFile)
       gFiles = gpsFileConcatenate(gFiles, gpxFile)
-      puts "341. gFiles: #{gFiles}."
+      # puts "341. gFiles: #{gFiles}"
     end
     
     gpxFileTEMP = folderPlus + ".TEMP"+ ".gpx" # so can access file for next day created by Garmin Log Renaming
@@ -352,36 +353,26 @@ def gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFil
     gpxFileI = folderPlus + ".i"+ ".gpx" # so can access file for next day created by iPhone using MotionGPX (or other?)
     if File.exists?(gpxFileI)
       gFiles = gpsFileConcatenate(gFiles, gpxFileI)
-      puts "355. gFiles: #{gFiles}."
+      # puts "355. gFiles: #{gFiles}"
     end
    end # tzoLoc
   # puts "#{fileCount}. gFiles: #{gFiles}"
   # puts "\n#{fileCount}. imageFile: #{imageFile}. "
   # gFiles = "--gpsfile \"" + gFiles
   if gFiles.to_s.length > 10 # Some way of checking if any of the gpx files found
-    puts "\n362. gFiles: #{gFiles}."
-    # puts "\n351. call to the gpsphoto.pl script \nperl #{gpsPhotoLoc}   --image #{imageFile} #{gFiles} --timeoffset #{geoOffset} --maxtimediff #{maxTimeDiff} --maxdistance #{maxDistance}  --geoinfo wikipedia --city auto --state guess --country guess"
-    # gFiles = "\"/Users/gscar/Dropbox/   GPX daily logs/2013 Download/20131226.gpx\"" # temp for a test
-#     puts "365. gFiles: #{gFiles}"
-    # gFiles = "" # this worked when used with --gpsdir Took forever to process the whole directory. Only did it for one photo
-    # perlOutput = `perl \"#{gpsPhotoLoc}\"   --image \"#{imageFile}\" --gpsfile #{gFiles} --timeoffset #{geoOffset} --maxtimediff #{maxTimeDiff} --maxdistance #{maxDistance}  --geoinfo #{geoInfoMethod} --city auto --state guess --country guess  2>&1`
-    
-    # Going to try a batch anotation. Should me more efficent, but will loose the easy ability to add timediff, but let's see what the output looks like
-    
-    # --gpsdir dir. Do for one year a time.
-    gpsdir = "\"/Users/gscar/Dropbox/   GPX daily logs/2013 Download/\"" 
-    
-    # --dir directory    Image directory. Multiple are allowed. This is destPhoto after getting them in that folder labeled but not gps coordinated which will happen if I run the script now, i.e., without gps coords being added
-    
-    perlOutput = `perl \"#{gpsPhotoLoc}\"   --dir \"#{destPhoto}\" --gpsdir #{gpsdir} --timeoffset #{geoOffset} --maxtimediff #{maxTimeDiff} --maxdistance #{maxDistance}  --geoinfo #{geoInfoMethod} --city auto --state guess --country guess  2>&1`
-    
-    
+    # gFiles = gFiles[1..-1] # trying to chop off leading zero
+     # gFiles = "\"/Users/gscar/Dropbox/   GPX daily logs/2013 Download/20131222.gpx\"" # strripped the leading blank
+    # puts "\n359. the final gFiles submitted to the perl script: \n#{gFiles}" # for testing as having problems getting in a format gpsphoto.pl likes at the moment
+    # Was using array for gpsfile, now a line by line list with --gpsfile-list
+    perlOutput = `perl \"#{gpsPhotoLoc}\"   --image \"#{imageFile}\" --gpsfile #{gFiles} --timeoffset #{geoOffset} --maxtimediff #{maxTimeDiff} --maxdistance #{maxDistance}  --geoinfo #{geoInfoMethod} --city auto --state guess --country guess  2>&1`
+        
     puts "\n365. #{fileCount}. perlOutput: \n#{perlOutput}#{fileCount}. End of perlOutput ================…365\n\n" # This didn't seem to be happening with 2>&1 appended? But w/o it, error not captured
     perlOutput =~ /timediff\=([0-9]+)/
     timediff = $1 # class string
     # puts"\n 453 timediff: #{timediff}. timediff.class: #{timediff.class}. "
     if timediff.to_i > 240
       timeDiffReport = ". Note that timediff is #{timediff} seconds. "
+      # writing to the photo file about high timediff
       writeTimeDiff(imageFile,timediff)
     else
       timeDiffReport = ""
@@ -425,7 +416,7 @@ def gpsInfo(geoOnly, tzoFile, tzoLoc, camError, folderGPX, fileDateUTC, imageFil
       problemReport = problemReport + report
     end
   else
-    report = "\n401. #{fileCount}. #{File.basename(imageFile)} didn't have gps coordinates added because #{File.basename(gpxFile)} is missing."
+    report = "\n#{fileCount}. #{File.basename(imageFile)} didn't have gps coordinates added because #{File.basename(gpxFile)} is missing. line 419"
     photoCoordsNotFound += 1
     # puts "** #{report}"
     problemReport = problemReport + report
@@ -575,7 +566,7 @@ if whichOne=="SD" # otherwise it's HD, probably should be case to be cleaner cod
   # to get a value use prefsPhoto("theNameInFileNamingEtcPashue.rb"), nothing to do with the name above
   # puts "Prefs as set by pPashua"
   # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
-  src = prefsPhoto["srcSelect"] + "/"
+  src = prefsPhoto["srcSelect"]  + "/"
   lastPhotoFilename = prefsPhoto["lastPhoto"]
   destPhoto = prefsPhoto["destPhotoP"]
   destOrig  = prefsPhoto["destOrig"]
@@ -792,5 +783,6 @@ problemReport = problemReport +"\n\nLocation fail array (for working on this. At
 summary(photoHandling,filesMovedCount,fileCount,thmCount,destPhoto,gpxFlag,addGPS2photos,gpxFileNo,photoCoordsFound,photoCoordsNotFound,locFailCount)
 puts "\nProblem Report Details:\n#{problemReport}"  if problemReport != "" # This wasn't working right
 puts "\nSuccess Report Details:\n#{noProblemReport}"
+puts "\n####### Should run \"Adding gps information to a folder full of files.rb\" until I get this script running right, because it's missing too many coords, \n####### although sometimes it seems to get them all. May work better in GMT -8, but no reason obviously this should be unless a problem dealing with the yml file info ###"
 puts "============================================================="
 # puts "locationFail array: #{locationFail}=======

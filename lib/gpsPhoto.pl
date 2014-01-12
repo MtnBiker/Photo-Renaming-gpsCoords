@@ -1069,7 +1069,7 @@ for my $dir (@dir) {
 		$file = File::Spec->rel2abs(File::Spec->join($dir,$file));
 		# First check if it is an image file.
 		my ($base, $dir, $ext) = fileparse($file,qr/\.[^.]*/);
-		if ($ext =~ /^\.(jpg|jpeg|nef|cr2|crw|mrw|jpe|tif|tiff|dng)$/i) {
+		if ($ext =~ /^\.(jpg|jpeg|nef|cr2|crw|mrw|jpe|tif|tiff|dng|rw2|MRW)$/i) {
 			push @images, $file;
 			$count++;
 		}

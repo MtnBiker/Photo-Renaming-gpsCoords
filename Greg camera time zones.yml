@@ -1,3 +1,18 @@
+"529":
+    Description: "California Daylight Time"
+    timeGMT: 2014-03-09T10-00-00Z
+    zone: -7
+    comments: "Switch to Daylight Saving Time"
+"528":
+    Description: "California Standard Time"
+    timeGMT: 2013-12-26T23-30-00Z
+    zone: -8
+    comments: "Back to PDT. Left Cleveland at 6:30 pm"
+"527":
+    Description: "Eastern Standard Time"
+    timeGMT: 2013-12-20T1-15-00Z
+    zone: -5
+    comments: "To Cleveland for Christmas. Left Calif. at 4:12 p.m. on Dec. 19 and give an hour to leave time zone"
 "526":
     Description: "California Standard Time"
     timeGMT: 2013-11-03T10-00-00Z
