@@ -14,7 +14,7 @@ include Pashua
 #  This is revised to eliminate the old cruft
 
 
-def pPashua(srcPhoto,lastPhotoFilename, destPhoto,destOrig)  
+def pPashua2(srcPhoto,lastPhotoFilename, destPhoto,destOrig)  
   # Need a symlink to Pashua in this folder too, include and require moved to top
 
   $:.push(File.dirname($0))
@@ -44,16 +44,6 @@ lastPhoto.label = Last photo imported to Aperture (from Special Instructions fil
 lastPhoto.width=120
 lastPhoto.default = #{lastPhotoFilename}
 
-# Moving photos. I think the first letter is used later to select the option. So first letter must be unit
-photoHandle.type = radiobutton
-photoHandle.label = What do_ you want to do_ with the original photo files and the annotated photos?
-photoHandle.width = 310
-photoHandle.option = Leave the original on the card, but put an annotated copy in the Latest Download folder and a copy of the original in the "_already imported" folder. Typical if downloading from SD card
-photoHandle.option = Annotate a copy of the photo and place in the Latest Download Folder, and move the original to the "_already imported" folder. Typically used for files copied to downloads folder since want to leave th SD card alone.
-photoHandle.option = Copy to New Destination and leave original in place. No copy of original photo copied to hard drive
-photoHandle.option = Move to New Destination (means removing from the SD card)
-photoHandle.default = Leave the original on the card, but put an annotated copy in the Latest Download folder and a copy of the original in the "_already imported" folder. Typical if downloading from SD card
-
 # Photo folder destination
 destPhotoP.type = openbrowser
 destPhotoP.label = Select the destination folder for the relabled and GPS coordinated photos:
@@ -66,10 +56,10 @@ destOrig.label = Select the destination folder a copy of the original photo file
 destOrig.width=700
 destOrig.default = #{destOrig}
 
-# Geolocation for files being renamed
-geoLoc.type = checkbox
-geoLoc.label = Do_ you want to add geo location?
-geoLoc.default = 1
+# Geolocation for files being renamed. Ignore for now, this is not being used. Only default is an option.
+# geoLoc.type = checkbox
+# geoLoc.label = Do_ you want to add geo location?
+# geoLoc.default = 1
 
 
 # Add a cancel button with default label
