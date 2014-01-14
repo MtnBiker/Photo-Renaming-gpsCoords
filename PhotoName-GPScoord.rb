@@ -22,6 +22,8 @@ downloadsFolders = "/Volumes/Knobby Aperture II/_Download folder/"
 destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
 destOrig  = downloadsFolders + "_already imported/" # folder to move originals to if not done in 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
+geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wikipedia—most general and osm—maybe better for cities
+
 
 puts "RUBY_DESCRIPTION: #{RUBY_DESCRIPTION}\n\n" 
 
@@ -164,3 +166,18 @@ puts "\nIntialization and complete. File renaming and copying/moving beginning..
 #  If working from SD card, copy or move files to " Drag Photos HERE Drag Photos HERE" folder, then will process from there.
 copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
 #  Note that file creation date is the time of copying. May want to fix this. Maybe a mv is a copy and move which is sort of a recreation. 
+
+# src = srcHD # switching since next part works from copied files on hard drive. 
+
+puts "\n 170. Photos will now be copied and renamed. \n........Using #{geoInfoMethod} as a source, GPS information will be added to photos..........\n"
+
+puts "First will copy to the final destination where the renaming will be done and the original moved to an archive (already imported folder)"
+
+Dir.foreach(srcHD) do |item| 
+  next if item == '.' or item == '..' or item == '.DS_Store' 
+  fn  = srcHD     + item
+  fnp = destPhoto + item
+  fnf = destOrig  + item
+  FileUtils.copy(fn, fnp)
+  FileUtils.move(fn, fnf)
+end
