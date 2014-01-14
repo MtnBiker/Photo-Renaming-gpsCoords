@@ -63,10 +63,10 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
   # some of the above counter variables could be set at the beginning of this script and used locally
   puts "Begin Copying photos from SD card. List includes photos skipped."
   cardCount = 0
+  cardCountCopied = 0
   doAgain = true # name isn't great, now means do it. A no doubt crude way to run back through the copy loop if we moved to another folder.
   timesThrough = 1 
   fileSDbasename = "" # got an error at puts fileSDbasename
-  cardCountMoved = ""
   while doAgain==true # and timesThrough<=2 
     Dir.chdir(src) # needed for glob
     Dir.glob("P*") do |item| 
@@ -75,9 +75,10 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
       fnp = srcHD + "/" + item # using srcHD as the put files here place, might cause problems later
       # get filename and make select later than already downloaded
       fileSDbasename = File.basename(item,".*")
-      puts "450. #{cardCount}. item: #{item}. fileSDbasename: #{fileSDbasename}, fn: #{fn}"
+      # puts "78. #{cardCount}. item: #{item}. fileSDbasename: #{fileSDbasename}, fn: #{fn}"
       next if item == '.' or item == '..' or fileSDbasename <= lastPhotoFilename # don't need the first two with Dir.glob, but doesn't slow things down much overall for this script
-      FileUtils.copy(fn, fnp) # Copy from card to 
+      FileUtils.copy(fn, fnp) # Copy from card to hard drive. , preserve = true gives and error. But preserve also preserves permissions, so that may not be a good thing. If care will have to manually change creation date
+      cardCountCopied += 1
     end # Dir.glob("P*") do |item| 
       # write the number of the last photo copied or moved
       # if fileSDbasename ends in 999, we need to move on to the next folder, and the while should allow another go around.
@@ -113,8 +114,8 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
   rescue IOError => e
     puts "Something went wrong. Could not write last photo read (#{fileSDbasename}) to #{fileNow}"
   end # begin
-    puts "\n116. Of the #{cardCount} photos on the SD card, #{cardCountCopied} were copied and #{cardCountMoved} were moved." # Could get rid of the and with an if somewhere since only copying or moving is done.
-    puts "117. Done moving or copying photos from SD card. src switched from card to folder holder moved or copied photos: #{src}"  
+    puts "\n116. Of the #{cardCount} photos on the SD card, #{cardCountCopied} were copied." # Could get rid of the and with an if somewhere since only copying or moving is done.
+    puts "117. Done copying photos from SD card. src switched from card to folder holder moved or copied photos: #{src}"  
 end # copySD
 
 
@@ -162,3 +163,4 @@ puts "\nIntialization and complete. File renaming and copying/moving beginning..
 
 #  If working from SD card, copy or move files to " Drag Photos HERE Drag Photos HERE" folder, then will process from there.
 copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
+#  Note that file creation date is the time of copying. May want to fix this. Maybe a mv is a copy and move which is sort of a recreation. 
