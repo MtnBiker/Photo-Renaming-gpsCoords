@@ -10,8 +10,8 @@ require 'yaml'
 require "time"
 
 require_relative 'lib/SDorHD'
-require_relative 'lib/Photo_Naming_Pashua-SD'
-require_relative 'lib/Photo_Naming_Pashua–HD'
+require_relative 'lib/Photo_Naming_Pashua-SD2'
+require_relative 'lib/Photo_Naming_Pashua–HD2'
 require_relative 'lib/gpsYesPashua'
 
 thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
@@ -40,15 +40,12 @@ def sdFolder(sdFolderFile)
   sdFolder
 end
 
-def whichOne(whereFrom)
-  whichOne = whereFrom["whichDrive"][0].chr # only using the first character
+def whichOne(whichOne)
   if whichOne=="S"
     whichOne = "SD"
-    whichOneLong = " a plugged in SD card."
   else # Hard drive
     whichOne = "HD"
-    whichOneLong = whichOneLong + " a folder on a hard drive."
-  end # whichOne=="S"
+  end 
   whichOne  
 end
 
@@ -62,15 +59,75 @@ def whichSource(whichOne,prefsPhoto)
   src
 end
 
+def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) 
+  # some of the above counter variables could be set at the beginning of this script and used locally
+  puts "Begin Copying photos from SD card. List includes photos skipped."
+  cardCount = 0
+  doAgain = true # name isn't great, now means do it. A no doubt crude way to run back through the copy loop if we moved to another folder.
+  timesThrough = 1 
+  fileSDbasename = "" # got an error at puts fileSDbasename
+  cardCountMoved = ""
+  while doAgain==true # and timesThrough<=2 
+    Dir.chdir(src) # needed for glob
+    Dir.glob("P*") do |item| 
+      cardCount += 1
+      fn = src + item
+      fnp = srcHD + "/" + item # using srcHD as the put files here place, might cause problems later
+      # get filename and make select later than already downloaded
+      fileSDbasename = File.basename(item,".*")
+      puts "450. #{cardCount}. item: #{item}. fileSDbasename: #{fileSDbasename}, fn: #{fn}"
+      next if item == '.' or item == '..' or fileSDbasename <= lastPhotoFilename # don't need the first two with Dir.glob, but doesn't slow things down much overall for this script
+      FileUtils.copy(fn, fnp) # Copy from card to 
+    end # Dir.glob("P*") do |item| 
+      # write the number of the last photo copied or moved
+      # if fileSDbasename ends in 999, we need to move on to the next folder, and the while should allow another go around.
+    doAgain = false
+    if fileSDbasename[-3,3]=="999" # and NEXT PAIRED FILE DOES NOT EXIST, then can uncomment the two last lines of this if, but may also have to start the loop over, but it seems to be OK with mid calculation change.
+        nextFolderNum = fileSDbasename[-7,3].to_i + 1 # getting first three digits of filename since that is also part of the folder name
+        nextFolderName = nextFolderNum.to_s + "_PANA"
+        begin
+          # Writing which folder we're now in
+          fileNow = File.open(thisScript + sdFolderFile, "w")
+          fileNow.write(nextFolderName) 
+        rescue IOError => e
+          puts "Something went wrong. Could not write last photo read (#{nextFolderName}) to #{sdFolderFile}"
+        ensure
+            fileNow.close unless fileNow == nil
+        end # begin writing sdFolderFile
+        # puts "\n#{nextFolderName} File.exist?(nextFolderName): #{File.exist?(nextFolderName)}" 
+        src = srcSDfolder + nextFolderName + "/"
+        if File.exist?(src)
+          doAgain = true
+        else
+          doAgain = false
+        end     
+        puts "Moving to #{src} because the folder we started in was full.\n"
+    end
+  end # if doAgain…
+  # Writing which file on the card we ended on
+  begin
+      fileNow = File.open(lastPhotoReadTextFile, "w") # must use explicit path, otherwise will use wherever we are are on the SD card
+      fileNow.puts fileSDbasename
+      fileNow.close
+      puts "\n495. The last file processed. fileSDbasename, #{fileSDbasename}, written to  #{fileSDbasename}."
+  rescue IOError => e
+    puts "Something went wrong. Could not write last photo read (#{fileSDbasename}) to #{fileNow}"
+  end # begin
+    puts "\n116. Of the #{cardCount} photos on the SD card, #{cardCountCopied} were copied and #{cardCountMoved} were moved." # Could get rid of the and with an if somewhere since only copying or moving is done.
+    puts "117. Done moving or copying photos from SD card. src switched from card to folder holder moved or copied photos: #{src}"  
+end # copySD
+
+
 ## The "program" #################
 puts "Fine naming and moving started: #{Time.now}" # for trial runs
 srcSD = srcSDfolder + sdFolder(sdFolderFile)
 
 # Ask whether working with photo files from SD card or HD
 fromWhere = whichLoc() # This is pulling in first Pashua window (1. ), SDorHD.rb which has been required
-puts "fromWhere: #{fromWhere}"
+whichDrive = fromWhere["whichDrive"][0].chr # only using the first character
+puts "whichDrive: #{whichDrive}"
 # Set the return into a more friendly variable and set the src of the photos to be processed
-whichOne = whichOne(fromWhere) # parsing result to get HD or SD
+whichOne = whichOne(whichDrive) # parsing result to get HD or SD
 if whichOne=="SD" # otherwise it's HD, probably should be case to be cleaner coding
   # read in last filename copied from card previously
   begin
@@ -82,7 +139,7 @@ if whichOne=="SD" # otherwise it's HD, probably should be case to be cleaner cod
     puts "Exception: #{err}. Not critical as value can be entered manually by user."
   end
   src = srcSD
-  prefsPhoto = pPashua(src,lastPhotoFilename,destPhoto,destOrig) # calling Photo_Handling_Pashua-SD
+  prefsPhoto = pPashua2(src,lastPhotoFilename,destPhoto,destOrig) # calling Photo_Handling_Pashua-SD
   # to get a value use prefsPhoto("theNameInFileNamingEtcPashue.rb"), nothing to do with the name above
   # puts "Prefs as set by pPashua"
   # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
@@ -90,24 +147,18 @@ if whichOne=="SD" # otherwise it's HD, probably should be case to be cleaner cod
   lastPhotoFilename = prefsPhoto["lastPhoto"]
   destPhoto = prefsPhoto["destPhotoP"]
   destOrig  = prefsPhoto["destOrig"]
-  photoHandling = prefsPhoto["photoHandle"][0].chr # only using the first character 
-else # whichOne=="HD"
+else # whichOne=="HD", but what
   src = srcHD
-  prefsPhoto = pGUI(src, destPhoto, photoHandling, destOrig,geoOnly) # is this only sending values in? 
+  prefsPhoto = pGUI(src, destPhoto, destOrig) # is this only sending values in? 
   # to get a value use prefsPhoto("theNameInFileNamingEtcPashue.rb"), nothing to do with the name above
   # puts "Prefs as set by pGUI"
   # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
   src = prefsPhoto["srcSelect"]  + "/"
   destPhoto = prefsPhoto["destPhotoP"]
   destOrig  = prefsPhoto["destOrig"]
-  photoHandling = prefsPhoto["photoHandle"][0].chr # only using the first character 
-  photoHandling = "A"  # since options not given, but could add back in
-  case prefsPhoto["geoOnly"]
-   when "1"
-     geoOnly = true
-  when "0"
-    geoOnly = false
-  else puts "We've got a problem determining geoOnly"
-  end
 end # whichOne=="SD"
 
+puts "\nIntialization and complete. File renaming and copying/moving beginning..."
+
+#  If working from SD card, copy or move files to " Drag Photos HERE Drag Photos HERE" folder, then will process from there.
+copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
