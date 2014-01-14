@@ -124,29 +124,38 @@ end # copySD
 def copyAndMove(srcHD,destPhoto,destOrig)
   puts "First will copy to the final destination where the renaming will be done and the original moved to an archive (already imported folder)"
   #  Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
+  # THIS METHOD WILL NOT WORK IF THE RAW FILE FORMAT ALPHABETICALLY COMES BEFORE JPG. SHOULD MAKE THIS MORE ROBUST
   photoFinalCount = 0
+  delCount = 1
+  itemPrev = "" # need something for first time through
+  fnp = "" # when looped back got error "undefined local variable or method ‘fnp’ for main:Object", so needs to be set here to remember it. Yes, this works, without this statement get an error 
   Dir.foreach(srcHD) do |item| 
+    # puts "131.. photoFinalCount: #{photoFinalCount + 1}. item: #{item}."
     next if item == '.' or item == '..' or item == '.DS_Store' 
     fileExt = File.extname(item)
-    if File.basename(itemPrev, ".*") == File.basename(item,".*")
+    if File.basename(itemPrev, ".*") == File.basename(item,".*") && photoFinalCount != 0
      #  The following shouldn't be necessary, but is a check in case another kind of raw or who know what else. Only the FileUtils.rm(itemPrev) should be needed
+     # puts "136.. itemPrev: #{itemPrev}"
      if File.extname(itemPrev) ==".JPG"
-        FileUtils.rm(fnp)
-        photoFinalCount -= 1
+       FileUtils.rm(fnp)
+       puts "141. #{delCount}. fnp: #{itemPrev} was deleted because it's a duplicate jpg."
+       delCount += 1
+       photoFinalCount -= 1
       else
         puts "xx. Something very wrong here with trying to remove JPGs when there is a corresponding .RW2"
-      end    
-    end
+      end # File.extname  
+    end   # File.basename
     fn  = srcHD     + item # sourced from Drag Photos Here
     fnp = destPhoto + item # new file in Latest Download
+    # puts "147.. fnp: #{fnp}"
     fnf = destOrig  + item # to already imported
     FileUtils.copy(fn, fnp)
     FileUtils.move(fn, fnf)
     itemPrev = item
     photoFinalCount += 1
-  end  
-  puts "148. photoFinalCount: #{photoFinalCount} photos have been moved and are ready for renaming and gpsing"
-end
+  end # Dir.foreach
+  puts "157. photoFinalCount: #{photoFinalCount} photos have been moved and are ready for renaming and gpsing. #{delCount} duplicate jpg were not moved."
+end # copyAndMove: copy to the final destination where the renaming will be done and the original moved to an archive (already imported folder)
 
 
 # With the fileDateUTC for the photo, find the time zone based on the log.
@@ -226,6 +235,6 @@ copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTe
 
 puts "\n 170. Photos will now be copied and renamed. \n........Using #{geoInfoMethod} as a source, GPS information will be added to photos..........\n"
 
-puts "First will copy to the final destination where the renaming will be done and the original moved to an archive (already imported folder)"
+# puts "First will copy to the final destination where the renaming will be done and the original moved to an archive (already imported folder)"
 #  Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
 copyAndMove(srcHD,destPhoto,destOrig)
