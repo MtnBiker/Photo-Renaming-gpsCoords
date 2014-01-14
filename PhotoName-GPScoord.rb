@@ -23,6 +23,7 @@ destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPS
 destOrig  = downloadsFolders + "_already imported/" # folder to move originals to if not done in 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
 geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wikipedia—most general and osm—maybe better for cities
+timeZonesFile = "lib/Greg camera time zones.yml"  
 
 
 puts "RUBY_DESCRIPTION: #{RUBY_DESCRIPTION}\n\n" 
@@ -120,6 +121,60 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
     puts "117. Done copying photos from SD card. src switched from card to folder holder moved or copied photos: #{src}"  
 end # copySD
 
+def copyAndMove(srcHD,destPhoto,destOrig)
+  puts "First will copy to the final destination where the renaming will be done and the original moved to an archive (already imported folder)"
+  #  Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
+  photoFinalCount = 0
+  Dir.foreach(srcHD) do |item| 
+    next if item == '.' or item == '..' or item == '.DS_Store' 
+    fileExt = File.extname(item)
+    if File.basename(itemPrev, ".*") == File.basename(item,".*")
+     #  The following shouldn't be necessary, but is a check in case another kind of raw or who know what else. Only the FileUtils.rm(itemPrev) should be needed
+     if File.extname(itemPrev) ==".JPG"
+        FileUtils.rm(fnp)
+        photoFinalCount -= 1
+      else
+        puts "xx. Something very wrong here with trying to remove JPGs when there is a corresponding .RW2"
+      end    
+    end
+    fn  = srcHD     + item # sourced from Drag Photos Here
+    fnp = destPhoto + item # new file in Latest Download
+    fnf = destOrig  + item # to already imported
+    FileUtils.copy(fn, fnp)
+    FileUtils.move(fn, fnf)
+    itemPrev = item
+    photoFinalCount += 1
+  end  
+  puts "148. photoFinalCount: #{photoFinalCount} photos have been moved and are ready for renaming and gpsing"
+end
+
+
+# With the fileDateUTC for the photo, find the time zone based on the log.
+# The log is in numerical order and used as index here. The log is a YAML file
+def timeZone(fileDateUTC, timeZonesFile)
+  # theTimeAhead = "2050-01-01T00:00:00Z"
+  # puts "379. timeZonesFile: #{timeZonesFile}. "
+  timeZones = YAML.load(File.read(timeZonesFile)) # should we do this once somewhere else?
+  i = timeZones.keys.max # e.g. 505
+  j = timeZones.keys.min # e.g. 488
+  while i > j # make sure I really get to the end 
+    theTime = timeZones[i]["timeGMT"]
+    # puts "\nA. i: #{i}. theTime: #{theTime}" # i: 502. theTime: 2011-06-29T01-00-00Z
+    theTime = Time.parse(theTime) # class: time Wed Jun 29 00:00:00 -0700 2011
+    # puts "\nB. #{i}. fileDateUTC: #{fileDateUTC}. theTime: #{theTime}. fileDateUTC.class: #{theTime.class}. fileDateUTC.class: #{theTime.class}"
+    # puts "Note that these dates are supposed to be UTC, but are getting my local time zone attached."
+    if fileDateUTC>theTime
+      theTimeZone = timeZones[i]["zone"]
+      # puts "C. #{i}. fileDateUTC: #{fileDateUTC} fileDateUTC.class: #{fileDateUTC.class}. theTimeZone: #{theTimeZone}."
+      return theTimeZone
+    else
+      i= (i.to_i-1).to_s
+    end
+  end # loop
+  # puts "D. #{i}. fileDateUTC: #{fileDateUTC} fileDateUTC.class: #{fileDateUTC.class}. theTimeZone: #{theTimeZone}. "
+  return theTimeZone
+end # timeZone
+
 
 ## The "program" #################
 puts "Fine naming and moving started: #{Time.now}" # for trial runs
@@ -172,12 +227,5 @@ copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTe
 puts "\n 170. Photos will now be copied and renamed. \n........Using #{geoInfoMethod} as a source, GPS information will be added to photos..........\n"
 
 puts "First will copy to the final destination where the renaming will be done and the original moved to an archive (already imported folder)"
-
-Dir.foreach(srcHD) do |item| 
-  next if item == '.' or item == '..' or item == '.DS_Store' 
-  fn  = srcHD     + item
-  fnp = destPhoto + item
-  fnf = destOrig  + item
-  FileUtils.copy(fn, fnp)
-  FileUtils.move(fn, fnf)
-end
+#  Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
+copyAndMove(srcHD,destPhoto,destOrig)
