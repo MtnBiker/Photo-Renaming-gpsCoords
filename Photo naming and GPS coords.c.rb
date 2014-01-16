@@ -37,9 +37,7 @@ movePhotoYN   =  false # Deprecated for photoHandling . For testing or depending
 photoHandling =  "C" # C[opy], M[ove], R[ename], N[o] for testing or to preview the images. See defPhoto() for more information
 movieHandling =  "C" # C[opy], M[ove], R[ename], N[o] for testing or to preview the images.
 addGPS2photos = true # true or false. Try to add gps location to photo files
-srcSDfolder = "/Volumes/NO NAME/DCIM/" # Panasonic and probably Canon
-srcHD = "/Volumes/Knobby Aperture II/_Download folder/ Drag Photos HERE/"  # trailing slash is added because Pashua doesn't pick it up. Photos copied from original location such as camera or sent by others
-#  srcHD is where photos copied to from SD card, might need to make this a different variable
+srcSD#  srcHD is where photos copied to from SD card, might need to make this a different variable
 #  the two above are set to src when select in first Pashua window
 # $srcPhoto = src # to bring variable into Pashua ### Change to mounted card when get detection built in FIX
 thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
@@ -540,6 +538,7 @@ end
 srcSD = srcSDfolder + sdFolder
 # puts "Current folder for photos on SD card (srcSD): #{srcSD}"
 whereFrom = whichLoc() # from dialog window SAY WHAT. This is pulling in first Pashua window, SDorHD.rb which has been required
+
 whichOne = whereFrom["whichDrive"][0].chr # only using the first character
 if whichOne=="S"
   whichOne = "SD"

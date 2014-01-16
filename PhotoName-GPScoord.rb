@@ -8,6 +8,7 @@ include FileUtils
 require 'find'
 require 'yaml'
 require "time"
+require 'shellwords'
 
 require_relative 'lib/SDorHD'
 require_relative 'lib/Photo_Naming_Pashua-SD2'
@@ -23,13 +24,23 @@ destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPS
 destOrig  = downloadsFolders + "_already imported/" # folder to move originals to if not done in 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
 geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wikipedia—most general and osm—maybe better for cities
-timeZonesFile = "lib/Greg camera time zones.yml"  
+timeZonesFile = "/Users/gscar/Dropbox/scriptsEtc/Greg camera time zones.yml"
+timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with
+gpsPhotoPerl = "lib/gpsPhoto.pl" # Perl script that puts gps locations into the photos. SEEMS TO WORK WITHOUT ./lib
+gpsPhotoPerl = "/Users/gscar/Documents/Ruby/Photo handling/lib/gpsPhoto.pl"
+folderGPX = "/Users/gscar/Dropbox/   GPX daily logs/2014 Download/" # Could make it smarter, so it knows which year it is. 
+
 
 
 puts "RUBY_DESCRIPTION: #{RUBY_DESCRIPTION}\n\n" 
 
 class Photo
   
+end
+
+def timeStamp
+  timeNowWas = Time.now
+  puts Time.now
 end
 
 def sdFolder(sdFolderFile)  
@@ -64,7 +75,7 @@ end
 
 def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) 
   # some of the above counter variables could be set at the beginning of this script and used locally
-  puts "Begin Copying photos from SD card. List includes photos skipped."
+  puts "\n72. Copying photos from an SD card"
   cardCount = 0
   cardCountCopied = 0
   doAgain = true # name isn't great, now means do it. A no doubt crude way to run back through the copy loop if we moved to another folder.
@@ -113,12 +124,12 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
       fileNow = File.open(lastPhotoReadTextFile, "w") # must use explicit path, otherwise will use wherever we are are on the SD card
       fileNow.puts fileSDbasename
       fileNow.close
-      puts "\n495. The last file processed. fileSDbasename, #{fileSDbasename}, written to  #{fileSDbasename}."
+      puts "\n127. The last file processed. fileSDbasename, #{fileSDbasename}, written to  #{fileSDbasename}."
   rescue IOError => e
     puts "Something went wrong. Could not write last photo read (#{fileSDbasename}) to #{fileNow}"
   end # begin
-    puts "\n116. Of the #{cardCount} photos on the SD card, #{cardCountCopied} were copied." # Could get rid of the and with an if somewhere since only copying or moving is done.
-    puts "117. Done copying photos from SD card. src switched from card to folder holder moved or copied photos: #{src}"  
+    puts "\n131. Of the #{cardCount} photos on the SD card, #{cardCountCopied} were copied" # Could get rid of the and with an if somewhere since only copying or moving is done.
+    # puts "125. Done copying photos from SD card. src switched from card to folder holder moved or copied photos: #{src}"  
 end # copySD
 
 def copyAndMove(srcHD,destPhoto,destOrig)
@@ -138,11 +149,11 @@ def copyAndMove(srcHD,destPhoto,destOrig)
      # puts "136.. itemPrev: #{itemPrev}"
      if File.extname(itemPrev) ==".JPG"
        FileUtils.rm(fnp)
-       puts "141. #{delCount}. fnp: #{itemPrev} was deleted because it's a duplicate jpg."
+       # puts "145. #{delCount}. fnp: #{itemPrev} will not be transferred because it's a duplicate jpg." # Is this slow? Turned off to try. Not sure.
        delCount += 1
        photoFinalCount -= 1
       else
-        puts "xx. Something very wrong here with trying to remove JPGs when there is a corresponding .RW2"
+        puts "149. Something very wrong here with trying to remove JPGs when there is a corresponding .RW2"
       end # File.extname  
     end   # File.basename
     fn  = srcHD     + item # sourced from Drag Photos Here
@@ -154,16 +165,48 @@ def copyAndMove(srcHD,destPhoto,destOrig)
     itemPrev = item
     photoFinalCount += 1
   end # Dir.foreach
-  puts "157. photoFinalCount: #{photoFinalCount} photos have been moved and are ready for renaming and gpsing. #{delCount} duplicate jpg were not moved."
+  puts "\n158. #{photoFinalCount} photos have been moved and are ready for renaming and gpsing. #{delCount-1} duplicate jpg were not moved."
 end # copyAndMove: copy to the final destination where the renaming will be done and the original moved to an archive (already imported folder)
 
+def userCamCode(fn)
+  fileEXIF = MiniExiftool.new(fn)
+  ## not very well thought out and the order of the tests matters
+  case fileEXIF.model
+  when "DMC-G2"
+    userCamCode = ".gs.L" # gs for photographer. L for Panasonic *L*umix
+  when "Canon PowerShot S100"
+    userCamCode = ".lb" # initials of the photographer who usually shoots with the S100
+  else
+    userCamCode = ".xx"
+  end # case
+  if fileEXIF.fileType(fn) == "??"
+    userCamCode = ".gs.L"
+  end
+  if fileEXIF.fileType(fn) == "AVI" # is this for Canon video ?
+    userCamCode = ".lb.c"
+  end
+  return userCamCode
+end # userCamCode
+
+def fileAnnotate(fn, fileEXIF, fileDateUTCstr, tzoLoc)  # writing original filename and dateTimeOrig to the photo file.
+  # writing original filename and dateTimeOrig to the photo file.
+  # ---- XMP-photoshop: Instructions  May not need, but it does show up if look at all EXIF, but not sure can see it in Aperture
+  # Comment shows up in Aperture as  
+  # fileEXIF = MiniExiftool.new(fn)
+  if fileEXIF.comment.to_s.length < 2 # if exists then don't write. If avoid rewriting, then can eliminate this test
+    # fileEXIF.comment = fileEXIF.instructions = "Original filename: #{File.basename(fn)} and date: #{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}" # This works, next line is testing returns in the EXIF 
+    fileEXIF.comment = fileEXIF.instructions = "Original filename: #{File.basename(fn)} \nCapture date: #{fileDateUTCstr} UTC \nTime zone of photo is GMT #{tzoLoc}"
+    
+    fileEXIF.save
+  end
+end # fileAnnotate. writing original filename and dateTimeOrig to the photo file.
 
 # With the fileDateUTC for the photo, find the time zone based on the log.
 # The log is in numerical order and used as index here. The log is a YAML file
-def timeZone(fileDateUTC, timeZonesFile)
+def timeZone(fileDateUTC, timeZones)
   # theTimeAhead = "2050-01-01T00:00:00Z"
   # puts "379. timeZonesFile: #{timeZonesFile}. "
-  timeZones = YAML.load(File.read(timeZonesFile)) # should we do this once somewhere else?
+  # timeZones = YAML.load(File.read(timeZonesFile)) # should we do this once somewhere else? Let's try that in this new version
   i = timeZones.keys.max # e.g. 505
   j = timeZones.keys.min # e.g. 488
   while i > j # make sure I really get to the end 
@@ -184,15 +227,87 @@ def timeZone(fileDateUTC, timeZonesFile)
   return theTimeZone
 end # timeZone
 
+def rename(src, timeZonesFile)
+  # Dir.chdir(thisScript) # otherwise didn't know where it was to find folderGPX since used a chdir elsewhere in the script
+  fileDatePrev = ""
+  dupCount = 0
+  seqLetter = %w(a b c d e f g h i) # seems like this should be an array, not a list
+  Dir.foreach(src) do |item| 
+    next if item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon ' # There is a space after Icon . This doesn't skip Icon as it should tries to process the file which results in an error. Also this Icon file is seen as a file, so can't use ftype so sort. I removed the icon, I guess I could have set up and error trap or maybe tried file type later in this process
+    fn = src + item
+       # puts "\n709. #{fileCount}. fn: #{fn}"
+    # puts "230.. File.file?(fn): #{File.file?(fn)}"
+    if File.file?(fn) # 
+      # Determine the time and time zone where the photo was taken
+      # puts "233.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}"
+      fileEXIF = MiniExiftool.new(fn)
+      fileDateUTC = fileEXIF.dateTimeOriginal # class time, but adds the local time zone to the result although it is really UTC (or whatever zone my camera is set for)
+      tzoLoc = timeZone(fileDateUTC, timeZonesFile)
+      timeChange = (3600*tzoLoc) # previously had error capture on this. Maybe for general cases which I'm not longer covering
+      fileDate = fileDateUTC + timeChange # date in local time photo was taken
+    
+      fileDateUTCstr = fileDateUTC.to_s[0..-6]
+
+      filePrev = fn
+      # Working out if files at the same time
+      # puts "\nxx.. #{fileCount}. oneBack: #{oneBack}."
+      # Determine dupCount, i.e., 0 if not in same second, otherwise the number of the sequence for the same time
+      
+      # Now the fileBaseName. Simple if not in the same second, otherwise an added sequence number
+      oneBack = fileDate == fileDatePrev # true if previous file at the same time calculated in local time
+      # puts "252.. oneBack: #{oneBack}. #{item}"
+      if oneBack
+        dupCount =+ 1
+        fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  seqLetter[dupCount] + userCamCode(fn)            
+      else # normal condition that this photo is at a different time than previous photo
+        dupCount = 0 # resets dupCount after having a group of photos in the same second
+        fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S")  + userCamCode(fn)
+      end # if oneBack
+      
+      fileDatePrev = fileDate
+      fileBaseNamePrev = fileBaseName
+   
+      # File renaming and/or moving happens here
+      # puts "fn: #{fn}. imageFile: #{imageFile}. fileDateUTC: #{fileDateUTC}. tzoLoc:#{tzoLoc}"
+      fileAnnotate(fn, fileEXIF, fileDateUTCstr, tzoLoc) # adds original file name, capture date and time zone to EXIF. Comments which I think show up as instructions in Aperture
+      fnp = src + fileBaseName + File.extname(fn).downcase
+      File.rename(fn,fnp)          
+    end # 3. if File
+  end # 2. Find  
+end # renaming photo files in the downloads folder and writing in original time.
+
+def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl)
+  # Remember writing a command line command, so telling perl, then which perl file, then the gpsphoto.pl script options
+  # maxTimeDiff = 50000 # seconds, default 120, but I changed it 2011.07.26 to allow for pictures taken at night but GPS off. Distance still has to be reasonable, that is the GPS had to be at the same place in the morning as the night before as set by the variable below
+  # Need to add a note to file with large time diff
+  # This works, put in because having problems with file locations
+  # perlOutput = `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`
+  puts "285.. gpsPhotoPerl.shellescape: #{gpsPhotoPerl.shellescape}"
+  perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby\ Aperture\ II/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ \ \ GPX\ daily\ logs/2014\ Download/' --timeoffset 0 --maxtimediff 50000`
+      
+  puts "\n273. perlOutput: \n#{perlOutput} \n\nEnd of perlOutput ================…273\n\n" # This didn't seem to be happening with 2>&1 appended? But w/o it, error not captured
+  # perlOutput =~ /timediff\=([0-9]+)/
+  # timediff = $1 # class string
+  # # puts"\n 453 timediff: #{timediff}. timediff.class: #{timediff.class}. "
+  # if timediff.to_i > 240
+  #   timeDiffReport = ". Note that timediff is #{timediff} seconds. "
+  #   # writing to the photo file about high timediff
+  #   writeTimeDiff(imageFile,timediff)
+  # else
+  #   timeDiffReport = ""
+  # end # timediff.to…
+  
+end
 
 ## The "program" #################
-puts "Fine naming and moving started: #{Time.now}" # for trial runs
+timeNowWas = Time.now
+puts "Fine naming and moving started: #{timeNowWas}" # for trial runs
 srcSD = srcSDfolder + sdFolder(sdFolderFile)
 
 # Ask whether working with photo files from SD card or HD
 fromWhere = whichLoc() # This is pulling in first Pashua window (1. ), SDorHD.rb which has been required
 whichDrive = fromWhere["whichDrive"][0].chr # only using the first character
-puts "whichDrive: #{whichDrive}"
+# puts "279.. whichDrive: #{whichDrive}"
 # Set the return into a more friendly variable and set the src of the photos to be processed
 whichOne = whichOne(whichDrive) # parsing result to get HD or SD
 if whichOne=="SD" # otherwise it's HD, probably should be case to be cleaner coding
@@ -200,7 +315,7 @@ if whichOne=="SD" # otherwise it's HD, probably should be case to be cleaner cod
   begin
     file = File.new(lastPhotoReadTextFile, "r")
     lastPhotoFilename = file.gets # apparently grabbing a return. maybe not the best reading method.
-    puts "540. lastPhotoFilename: #{lastPhotoFilename}. Read from #{lastPhotoReadTextFile}. Value can be changed by user, so this may not be the final value."
+    puts "\n303. lastPhotoFilename: #{lastPhotoFilename.chop}. Read from #{lastPhotoReadTextFile}. Value can be changed by user, so this may not be the final value."
     file.close
   rescue Exception => err
     puts "Exception: #{err}. Not critical as value can be entered manually by user."
@@ -227,14 +342,34 @@ end # whichOne=="SD"
 
 puts "\nIntialization and complete. File renaming and copying/moving beginning..."
 
+puts "#{Time.now-timeNowWas}. #{Time.now}"
+timeNowWas = Time.now
+
 #  If working from SD card, copy or move files to " Drag Photos HERE Drag Photos HERE" folder, then will process from there.
 copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
 #  Note that file creation date is the time of copying. May want to fix this. Maybe a mv is a copy and move which is sort of a recreation. 
 
 # src = srcHD # switching since next part works from copied files on hard drive. 
+puts "#{(Time.now-timeNowWas).to_i} seconds?. #{Time.now.strftime("%I:%M:%S %p")}" ; timeNowWas = Time.now
+puts "\n336. Photos will now be moved and renamed.\n"
 
-puts "\n 170. Photos will now be copied and renamed. \n........Using #{geoInfoMethod} as a source, GPS information will be added to photos..........\n"
+puts "#{(Time.now-timeNowWas).to_i} seconds?. #{Time.now.strftime("%I:%M:%S %p")}" ; timeNowWas = Time.now
 
 # puts "First will copy to the final destination where the renaming will be done and the original moved to an archive (already imported folder)"
 #  Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
 copyAndMove(srcHD,destPhoto,destOrig)
+
+puts "#{(Time.now-timeNowWas).to_i} seconds?. #{Time.now.strftime("%I:%M:%S %p")}" ; timeNowWas = Time.now
+
+timeNowWas = Time.now
+# Rename the photo files with date and an ID for the camera or photographer
+rename(destPhoto, timeZones)
+puts "#{Time.now-timeNowWas}. #{Time.now}"
+timeNowWas = Time.now
+puts "\n345. Using perl script to add gps coordinates. Will take a while as all the files will be processed. #{Time.now}"
+puts "#{Time.now-timeNowWas}. #{Time.now}"
+timeNowWas = Time.now
+# Add GPS coordinates. Will add location later using some options depending on which country since different databases are relevant.
+addCoordinates(destPhoto, folderGPX, gpsPhotoPerl)
+puts "#{Time.now-timeNowWas}. #{Time.now}"
+timeNowWas = Time.now
