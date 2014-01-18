@@ -38,9 +38,9 @@ class Photo
   
 end
 
-def timeStamp
+def timeStamp(timeNowWas)
+  puts "#{(Time.now-timeNowWas).to_i} seconds. #{Time.now.strftime("%I:%M:%S %p")}"
   timeNowWas = Time.now
-  puts Time.now
 end
 
 def sdFolder(sdFolderFile)  
@@ -195,7 +195,7 @@ def fileAnnotate(fn, fileEXIF, fileDateUTCstr, tzoLoc)  # writing original filen
   # fileEXIF = MiniExiftool.new(fn)
   if fileEXIF.comment.to_s.length < 2 # if exists then don't write. If avoid rewriting, then can eliminate this test
     # fileEXIF.comment = fileEXIF.instructions = "Original filename: #{File.basename(fn)} and date: #{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}" # This works, next line is testing returns in the EXIF 
-    fileEXIF.comment = fileEXIF.instructions = "Original filename: #{File.basename(fn)} \nCapture date: #{fileDateUTCstr} UTC \nTime zone of photo is GMT #{tzoLoc}"
+    fileEXIF.comment = fileEXIF.instructions = "Original filename: #{File.basename(fn)}. Capture date: #{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}"
     
     fileEXIF.save
   end
@@ -283,7 +283,7 @@ def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl)
   # This works, put in because having problems with file locations
   # perlOutput = `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`
   puts "285.. gpsPhotoPerl.shellescape: #{gpsPhotoPerl.shellescape}"
-  perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby\ Aperture\ II/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ \ \ GPX\ daily\ logs/2014\ Download/' --timeoffset 0 --maxtimediff 50000`
+  perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby\ Aperture\ II/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ \ \ GPX\ daily\ logs/2013\ Download/' --timeoffset 0 --maxtimediff 50000`
       
   puts "\n273. perlOutput: \n#{perlOutput} \n\nEnd of perlOutput ================…273\n\n" # This didn't seem to be happening with 2>&1 appended? But w/o it, error not captured
   # perlOutput =~ /timediff\=([0-9]+)/
@@ -296,12 +296,31 @@ def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl)
   # else
   #   timeDiffReport = ""
   # end # timediff.to…
-  
+  return perlOutput
+end
+
+def addLocation(src)
+  # read coords and add a hierarchy of choices for location information. Look at GPS Log Renaming for what works.
+  Dir.foreach(src) do |item| 
+    next if item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon ' # See notes in rename method
+    fn = src + item
+    if File.file?(fn) 
+      puts "308.. No location information written  yet."
+      fileEXIF = MiniExiftool.new(fn)
+      # Special Instructions            : Lat 33.812123, Lon -118.383647 - Bearing: unknown - Altitude: 29m. Individual lat and long are in deg min sec
+      gps = fileEXIF.specialinstructions.split(", ") # or some way of getting lat and lon. This is a good start. Look at input form needed
+      timeNowWas = timeStamp(timeNowWas)
+      puts "gps: #{gps}. gps.class: #{gps.class}"
+      latIn = gps[0][4,11]
+      longIn = gps[1][4,11]
+      # Now have lat and long and now get some location names
+    end
+  end  
 end
 
 ## The "program" #################
-timeNowWas = Time.now
-puts "Fine naming and moving started: #{timeNowWas}" # for trial runs
+timeNowWas = timeStamp(Time.now) # this first use of timeStamp is different
+puts "Fine naming and moving started………………………" # for trial runs  #{timeNowWas}
 srcSD = srcSDfolder + sdFolder(sdFolderFile)
 
 # Ask whether working with photo files from SD card or HD
@@ -350,26 +369,33 @@ copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTe
 #  Note that file creation date is the time of copying. May want to fix this. Maybe a mv is a copy and move which is sort of a recreation. 
 
 # src = srcHD # switching since next part works from copied files on hard drive. 
-puts "#{(Time.now-timeNowWas).to_i} seconds?. #{Time.now.strftime("%I:%M:%S %p")}" ; timeNowWas = Time.now
+timeNowWas = timeStamp(timeNowWas)
 puts "\n336. Photos will now be moved and renamed.\n"
 
-puts "#{(Time.now-timeNowWas).to_i} seconds?. #{Time.now.strftime("%I:%M:%S %p")}" ; timeNowWas = Time.now
+puts "#{(Time.now-timeNowWas).to_i} seconds. #{Time.now.strftime("%I:%M:%S %p")}" ; timeNowWas = Time.now
 
 # puts "First will copy to the final destination where the renaming will be done and the original moved to an archive (already imported folder)"
 #  Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
 copyAndMove(srcHD,destPhoto,destOrig)
 
-puts "#{(Time.now-timeNowWas).to_i} seconds?. #{Time.now.strftime("%I:%M:%S %p")}" ; timeNowWas = Time.now
+timeNowWas = timeStamp(timeNowWas)
 
 timeNowWas = Time.now
 # Rename the photo files with date and an ID for the camera or photographer
 rename(destPhoto, timeZones)
-puts "#{Time.now-timeNowWas}. #{Time.now}"
-timeNowWas = Time.now
+
+timeNowWas = timeStamp(timeNowWas)
+
 puts "\n345. Using perl script to add gps coordinates. Will take a while as all the files will be processed. #{Time.now}"
-puts "#{Time.now-timeNowWas}. #{Time.now}"
-timeNowWas = Time.now
+
+puts "#{(Time.now-timeNowWas).to_i} seconds. #{Time.now.strftime("%I:%M:%S %p")}" ; timeNowWas = Time.now
+
 # Add GPS coordinates. Will add location later using some options depending on which country since different databases are relevant.
-addCoordinates(destPhoto, folderGPX, gpsPhotoPerl)
-puts "#{Time.now-timeNowWas}. #{Time.now}"
-timeNowWas = Time.now
+perlOutput = addCoordinates(destPhoto, folderGPX, gpsPhotoPerl)
+
+# Parce perlOutput and add maxTimeDiff info to photo files
+
+# Add location information
+addLocation(destPhoto)
+
+puts "#{(Time.now-timeNowWas).to_i} seconds. #{Time.now.strftime("%I:%M:%S %p")}" ; timeNowWas = Time.now
