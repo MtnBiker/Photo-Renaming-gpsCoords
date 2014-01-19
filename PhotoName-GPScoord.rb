@@ -356,10 +356,10 @@ def addLocation(src, geoNamesUser)
             findNearbyPlaceName = api.find_nearby_place_name(lat: lat, lng: lon)
             location = findNearbyPlaceName.first['toponymName']
             puts "358.. location (rescue): #{location}"      
-          rescue 
-            puts "360.. find_nearby_postal_codes failedfor city"
+          rescue # probably end up here for a remote place, so wikipedia may be the best
+            puts "360.. find_nearby_postal_codes failed for city, so use Wikipedia to find a location"
             city = ""
-            location = ""
+            location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']
           end # of within a rescue
   
         end
@@ -368,9 +368,11 @@ def addLocation(src, geoNamesUser)
         findNearbyPostalCodes = api.find_nearby_postal_codes(lat: lat, lng: lon, maxRows: 1).first
         state = findNearbyPostalCodes['adminName1']
         puts "353.. state (outside US): #{state}"
-        city = findNearbyPostalCodes['placeName'] # close to city, but misses Dubrovnik
+        # city = findNearbyPostalCodes['placeName'] # close to city, but misses Dubrovnik and Zagreb
+        city = api.find_nearby_place_name(lat: lat, lng: lon, maxRows: 1).first['toponymName'] # name or adminName1 could work too
         puts "355.. city (outside US):  #{city}"
-        # puts city =  api.find_nearby_wikipedia(lat: lat, lng: lon)["geonames"].first["title"] # the third item is a city, maybe could regex wikipedia, but doubt it's consistent enough to work  
+        # puts city =  api.find_nearby_wikipedia(lat: lat, lng: lon)["geonames"].first["title"] # the third item is a city, maybe could regex wikipedia, but doubt it's consistent enough to work 
+        location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']  # may have to add distance
       end
 
       # puts "355.. Use MiniExiftool to write location info to photo files\n" # Have already set fileEXIF
@@ -382,9 +384,10 @@ def addLocation(src, geoNamesUser)
       fileEXIF.save
       # Now have lat and long and now get some location names
     end
+    puts "\n385.  #{countTotal} photos processed. Can't get countLoc to be a good local variable. No trouble with countTotal" 
   end 
   # puts "\n368. Location information found for #{countLoc} of #{countTotal} photos processed" 
-  puts "\n368.  #{countTotal} photos processed. Can't get countLoc to be a good local variable. No trouble with countTotal" 
+  
 end
 
 ## The "program" #################
