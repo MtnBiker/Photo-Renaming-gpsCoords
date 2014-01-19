@@ -32,12 +32,7 @@ gpsPhotoPerl = "/Users/gscar/Documents/Ruby/Photo handling/lib/gpsPhoto.pl"
 folderGPX = "/Users/gscar/Dropbox/   GPX daily logs/2014 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't 
 geoNamesUser    = "geonames@web.knobby.ws"
 
-
-puts "RUBY_DESCRIPTION: #{RUBY_DESCRIPTION}\n\n" 
-
-class Photo
-  
-end
+# puts "RUBY_DESCRIPTION: #{RUBY_DESCRIPTION}\n\n" # probably isn't always accurate. Just look in the purple on the window
 
 def timeStamp(timeNowWas)
   puts "-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -   #{(Time.now-timeNowWas).to_i} seconds. #{Time.now.strftime("%I:%M:%S %p")}   -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  "
@@ -134,7 +129,7 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
 end # copySD
 
 def copyAndMove(srcHD,destPhoto,destOrig)
-  puts "Copy photos to the final destination (Latest Download) where the renaming will be done and the originals moved to an archive (already imported folder)"
+  puts "\n137. Copy photos to the final destination (Latest Download) where the renaming will be done and the originals moved to an archive (already imported folder)"
   #  Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
   # THIS METHOD WILL NOT WORK IF THE RAW FILE FORMAT ALPHABETICALLY COMES BEFORE JPG. SHOULD MAKE THIS MORE ROBUST
   photoFinalCount = 0
@@ -286,7 +281,8 @@ def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl)
   puts "\n286.. gpsPhotoPerl.shellescape: #{gpsPhotoPerl.shellescape}. but can't figure out how to make this work. So done manually"
   puts "\n287.. `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`"
   puts "\n288. Finding all gps points from all the gpx files using gpsPhoto.pl. This may take a while"
-  perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby\ Aperture\ II/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ \ \ GPX\ daily\ logs/2013\ Massaged/' --timeoffset 0 --maxtimediff 50000`
+  perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby\ Aperture\ II/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ \ \ GPX\ daily\ logs/2014\ Massaged/' --timeoffset 0 --maxtimediff 50000`
+  # perlOutput = "`perl #{gpsPhotoPerl.shellescape} --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`"
       
   puts "\n273. perlOutput: \n#{perlOutput} \n\nEnd of perlOutput ================…273\n\n" # This didn't seem to be happening with 2>&1 appended? But w/o it, error not captured
   # perlOutput =~ /timediff\=([0-9]+)/
@@ -304,11 +300,11 @@ end
 
 def addLocation(src, geoNamesUser)
   # read coords and add a hierarchy of choices for location information. Look at GPS Log Renaming for what works.
+    countTotal = 0 
+    countLoc = 0
     Dir.foreach(src) do |item| 
     next if item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon ' # See notes in rename method
     fn = src + item
-    countTotal = 0 
-    countLoc = 0
     if File.file?(fn) 
       countTotal += 1
       fileEXIF = MiniExiftool.new(fn)
@@ -318,16 +314,23 @@ def addLocation(src, geoNamesUser)
       gps = fileEXIF.specialinstructions.split(", ") # or some way of getting lat and lon. This is a good start. Look at input form needed
       lat = gps[0][4,11] # Capture long numbers like -123.123456, but short ones aren't that long, but nothing is there
       lon = gps[1][4,11].split(" ")[0] # needs to 11 long to capture when -xxx.xxxxxx, but then can capture the - when it's xx.xxxxxx. Then grab whats between the first two spaces. Still need the 4,11 because there seems to be a space at the beginning if leave out [4,11]
-      # countLoc += 1 # gives and error here or at the end.
+      countLoc += 1 # gives and error here or at the end.
       puts "\n321.. #{countTotal}. Use geonames to  Determine city, state, country, location. #{item}"
       api = GeoNames.new(username: geoNamesUser) 
 
-      # Determine country
-      countryCodeGeo = api.country_code(lat: lat, lng: lon)
-      countryCode  = countryCodeGeo['countryCode'] 
-      puts "327.. countryCode:  #{countryCode}"
-      country = countryCodeGeo['countryName']
-      puts "329.. country:      #{country}"
+      # Determine country 
+      begin
+        # doesn't work for Istanbul, works for Croatia
+        ccountryCodeGeo = api.country_code(lat: lat, lng: lon) # doesn't work in Turkey
+        countryCode  = countryCodeGeo['countryCode'] 
+      rescue
+        countryCodeGeo = api.find_nearby_place_name(lat: lat, lng: lon).first # works for Turkey
+        countryCode  = countryCodeGeo['countryCode'] 
+      end
+       
+      puts "331.. countryCode:  #{countryCode}"
+      country = countryCodeGeo['countryName'] # works with both country_code  and find_nearby_place_name above
+      puts "333.. country:      #{country}"
 
       # Determine city, state, location
       if countryCode == "US"
@@ -359,11 +362,12 @@ def addLocation(src, geoNamesUser)
           rescue # probably end up here for a remote place, so wikipedia may be the best
             puts "360.. find_nearby_postal_codes failed for city, so use Wikipedia to find a location"
             city = ""
+            distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance']
             location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']
-            puts "363.. location:     #{location}"
+            puts "363.. location:     #{location}. distance: #{distance}" # may need to screen as for outside US
           end # of within a rescue
   
-        end
+        end # begin rescue outer
          location = "" if city == location # cases where they where the same (Myers Flat, Callahan and Etna). Could try to find a location with some other find, maybe Wikipedia, but would want a distance check
       else # outside US
         findNearbyPostalCodes = api.find_nearby_postal_codes(lat: lat, lng: lon, maxRows: 1).first
@@ -373,14 +377,11 @@ def addLocation(src, geoNamesUser)
         city = api.find_nearby_place_name(lat: lat, lng: lon, maxRows: 1).first['toponymName'] # name or adminName1 could work too
         puts "355.. city (outside US):  #{city}"
         # puts city =  api.find_nearby_wikipedia(lat: lat, lng: lon)["geonames"].first["title"] # the third item is a city, maybe could regex wikipedia, but doubt it's consistent enough to work 
-        distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance']
-        if distance < 0.3
-          location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title'] 
-        else
-          location = ""
-        end
-        puts "382.. location:     #{location}. distance: #{distance}"
-      end
+        location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title'] 
+        distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance'].to_f
+        puts "382.. location:     #{location}. distance: #{distance}. If distance > 0.3km location not used"
+        location = "" if distance < 0.3      
+      end # if countryCode
 
       # puts "355.. Use MiniExiftool to write location info to photo files\n" # Have already set fileEXIF
       fileEXIF.CountryCode = countryCode  # Aperture: IPTC: Country-PrimaryLocationCode
@@ -390,11 +391,9 @@ def addLocation(src, geoNamesUser)
       fileEXIF.location = location # Aperture: IPTC: Sub-location
       fileEXIF.save
       # Now have lat and long and now get some location names
-    end
-    
+    end    
   end 
-  # puts "\n368. Location information found for #{countLoc} of #{countTotal} photos processed" 
-  # puts "\n385.  #{countTotal} photos processed. Can't get countLoc to be a good local variable. No trouble with countTotal"
+  puts "\n398. Location information found for #{countLoc} of #{countTotal} photos processed" 
 end
 
 ## The "program" #################
@@ -448,7 +447,7 @@ copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTe
 #  Note that file creation date is the time of copying. May want to fix this. Maybe a mv is a copy and move which is sort of a recreation. 
 
 timeNowWas = timeStamp(timeNowWas)
-puts "\n442. Photos will now be moved and renamed.)"
+puts "\n452. Photos will now be moved and renamed."
 
 # puts "First will copy to the final destination where the renaming will be done and the original moved to an archive (already imported folder)"
 #  Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
@@ -464,7 +463,6 @@ timeNowWas = timeStamp(timeNowWas)
 puts "\n435. Using perl script to add gps coordinates. Will take a while as all the gps files for the year will be processed and then all the photos."
 
 
-
 # Add GPS coordinates. Will add location later using some options depending on which country since different databases are relevant.
 perlOutput = addCoordinates(destPhoto, folderGPX, gpsPhotoPerl)
 
@@ -473,5 +471,5 @@ timeNowWas = timeStamp(timeNowWas)
 
 # Add location information to photo file
 addLocation(destPhoto, geoNamesUser)
-
+puts "\477. All done"
 timeNowWas = timeStamp(timeNowWas)
