@@ -128,6 +128,18 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
     # puts "125. Done copying photos from SD card. src switched from card to folder holder moved or copied photos: #{src}"  
 end # copySD
 
+def uniqueFileName(fnp)
+  # https://www.ruby-forum.com/topic/191831#836607
+  count = 0
+  unique_name = fnp
+  while File.exists?(unique_name)
+    count += 1
+    unique_name = "#{File.join(File.dirname(fnp),File.basename(fnp, ".*"))}-#{count}#{File.extname(fnp)}"
+  end
+  unique_name
+end
+
+
 def copyAndMove(srcHD,destPhoto,destOrig)
   puts "\n137. Copy photos to the final destination (Latest Download) where the renaming will be done and the originals moved to an archive (already imported folder)"
   #  Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
@@ -156,8 +168,14 @@ def copyAndMove(srcHD,destPhoto,destOrig)
     fnp = destPhoto + item # new file in Latest Download
     # puts "147.. fnp: #{fnp}"
     fnf = destOrig  + item # to already imported
-    FileUtils.copy(fn, fnp)
-    FileUtils.move(fn, fnf)
+    FileUtils.copy(fn, fnp) # making a copy in the Latest Downloads folder for further action
+    if File.exists?(fnf)  # moving the original to _already imported, but not writing over existing files
+      fnf = uniqueFileName(fnf)
+      FileUtils.move(fn, fnf)
+      puts "\n179. A file already existed with this name so it was changed to fnf: #{fnf}"
+    else # no copies, so move
+      FileUtils.move(fn, fnf)
+    end
     itemPrev = item
     photoFinalCount += 1
   end # Dir.foreach

@@ -7,7 +7,9 @@ geoNamesUser    = "geonames@web.knobby.ws"
 
 
 fn = "/Volumes/Knobby Aperture II/_Download folder/Latest Download/2013.09.14-20.42.44.gs.L.rw2" # Croatia
-fn = "/Volumes/Knobby Aperture II/_Download folder/Latest Download/2014.01.15-11.12.42.gs.L 9.47.30 PM.rw2" # Home
+fn = "/Volumes/Knobby Aperture II/_Download folder/Latest Download/2014.01.15-11.12.42.gs.L.rw2" # Home
+# fn = "/Volumes/Knobby Aperture II/_Download folder/Latest Download/2013.09.01-11.35.45.gs.L.rw2" # Should be Zagreb
+fn = "/Volumes/Knobby Aperture II/_Download folder/Latest Download/2013.09.21-15.46.34.gs.L.rw2"
 
 
 fileEXIF = MiniExiftool.new(fn)
@@ -24,8 +26,6 @@ lat = gps[0][4,11] # Capture long numbers like -123.123456, but short ones aren'
 puts gps[1]
 lon = gps[1][4,11].split(" ")[0] # needs to 11 long to capture when -xxx.xxxxxx, but then can capture the - when it's xx.xxxxxx. Then grab whats between the first two spaces. Still need the 4,11 because there seems to be a space at the beginning if leave out [4,11]
 
-puts "lat:  #{lat}"
-puts "lon: #{lon}"
 # 
 # #  neighborhood and find_nearby fails for this
 # lat =   33.836603
@@ -35,10 +35,21 @@ puts "lon: #{lon}"
 # lon = 18.0913889
 # lat = 42.6505556
 
+# Istanbul which breaks country_code geoNames::APIError: {"message"=>"no country code found", "value"=>15}
+lat =   41.005423
+lon =   28.976968
 
-api = GeoNames.new(username: geoNamesUser) # required with Jan 2014 version
-puts "\ncountryCode = api.country_code(lat: lat, lng: lon):\n  #{countryCode = api.country_code(lat: lat, lng: lon)}." # setting distance to 0.5 [radius: 0.5] still got info at 1.3km
-# not sure sigPlace and distance are needed; may be too much noise
+puts "lat:  #{lat}"
+puts "lon: #{lon}"
+
+begin
+  api = GeoNames.new(username: geoNamesUser) # required with Jan 2014 version
+  puts "\ncountryCode = api.country_code(lat: lat, lng: lon):\n  #{countryCode = api.country_code(lat: lat, lng: lon)}." # setting distance to 0.5 [radius: 0.5] still got info at 1.3km
+  # not sure sigPlace and distance are needed; may be too much noise
+rescue Exception => e
+  puts "\n50. country_code broken for #{lat} #{lon}"
+end
+
 
 begin
   puts "\nsigPlace = api.find_nearby_wikipedia(lat: lat, lng: lon)[\"geonames\"].first[\"title\"]\n  #{sigPlace = api.find_nearby_wikipedia(lat: lat, lng: lon)["geonames"].first["title"]}."
@@ -88,7 +99,14 @@ end
 #   #
 # api.country_code(lat: 47.03, lng: 10.2)
 #   def country_code
-puts "\napi.country_code #{lat} #{lon}: #{api.country_code(lat: lat, lng: lon)}"
+
+begin
+  api = GeoNames.new(username: geoNamesUser) # required with Jan 2014 version
+  puts "\napi.country_code #{lat} #{lon}: #{api.country_code(lat: lat, lng: lon)}"
+rescue Exception => e
+  puts "\n50. country_code broken for #{lat} #{lon}"
+end
+
 
 # api.country_code 33.812123 -118.383647: {"languages"=>"en-US,es-US,haw,fr", "distance"=>"0", "countryName"=>"United States", "countryCode"=>"US"}
 
@@ -105,7 +123,15 @@ puts "\napi.country_code #{lat} #{lon}: #{api.country_code(lat: lat, lng: lon)}"
 #   # With the parameters 'radius' and 'maxRows' you get the closest subdivisions ordered by distance:
 #   api.country_subdivision(lat: 47.03, lng: 10.2, maxRows: 10, radius: 40)
 # def country_subdivision
-puts "\napi.country_subdivision  #{lat} #{lon}: #{api.country_subdivision(lat: lat, lng: lon)}"
+
+
+begin
+  puts "\napi.country_subdivision  #{lat} #{lon}: #{api.country_subdivision(lat: lat, lng: lon)}"
+rescue Exception => e
+  puts "\n50. country_subdivision broken for #{lat} #{lon}"
+end
+
+# GeoNames::APIError: {"message"=>"we are afraid we could not find a administrative country subdivision for latitude and longitude :41.005423,28.976968", "value"=>15} # ie Istanbul
 
 # api.country_subdivision  33.812123 -118.383647: {"distance"=>0, "adminCode1"=>"CA", "countryName"=>"United States", "countryCode"=>"US", "codes"=>[{"code"=>"06", "type"=>"FIPS10-4"}, {"code"=>"CA", "type"=>"ISO3166-2"}], "adminName1"=>"California"}
 
@@ -204,6 +230,7 @@ puts "\napi.country_subdivision  #{lat} #{lon}: #{api.country_subdivision(lat: l
   #   api.find_nearby_place_name(lat: 47.3, lng: 9)
   # def find_nearby_place_name
   puts "\nfind_nearby_place_name  #{lat} #{lon}: #{api.find_nearby_place_name(lat: lat, lng: lon)}"
+  puts "\nfind_nearby_place_name  #{lat} #{lon} first['adminName1']: #{api.find_nearby_place_name(lat: lat, lng: lon).first['adminName1']}"
   
   # find_nearby_place_name  33.812123 -118.383647: [{"countryId"=>"6252001", "adminCode1"=>"CA", "countryName"=>"United States", "fclName"=>"city, village,...", "countryCode"=>"US", "lng"=>"-118.38313", "fcodeName"=>"populated place", "distance"=>"0.23339", "toponymName"=>"Hollywood Riviera", "fcl"=>"P", "name"=>"Hollywood Riviera", "fcode"=>"PPL", "geonameId"=>5357553, "lat"=>"33.81418", "adminName1"=>"California", "population"=>0}]
   
@@ -284,9 +311,13 @@ end
   # or
   # ws.geonames.org/findNearbyWikipedia?postalcode=8775&country=CH&radius=10
   # def find_nearby_wikipedia
-puts "\nfind_nearby_wikipedia  #{lat} #{lon}, maxRows 1: #{api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames']}"
+puts "\nfind_nearby_wikipedia  #{lat} #{lon} ['geonames'], maxRows 1: #{api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames']}"
 
-# find_nearby_wikipedia  33.812123 -118.383647: {"geonames"=>[{"summary"=>"Tulita Elementary School is located in Redondo Beach, California, United States. It's one of 8 elementary schools in the Redondo Beach Unified School District. Students attend Kindergarten through 5th grade (as of 2010) and then typically go on to Parras Middle School, and then to Redondo Union High (...)", "distance"=>"1.1527", "rank"=>8, "title"=>"Tulita Elementary School", "wikipediaUrl"=>"en.wikipedia.org/wiki/Tulita_Elementary_School", "elevation"=>29, "countryCode"=>"US", "lng"=>-118.37638888888888, "feature"=>"landmark", "geoNameId"=>5403871, "lang"=>"en", "lat"=>33.82055555555556}, {"summary"=>"South High School is a public high school in Torrance, California. It is one of five high schools in the Torrance Unified School District.  (...)", "distance"=>"1.8617", "rank"=>60, "title"=>"South High School (Torrance)", "wikipediaUrl"=>"en.wikipedia.org/wiki/South_High_School_%28Torrance%29", "elevation"=>24, "countryCode"=>"US", "lng"=>-118.36352, "feature"=>"edu", "lang"=>"en", "lat"=>33.81296}, {"summary"=>"Bishop Montgomery High School (commonly referred to as \"BMHS\" or simply \"Bishop\" by students) is a Catholic high school serving twenty-five parishes in the Roman Catholic Archdiocese of Los Angeles. BMHS was founded in 1957, and staffed by the Sisters of St (...)", "distance"=>"2.9836", "rank"=>83, "title"=>"Bishop Montgomery High School", "wikipediaUrl"=>"en.wikipedia.org/wiki/Bishop_Montgomery_High_School", "elevation"=>38, "countryCode"=>"US", "lng"=>-118.37222222222222, "feature"=>"edu", "geoNameId"=>5328829, "lang"=>"en", "lat"=>33.83722222222222}, {"summary"=>"Palos Verdes Estates is a city in Los Angeles County, California, USA on the Palos Verdes Peninsula. The city was masterplanned by the noted American landscape architect and planner Frederick Law Olmsted, Jr. The population was 13,438 at the 2010 census, up from 13,340 in the 2000 census (...)", "distance"=>"3.0471", "rank"=>93, "title"=>"Palos Verdes Estates, California", "wikipediaUrl"=>"en.wikipedia.org/wiki/Palos_Verdes_Estates%2C_California", "elevation"=>285, "countryCode"=>"US", "lng"=>-118.39666666666668, "feature"=>"city", "thumbnailImg"=>"http://www.geonames.org/img/wikipedia/157000/thumb-156721-100.png", "lang"=>"en", "lat"=>33.786944444444444}, {"summary"=>"Walteria is a region of the city of Torrance in southern California. It is south of the Pacific Coast Highway. The local Zip code is 90505.", "distance"=>"3.1085", "rank"=>1, "title"=>"Walteria, California", "wikipediaUrl"=>"en.wikipedia.org/wiki/Walteria%2C_California", "elevation"=>34, "countryCode"=>"US", "lng"=>-118.35111111111111, "feature"=>"city", "geoNameId"=>5285212, "lang"=>"en", "lat"=>33.805}]}
+puts "\nfind_nearby_wikipedia  #{lat} #{lon}, maxRows 1: #{api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']}" #  Dolac Market
+
+puts "\n api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title'] : #{api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title'] }."
+
+  # find_nearby_wikipedia  33.812123 -118.383647, maxRows 1: [{"summary"=>"Tulita Elementary School is located in Redondo Beach, California, United States. It's one of 8 elementary schools in the Redondo Beach Unified School District. Students attend Kindergarten through 5th grade (as of 2010) and then typically go on to Parras Middle School, and then to Redondo Union High (...)", "distance"=>"1.1527", "rank"=>8, "title"=>"Tulita Elementary School", "wikipediaUrl"=>"en.wikipedia.org/wiki/Tulita_Elementary_School", "elevation"=>29, "countryCode"=>"US", "lng"=>-118.37638888888888, "feature"=>"landmark", "geoNameId"=>5403871, "lang"=>"en", "lat"=>33.82055555555556}]
 
 # find_nearby_wikipedia  42.643018 18.107581: {"geonames"=>[{"summary"=>"St. Saviour Church is a small votive church located in the old town of Dubrovnik. It is dedicated to Jesus Christ.  (...)", "distance"=>"0.159", "rank"=>62, "title"=>"St. Saviour Church, Dubrovnik", "wikipediaUrl"=>"en.wikipedia.org/wiki/St._Saviour_Church%2C_Dubrovnik", "elevation"=>9, "lng"=>18.106944444444444, "feature"=>"landmark", "lang"=>"en", "lat"=>42.641666666666666}, {"summary"=>"Stradun or Placa (Stradone or Corso) is the main street of Dubrovnik, Croatia. The limestone-paved pedestrian street runs some 300 metres through the Old Town, the historic part of the city surrounded by the Walls of Dubrovnik (...)", "distance"=>"0.179", "rank"=>70, "title"=>"Stradun (street)", "wikipediaUrl"=>"en.wikipedia.org/wiki/Stradun_%28street%29", "elevation"=>16, "countryCode"=>"HR", "lng"=>18.108194444444447, "lang"=>"en", "lat"=>42.64147222222222}, {"summary"=>"Dubrovnik (Ragoùsa) is a city on the Adriatic Sea coast of Croatia, positioned at the terminal end of the Isthmus of Dubrovnik. It is one of the most prominent tourist destinations on the Adriatic, a seaport and the centre of Dubrovnik-Neretva county. Its total population is 42,641 (census 2011) (...)", "distance"=>"0.2809", "rank"=>100, "title"=>"Dubrovnik", "wikipediaUrl"=>"en.wikipedia.org/wiki/Dubrovnik", "elevation"=>9, "countryCode"=>"HR", "lng"=>18.10898888888889, "thumbnailImg"=>"http://www.geonames.org/img/wikipedia/3000/thumb-2713-100.jpg", "geoNameId"=>7577034, "lang"=>"en", "lat"=>42.64071388888889}, {"summary"=>"Fort Lovrijenac or St. Lawrence Fortress, often called \"Dubrovnik's Gibraltar\", is a fortress and theater located outside the western wall of the city of Dubrovnik in Croatia, 37 m above sea level. Tim Emert. Retrieved 2009-11-05 (...)", "distance"=>"0.3373", "rank"=>45, "title"=>"Lovrijenac", "wikipediaUrl"=>"en.wikipedia.org/wiki/Lovrijenac", "elevation"=>22, "lng"=>18.108, "feature"=>"landmark", "lang"=>"en", "lat"=>42.64}, {"summary"=>"The Walls of Dubrovnik are a series of defensive stone walls that have surrounded and protected the citizens of the afterward proclaimed maritime city-state of Dubrovnik (Ragusa), situated in southern Croatia, since the city's founding prior to the 7th century as a Byzantium castrum on a rocky (...)", "distance"=>"0.3373", "rank"=>97, "title"=>"Walls of Dubrovnik", "wikipediaUrl"=>"en.wikipedia.org/wiki/Walls_of_Dubrovnik", "elevation"=>22, "lng"=>18.108, "lang"=>"en", "lat"=>42.64}]}
 # #####################
