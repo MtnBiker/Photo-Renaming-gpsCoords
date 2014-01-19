@@ -360,6 +360,7 @@ def addLocation(src, geoNamesUser)
             puts "360.. find_nearby_postal_codes failed for city, so use Wikipedia to find a location"
             city = ""
             location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']
+            puts "363.. location:     #{location}"
           end # of within a rescue
   
         end
@@ -372,7 +373,13 @@ def addLocation(src, geoNamesUser)
         city = api.find_nearby_place_name(lat: lat, lng: lon, maxRows: 1).first['toponymName'] # name or adminName1 could work too
         puts "355.. city (outside US):  #{city}"
         # puts city =  api.find_nearby_wikipedia(lat: lat, lng: lon)["geonames"].first["title"] # the third item is a city, maybe could regex wikipedia, but doubt it's consistent enough to work 
-        location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']  # may have to add distance
+        distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance']
+        if distance < 0.3
+          location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title'] 
+        else
+          location = ""
+        end
+        puts "382.. location:     #{location}. distance: #{distance}"
       end
 
       # puts "355.. Use MiniExiftool to write location info to photo files\n" # Have already set fileEXIF
@@ -384,10 +391,10 @@ def addLocation(src, geoNamesUser)
       fileEXIF.save
       # Now have lat and long and now get some location names
     end
-    puts "\n385.  #{countTotal} photos processed. Can't get countLoc to be a good local variable. No trouble with countTotal" 
+    
   end 
   # puts "\n368. Location information found for #{countLoc} of #{countTotal} photos processed" 
-  
+  # puts "\n385.  #{countTotal} photos processed. Can't get countLoc to be a good local variable. No trouble with countTotal"
 end
 
 ## The "program" #################
