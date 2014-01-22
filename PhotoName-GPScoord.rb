@@ -34,8 +34,15 @@ geoNamesUser    = "geonames@web.knobby.ws"
 
 # puts "RUBY_DESCRIPTION: #{RUBY_DESCRIPTION}\n\n" # probably isn't always accurate. Just look in the purple on the window
 
-def timeStamp(timeNowWas)
-  puts "-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -   #{(Time.now-timeNowWas).to_i} seconds. #{Time.now.strftime("%I:%M:%S %p")}   -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  "
+def timeStamp(timeNowWas)  
+  seconds = Time.now-timeNowWas
+  minutes = seconds/60
+  if minutes < 2
+    report = "#{seconds.to_i} seconds"
+  else
+    report = "#{minutes.to_i} minutes"
+  end   
+  puts "-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -   #{report}. #{Time.now.strftime("%I:%M:%S %p")}   -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  "
   Time.now
 end
 
@@ -124,17 +131,17 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
   rescue IOError => e
     puts "Something went wrong. Could not write last photo read (#{fileSDbasename}) to #{fileNow}"
   end # begin
-    puts "\n131. Of the #{cardCount} photos on the SD card, #{cardCountCopied} were copied" # Could get rid of the and with an if somewhere since only copying or moving is done.
+    puts "\n127. Of the #{cardCount} photos on the SD card, #{cardCountCopied} were copied" # Could get rid of the and with an if somewhere since only copying or moving is done.
     # puts "125. Done copying photos from SD card. src switched from card to folder holder moved or copied photos: #{src}"  
 end # copySD
 
-def uniqueFileName(fnp)
+def uniqueFileName(filename)
   # https://www.ruby-forum.com/topic/191831#836607
   count = 0
-  unique_name = fnp
+  unique_name = filename
   while File.exists?(unique_name)
     count += 1
-    unique_name = "#{File.join(File.dirname(fnp),File.basename(fnp, ".*"))}-#{count}#{File.extname(fnp)}"
+    unique_name = "#{File.join(File.dirname(filename),File.basename(filename, ".*"))}-#{count}#{File.extname(filename)}"
   end
   unique_name
 end
@@ -179,7 +186,14 @@ def copyAndMove(srcHD,destPhoto,destOrig)
     itemPrev = item
     photoFinalCount += 1
   end # Dir.foreach
-  puts "\n158. #{photoFinalCount} photos have been moved and are ready for renaming and gpsing. #{delCount-1} duplicate jpg were not moved."
+  # puts "\n158. #{photoFinalCount} photos have been moved and are ready for renaming and gpsing. #{delCount-1} duplicate jpg were not
+  if delCount > 1
+    comment = ". #{delCount-1} duplicate jpg were not moved."
+  else
+    comment = ""
+  end
+  puts "\n182. #{photoFinalCount} photos have been moved and are ready for renaming and gpsing#{comment}"
+   
 end # copyAndMove: copy to the final destination where the renaming will be done and the original moved to an archive (already imported folder)
 
 def userCamCode(fn)
@@ -209,8 +223,14 @@ def fileAnnotate(fn, fileEXIF, fileDateUTCstr, tzoLoc)  # writing original filen
   # fileEXIF = MiniExiftool.new(fn)
   if fileEXIF.comment.to_s.length < 2 # if exists then don't write. If avoid rewriting, then can eliminate this test
     # fileEXIF.comment = fileEXIF.instructions = "Original filename: #{File.basename(fn)} and date: #{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}" # This works, next line is testing returns in the EXIF 
-    fileEXIF.comment = fileEXIF.instructions = "Original filename: #{File.basename(fn)}. Capture date: #{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}"
-    
+    # fileEXIF.comment = fileEXIF.instructions = "Original filename: #{File.basename(fn)}. Capture date: #{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}"
+    # fileEXIF.comment = fileEXIF.instructions = "Capture date: #{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}"
+    fileEXIF.instructions = "#{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}"
+    # fileEXIF.picturetimezone = tzoLoc # Guess at field name, can't find in EXIF. Need to look at IPTC or exif
+    # fileEXIF.comment = "Capture date: #{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Doesn't show up in Aperture
+    # fileEXIF.source = fileEXIF.title = "#{File.basename(fn)} original filename" # OK, but Title seemed a bit better
+    fileEXIF.title = "#{File.basename(fn)}"
+    fileEXIF.TimeZoneOffset = tzoLoc
     fileEXIF.save
   end
 end # fileAnnotate. writing original filename and dateTimeOrig to the photo file.
@@ -296,10 +316,10 @@ def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl)
   # Need to add a note to file with large time diff
   # This works, put in because having problems with file locations
   # perlOutput = `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`
-  puts "\n286.. gpsPhotoPerl.shellescape: #{gpsPhotoPerl.shellescape}. but can't figure out how to make this work. So done manually"
-  puts "\n287.. `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`"
+  # puts "\n286.. gpsPhotoPerl.shellescape: #{gpsPhotoPerl.shellescape}. but can't figure out how to make this work. So done manually"
+  # puts "\n287.. `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`"
   puts "\n288. Finding all gps points from all the gpx files using gpsPhoto.pl. This may take a while"
-  perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby\ Aperture\ II/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ \ \ GPX\ daily\ logs/2014\ Massaged/' --timeoffset 0 --maxtimediff 50000`
+  perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby\ Aperture\ II/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ \ \ GPX\ daily\ logs/2013\ Massaged/' --timeoffset 0 --maxtimediff 50000`
   # perlOutput = "`perl #{gpsPhotoPerl.shellescape} --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`"
       
   puts "\n273. perlOutput: \n#{perlOutput} \n\nEnd of perlOutput ================…273\n\n" # This didn't seem to be happening with 2>&1 appended? But w/o it, error not captured
@@ -386,7 +406,7 @@ def addLocation(src, geoNamesUser)
           end # of within a rescue
   
         end # begin rescue outer
-         location = "" if city == location # cases where they where the same (Myers Flat, Callahan and Etna). Could try to find a location with some other find, maybe Wikipedia, but would want a distance check
+        
       else # outside US
         findNearbyPostalCodes = api.find_nearby_postal_codes(lat: lat, lng: lon, maxRows: 1).first
         state = findNearbyPostalCodes['adminName1']
@@ -400,7 +420,7 @@ def addLocation(src, geoNamesUser)
         puts "382.. location:     #{location}. distance: #{distance}. If distance > 0.3km location not used"
         location = "" if distance < 0.3      
       end # if countryCode
-
+      location = "" if city == location # cases where they where the same (Myers Flat, Callahan and Etna). Could try to find a location with some other find, maybe Wikipedia, but would want a distance check
       # puts "355.. Use MiniExiftool to write location info to photo files\n" # Have already set fileEXIF
       fileEXIF.CountryCode = countryCode  # Aperture: IPTC: Country-PrimaryLocationCode
       fileEXIF.country = country  # Aperture: IPTC: Country-Primary Location Name
@@ -417,7 +437,7 @@ end
 ## The "program" #################
 timeNowWas = timeStamp(Time.now) # this first use of timeStamp is different
 puts "Are the gps logs up to date?"
-puts "Fine naming and moving started………………………" # for trial runs  #{timeNowWas}
+puts "Fine naming and moving started  . . . . . . . . . . . . " # for trial runs  #{timeNowWas}
 srcSD = srcSDfolder + sdFolder(sdFolderFile)
 
 # Ask whether working with photo files from SD card or HD
@@ -456,7 +476,7 @@ else # whichOne=="HD", but what
   destOrig  = prefsPhoto["destOrig"]
 end # whichOne=="SD"
 
-puts "\n412. Intialization complete. File renaming and copying/moving beginning...#{timeNowWas = timeStamp(Time.now)}"
+puts "\n471. Intialization complete. File renaming and copying/moving beginning  . . Time below is responding to options requests via Pashua"
 
 # timeNowWas = timeStamp(Time.now) # Initial time stamp is different
 
@@ -489,5 +509,5 @@ timeNowWas = timeStamp(timeNowWas)
 
 # Add location information to photo file
 addLocation(destPhoto, geoNamesUser)
-puts "\477. All done"
+puts "\n504.-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -All done"
 timeNowWas = timeStamp(timeNowWas)
