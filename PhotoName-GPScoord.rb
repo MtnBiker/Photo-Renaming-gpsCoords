@@ -78,7 +78,7 @@ end
 
 def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) 
   # some of the above counter variables could be set at the beginning of this script and used locally
-  puts "\n72. Copying photos from an SD card"
+  puts "\n81. Copying photos from an SD card"
   cardCount = 0
   cardCountCopied = 0
   doAgain = true # name isn't great, now means do it. A no doubt crude way to run back through the copy loop if we moved to another folder.
@@ -179,7 +179,7 @@ def copyAndMove(srcHD,destPhoto,destOrig)
     if File.exists?(fnf)  # moving the original to _already imported, but not writing over existing files
       fnf = uniqueFileName(fnf)
       FileUtils.move(fn, fnf)
-      puts "\n179. A file already existed with this name so it was changed to fnf: #{fnf}"
+      puts "\n182. A file already existed with this name so it was changed to fnf: #{fnf}"
     else # no copies, so move
       FileUtils.move(fn, fnf)
     end
@@ -192,7 +192,7 @@ def copyAndMove(srcHD,destPhoto,destOrig)
   else
     comment = ""
   end
-  puts "\n182. #{photoFinalCount} photos have been moved and are ready for renaming and gpsing#{comment}"
+  puts "\n195. #{photoFinalCount} photos have been moved and are ready for renaming and gpsing#{comment}"
    
 end # copyAndMove: copy to the final destination where the renaming will be done and the original moved to an archive (already imported folder)
 
@@ -220,15 +220,11 @@ def fileAnnotate(fn, fileEXIF, fileDateUTCstr, tzoLoc)  # writing original filen
   # writing original filename and dateTimeOrig to the photo file.
   # ---- XMP-photoshop: Instructions  May not need, but it does show up if look at all EXIF, but not sure can see it in Aperture
   # Comment shows up in Aperture as  
-  # fileEXIF = MiniExiftool.new(fn)
+  # fileEXIF = MiniExiftool.new(fn) # done already
   if fileEXIF.comment.to_s.length < 2 # if exists then don't write. If avoid rewriting, then can eliminate this test
-    # fileEXIF.comment = fileEXIF.instructions = "Original filename: #{File.basename(fn)} and date: #{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}" # This works, next line is testing returns in the EXIF 
-    # fileEXIF.comment = fileEXIF.instructions = "Original filename: #{File.basename(fn)}. Capture date: #{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}"
-    # fileEXIF.comment = fileEXIF.instructions = "Capture date: #{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}"
-    fileEXIF.instructions = "#{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}"
-    # fileEXIF.picturetimezone = tzoLoc # Guess at field name, can't find in EXIF. Need to look at IPTC or exif
+     fileEXIF.instructions = "#{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}"
     # fileEXIF.comment = "Capture date: #{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Doesn't show up in Aperture
-    # fileEXIF.source = fileEXIF.title = "#{File.basename(fn)} original filename" # OK, but Title seemed a bit better
+    # fileEXIF.source = fileEXIF.title = "#{File.basename(fn)} original filename" # Source OK, but Title seemed a bit better
     fileEXIF.title = "#{File.basename(fn)}"
     fileEXIF.TimeZoneOffset = tzoLoc
     fileEXIF.save
@@ -319,7 +315,7 @@ def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl)
   # puts "\n286.. gpsPhotoPerl.shellescape: #{gpsPhotoPerl.shellescape}. but can't figure out how to make this work. So done manually"
   # puts "\n287.. `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`"
   puts "\n288. Finding all gps points from all the gpx files using gpsPhoto.pl. This may take a while"
-  perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby\ Aperture\ II/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ \ \ GPX\ daily\ logs/2013\ Massaged/' --timeoffset 0 --maxtimediff 50000`
+  perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby\ Aperture\ II/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ \ \ GPX\ daily\ logs/2014\ Massaged/' --timeoffset 0 --maxtimediff 50000`
   # perlOutput = "`perl #{gpsPhotoPerl.shellescape} --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`"
       
   puts "\n273. perlOutput: \n#{perlOutput} \n\nEnd of perlOutput ================…273\n\n" # This didn't seem to be happening with 2>&1 appended? But w/o it, error not captured
@@ -347,7 +343,7 @@ def addLocation(src, geoNamesUser)
       countTotal += 1
       fileEXIF = MiniExiftool.new(fn)
       # Get lat and lon from photo file
-      puts "311.. No gps information for #{item}" if fileEXIF.specialinstructions == nil
+      puts "311.. No gps information for #{item}. #{fileEXIF.title}" if fileEXIF.specialinstructions == nil
       next if fileEXIF.specialinstructions == nil # can I combine this step and the one above into one step or if statement? 
       gps = fileEXIF.specialinstructions.split(", ") # or some way of getting lat and lon. This is a good start. Look at input form needed
       lat = gps[0][4,11] # Capture long numbers like -123.123456, but short ones aren't that long, but nothing is there
@@ -478,7 +474,7 @@ end # whichOne=="SD"
 
 puts "\n471. Intialization complete. File renaming and copying/moving beginning  . . Time below is responding to options requests via Pashua"
 
-# timeNowWas = timeStamp(Time.now) # Initial time stamp is different
+timeNowWas = timeStamp(Time.now) # Initial time stamp is different. Had this off and no time for start when copying from SD card
 
 #  If working from SD card, copy or move files to " Drag Photos HERE Drag Photos HERE" folder, then will process from there.
 copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
