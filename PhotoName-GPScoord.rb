@@ -430,6 +430,21 @@ def addLocation(src, geoNamesUser)
   puts "\n398. Location information found for #{countLoc} of #{countTotal} photos processed" 
 end
 
+#  Write timeDiff to the photo files
+def writeTimeDiff(perlOutput)
+  perlOutput.each_line do |line|
+    if line =~ /timediff=/
+      fn = $`.split(",")[0]
+      timeDiff = $'.split(" ")[0]
+      puts "\439.. #{fn} timeDiff: #{timeDiff}"
+      # write timeDiff to GPSTrack or Headline or
+      fileEXIF = MiniExiftool.new(fn)
+      fileEXIF.headline =fileEXIF.usageterms = "#{timeDiff} seconds from nearest GPS point"
+      fileEXIF.save
+    end
+  end
+end
+
 ## The "program" #################
 timeNowWas = timeStamp(Time.now) # this first use of timeStamp is different
 puts "Are the gps logs up to date?"
@@ -499,6 +514,12 @@ puts "\n435. Using perl script to add gps coordinates. Will take a while as all 
 
 # Add GPS coordinates. Will add location later using some options depending on which country since different databases are relevant.
 perlOutput = addCoordinates(destPhoto, folderGPX, gpsPhotoPerl)
+
+timeNowWas = timeStamp(timeNowWas)
+
+# Write timeDiff to the photo files
+puts "\n506. Write timeDiff to the photo files"
+writeTimeDiff(perlOutput)
 
 timeNowWas = timeStamp(timeNowWas)
 # Parce perlOutput and add maxTimeDiff info to photo files
