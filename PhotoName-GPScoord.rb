@@ -105,7 +105,8 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
         nextFolderName = nextFolderNum.to_s + "_PANA"
         begin
           # Writing which folder we're now in
-          fileNow = File.open(thisScript + sdFolderFile, "w")
+          # fileNow = File.open(thisScript + sdFolderFile, "w") # Was 2014.02.28 How could this have worked?
+          fileNow = File.open(sdFolderFile, "w")
           fileNow.write(nextFolderName) 
         rescue IOError => e
           puts "Something went wrong. Could not write last photo read (#{nextFolderName}) to #{sdFolderFile}"
@@ -349,7 +350,7 @@ def addLocation(src, geoNamesUser)
       lat = gps[0][4,11] # Capture long numbers like -123.123456, but short ones aren't that long, but nothing is there
       lon = gps[1][4,11].split(" ")[0] # needs to 11 long to capture when -xxx.xxxxxx, but then can capture the - when it's xx.xxxxxx. Then grab whats between the first two spaces. Still need the 4,11 because there seems to be a space at the beginning if leave out [4,11]
       countLoc += 1 # gives and error here or at the end.
-      puts "\n321.. #{countTotal}. Use geonames to  Determine city, state, country, location. #{item}"
+      # puts "\n321.. #{countTotal}. Use geonames to  Determine city, state, country, location. #{item}"
       api = GeoNames.new(username: geoNamesUser) 
 
       # Determine country 
@@ -362,9 +363,9 @@ def addLocation(src, geoNamesUser)
         countryCode  = countryCodeGeo['countryCode'] 
       end
        
-      puts "331.. countryCode:  #{countryCode}"
+      # puts "331.. countryCode:  #{countryCode}"
       country = countryCodeGeo['countryName'] # works with both country_code  and find_nearby_place_name above
-      puts "333.. country:      #{country}"
+      # puts "333.. country:      #{country}"
 
       # Determine city, state, location
       if countryCode == "US"
@@ -376,25 +377,25 @@ def addLocation(src, geoNamesUser)
           state = api.country_subdivision(lat: lat, lng: lon, maxRows: 1)['adminName1']
           # puts "49. api.find_nearby_postal_codes failed, so used  api.country_subdivision"
         end
-        puts "335.. state:        #{state}"
+        # puts "335.. state:        #{state}"
         
         begin  # city, location
           neigh = api.neighbourhood(lat: lat, lng: lon) # errors outside the US and at other time
           city =  neigh['city']
-          puts "339.. city:         #{city}"
+          # puts "339.. city:         #{city}"
           location = neigh['name']
-          puts "341.. location:     #{location}"
+          # puts "386.. location:     #{location}"
         rescue # could use api.find_nearby_postal_codes for some of this
-          puts "344.  api.neighbourhood failed for #{lat} #{lon}"
+          # puts "344.  api.neighbourhood failed for #{lat} #{lon}"
           
           begin # within a rescue
             city = postalCodes.first['placeName'] # breaking for some points, but is it better than replacement? If so add another rescue
-            puts "355.. city (rescue): #{city}"
+            # puts "355.. city (rescue): #{city}"
             findNearbyPlaceName = api.find_nearby_place_name(lat: lat, lng: lon)
             location = findNearbyPlaceName.first['toponymName']
-            puts "358.. location (rescue): #{location}"      
+            # puts "358.. location (rescue): #{location}"      
           rescue # probably end up here for a remote place, so wikipedia may be the best
-            puts "360.. find_nearby_postal_codes failed for city, so use Wikipedia to find a location"
+            # puts "360.. find_nearby_postal_codes failed for city, so use Wikipedia to find a location"
             city = ""
             distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance']
             location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']
@@ -430,20 +431,18 @@ def addLocation(src, geoNamesUser)
   puts "\n398. Location information found for #{countLoc} of #{countTotal} photos processed" 
 end
 
-#  Write timeDiff to the photo files
 def writeTimeDiff(perlOutput)
   perlOutput.each_line do |line|
     if line =~ /timediff=/
       fn = $`.split(",")[0]
       timeDiff = $'.split(" ")[0]
-      puts "\439.. #{fn} timeDiff: #{timeDiff}"
-      # write timeDiff to GPSTrack or Headline or
+      # puts "\n439.. #{fn} timeDiff: #{timeDiff}"
       fileEXIF = MiniExiftool.new(fn)
-      fileEXIF.headline =fileEXIF.usageterms = "#{timeDiff} seconds from nearest GPS point"
+      fileEXIF.usageterms = "#{timeDiff} seconds from nearest GPS point"
       fileEXIF.save
     end
   end
-end
+end #  Write timeDiff to the photo files
 
 ## The "program" #################
 timeNowWas = timeStamp(Time.now) # this first use of timeStamp is different
