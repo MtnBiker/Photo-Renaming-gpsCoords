@@ -20,9 +20,18 @@ thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script call
 srcSDfolder = "/Volumes/NO NAME/DCIM/" # SD folder. Panasonic and probably Canon
 srcHD = "/Volumes/Knobby Aperture II/_Download folder/ Drag Photos HERE/"  # Photos copied from original location such as camera or sent by others
 sdFolderFile = thisScript + "currentData/SDfolder.txt" # shouldn't need full path
+
+# Appropriate folders on Knobby Aperture
 downloadsFolders = "/Volumes/Knobby Aperture II/_Download folder/"
 destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
 destOrig  = downloadsFolders + "_already imported/" # folder to move originals to if not done in 
+
+# Appropriate temporary folders on laptop
+laptopLocation = "/Users/gscar/Pictures/_Photo Processing Folders/"
+laptopDownloadsFolder = laptopLocation + "Download folder/"
+laptopDestination = laptopLocation + "Processed photos to be imported to Aperture/"
+laptopDestOrig = laptopLocation + "Originals to archive"
+
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
 geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wikipedia—most general and osm—maybe better for cities
 timeZonesFile = "/Users/gscar/Dropbox/scriptsEtc/Greg camera time zones.yml"
@@ -147,7 +156,6 @@ def uniqueFileName(filename)
   unique_name
 end
 
-
 def copyAndMove(srcHD,destPhoto,destOrig)
   puts "\n137. Copy photos to the final destination (Latest Download) where the renaming will be done and the originals moved to an archive (already imported folder)"
   #  Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
@@ -202,7 +210,9 @@ def userCamCode(fn)
   ## not very well thought out and the order of the tests matters
   case fileEXIF.model
   when "DMC-G2"
-    userCamCode = ".gs.L" # gs for photographer. L for Panasonic *L*umix
+    userCamCode = ".gs.L" # gs for photographer. L for Panasonic *L*umix DMC-G2
+  when "DMC-GX7"
+    userCamCode = ".gs.P" # gs for photographer. P for Panasonic Lumix DMC-GX7
   when "Canon PowerShot S100"
     userCamCode = ".lb" # initials of the photographer who usually shoots with the S100
   else
@@ -222,6 +232,7 @@ def fileAnnotate(fn, fileEXIF, fileDateUTCstr, tzoLoc)  # writing original filen
   # ---- XMP-photoshop: Instructions  May not need, but it does show up if look at all EXIF, but not sure can see it in Aperture
   # Comment shows up in Aperture as  
   # fileEXIF = MiniExiftool.new(fn) # done already
+  # SEEMS SLOPPY THAT I'M OPENING THE FILE ELSEWHERE AND SAVING IT HERE
   if fileEXIF.comment.to_s.length < 2 # if exists then don't write. If avoid rewriting, then can eliminate this test
      fileEXIF.instructions = "#{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}"
     # fileEXIF.comment = "Capture date: #{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Doesn't show up in Aperture
@@ -359,8 +370,13 @@ def addLocation(src, geoNamesUser)
         ccountryCodeGeo = api.country_code(lat: lat, lng: lon) # doesn't work in Turkey
         countryCode  = countryCodeGeo['countryCode'] 
       rescue
-        countryCodeGeo = api.find_nearby_place_name(lat: lat, lng: lon).first # works for Turkey
-        countryCode  = countryCodeGeo['countryCode'] 
+        begin
+          countryCodeGeo = api.find_nearby_place_name(lat: lat, lng: lon).first # works for Turkey
+          countryCode  = countryCodeGeo['countryCode'] 
+        rescue SocketError # SocketError: getaddrinfo: nodename nor servname provided, or not known. NOT SURE WHAT THE FAILURE IS HERE. WILL SEE IF IT HAPPENS AGAIN
+          puts " 366. Failing for api.find_nearby_place_name(lat: lat, lng: lon).first #{lat} #{lon} \nfor #{src}\n"
+          $stderr.print  $! # Thomas p. 108
+        end
       end
        
       # puts "331.. countryCode:  #{countryCode}"
@@ -450,6 +466,13 @@ puts "Are the gps logs up to date?"
 puts "Fine naming and moving started  . . . . . . . . . . . . " # for trial runs  #{timeNowWas}
 srcSD = srcSDfolder + sdFolder(sdFolderFile)
 
+if !File.exists?(downloadsFolders) # if KnobbyAperture isn't mounted use folders on laptop
+  puts "487. #{downloadsFolders} isn't mounted, so will use local folders to process"
+  downloadsFolders = laptopDownloadsFolder
+  destPhoto = laptopDestination
+  destOrig  = laptopDestOrig
+end
+
 # Ask whether working with photo files from SD card or HD
 fromWhere = whichLoc() # This is pulling in first Pashua window (1. ), SDorHD.rb which has been required
 whichDrive = fromWhere["whichDrive"][0].chr # only using the first character
@@ -466,7 +489,7 @@ if whichOne=="SD" # otherwise it's HD, probably should be case to be cleaner cod
   rescue Exception => err
     puts "Exception: #{err}. Not critical as value can be entered manually by user."
   end
-  src = srcSD
+  src = srcSD    
   prefsPhoto = pPashua2(src,lastPhotoFilename,destPhoto,destOrig) # calling Photo_Handling_Pashua-SD
   # to get a value use prefsPhoto("theNameInFileNamingEtcPashue.rb"), nothing to do with the name above
   # puts "Prefs as set by pPashua"
@@ -486,7 +509,7 @@ else # whichOne=="HD", but what
   destOrig  = prefsPhoto["destOrig"]
 end # whichOne=="SD"
 
-puts "\n471. Intialization complete. File renaming and copying/moving beginning  . . Time below is responding to options requests via Pashua"
+puts "\n489. Intialization complete. File renaming and copying/moving beginning. Time below is responding to options requests via Pashua"
 
 timeNowWas = timeStamp(Time.now) # Initial time stamp is different. Had this off and no time for start when copying from SD card
 
@@ -517,7 +540,7 @@ perlOutput = addCoordinates(destPhoto, folderGPX, gpsPhotoPerl)
 timeNowWas = timeStamp(timeNowWas)
 
 # Write timeDiff to the photo files
-puts "\n506. Write timeDiff to the photo files"
+puts "\n520. Write timeDiff to the photo files"
 writeTimeDiff(perlOutput)
 
 timeNowWas = timeStamp(timeNowWas)
