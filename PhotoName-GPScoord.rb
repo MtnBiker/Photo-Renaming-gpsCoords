@@ -18,7 +18,9 @@ require_relative 'lib/gpsYesPashua'
 
 thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
 srcSDfolder = "/Volumes/NO NAME/DCIM/" # SD folder. Panasonic and probably Canon
+srcSDfolder = "/Volumes/Untitled/DCIM/" # SD folder. Maybe temp for an unformated card? 2014.06.10
 srcHD = "/Volumes/Knobby Aperture II/_Download folder/ Drag Photos HERE/"  # Photos copied from original location such as camera or sent by others
+srcHD = "/Users/gscar/Pictures/_Photo Processing Folders/Download folder/" # for laptop use. NEED TO SET UP TRAVEL OPTION
 sdFolderFile = thisScript + "currentData/SDfolder.txt" # shouldn't need full path
 
 # Appropriate folders on Knobby Aperture
@@ -30,7 +32,7 @@ destOrig  = downloadsFolders + "_already imported/" # folder to move originals t
 laptopLocation = "/Users/gscar/Pictures/_Photo Processing Folders/"
 laptopDownloadsFolder = laptopLocation + "Download folder/"
 laptopDestination = laptopLocation + "Processed photos to be imported to Aperture/"
-laptopDestOrig = laptopLocation + "Originals to archive"
+laptopDestOrig = laptopLocation + "Originals to archive/"
 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
 geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wikipedia—most general and osm—maybe better for cities
@@ -275,13 +277,14 @@ def rename(src, timeZonesFile)
   dupCount = 0
   seqLetter = %w(a b c d e f g h i) # seems like this should be an array, not a list
   Dir.foreach(src) do |item| 
-    next if item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon ' # There is a space after Icon . This doesn't skip Icon as it should tries to process the file which results in an error. Also this Icon file is seen as a file, so can't use ftype so sort. I removed the icon, I guess I could have set up and error trap or maybe tried file type later in this process
+    puts "280. item: |#{item}|" # vert lines to check for spaces
+    next if item != '.' or item != '..' or item != '.DS_Store' or item != 'Icon ' # There is a space after Icon . This doesn't skip Icon as it should tries to process the file which results in an error. Also this Icon file is seen as a file, so can't use ftype so sort. I removed the icon, I guess I could have set up and error trap or maybe tried file type later in this process
     fn = src + item
        # puts "\n709. #{fileCount}. fn: #{fn}"
     # puts "230.. File.file?(fn): #{File.file?(fn)}"
     if File.file?(fn) # 
       # Determine the time and time zone where the photo was taken
-      # puts "233.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}"
+      puts "286.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}"
       fileEXIF = MiniExiftool.new(fn)
       fileDateUTC = fileEXIF.dateTimeOriginal # class time, but adds the local time zone to the result although it is really UTC (or whatever zone my camera is set for)
       tzoLoc = timeZone(fileDateUTC, timeZonesFile)
