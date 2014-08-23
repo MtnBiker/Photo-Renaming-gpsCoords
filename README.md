@@ -14,4 +14,4 @@ mini_exiftools, a Ruby script, to connect with the Perl script ExifTool by Phil 
 
 ### Notes
 
-I'm very much an neophyte Ruby script writer, so at best use this as a guideline. Use at your own risk. I pretty much learned Ruby to write this script. 
+I'm very much a neophyte Ruby script writer, so at best use this as a guideline. Use at your own risk. I pretty much learned Ruby to write this script. 
