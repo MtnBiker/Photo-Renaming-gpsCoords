@@ -17,14 +17,14 @@ require_relative 'lib/Photo_Naming_Pashua–HD2'
 require_relative 'lib/gpsYesPashua'
 
 thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
-srcSDfolder = "/Volumes/NO NAME/DCIM/" # SD folder. Panasonic and probably Canon
-srcSDfolder = "/Volumes/Untitled/DCIM/" # SD folder. Maybe temp for an unformated card? 2014.06.10
-srcHD = "/Volumes/Knobby Aperture II/_Download folder/ Drag Photos HERE/"  # Photos copied from original location such as camera or sent by others
-srcHD = "/Users/gscar/Pictures/_Photo Processing Folders/Download folder/" # for laptop use. NEED TO SET UP TRAVEL OPTION
+srcSDfolder = "/Volumes/Untitled/DCIM/" # SD folder. Panasonic and probably Canon
+# srcSDfolder = "/Volumes/Untitled/DCIM/" # SD folder. Maybe temp for an unformated card? 2014.06.10
+srcHD = "/Volumes/Knobby Aperture Seagate/_Download folder/ Drag Photos HERE/"  # Photos copied from original location such as camera or sent by others
+# srcHD = "/Users/gscar/Pictures/_Photo Processing Folders/Download folder/" # for laptop use. NEED TO SET UP TRAVEL OPTION
 sdFolderFile = thisScript + "currentData/SDfolder.txt" # shouldn't need full path
 
 # Appropriate folders on Knobby Aperture
-downloadsFolders = "/Volumes/Knobby Aperture II/_Download folder/"
+downloadsFolders = "/Volumes/Knobby Aperture Seagate/_Download folder/"
 destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
 destOrig  = downloadsFolders + "_already imported/" # folder to move originals to if not done in 
 
@@ -277,14 +277,19 @@ def rename(src, timeZonesFile)
   dupCount = 0
   seqLetter = %w(a b c d e f g h i) # seems like this should be an array, not a list
   Dir.foreach(src) do |item| 
-    puts "280. item: |#{item}|" # vert lines to check for spaces
-    next if item != '.' or item != '..' or item != '.DS_Store' or item != 'Icon ' # There is a space after Icon . This doesn't skip Icon as it should tries to process the file which results in an error. Also this Icon file is seen as a file, so can't use ftype so sort. I removed the icon, I guess I could have set up and error trap or maybe tried file type later in this process
+    # puts "280. item: |#{item}| " # vert lines so can see trailing spaces more easily
+    # next if item == '.'
+ #    puts "282"
+ #    next if item == '..'
+    next if item != '.DS_Store'
+    puts "285. item: |#{item}|. item != \"Icon \": #{item != "Icon "}. item != \'.DS_Store\': #{item != '.DS_Store'}."
+   next if item != "Icon " # There is a space after Icon . Originally had == which was wrong. Doesn't 284 take care of this?
     fn = src + item
        # puts "\n709. #{fileCount}. fn: #{fn}"
-    # puts "230.. File.file?(fn): #{File.file?(fn)}"
+    puts "288.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
     if File.file?(fn) # 
       # Determine the time and time zone where the photo was taken
-      puts "286.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}"
+      puts "291.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}"
       fileEXIF = MiniExiftool.new(fn)
       fileDateUTC = fileEXIF.dateTimeOriginal # class time, but adds the local time zone to the result although it is really UTC (or whatever zone my camera is set for)
       tzoLoc = timeZone(fileDateUTC, timeZonesFile)
@@ -352,7 +357,7 @@ def addLocation(src, geoNamesUser)
     countTotal = 0 
     countLoc = 0
     Dir.foreach(src) do |item| 
-    next if item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon ' # See notes in rename method
+    next if item != '.' or item != '..' or item != '.DS_Store' or item != 'Icon ' # See notes in rename method
     fn = src + item
     if File.file?(fn) 
       countTotal += 1
@@ -529,7 +534,7 @@ copyAndMove(srcHD,destPhoto,destOrig)
 
 timeNowWas = timeStamp(timeNowWas)
 
-puts "\n432. Rename the photo files with date and an ID for the camera or photographer"
+puts "\n532. Rename the photo files with date and an ID for the camera or photographer"
 rename(destPhoto, timeZones)
 
 timeNowWas = timeStamp(timeNowWas)
