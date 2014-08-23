@@ -1,5 +1,7 @@
+<<<<<<< Local Changes
+=======
 #!/usr/bin/env ruby
-# Refactored new version 2013.12.10
+# Refactored new version 2013.12.10 and Ruby 2 compatibility
 
 require 'rubygems' # # Needed by rbosa, mini_exiftool, and maybe by appscript. Not needed if correct path set somewhere.
 require 'mini_exiftool' # Requires Ruby ≥1.9. A wrapper for the Perl ExifTool
@@ -8,14 +10,13 @@ include FileUtils
 require 'find'
 require 'yaml'
 require "time"
-require 'shellwords'
-require 'geonames'
 
 require_relative 'lib/SDorHD'
-require_relative 'lib/Photo_Naming_Pashua-SD2'
-require_relative 'lib/Photo_Naming_Pashua–HD2'
+require_relative 'lib/Photo_Naming_Pashua-SD'
+require_relative 'lib/Photo_Naming_Pashua–HD'
 require_relative 'lib/gpsYesPashua'
 
+<<<<<<< Local Changes
 thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
 srcSDfolder = "/Volumes/NO NAME/DCIM/" # SD folder. Panasonic and probably Canon
 srcHD = "/Volumes/Knobby Aperture II/_Download folder/ Drag Photos HERE/"  # Photos copied from original location such as camera or sent by others
@@ -206,7 +207,15 @@ def fileAnnotate(fn, fileEXIF, fileDateUTCstr, tzoLoc)  # writing original filen
   # writing original filename and dateTimeOrig to the photo file.
   # ---- XMP-photoshop: Instructions  May not need, but it does show up if look at all EXIF, but not sure can see it in Aperture
   # Comment shows up in Aperture as  
+<<<<<<< Local Changes
+<<<<<<< Local Changes
+  # fileEXIF = MiniExiftool.new(fn) # done already
+=======
   # fileEXIF = MiniExiftool.new(fn)
+>>>>>>> External Changes
+=======
+  # fileEXIF = MiniExiftool.new(fn)
+>>>>>>> External Changes
   if fileEXIF.comment.to_s.length < 2 # if exists then don't write. If avoid rewriting, then can eliminate this test
     # fileEXIF.comment = fileEXIF.instructions = "Original filename: #{File.basename(fn)} and date: #{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}" # This works, next line is testing returns in the EXIF 
     fileEXIF.comment = fileEXIF.instructions = "Original filename: #{File.basename(fn)}. Capture date: #{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}"
@@ -384,7 +393,13 @@ def addLocation(src, geoNamesUser)
             location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']
             puts "363.. location:     #{location}. distance: #{distance}" # may need to screen as for outside US
           end # of within a rescue
+=======
+puts "RUBY_DESCRIPTION: #{RUBY_DESCRIPTION}\n\n" 
+
+class Photo
+>>>>>>> External Changes
   
+<<<<<<< Local Changes
         end # begin rescue outer
          location = "" if city == location # cases where they where the same (Myers Flat, Callahan and Etna). Could try to find a location with some other find, maybe Wikipedia, but would want a distance check
       else # outside US
@@ -456,7 +471,15 @@ else # whichOne=="HD", but what
   destOrig  = prefsPhoto["destOrig"]
 end # whichOne=="SD"
 
+<<<<<<< Local Changes
+<<<<<<< Local Changes
+puts "\n471. Intialization complete. File renaming and copying/moving beginning  . . Time below is responding to options requests via Pashua"
+=======
 puts "\n412. Intialization complete. File renaming and copying/moving beginning...#{timeNowWas = timeStamp(Time.now)}"
+>>>>>>> External Changes
+=======
+puts "\n412. Intialization complete. File renaming and copying/moving beginning...#{timeNowWas = timeStamp(Time.now)}"
+>>>>>>> External Changes
 
 # timeNowWas = timeStamp(Time.now) # Initial time stamp is different
 
@@ -485,9 +508,31 @@ puts "\n435. Using perl script to add gps coordinates. Will take a while as all 
 perlOutput = addCoordinates(destPhoto, folderGPX, gpsPhotoPerl)
 
 timeNowWas = timeStamp(timeNowWas)
+<<<<<<< Local Changes
+<<<<<<< Local Changes
+
+# Write timeDiff to the photo files
+puts "\n506. Write timeDiff to the photo files"
+writeTimeDiff(perlOutput)
+
+timeNowWas = timeStamp(timeNowWas)
+=======
+>>>>>>> External Changes
+=======
+>>>>>>> External Changes
 # Parce perlOutput and add maxTimeDiff info to photo files
 
 # Add location information to photo file
 addLocation(destPhoto, geoNamesUser)
+<<<<<<< Local Changes
+<<<<<<< Local Changes
+puts "\n504.-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -All done"
+timeNowWas = timeStamp(timeNowWas)>>>>>>> External Changes
+=======
+end>>>>>>> External Changes
+=======
 puts "\477. All done"
-timeNowWas = timeStamp(timeNowWas)
+timeNowWas = timeStamp(timeNowWas)>>>>>>> External Changes
+=======
+puts "\477. All done"
+timeNowWas = timeStamp(timeNowWas)>>>>>>> External Changes
