@@ -287,13 +287,13 @@ def rename(src, timeZonesFile)
     next if item == '.' 
     next if item == '..' 
     next if item == "Icon "
-    puts "294. item: #{item}. This item will be processed renamed.hj"
+    puts "294. item: #{item}. This item will be renamed."
     fn = src + item
        # puts "\n709. #{fileCount}. fn: #{fn}"
-    puts "295.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
+    # puts "295.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
     if File.file?(fn) # 
       # Determine the time and time zone where the photo was taken
-      puts "298.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}"
+      # puts "298.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}"
       fileEXIF = MiniExiftool.new(fn)
       fileDateUTC = fileEXIF.dateTimeOriginal # class time, but adds the local time zone to the result although it is really UTC (or whatever zone my camera is set for)
       tzoLoc = timeZone(fileDateUTC, timeZonesFile)
@@ -336,13 +336,15 @@ def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl)
   # Need to add a note to file with large time diff
   # This works, put in because having problems with file locations
   # perlOutput = `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`
-  # puts "\n286.. gpsPhotoPerl.shellescape: #{gpsPhotoPerl.shellescape}. but can't figure out how to make this work. So done manually"
-  # puts "\n287.. `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`"
-  puts "\n288. Finding all gps points from all the gpx files using gpsPhoto.pl. This may take a while"
-  perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby\ Aperture\ II/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ \ \ GPX\ daily\ logs/2014\ Massaged/' --timeoffset 0 --maxtimediff 50000`
+  puts "\n339.. gpsPhotoPerl.shellescape: #{gpsPhotoPerl.shellescape}. but can't figure out how to make this work [later, looks right to me]. So done manually"
+  # puts "\n340.. `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`" # probably can't double quote inside the backticks
+  puts "\n341. Finding all gps points from all the gpx files using gpsPhoto.pl. This may take a while"
+  # Since have to manually craft the perl call, need one for with Knobby Aperture Seagate and one for on laptop
+  #Knobby Aperture Seagate version. /Volumes/Knobby Aperture Seagate/_Download folder/Latest Download/
+  perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby\ Aperture\ Seagate/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ \ \ GPX\ daily\ logs/2014\ Massaged/' --timeoffset 0 --maxtimediff 50000`
   # perlOutput = "`perl #{gpsPhotoPerl.shellescape} --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`"
       
-  puts "\n273. perlOutput: \n#{perlOutput} \n\nEnd of perlOutput ================…273\n\n" # This didn't seem to be happening with 2>&1 appended? But w/o it, error not captured
+  puts "\n345. perlOutput: \n#{perlOutput} \n\nEnd of perlOutput ================…345\n\n" # This didn't seem to be happening with 2>&1 appended? But w/o it, error not captured
   # perlOutput =~ /timediff\=([0-9]+)/
   # timediff = $1 # class string
   # # puts"\n 453 timediff: #{timediff}. timediff.class: #{timediff.class}. "
