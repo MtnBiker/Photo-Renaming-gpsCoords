@@ -23,10 +23,10 @@ srcHD = "/Volumes/Knobby Aperture Seagate/_Download folder/ Drag Photos HERE/"  
 # srcHD = "/Users/gscar/Pictures/_Photo Processing Folders/Download folder/" # for laptop use. NEED TO SET UP TRAVEL OPTION
 sdFolderFile = thisScript + "currentData/SDfolder.txt" # shouldn't need full path
 
-# Appropriate folders on Knobby Aperture
-downloadsFolders = "/Volumes/Knobby Aperture Seagate/_Download folder/"
-destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
-destOrig  = downloadsFolders + "_already imported/" # folder to move originals to if not done in 
+# # Appropriate folders on Knobby Aperture NOT USING THIS AS MAIN PLACE ANYMORE
+# downloadsFolders = "/Volumes/Knobby Aperture Seagate/_Download folder/"
+# destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
+# destOrig  = downloadsFolders + "_already imported/" # folder to move originals to if not done in
 
 # Appropriate temporary folders on laptop
 laptopLocation = "/Users/gscar/Pictures/_Photo Processing Folders/"
@@ -34,12 +34,18 @@ laptopDownloadsFolder = laptopLocation + "Download folder/"
 laptopDestination = laptopLocation + "Processed photos to be imported to Aperture/"
 laptopDestOrig = laptopLocation + "Originals to archive/"
 
+# Folders on portable drive: Knobby Aperture Seagate
+downloadsFolders = "/Volumes/Knobby Aperture Seagate/_Download folder/"
+destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
+destOrig  = downloadsFolders + "_already imported/" # folder to move originals to if not done in 
+
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
 geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wikipedia—most general and osm—maybe better for cities
 timeZonesFile = "/Users/gscar/Dropbox/scriptsEtc/Greg camera time zones.yml"
 timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with
-gpsPhotoPerl = "lib/gpsPhoto.pl" # Perl script that puts gps locations into the photos. SEEMS TO WORK WITHOUT ./lib
-gpsPhotoPerl = "/Users/gscar/Documents/Ruby/Photo handling/lib/gpsPhoto.pl"
+# gpsPhotoPerl = "lib/gpsPhoto.pl" # Perl script that puts gps locations into the photos. SEEMS TO WORK WITHOUT ./lib
+# gpsPhotoPerl = "/Users/gscar/Documents/Ruby/Photo handling/lib/gpsPhoto.pl"
+gpsPhotoPerl = thisScript + "/lib/gpsPhoto.pl"
 folderGPX = "/Users/gscar/Dropbox/   GPX daily logs/2014 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't 
 geoNamesUser    = "geonames@web.knobby.ws"
 
@@ -203,8 +209,7 @@ def copyAndMove(srcHD,destPhoto,destOrig)
   else
     comment = ""
   end
-  puts "\n195. #{photoFinalCount} photos have been moved and are ready for renaming and gpsing#{comment}"
-   
+  puts "\n212. #{photoFinalCount} photos have been moved and are ready for renaming and gpsing#{comment}"
 end # copyAndMove: copy to the final destination where the renaming will be done and the original moved to an archive (already imported folder)
 
 def userCamCode(fn)
@@ -277,19 +282,18 @@ def rename(src, timeZonesFile)
   dupCount = 0
   seqLetter = %w(a b c d e f g h i) # seems like this should be an array, not a list
   Dir.foreach(src) do |item| 
-    # puts "280. item: |#{item}| " # vert lines so can see trailing spaces more easily
-    # next if item == '.'
- #    puts "282"
- #    next if item == '..'
-    next if item != '.DS_Store'
-    puts "285. item: |#{item}|. item != \"Icon \": #{item != "Icon "}. item != \'.DS_Store\': #{item != '.DS_Store'}."
-   next if item != "Icon " # There is a space after Icon . Originally had == which was wrong. Doesn't 284 take care of this?
+    puts "289. item: |#{item}|. item != \"Icon \": #{item != "Icon "}. item != \'.DS_Store\': #{item != '.DS_Store'}."
+    next if item == '.DS_Store' 
+    next if item == '.' 
+    next if item == '..' 
+    next if item == "Icon "
+    puts "294. item: #{item}. This item will be processed renamed.hj"
     fn = src + item
        # puts "\n709. #{fileCount}. fn: #{fn}"
-    puts "288.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
+    puts "295.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
     if File.file?(fn) # 
       # Determine the time and time zone where the photo was taken
-      puts "291.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}"
+      puts "298.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}"
       fileEXIF = MiniExiftool.new(fn)
       fileDateUTC = fileEXIF.dateTimeOriginal # class time, but adds the local time zone to the result although it is really UTC (or whatever zone my camera is set for)
       tzoLoc = timeZone(fileDateUTC, timeZonesFile)
@@ -497,7 +501,7 @@ if whichOne=="SD" # otherwise it's HD, probably should be case to be cleaner cod
   rescue Exception => err
     puts "Exception: #{err}. Not critical as value can be entered manually by user."
   end
-  src = srcSD    
+  src = srcSD
   prefsPhoto = pPashua2(src,lastPhotoFilename,destPhoto,destOrig) # calling Photo_Handling_Pashua-SD
   # to get a value use prefsPhoto("theNameInFileNamingEtcPashue.rb"), nothing to do with the name above
   # puts "Prefs as set by pPashua"
@@ -517,7 +521,7 @@ else # whichOne=="HD", but what
   destOrig  = prefsPhoto["destOrig"]
 end # whichOne=="SD"
 
-puts "\n489. Intialization complete. File renaming and copying/moving beginning. Time below is responding to options requests via Pashua"
+puts "\n520. Intialization complete. File renaming and copying/moving beginning. Time below is responding to options requests via Pashua"
 
 timeNowWas = timeStamp(Time.now) # Initial time stamp is different. Had this off and no time for start when copying from SD card
 
