@@ -19,8 +19,6 @@ require_relative 'lib/gpsYesPashua'
 thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
 srcSDfolder = "/Volumes/Untitled/DCIM/" # SD folder. Panasonic and probably Canon
 # srcSDfolder = "/Volumes/Untitled/DCIM/" # SD folder. Maybe temp for an unformated card? 2014.06.10
-srcHD = "/Volumes/Knobby Aperture Seagate/_Download folder/ Drag Photos HERE/"  # Photos copied from original location such as camera or sent by others
-# srcHD = "/Users/gscar/Pictures/_Photo Processing Folders/Download folder/" # for laptop use. NEED TO SET UP TRAVEL OPTION
 sdFolderFile = thisScript + "currentData/SDfolder.txt" # shouldn't need full path
 
 # # Appropriate folders on Knobby Aperture NOT USING THIS AS MAIN PLACE ANYMORE
@@ -29,12 +27,14 @@ sdFolderFile = thisScript + "currentData/SDfolder.txt" # shouldn't need full pat
 # destOrig  = downloadsFolders + "_already imported/" # folder to move originals to if not done in
 
 # Appropriate temporary folders on laptop
+# srcHD = "/Users/gscar/Pictures/_Photo Processing Folders/Download folder/" # for laptop use. NEED TO SET UP TRAVEL OPTION
 laptopLocation = "/Users/gscar/Pictures/_Photo Processing Folders/"
 laptopDownloadsFolder = laptopLocation + "Download folder/"
 laptopDestination = laptopLocation + "Processed photos to be imported to Aperture/"
 laptopDestOrig = laptopLocation + "Originals to archive/"
 
 # Folders on portable drive: Knobby Aperture Seagate
+srcHD = "/Volumes/Knobby Aperture Seagate/_Download folder/ Drag Photos HERE/"  # Photos copied from original location such as camera or sent by others
 downloadsFolders = "/Volumes/Knobby Aperture Seagate/_Download folder/"
 destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
 destOrig  = downloadsFolders + "_already imported/" # folder to move originals to if not done in 
@@ -145,7 +145,7 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
       fileNow = File.open(lastPhotoReadTextFile, "w") # must use explicit path, otherwise will use wherever we are are on the SD card
       fileNow.puts fileSDbasename
       fileNow.close
-      puts "\n127. The last file processed. fileSDbasename, #{fileSDbasename}, written to  #{fileSDbasename}."
+      puts "\n148. The last file processed. fileSDbasename, #{fileSDbasename}, written to  #{fileSDbasename}."
   rescue IOError => e
     puts "Something went wrong. Could not write last photo read (#{fileSDbasename}) to #{fileNow}"
   end # begin
@@ -165,7 +165,7 @@ def uniqueFileName(filename)
 end
 
 def copyAndMove(srcHD,destPhoto,destOrig)
-  puts "\n137. Copy photos to the final destination (Latest Download) where the renaming will be done and the originals moved to an archive (already imported folder)"
+  puts "\n168. Copy photos to the final destination (#{destPhoto}) where the renaming will be done and the originals moved to an archive (#{destOrig})"
   #  Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
   # THIS METHOD WILL NOT WORK IF THE RAW FILE FORMAT ALPHABETICALLY COMES BEFORE JPG. SHOULD MAKE THIS MORE ROBUST
   photoFinalCount = 0
@@ -173,7 +173,7 @@ def copyAndMove(srcHD,destPhoto,destOrig)
   itemPrev = "" # need something for first time through
   fnp = "" # when looped back got error "undefined local variable or method ‘fnp’ for main:Object", so needs to be set here to remember it. Yes, this works, without this statement get an error 
   Dir.foreach(srcHD) do |item| 
-    # puts "131.. photoFinalCount: #{photoFinalCount + 1}. item: #{item}."
+    # puts "176.. photoFinalCount: #{photoFinalCount + 1}. item: #{item}."
     next if item == '.' or item == '..' or item == '.DS_Store' 
     fileExt = File.extname(item)
     if File.basename(itemPrev, ".*") == File.basename(item,".*") && photoFinalCount != 0
@@ -282,12 +282,12 @@ def rename(src, timeZonesFile)
   dupCount = 0
   seqLetter = %w(a b c d e f g h i) # seems like this should be an array, not a list
   Dir.foreach(src) do |item| 
-    puts "289. item: |#{item}|. item != \"Icon \": #{item != "Icon "}. item != \'.DS_Store\': #{item != '.DS_Store'}."
+    # puts "285. item: |#{item}|. item != \"Icon \": #{item != "Icon "}. item != \'.DS_Store\': #{item != '.DS_Store'}."
     next if item == '.DS_Store' 
     next if item == '.' 
     next if item == '..' 
     next if item == "Icon "
-    puts "294. item: #{item}. This item will be renamed."
+    puts "290. #{item} will be renamed."
     fn = src + item
        # puts "\n709. #{fileCount}. fn: #{fn}"
     # puts "295.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
@@ -330,7 +330,7 @@ def rename(src, timeZonesFile)
   end # 2. Find  
 end # renaming photo files in the downloads folder and writing in original time.
 
-def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl)
+def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop)
   # Remember writing a command line command, so telling perl, then which perl file, then the gpsphoto.pl script options
   # maxTimeDiff = 50000 # seconds, default 120, but I changed it 2011.07.26 to allow for pictures taken at night but GPS off. Distance still has to be reasonable, that is the GPS had to be at the same place in the morning as the night before as set by the variable below
   # Need to add a note to file with large time diff
@@ -341,8 +341,12 @@ def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl)
   puts "\n341. Finding all gps points from all the gpx files using gpsPhoto.pl. This may take a while"
   # Since have to manually craft the perl call, need one for with Knobby Aperture Seagate and one for on laptop
   #Knobby Aperture Seagate version. /Volumes/Knobby Aperture Seagate/_Download folder/Latest Download/
-  perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby\ Aperture\ Seagate/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ \ \ GPX\ daily\ logs/2014\ Massaged/' --timeoffset 0 --maxtimediff 50000`
+  if loadingToLaptop
+    perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Users/gscar/Pictures/_Photo Processing Folders/Processed\ photos\ to\ be\ imported\ to\ Aperture/' --gpsdir '/Users/gscar/Dropbox/\ \ \ GPX\ daily\ logs/2014\ Massaged/' --timeoffset 0 --maxtimediff 50000`
+  else # default location on Knobby Aperture Seagate
+    perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby\ Aperture\ Seagate/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ \ \ GPX\ daily\ logs/2014\ Massaged/' --timeoffset 0 --maxtimediff 50000`
   # perlOutput = "`perl #{gpsPhotoPerl.shellescape} --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`"
+end
       
   puts "\n345. perlOutput: \n#{perlOutput} \n\nEnd of perlOutput ================…345\n\n" # This didn't seem to be happening with 2>&1 appended? But w/o it, error not captured
   # perlOutput =~ /timediff\=([0-9]+)/
@@ -458,7 +462,7 @@ def addLocation(src, geoNamesUser)
       # Now have lat and long and now get some location names
     end    
   end 
-  puts "\n398. Location information found for #{countLoc} of #{countTotal} photos processed" 
+  puts "\n465. Location information found for #{countLoc} of #{countTotal} photos processed" 
 end
 
 def writeTimeDiff(perlOutput)
@@ -482,9 +486,11 @@ srcSD = srcSDfolder + sdFolder(sdFolderFile)
 
 if !File.exists?(downloadsFolders) # if KnobbyAperture isn't mounted use folders on laptop
   puts "487. #{downloadsFolders} isn't mounted, so will use local folders to process"
+  # Knobby Aperture folders location loaded by default, change as needed
   downloadsFolders = laptopDownloadsFolder
   destPhoto = laptopDestination
   destOrig  = laptopDestOrig
+  loadingToLaptop = true
 end
 
 # Ask whether working with photo files from SD card or HD
@@ -540,7 +546,7 @@ copyAndMove(srcHD,destPhoto,destOrig)
 
 timeNowWas = timeStamp(timeNowWas)
 
-puts "\n532. Rename the photo files with date and an ID for the camera or photographer"
+puts "\n549. Rename the photo files with date and an ID for the camera or photographer"
 rename(destPhoto, timeZones)
 
 timeNowWas = timeStamp(timeNowWas)
@@ -549,7 +555,7 @@ puts "\n435. Using perl script to add gps coordinates. Will take a while as all 
 
 
 # Add GPS coordinates. Will add location later using some options depending on which country since different databases are relevant.
-perlOutput = addCoordinates(destPhoto, folderGPX, gpsPhotoPerl)
+perlOutput = addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop)
 
 timeNowWas = timeStamp(timeNowWas)
 
