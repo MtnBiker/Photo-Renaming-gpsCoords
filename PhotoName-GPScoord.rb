@@ -47,9 +47,15 @@ timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get 
 # gpsPhotoPerl = "/Users/gscar/Documents/Ruby/Photo handling/lib/gpsPhoto.pl"
 gpsPhotoPerl = thisScript + "/lib/gpsPhoto.pl"
 folderGPX = "/Users/gscar/Dropbox/   GPX daily logs/2014 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't 
-geoNamesUser    = "geonames@web.knobby.ws"
+geoNamesUser    = "geonames@web.knobby.ws" # Good but may use it up. Ran out after about 300 photos per hour.
+# geoNamesUser    = "geonamestwo" # second account when use up first
 
 # puts "RUBY_DESCRIPTION: #{RUBY_DESCRIPTION}\n\n" # probably isn't always accurate. Just look in the purple on the window
+
+def ignoreNonFiles(item) # invisible files that shouldn't be processed
+  item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon '
+  # This is true when it should not be processed i.e. next if ignoreNonFiles(item) == true
+  end
 
 def timeStamp(timeNowWas)  
   seconds = Time.now-timeNowWas
@@ -282,14 +288,8 @@ def rename(src, timeZonesFile)
   dupCount = 0
   seqLetter = %w(a b c d e f g h i) # seems like this should be an array, not a list
   Dir.foreach(src) do |item| 
-    # puts "285. item: |#{item}|. item != \"Icon \": #{item != "Icon "}. item != \'.DS_Store\': #{item != '.DS_Store'}."
-    # puts "286.. #{item} should be ignored (or not) #{ignoreNonFiles(item)}. If true "
-    # next if item == '.DS_Store'
-#     next if item == '.'
-#     next if item == '..'
-#     next if item == "Icon "
     next if ignoreNonFiles(item) == true # skipping file when true
-    puts "291. #{item} will be renamed"
+    # puts "293. #{item} will be renamed"
     fn = src + item
        # puts "\n709. #{fileCount}. fn: #{fn}"
     # puts "295.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
@@ -327,7 +327,8 @@ def rename(src, timeZonesFile)
       # puts "fn: #{fn}. imageFile: #{imageFile}. fileDateUTC: #{fileDateUTC}. tzoLoc:#{tzoLoc}"
       fileAnnotate(fn, fileEXIF, fileDateUTCstr, tzoLoc) # adds original file name, capture date and time zone to EXIF. Comments which I think show up as instructions in Aperture
       fnp = src + fileBaseName + File.extname(fn).downcase
-      File.rename(fn,fnp)          
+      File.rename(fn,fnp)   
+      puts "326. #{item} was renamed to #{fileBaseName}"       
     end # 3. if File
   end # 2. Find  
 end # renaming photo files in the downloads folder and writing in original time.
@@ -364,11 +365,6 @@ end
   return perlOutput
 end
 
-def ignoreNonFiles(item)
-  item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon '
-  # This is true when it should not be processed i.e. next if ignoreNonFiles(item) == true
-  end
-
 def addLocation(src, geoNamesUser)
   # read coords and add a hierarchy of choices for location information. Look at GPS Log Renaming for what works.
     countTotal = 0 
@@ -387,7 +383,7 @@ def addLocation(src, geoNamesUser)
         lat = gps[0][4,11] # Capture long numbers like -123.123456, but short ones aren't that long, but nothing is there
         lon = gps[1][4,11].split(" ")[0] # needs to 11 long to capture when -xxx.xxxxxx, but then can capture the - when it's xx.xxxxxx. Then grab whats between the first two spaces. Still need the 4,11 because there seems to be a space at the beginning if leave out [4,11]
         countLoc += 1 # gives and error here or at the end.
-        puts "\n388.. #{countTotal}. Use geonames to  Determine city, state, country, location. #{item}"
+        puts "\n388.. #{countTotal}. Use geonames to determine city, state, country, and location for #{item}"
         api = GeoNames.new(username: geoNamesUser) 
 
         # Determine country 
@@ -493,8 +489,8 @@ puts "Fine naming and moving started  . . . . . . . . . . . . " # for trial runs
 srcSD = srcSDfolder + sdFolder(sdFolderFile)
 
 if !File.exists?(downloadsFolders) # if KnobbyAperture isn't mounted use folders on laptop
-  puts "487. #{downloadsFolders} isn't mounted, so will use local folders to process"
-  # Knobby Aperture folders location loaded by default, change as needed
+  puts "498. #{downloadsFolders} isn't mounted, so will use local folders to process"
+  # Knobby Aperture folders location loaded by default, changed as needed
   downloadsFolders = laptopDownloadsFolder
   destPhoto = laptopDestination
   destOrig  = laptopDestOrig
@@ -546,7 +542,7 @@ copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTe
 #  Note that file creation date is the time of copying. May want to fix this. Maybe a mv is a copy and move which is sort of a recreation. 
 
 timeNowWas = timeStamp(timeNowWas)
-puts "\n452. Photos will now be moved and renamed."
+puts "\n549. Photos will now be moved and renamed."
 
 # puts "First will copy to the final destination where the renaming will be done and the original moved to an archive (already imported folder)"
 #  Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
@@ -560,7 +556,6 @@ rename(destPhoto, timeZones)
 timeNowWas = timeStamp(timeNowWas)
 
 puts "\n554. Using perl script to add gps coordinates. Will take a while as all the gps files for the year will be processed and then all the photos."
-
 
 # Add GPS coordinates. Will add location later using some options depending on which country since different databases are relevant.
 perlOutput = addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop)
