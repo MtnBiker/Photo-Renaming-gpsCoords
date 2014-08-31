@@ -216,10 +216,10 @@ def userCamCode(fn)
   fileEXIF = MiniExiftool.new(fn)
   ## not very well thought out and the order of the tests matters
   case fileEXIF.model
+  when "DMC-GX7"
+    userCamCode = ".gs.P" # gs for photographer. P for *P*anasonic Lumix DMC-GX7
   when "DMC-G2"
     userCamCode = ".gs.L" # gs for photographer. L for Panasonic *L*umix DMC-G2
-  when "DMC-GX7"
-    userCamCode = ".gs.P" # gs for photographer. P for Panasonic Lumix DMC-GX7
   when "Canon PowerShot S100"
     userCamCode = ".lb" # initials of the photographer who usually shoots with the S100
   else
@@ -283,11 +283,13 @@ def rename(src, timeZonesFile)
   seqLetter = %w(a b c d e f g h i) # seems like this should be an array, not a list
   Dir.foreach(src) do |item| 
     # puts "285. item: |#{item}|. item != \"Icon \": #{item != "Icon "}. item != \'.DS_Store\': #{item != '.DS_Store'}."
-    next if item == '.DS_Store' 
-    next if item == '.' 
-    next if item == '..' 
-    next if item == "Icon "
-    puts "290. #{item} will be renamed."
+    # puts "286.. #{item} should be ignored (or not) #{ignoreNonFiles(item)}. If true "
+    # next if item == '.DS_Store'
+#     next if item == '.'
+#     next if item == '..'
+#     next if item == "Icon "
+    next if ignoreNonFiles(item) == true # skipping file when true
+    puts "291. #{item} will be renamed"
     fn = src + item
        # puts "\n709. #{fileCount}. fn: #{fn}"
     # puts "295.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
@@ -362,40 +364,46 @@ end
   return perlOutput
 end
 
+def ignoreNonFiles(item)
+  item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon '
+  # This is true when it should not be processed i.e. next if ignoreNonFiles(item) == true
+  end
+
 def addLocation(src, geoNamesUser)
   # read coords and add a hierarchy of choices for location information. Look at GPS Log Renaming for what works.
     countTotal = 0 
     countLoc = 0
     Dir.foreach(src) do |item| 
-    next if item != '.' or item != '..' or item != '.DS_Store' or item != 'Icon ' # See notes in rename method
-    fn = src + item
-    if File.file?(fn) 
-      countTotal += 1
-      fileEXIF = MiniExiftool.new(fn)
-      # Get lat and lon from photo file
-      puts "311.. No gps information for #{item}. #{fileEXIF.title}" if fileEXIF.specialinstructions == nil
-      next if fileEXIF.specialinstructions == nil # can I combine this step and the one above into one step or if statement? 
-      gps = fileEXIF.specialinstructions.split(", ") # or some way of getting lat and lon. This is a good start. Look at input form needed
-      lat = gps[0][4,11] # Capture long numbers like -123.123456, but short ones aren't that long, but nothing is there
-      lon = gps[1][4,11].split(" ")[0] # needs to 11 long to capture when -xxx.xxxxxx, but then can capture the - when it's xx.xxxxxx. Then grab whats between the first two spaces. Still need the 4,11 because there seems to be a space at the beginning if leave out [4,11]
-      countLoc += 1 # gives and error here or at the end.
-      # puts "\n321.. #{countTotal}. Use geonames to  Determine city, state, country, location. #{item}"
-      api = GeoNames.new(username: geoNamesUser) 
+      next if ignoreNonFiles(item) == true # skipping file when true
+      fn = src + item
+      if File.file?(fn) 
+        # puts "381.. #{item} is going to be processed"
+        countTotal += 1
+        fileEXIF = MiniExiftool.new(fn)
+        # Get lat and lon from photo file
+        puts "311.. No gps information for #{item}. #{fileEXIF.title}" if fileEXIF.specialinstructions == nil
+        next if fileEXIF.specialinstructions == nil # can I combine this step and the one above into one step or if statement? 
+        gps = fileEXIF.specialinstructions.split(", ") # or some way of getting lat and lon. This is a good start. Look at input form needed
+        lat = gps[0][4,11] # Capture long numbers like -123.123456, but short ones aren't that long, but nothing is there
+        lon = gps[1][4,11].split(" ")[0] # needs to 11 long to capture when -xxx.xxxxxx, but then can capture the - when it's xx.xxxxxx. Then grab whats between the first two spaces. Still need the 4,11 because there seems to be a space at the beginning if leave out [4,11]
+        countLoc += 1 # gives and error here or at the end.
+        puts "\n388.. #{countTotal}. Use geonames to  Determine city, state, country, location. #{item}"
+        api = GeoNames.new(username: geoNamesUser) 
 
-      # Determine country 
-      begin
-        # doesn't work for Istanbul, works for Croatia
-        ccountryCodeGeo = api.country_code(lat: lat, lng: lon) # doesn't work in Turkey
-        countryCode  = countryCodeGeo['countryCode'] 
-      rescue
+        # Determine country 
         begin
-          countryCodeGeo = api.find_nearby_place_name(lat: lat, lng: lon).first # works for Turkey
+          # doesn't work for Istanbul, works for Croatia
+          ccountryCodeGeo = api.country_code(lat: lat, lng: lon) # doesn't work in Turkey
           countryCode  = countryCodeGeo['countryCode'] 
-        rescue SocketError # SocketError: getaddrinfo: nodename nor servname provided, or not known. NOT SURE WHAT THE FAILURE IS HERE. WILL SEE IF IT HAPPENS AGAIN
-          puts " 366. Failing for api.find_nearby_place_name(lat: lat, lng: lon).first #{lat} #{lon} \nfor #{src}\n"
-          $stderr.print  $! # Thomas p. 108
+        rescue
+          begin
+            countryCodeGeo = api.find_nearby_place_name(lat: lat, lng: lon).first # works for Turkey
+            countryCode  = countryCodeGeo['countryCode'] 
+          rescue SocketError # SocketError: getaddrinfo: nodename nor servname provided, or not known. NOT SURE WHAT THE FAILURE IS HERE. WILL SEE IF IT HAPPENS AGAIN
+            puts " 366. Failing for api.find_nearby_place_name(lat: lat, lng: lon).first #{lat} #{lon} \nfor #{src}\n"
+            $stderr.print  $! # Thomas p. 108
+          end
         end
-      end
        
       # puts "331.. countryCode:  #{countryCode}"
       country = countryCodeGeo['countryName'] # works with both country_code  and find_nearby_place_name above
@@ -551,7 +559,7 @@ rename(destPhoto, timeZones)
 
 timeNowWas = timeStamp(timeNowWas)
 
-puts "\n435. Using perl script to add gps coordinates. Will take a while as all the gps files for the year will be processed and then all the photos."
+puts "\n554. Using perl script to add gps coordinates. Will take a while as all the gps files for the year will be processed and then all the photos."
 
 
 # Add GPS coordinates. Will add location later using some options depending on which country since different databases are relevant.
@@ -560,7 +568,7 @@ perlOutput = addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop)
 timeNowWas = timeStamp(timeNowWas)
 
 # Write timeDiff to the photo files
-puts "\n520. Write timeDiff to the photo files"
+puts "\n563. Write timeDiff to the photo files"
 writeTimeDiff(perlOutput)
 
 timeNowWas = timeStamp(timeNowWas)
