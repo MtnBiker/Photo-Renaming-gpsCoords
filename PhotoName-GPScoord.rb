@@ -111,6 +111,7 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
     Dir.chdir(src) # needed for glob
     Dir.glob("P*") do |item| 
       cardCount += 1
+      puts "120. src: #{src}/item: #{item}."
       fn = src + item
       fnp = srcHD + "/" + item # using srcHD as the put files here place, might cause problems later
       # get filename and make select later than already downloaded
@@ -489,14 +490,15 @@ puts "Fine naming and moving started  . . . . . . . . . . . . " # for trial runs
 srcSD = srcSDfolder + sdFolder(sdFolderFile)
 
 if !File.exists?(downloadsFolders) # if KnobbyAperture isn't mounted use folders on laptop
-  puts "498. #{downloadsFolders} isn't mounted, so will use local folders to process"
+  puts "/n494. #{downloadsFolders} isn't mounted, so will use local folders to process"
   # Knobby Aperture folders location loaded by default, changed as needed
   downloadsFolders = laptopDownloadsFolder
   destPhoto = laptopDestination
   destOrig  = laptopDestOrig
+  srcHD = downloadsFolders
   loadingToLaptop = true
 end
-
+puts "501.. downloadsFolders: #{downloadsFolders}."
 # Ask whether working with photo files from SD card or HD
 fromWhere = whichLoc() # This is pulling in first Pashua window (1. ), SDorHD.rb which has been required
 whichDrive = fromWhere["whichDrive"][0].chr # only using the first character
@@ -538,6 +540,7 @@ puts "\n520. Intialization complete. File renaming and copying/moving beginning.
 timeNowWas = timeStamp(Time.now) # Initial time stamp is different. Had this off and no time for start when copying from SD card
 
 #  If working from SD card, copy or move files to " Drag Photos HERE Drag Photos HERE" folder, then will process from there.
+puts "542.. src: #{src}. srcHD: #{srcHD}."
 copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
 #  Note that file creation date is the time of copying. May want to fix this. Maybe a mv is a copy and move which is sort of a recreation. 
 
