@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 # Refactored new version 2013.12.10
 
+#  A log of first and last processed would be good.
+
 require 'rubygems' # # Needed by rbosa, mini_exiftool, and maybe by appscript. Not needed if correct path set somewhere.
 require 'mini_exiftool' # Requires Ruby ≥1.9. A wrapper for the Perl ExifTool
 require 'fileutils'
@@ -11,6 +13,7 @@ require "time"
 require 'shellwords'
 require 'geonames'
 
+require_relative 'lib/LatestDownloadsFolderEmpty_Pashua'
 require_relative 'lib/SDorHD'
 require_relative 'lib/Photo_Naming_Pashua-SD2'
 require_relative 'lib/Photo_Naming_Pashua–HD2'
@@ -46,16 +49,16 @@ timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get 
 # gpsPhotoPerl = "lib/gpsPhoto.pl" # Perl script that puts gps locations into the photos. SEEMS TO WORK WITHOUT ./lib
 # gpsPhotoPerl = "/Users/gscar/Documents/Ruby/Photo handling/lib/gpsPhoto.pl"
 gpsPhotoPerl = thisScript + "/lib/gpsPhoto.pl"
-folderGPX = "/Users/gscar/Dropbox/   GPX daily logs/2014 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't 
+folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2015 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't 
 geoNamesUser    = "geonames@web.knobby.ws" # Good but may use it up. Ran out after about 300 photos per hour.
-# geoNamesUser    = "geonamestwo" # second account when use up first
+geoNamesUser2    = "geonamestwo" # second account when use up first. Or use for location information, i.e., splitting use in half.
 
 # puts "RUBY_DESCRIPTION: #{RUBY_DESCRIPTION}\n\n" # probably isn't always accurate. Just look in the purple on the window
 
 def ignoreNonFiles(item) # invisible files that shouldn't be processed
   item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon '
   # This is true when it should not be processed i.e. next if ignoreNonFiles(item) == true
-  end
+end
 
 def timeStamp(timeNowWas)  
   seconds = Time.now-timeNowWas
@@ -111,12 +114,12 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
     Dir.chdir(src) # needed for glob
     Dir.glob("P*") do |item| 
       cardCount += 1
-      puts "120. src: #{src}/item: #{item}."
+      # puts "114.. src/item: #{src}#{item}."
       fn = src + item
       fnp = srcHD + "/" + item # using srcHD as the put files here place, might cause problems later
       # get filename and make select later than already downloaded
       fileSDbasename = File.basename(item,".*")
-      # puts "78. #{cardCount}. item: #{item}. fileSDbasename: #{fileSDbasename}, fn: #{fn}"
+      # puts "119. #{cardCount}. item: #{item}. fileSDbasename: #{fileSDbasename}, fn: #{fn}"
       next if item == '.' or item == '..' or fileSDbasename <= lastPhotoFilename # don't need the first two with Dir.glob, but doesn't slow things down much overall for this script
       FileUtils.copy(fn, fnp) # Copy from card to hard drive. , preserve = true gives and error. But preserve also preserves permissions, so that may not be a good thing. If care will have to manually change creation date
       cardCountCopied += 1
@@ -144,7 +147,7 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
         else
           doAgain = false
         end     
-        puts "Moving to #{src} because the folder we started in was full.\n"
+        puts "Moving to #{src} because the folder we started in was full and the camera started another one.\n"
     end
   end # if doAgain…
   # Writing which file on the card we ended on
@@ -340,17 +343,17 @@ def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop)
   # Need to add a note to file with large time diff
   # This works, put in because having problems with file locations
   # perlOutput = `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`
-  puts "\n339.. gpsPhotoPerl.shellescape: #{gpsPhotoPerl.shellescape}. but can't figure out how to make this work [later, looks right to me]. So done manually"
+  puts "\n346.. gpsPhotoPerl.shellescape: #{gpsPhotoPerl.shellescape}. but can't figure out how to make this work [later, looks right to me]. So done manually"
   # puts "\n340.. `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`" # probably can't double quote inside the backticks
-  puts "\n341. Finding all gps points from all the gpx files using gpsPhoto.pl. This may take a while"
+  puts "\n348. Finding all gps points from all the gpx files using gpsPhoto.pl. This may take a while"
   # Since have to manually craft the perl call, need one for with Knobby Aperture Seagate and one for on laptop
   #Knobby Aperture Seagate version. /Volumes/Knobby Aperture Seagate/_Download folder/Latest Download/
   if loadingToLaptop
-    perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Users/gscar/Pictures/_Photo Processing Folders/Processed\ photos\ to\ be\ imported\ to\ Aperture/' --gpsdir '/Users/gscar/Dropbox/\ \ \ GPX\ daily\ logs/2014\ Massaged/' --timeoffset 0 --maxtimediff 50000`
+    perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Users/gscar/Pictures/_Photo Processing Folders/Processed\ photos\ to\ be\ imported\ to\ Aperture/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2015\ Massaged/' --timeoffset 0 --maxtimediff 50000`
   else # default location on Knobby Aperture Seagate
-    perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby\ Aperture\ Seagate/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ \ \ GPX\ daily\ logs/2014\ Massaged/' --timeoffset 0 --maxtimediff 50000`
+    perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby\ Aperture\ Seagate/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2015\ Massaged/' --timeoffset 0 --maxtimediff 50000`
   # perlOutput = "`perl #{gpsPhotoPerl.shellescape} --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`"
-end
+  end
       
   puts "\n345. perlOutput: \n#{perlOutput} \n\nEnd of perlOutput ================…345\n\n" # This didn't seem to be happening with 2>&1 appended? But w/o it, error not captured
   # perlOutput =~ /timediff\=([0-9]+)/
@@ -384,7 +387,7 @@ def addLocation(src, geoNamesUser)
         lat = gps[0][4,11] # Capture long numbers like -123.123456, but short ones aren't that long, but nothing is there
         lon = gps[1][4,11].split(" ")[0] # needs to 11 long to capture when -xxx.xxxxxx, but then can capture the - when it's xx.xxxxxx. Then grab whats between the first two spaces. Still need the 4,11 because there seems to be a space at the beginning if leave out [4,11]
         countLoc += 1 # gives and error here or at the end.
-        puts "\n388.. #{countTotal}. Use geonames to determine city, state, country, and location for #{item}"
+        puts "387.. #{countTotal}. Use geonames to determine city, state, country, and location for #{item}"
         api = GeoNames.new(username: geoNamesUser) 
 
         # Determine country 
@@ -490,7 +493,7 @@ puts "Fine naming and moving started  . . . . . . . . . . . . " # for trial runs
 srcSD = srcSDfolder + sdFolder(sdFolderFile)
 
 if !File.exists?(downloadsFolders) # if KnobbyAperture isn't mounted use folders on laptop
-  puts "/n494. #{downloadsFolders} isn't mounted, so will use local folders to process"
+  puts "\n497. #{downloadsFolders} isn't mounted, so will use local folders to process"
   # Knobby Aperture folders location loaded by default, changed as needed
   downloadsFolders = laptopDownloadsFolder
   destPhoto = laptopDestination
@@ -498,7 +501,16 @@ if !File.exists?(downloadsFolders) # if KnobbyAperture isn't mounted use folders
   srcHD = downloadsFolders
   loadingToLaptop = true
 end
-puts "501.. downloadsFolders: #{downloadsFolders}."
+
+# Check if photos are already in Latest Download folder. A problem because they get reprocessed by gps coordinate adding.
+folderPhotoCount = Dir.entries(destPhoto).count
+if folderPhotoCount > 0
+  downloadsFolderEmpty(destPhoto, folderPhotoCount) # Pashua window
+else
+  puts "\n511. Downloads folder is empty and script will continue."
+end
+
+puts "514.. downloadsFolders: #{downloadsFolders}."
 # Ask whether working with photo files from SD card or HD
 fromWhere = whichLoc() # This is pulling in first Pashua window (1. ), SDorHD.rb which has been required
 whichDrive = fromWhere["whichDrive"][0].chr # only using the first character
@@ -535,7 +547,7 @@ else # whichOne=="HD", but what
   destOrig  = prefsPhoto["destOrig"]
 end # whichOne=="SD"
 
-puts "\n520. Intialization complete. File renaming and copying/moving beginning. Time below is responding to options requests via Pashua"
+puts "\n551. Intialization complete. File renaming and copying/moving beginning. Time below is responding to options requests via Pashua"
 
 timeNowWas = timeStamp(Time.now) # Initial time stamp is different. Had this off and no time for start when copying from SD card
 
@@ -573,6 +585,6 @@ timeNowWas = timeStamp(timeNowWas)
 # Parce perlOutput and add maxTimeDiff info to photo files
 
 # Add location information to photo file
-addLocation(destPhoto, geoNamesUser)
+addLocation(destPhoto, geoNamesUser2)
 puts "\n504.-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -All done"
 timeNowWas = timeStamp(timeNowWas)
