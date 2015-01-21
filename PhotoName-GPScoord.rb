@@ -503,7 +503,7 @@ if !File.exists?(downloadsFolders) # if KnobbyAperture isn't mounted use folders
 end
 
 # Check if photos are already in Latest Download folder. A problem because they get reprocessed by gps coordinate adding.
-folderPhotoCount = Dir.entries(destPhoto).count
+folderPhotoCount = Dir.entries(destPhoto).count - 3 # -3 is a crude way to take care of ., .., .. Crude is probably OK since this isn't critical. If one real photo is there, not a big problem
 if folderPhotoCount > 0
   downloadsFolderEmpty(destPhoto, folderPhotoCount) # Pashua window
 else
