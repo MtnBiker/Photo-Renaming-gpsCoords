@@ -30,52 +30,11 @@ config = <<EOS
 
 # Introductory text
 txt.type = text
-txt.default = There are #{folderPhotoCount} photos in the Lastest Downloads Folder and they should be deleted or they will be reprocessed during the adding of gps coordinates.[return][return]You can delete them and the come back and continue. (Or this program could be set up to do that.)[return][return]The path to Latest Download Folder is:[return][return]#{destPhoto}
-txt.height = 276
+txt.default = There are #{folderPhotoCount} photos in the Lastest Downloads Folder and they should be deleted or they will be reprocessed during the adding of gps coordinates.[return][return]You can delete them and the come back and continue. (Or this program could be set up to do that.)[return][return]The path to Latest Download Folder is:[return][return]#{destPhoto}[return][return]The files in the folder are:[return][return]#{Dir.entries(destPhoto)}
+txt.height = 476
 txt.width = 310
 txt.x = 44
 txt.y = 64
-
-
-tf2.type = text
-# tf2.label =
-tf2.default = #{Dir.entries(destPhoto)}
-tf2.width = 310
-#
-# # Add a filesystem browser
-# ob.type = openbrowser
-# ob.label = Example filesystem browser (textfield + open panel)
-# ob.width=310
-# ob.tooltip = Blabla filesystem browser
-#
-# # Define radiobuttons
-# rb.type = radiobutton
-# rb.label = Example radiobuttons
-# rb.option = Radiobutton item #1
-# rb.option = Radiobutton item #2
-# rb.option = Radiobutton item #3
-# rb.option = Radiobutton item #4
-# rb.default = Radiobutton item #2
-#
-# # Add a popup menu
-# pop.type = popup
-# pop.label = Example popup menu
-# pop.width = 310
-# pop.option = Popup menu item #1
-# pop.option = Popup menu item #2
-# pop.option = Popup menu item #3
-# pop.default = Popup menu item #2
-#
-# # Add a checkbox
-# chk1.type = checkbox
-# chk1.label = Pashua offers checkboxes, too
-# chk1.rely = -18
-# chk1.default = 1
-#
-# # Add another one
-# chk2.type = checkbox
-# chk2.label = But this one is disabled
-# chk2.disabled = 1
 
 # Add a cancel button with default label
 cb.type = cancelbutton

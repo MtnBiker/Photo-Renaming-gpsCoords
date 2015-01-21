@@ -510,7 +510,7 @@ else
   puts "\n511. Downloads folder is empty and script will continue."
 end
 
-puts "514.. downloadsFolders: #{downloadsFolders}."
+puts "513.. downloadsFolders: #{downloadsFolders}."
 # Ask whether working with photo files from SD card or HD
 fromWhere = whichLoc() # This is pulling in first Pashua window (1. ), SDorHD.rb which has been required
 whichDrive = fromWhere["whichDrive"][0].chr # only using the first character
