@@ -21,7 +21,8 @@ require_relative 'lib/gpsYesPashua'
 
 thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
 srcSDfolder = "/Volumes/Untitled/DCIM/" # SD folder. Panasonic and probably Canon
-# srcSDfolder = "/Volumes/Untitled/DCIM/" # SD folder. Maybe temp for an unformated card? 2014.06.10
+srcSDfolder = "/Volumes/NO NAME/DCIM/" # SD folder. Maybe temp for an unformated card? 2014.06.10
+
 sdFolderFile = thisScript + "currentData/SDfolder.txt" # shouldn't need full path
 
 # # Appropriate folders on Knobby Aperture NOT USING THIS AS MAIN PLACE ANYMORE
@@ -49,15 +50,23 @@ timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get 
 # gpsPhotoPerl = "lib/gpsPhoto.pl" # Perl script that puts gps locations into the photos. SEEMS TO WORK WITHOUT ./lib
 # gpsPhotoPerl = "/Users/gscar/Documents/Ruby/Photo handling/lib/gpsPhoto.pl"
 gpsPhotoPerl = thisScript + "/lib/gpsPhoto.pl"
-folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2015 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't 
+folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2016 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
+puts "54. Must manually set folder for GPX files. Set at lines 362 and 364 "
 geoNamesUser    = "geonames@web.knobby.ws" # Good but may use it up. Ran out after about 300 photos per hour.
-geoNamesUser2    = "geonamestwo" # second account when use up first. Or use for location information, i.e., splitting use in half.
+geoNamesUser2   = "geonamestwo@web.knobby.ws" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
 
 # puts "RUBY_DESCRIPTION: #{RUBY_DESCRIPTION}\n\n" # probably isn't always accurate. Just look in the purple on the window
 
 def ignoreNonFiles(item) # invisible files that shouldn't be processed
   item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon '
   # This is true when it should not be processed i.e. next if ignoreNonFiles(item) == true
+end
+
+def gpsFilesUpToDate(folderGPX)
+  # Find latest file, will have to be alphabetical order since creation date is date copied to drive.
+  # Check date of file with current date, i.e. parse the file name. 
+  # Compare and report.
+  # Have to do after select location of files
 end
 
 def timeStamp(timeNowWas)  
@@ -77,7 +86,8 @@ def sdFolder(sdFolderFile)
     file = File.new(sdFolderFile, "r")
     sdFolder = file.gets
     file.close
-  rescue Exception => err
+  # rescue Exception => err # Shouldn't rescue and Exception
+  rescue StandardError => err # or can write "rescue => err" since Ruby assumes it's standard error
     puts "Exception: #{err}. Could not read which folder is current on the SD card from #{sdFolderFile}"
   end
   sdFolder
@@ -264,7 +274,7 @@ end # fileAnnotate. writing original filename and dateTimeOrig to the photo file
 # The log is in numerical order and used as index here. The log is a YAML file
 def timeZone(fileDateUTC, timeZones)
   # theTimeAhead = "2050-01-01T00:00:00Z"
-  # puts "379. timeZonesFile: #{timeZonesFile}. "
+  # puts "276. timeZones: #{timeZones}. "
   # timeZones = YAML.load(File.read(timeZonesFile)) # should we do this once somewhere else? Let's try that in this new version
   i = timeZones.keys.max # e.g. 505
   j = timeZones.keys.min # e.g. 488
@@ -299,7 +309,7 @@ def rename(src, timeZonesFile)
     # puts "295.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
     if File.file?(fn) # 
       # Determine the time and time zone where the photo was taken
-      # puts "298.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}"
+      # puts "302.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}"
       fileEXIF = MiniExiftool.new(fn)
       fileDateUTC = fileEXIF.dateTimeOriginal # class time, but adds the local time zone to the result although it is really UTC (or whatever zone my camera is set for)
       tzoLoc = timeZone(fileDateUTC, timeZonesFile)
@@ -332,7 +342,7 @@ def rename(src, timeZonesFile)
       fileAnnotate(fn, fileEXIF, fileDateUTCstr, tzoLoc) # adds original file name, capture date and time zone to EXIF. Comments which I think show up as instructions in Aperture
       fnp = src + fileBaseName + File.extname(fn).downcase
       File.rename(fn,fnp)   
-      puts "326. #{item} was renamed to #{fileBaseName}"       
+      puts "344. #{item} was renamed to #{fileBaseName}"       
     end # 3. if File
   end # 2. Find  
 end # renaming photo files in the downloads folder and writing in original time.
@@ -343,19 +353,19 @@ def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop)
   # Need to add a note to file with large time diff
   # This works, put in because having problems with file locations
   # perlOutput = `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`
-  puts "\n346.. gpsPhotoPerl.shellescape: #{gpsPhotoPerl.shellescape}. but can't figure out how to make this work [later, looks right to me]. So done manually"
+  puts "\n356. gpsPhotoPerl.shellescape: #{gpsPhotoPerl.shellescape}. but can't figure out how to make this work [later, looks right to me]. So done manually"
   # puts "\n340.. `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`" # probably can't double quote inside the backticks
-  puts "\n348. Finding all gps points from all the gpx files using gpsPhoto.pl. This may take a while"
+  puts "\n358. Finding all gps points from all the gpx files using gpsPhoto.pl. This may take a while"
   # Since have to manually craft the perl call, need one for with Knobby Aperture Seagate and one for on laptop
   #Knobby Aperture Seagate version. /Volumes/Knobby Aperture Seagate/_Download folder/Latest Download/
   if loadingToLaptop
-    perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Users/gscar/Pictures/_Photo Processing Folders/Processed\ photos\ to\ be\ imported\ to\ Aperture/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2015\ Massaged/' --timeoffset 0 --maxtimediff 50000`
+    perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Users/gscar/Pictures/_Photo Processing Folders/Processed\ photos\ to\ be\ imported\ to\ Aperture/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2016\ Massaged/' --timeoffset 0 --maxtimediff 50000`
   else # default location on Knobby Aperture Seagate
-    perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby\ Aperture\ Seagate/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2015\ Massaged/' --timeoffset 0 --maxtimediff 50000`
+    perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby\ Aperture\ Seagate/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2016\ Massaged/' --timeoffset 0 --maxtimediff 50000`
   # perlOutput = "`perl #{gpsPhotoPerl.shellescape} --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`"
   end
       
-  puts "\n345. perlOutput: \n#{perlOutput} \n\nEnd of perlOutput ================…345\n\n" # This didn't seem to be happening with 2>&1 appended? But w/o it, error not captured
+  puts "\n367. perlOutput: \n#{perlOutput} \n\nEnd of perlOutput ================…367\n\n" # This didn't seem to be happening with 2>&1 appended? But w/o it, error not captured
   # perlOutput =~ /timediff\=([0-9]+)/
   # timediff = $1 # class string
   # # puts"\n 453 timediff: #{timediff}. timediff.class: #{timediff.class}. "
@@ -377,18 +387,19 @@ def addLocation(src, geoNamesUser)
       next if ignoreNonFiles(item) == true # skipping file when true
       fn = src + item
       if File.file?(fn) 
-        # puts "381.. #{item} is going to be processed"
         countTotal += 1
+        puts "\n390..#{countTotal}. #{item} is going to be processed using geonames for gps coordinates"
         fileEXIF = MiniExiftool.new(fn)
         # Get lat and lon from photo file
-        puts "311.. No gps information for #{item}. #{fileEXIF.title}" if fileEXIF.specialinstructions == nil
+        puts "393..No gps information for #{item}. #{fileEXIF.title}" if fileEXIF.specialinstructions == nil
         next if fileEXIF.specialinstructions == nil # can I combine this step and the one above into one step or if statement? 
         gps = fileEXIF.specialinstructions.split(", ") # or some way of getting lat and lon. This is a good start. Look at input form needed
         lat = gps[0][4,11] # Capture long numbers like -123.123456, but short ones aren't that long, but nothing is there
         lon = gps[1][4,11].split(" ")[0] # needs to 11 long to capture when -xxx.xxxxxx, but then can capture the - when it's xx.xxxxxx. Then grab whats between the first two spaces. Still need the 4,11 because there seems to be a space at the beginning if leave out [4,11]
         countLoc += 1 # gives and error here or at the end.
-        puts "387.. #{countTotal}. Use geonames to determine city, state, country, and location for #{item}"
-        api = GeoNames.new(username: geoNamesUser) 
+        # puts "390..#{countTotal}. Use geonames to determine city, state, country, and location for #{item}"
+        api = GeoNames.new(username: geoNamesUser)
+        # puts "392. geoNamesUser: #{geoNamesUser}. api: #{api}"
 
         # Determine country 
         begin
@@ -449,14 +460,14 @@ def addLocation(src, geoNamesUser)
       else # outside US
         findNearbyPostalCodes = api.find_nearby_postal_codes(lat: lat, lng: lon, maxRows: 1).first
         state = findNearbyPostalCodes['adminName1']
-        puts "353.. state (outside US): #{state}"
+        puts "453.. state (outside US): #{state}"
         # city = findNearbyPostalCodes['placeName'] # close to city, but misses Dubrovnik and Zagreb
         city = api.find_nearby_place_name(lat: lat, lng: lon, maxRows: 1).first['toponymName'] # name or adminName1 could work too
-        puts "355.. city (outside US):  #{city}"
+        puts "456.. city (outside US):  #{city}"
         # puts city =  api.find_nearby_wikipedia(lat: lat, lng: lon)["geonames"].first["title"] # the third item is a city, maybe could regex wikipedia, but doubt it's consistent enough to work 
         location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title'] 
         distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance'].to_f
-        puts "382.. location:     #{location}. distance: #{distance}. If distance > 0.3km location not used"
+        puts "460.. location:     #{location}. distance: #{distance}. If distance > 0.3km location not used"
         location = "" if distance < 0.3      
       end # if countryCode
       location = "" if city == location # cases where they where the same (Myers Flat, Callahan and Etna). Could try to find a location with some other find, maybe Wikipedia, but would want a distance check
@@ -470,7 +481,7 @@ def addLocation(src, geoNamesUser)
       # Now have lat and long and now get some location names
     end    
   end 
-  puts "\n465. Location information found for #{countLoc} of #{countTotal} photos processed" 
+  puts "\n474. Location information found for #{countLoc} of #{countTotal} photos processed" 
 end
 
 def writeTimeDiff(perlOutput)
@@ -478,7 +489,7 @@ def writeTimeDiff(perlOutput)
     if line =~ /timediff=/
       fn = $`.split(",")[0]
       timeDiff = $'.split(" ")[0]
-      # puts "\n439.. #{fn} timeDiff: #{timeDiff}"
+      puts "\n492.. #{fn} timeDiff: #{timeDiff}"
       fileEXIF = MiniExiftool.new(fn)
       fileEXIF.usageterms = "#{timeDiff} seconds from nearest GPS point"
       fileEXIF.save
@@ -488,7 +499,7 @@ end #  Write timeDiff to the photo files
 
 ## The "program" #################
 timeNowWas = timeStamp(Time.now) # this first use of timeStamp is different
-puts "Are the gps logs up to date?"
+puts "Are the gps logs up to date?" # Should check for this since I don't see the message
 puts "Fine naming and moving started  . . . . . . . . . . . . " # for trial runs  #{timeNowWas}
 srcSD = srcSDfolder + sdFolder(sdFolderFile)
 
@@ -524,7 +535,8 @@ if whichOne=="SD" # otherwise it's HD, probably should be case to be cleaner cod
     lastPhotoFilename = file.gets # apparently grabbing a return. maybe not the best reading method.
     puts "\n303. lastPhotoFilename: #{lastPhotoFilename.chop}. Read from #{lastPhotoReadTextFile}. Value can be changed by user, so this may not be the final value."
     file.close
-  rescue Exception => err
+  # rescue Exception => err # Not good to rescue Exception
+  rescue => err
     puts "Exception: #{err}. Not critical as value can be entered manually by user."
   end
   src = srcSD
@@ -552,12 +564,12 @@ puts "\n551. Intialization complete. File renaming and copying/moving beginning.
 timeNowWas = timeStamp(Time.now) # Initial time stamp is different. Had this off and no time for start when copying from SD card
 
 #  If working from SD card, copy or move files to " Drag Photos HERE Drag Photos HERE" folder, then will process from there.
-puts "542.. src: #{src}. srcHD: #{srcHD}."
+puts "555..   src: #{src} \nsrcHD: #{srcHD}"
 copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
 #  Note that file creation date is the time of copying. May want to fix this. Maybe a mv is a copy and move which is sort of a recreation. 
 
 timeNowWas = timeStamp(timeNowWas)
-puts "\n549. Photos will now be moved and renamed."
+puts "\n563. Photos will now be moved and renamed."
 
 # puts "First will copy to the final destination where the renaming will be done and the original moved to an archive (already imported folder)"
 #  Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
@@ -565,12 +577,12 @@ copyAndMove(srcHD,destPhoto,destOrig)
 
 timeNowWas = timeStamp(timeNowWas)
 
-puts "\n549. Rename the photo files with date and an ID for the camera or photographer"
+puts "\n579. Rename the photo files with date and an ID for the camera or photographer"
 rename(destPhoto, timeZones)
 
 timeNowWas = timeStamp(timeNowWas)
 
-puts "\n554. Using perl script to add gps coordinates. Will take a while as all the gps files for the year will be processed and then all the photos."
+puts "\n584. Using perl script to add gps coordinates. Will take a while as all the gps files for the year will be processed and then all the photos."
 
 # Add GPS coordinates. Will add location later using some options depending on which country since different databases are relevant.
 perlOutput = addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop)
@@ -578,13 +590,13 @@ perlOutput = addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop)
 timeNowWas = timeStamp(timeNowWas)
 
 # Write timeDiff to the photo files
-puts "\n563. Write timeDiff to the photo files"
+puts "\n593. Write timeDiff to the photo files"
 writeTimeDiff(perlOutput)
 
 timeNowWas = timeStamp(timeNowWas)
 # Parce perlOutput and add maxTimeDiff info to photo files
 
 # Add location information to photo file
-addLocation(destPhoto, geoNamesUser2)
+addLocation(destPhoto, geoNamesUser)
 puts "\n504.-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -All done"
 timeNowWas = timeStamp(timeNowWas)

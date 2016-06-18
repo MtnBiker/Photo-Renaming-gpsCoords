@@ -1,6 +1,8 @@
 #!/usr/bin/perl -w
 
-BEGIN { unshift @INC, "/usr/bin/lib/" }
+# BEGIN { unshift @INC, "/usr/bin/lib/" }
+BEGIN { unshift @INC, "/usr/local/bin/lib/" }
+# /usr/local/bin/lib/Image/ExifTool Path found 2015.11.12
 # The above line was in a previous version. Couldn't find Exif.pm without this line.
 
 # $Id: gpsPhoto.pl,v 1.160 2012/10/10 19:51:46 girlich Exp $ #Still current as of 2013.07.08
