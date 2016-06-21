@@ -11,7 +11,9 @@ require 'find'
 require 'yaml'
 require "time"
 require 'shellwords'
-require 'geonames'
+# require 'geonames'
+load 'geonames.rb'
+require 'pg' # https://bitbucket.org/ged/ruby-pg/wiki/Home for using PostGIS for geonames local files
 
 require_relative 'lib/LatestDownloadsFolderEmpty_Pashua'
 require_relative 'lib/SDorHD'
@@ -26,7 +28,7 @@ srcSDfolder = "/Volumes/NO NAME/DCIM/" # SD folder. Maybe temp for an unformated
 sdFolderFile = thisScript + "currentData/SDfolder.txt" # shouldn't need full path
 
 # # Appropriate folders on Knobby Aperture NOT USING THIS AS MAIN PLACE ANYMORE
-# downloadsFolders = "/Volumes/Knobby Aperture Seagate/_Download folder/"
+# downloadsFolders = "/Volumes/Daguerre/_Download folder/"
 # destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
 # destOrig  = downloadsFolders + "_already imported/" # folder to move originals to if not done in
 
@@ -34,12 +36,12 @@ sdFolderFile = thisScript + "currentData/SDfolder.txt" # shouldn't need full pat
 # srcHD = "/Users/gscar/Pictures/_Photo Processing Folders/Download folder/" # for laptop use. NEED TO SET UP TRAVEL OPTION
 laptopLocation = "/Users/gscar/Pictures/_Photo Processing Folders/"
 laptopDownloadsFolder = laptopLocation + "Download folder/"
-laptopDestination = laptopLocation + "Processed photos to be imported to Aperture/"
-laptopDestOrig = laptopLocation + "Originals to archive/"
+laptopDestination     = laptopLocation + "Processed photos to be imported to Aperture/"
+laptopDestOrig        = laptopLocation + "Originals to archive/"
 
-# Folders on portable drive: Knobby Aperture Seagate
-srcHD = "/Volumes/Knobby Aperture Seagate/_Download folder/ Drag Photos HERE/"  # Photos copied from original location such as camera or sent by others
-downloadsFolders = "/Volumes/Knobby Aperture Seagate/_Download folder/"
+# Folders on portable drive: Daguerre
+srcHD = "/Volumes/Daguerre/_Download folder/ Drag Photos HERE/"  # Photos copied from original location such as camera or sent by others
+downloadsFolders = "/Volumes/Daguerre/_Download folder/"
 destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
 destOrig  = downloadsFolders + "_already imported/" # folder to move originals to if not done in 
 
@@ -47,11 +49,9 @@ lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
 geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wikipedia—most general and osm—maybe better for cities
 timeZonesFile = "/Users/gscar/Dropbox/scriptsEtc/Greg camera time zones.yml"
 timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with
-# gpsPhotoPerl = "lib/gpsPhoto.pl" # Perl script that puts gps locations into the photos. SEEMS TO WORK WITHOUT ./lib
-# gpsPhotoPerl = "/Users/gscar/Documents/Ruby/Photo handling/lib/gpsPhoto.pl"
 gpsPhotoPerl = thisScript + "/lib/gpsPhoto.pl"
 folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2016 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
-puts "54. Must manually set folder for GPX files. Set at lines 362 and 364 "
+puts "54. Must manually set folder for GPX files. Set at lines 362 and 364. Particularly important at start of new year. "
 geoNamesUser    = "geonames@web.knobby.ws" # Good but may use it up. Ran out after about 300 photos per hour.
 geoNamesUser2   = "geonamestwo@web.knobby.ws" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
 
@@ -300,6 +300,7 @@ def rename(src, timeZonesFile)
   # Dir.chdir(thisScript) # otherwise didn't know where it was to find folderGPX since used a chdir elsewhere in the script
   fileDatePrev = ""
   dupCount = 0
+  count    = 0
   seqLetter = %w(a b c d e f g h i) # seems like this should be an array, not a list
   Dir.foreach(src) do |item| 
     next if ignoreNonFiles(item) == true # skipping file when true
@@ -342,7 +343,8 @@ def rename(src, timeZonesFile)
       fileAnnotate(fn, fileEXIF, fileDateUTCstr, tzoLoc) # adds original file name, capture date and time zone to EXIF. Comments which I think show up as instructions in Aperture
       fnp = src + fileBaseName + File.extname(fn).downcase
       File.rename(fn,fnp)   
-      puts "344. #{item} was renamed to #{fileBaseName}"       
+      count += 1
+      puts "347. #{count} #{item} was renamed to #{fileBaseName}"       
     end # 3. if File
   end # 2. Find  
 end # renaming photo files in the downloads folder and writing in original time.
@@ -355,13 +357,13 @@ def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop)
   # perlOutput = `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`
   puts "\n356. gpsPhotoPerl.shellescape: #{gpsPhotoPerl.shellescape}. but can't figure out how to make this work [later, looks right to me]. So done manually"
   # puts "\n340.. `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`" # probably can't double quote inside the backticks
-  puts "\n358. Finding all gps points from all the gpx files using gpsPhoto.pl. This may take a while"
-  # Since have to manually craft the perl call, need one for with Knobby Aperture Seagate and one for on laptop
-  #Knobby Aperture Seagate version. /Volumes/Knobby Aperture Seagate/_Download folder/Latest Download/
+  puts "\n360. Finding all gps points from all the gpx files using gpsPhoto.pl. This may take a while.\n"
+  # Since have to manually craft the perl call, need one for with Daguerre and one for on laptop
+  #Daguerre version. /Volumes/Daguerre/_Download folder/Latest Download/
   if loadingToLaptop
     perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Users/gscar/Pictures/_Photo Processing Folders/Processed\ photos\ to\ be\ imported\ to\ Aperture/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2016\ Massaged/' --timeoffset 0 --maxtimediff 50000`
-  else # default location on Knobby Aperture Seagate
-    perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby\ Aperture\ Seagate/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2016\ Massaged/' --timeoffset 0 --maxtimediff 50000`
+  else # default location on Daguerre
+    perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Daguerre/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2016\ Massaged/' --timeoffset 0 --maxtimediff 50000`
   # perlOutput = "`perl #{gpsPhotoPerl.shellescape} --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`"
   end
       
@@ -388,10 +390,10 @@ def addLocation(src, geoNamesUser)
       fn = src + item
       if File.file?(fn) 
         countTotal += 1
-        puts "\n390..#{countTotal}. #{item} is going to be processed using geonames for gps coordinates"
+        puts "\n393..#{countTotal}. #{item} is going to be processed using geonames for gps coordinates"
         fileEXIF = MiniExiftool.new(fn)
         # Get lat and lon from photo file
-        puts "393..No gps information for #{item}. #{fileEXIF.title}" if fileEXIF.specialinstructions == nil
+        puts "396..No gps information for #{item}. #{fileEXIF.title}" if fileEXIF.specialinstructions == nil
         next if fileEXIF.specialinstructions == nil # can I combine this step and the one above into one step or if statement? 
         gps = fileEXIF.specialinstructions.split(", ") # or some way of getting lat and lon. This is a good start. Look at input form needed
         lat = gps[0][4,11] # Capture long numbers like -123.123456, but short ones aren't that long, but nothing is there
@@ -399,26 +401,27 @@ def addLocation(src, geoNamesUser)
         countLoc += 1 # gives and error here or at the end.
         # puts "390..#{countTotal}. Use geonames to determine city, state, country, and location for #{item}"
         api = GeoNames.new(username: geoNamesUser)
-        # puts "392. geoNamesUser: #{geoNamesUser}. api: #{api}"
+        puts "404. geoNamesUser: #{geoNamesUser}. api: #{api}"
 
         # Determine country 
         begin
           # doesn't work for Istanbul, works for Croatia
           ccountryCodeGeo = api.country_code(lat: lat, lng: lon) # doesn't work in Turkey
-          countryCode  = countryCodeGeo['countryCode'] 
+          countryCode  = countryCodeGeo['countryCode']
+          puts "411. countryCode #{countryCode}" 
         rescue
           begin
             countryCodeGeo = api.find_nearby_place_name(lat: lat, lng: lon).first # works for Turkey
             countryCode  = countryCodeGeo['countryCode'] 
           rescue SocketError # SocketError: getaddrinfo: nodename nor servname provided, or not known. NOT SURE WHAT THE FAILURE IS HERE. WILL SEE IF IT HAPPENS AGAIN
-            puts " 366. Failing for api.find_nearby_place_name(lat: lat, lng: lon).first #{lat} #{lon} \nfor #{src}\n"
+            puts " 417. Failing for api.find_nearby_place_name(lat: lat, lng: lon).first #{lat} #{lon} \nfor #{src}\n"
             $stderr.print  $! # Thomas p. 108
           end
         end
        
       # puts "331.. countryCode:  #{countryCode}"
       country = countryCodeGeo['countryName'] # works with both country_code  and find_nearby_place_name above
-      # puts "333.. country:      #{country}"
+      puts "423.. country:      #{country}"
 
       # Determine city, state, location
       if countryCode == "US"
@@ -429,7 +432,7 @@ def addLocation(src, geoNamesUser)
         rescue 
           state = api.country_subdivision(lat: lat, lng: lon, maxRows: 1)['adminName1']
           # puts "49. api.find_nearby_postal_codes failed, so used  api.country_subdivision"
-        end
+        end # if country code
         # puts "335.. state:        #{state}"
         
         begin  # city, location
@@ -457,19 +460,25 @@ def addLocation(src, geoNamesUser)
   
         end # begin rescue outer
         
-      else # outside US
-        findNearbyPostalCodes = api.find_nearby_postal_codes(lat: lat, lng: lon, maxRows: 1).first
-        state = findNearbyPostalCodes['adminName1']
-        puts "453.. state (outside US): #{state}"
-        # city = findNearbyPostalCodes['placeName'] # close to city, but misses Dubrovnik and Zagreb
-        city = api.find_nearby_place_name(lat: lat, lng: lon, maxRows: 1).first['toponymName'] # name or adminName1 could work too
-        puts "456.. city (outside US):  #{city}"
-        # puts city =  api.find_nearby_wikipedia(lat: lat, lng: lon)["geonames"].first["title"] # the third item is a city, maybe could regex wikipedia, but doubt it's consistent enough to work 
-        location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title'] 
-        distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance'].to_f
-        puts "460.. location:     #{location}. distance: #{distance}. If distance > 0.3km location not used"
-        location = "" if distance < 0.3      
-      end # if countryCode
+      else # outside US. Doesn't work in Indonesia
+        locationIN  = indoLocation(lat,lon)
+        countryCode  = locationIN[0]
+        city     = locationIN[1]
+        location = locationIN[2]
+                 
+        # off for Indonesia
+        # findNearbyPostalCodes = api.find_nearby_postal_codes(lat: lat, lng: lon, maxRows: 1).first
+   #      state = findNearbyPostalCodes['adminName1']
+   #      puts "453.. state (outside US): #{state}"
+   #      # city = findNearbyPostalCodes['placeName'] # close to city, but misses Dubrovnik and Zagreb
+   #      city = api.find_nearby_place_name(lat: lat, lng: lon, maxRows: 1).first['toponymName'] # name or adminName1 could work too
+   #      puts "456.. city (outside US):  #{city}"
+   #      # puts city =  api.find_nearby_wikipedia(lat: lat, lng: lon)["geonames"].first["title"] # the third item is a city, maybe could regex wikipedia, but doubt it's consistent enough to work
+   #      location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']
+   #      distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance'].to_f
+   #      puts "460.. location:     #{location}. distance: #{distance}. If distance > 0.3km location not used"
+   #      location = "" if distance < 0.3
+    end # if countryCode
       location = "" if city == location # cases where they where the same (Myers Flat, Callahan and Etna). Could try to find a location with some other find, maybe Wikipedia, but would want a distance check
       # puts "355.. Use MiniExiftool to write location info to photo files\n" # Have already set fileEXIF
       fileEXIF.CountryCode = countryCode  # Aperture: IPTC: Country-PrimaryLocationCode
@@ -484,12 +493,26 @@ def addLocation(src, geoNamesUser)
   puts "\n474. Location information found for #{countLoc} of #{countTotal} photos processed" 
 end
 
+def indoLocation(lat,lon) #
+  conn = PG.connect( dbname: 'Indonesia' )
+  #  lon/lat is the order for ST_GeomFromText
+  indo  = conn.exec("SELECT * FROM indonesia ORDER BY ST_Distance(ST_GeomFromText('POINT(#{lon} #{lat})', 4326), geom) ASC LIMIT 1")
+  country = indo.getvalue(0,8)
+  name    = indo.getvalue(0,1)
+  altNames= indo.getvalue(0,3)
+  puts "\n499. Indonesia country: #{country}"
+  puts "500. Indonesia name: #{name}"
+  puts "501. Indonesia alt names: #{altNames}"
+  result = [country, name, altNames]
+  # puts "\503 result #{result}"
+end
+
 def writeTimeDiff(perlOutput)
   perlOutput.each_line do |line|
     if line =~ /timediff=/
       fn = $`.split(",")[0]
       timeDiff = $'.split(" ")[0]
-      puts "\n492.. #{fn} timeDiff: #{timeDiff}"
+      # puts "\n515.. #{fn} timeDiff: #{timeDiff}"
       fileEXIF = MiniExiftool.new(fn)
       fileEXIF.usageterms = "#{timeDiff} seconds from nearest GPS point"
       fileEXIF.save
@@ -577,7 +600,7 @@ copyAndMove(srcHD,destPhoto,destOrig)
 
 timeNowWas = timeStamp(timeNowWas)
 
-puts "\n579. Rename the photo files with date and an ID for the camera or photographer"
+puts "\n583. Rename the photo files with date and an ID for the camera or photographer\n"
 rename(destPhoto, timeZones)
 
 timeNowWas = timeStamp(timeNowWas)
