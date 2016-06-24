@@ -17,6 +17,7 @@ def pGUI(srcPhoto,destPhoto,destOrig)
   # Need a symlink to Pashua in this folder too, include and require moved to top
 
   $:.push(File.dirname($0))
+  destOrig = destOrig + "/" # the plus part is trying to fix what happens when pick the archive folder, but probably isn't right
 
 config = <<end_of_string
 # Set transparency: 0 is transparent, 1 is opaque
