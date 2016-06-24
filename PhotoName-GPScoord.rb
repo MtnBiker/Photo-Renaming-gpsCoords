@@ -414,11 +414,11 @@ def addLocation(src, geoNamesUser)
           begin
             # Commented out because of errors with Phillipines
             
-          #   countryCodeGeo = api.find_nearby_place_name(lat: lat, lng: lon).first # works for Turkey
-          #   countryCode  = countryCodeGeo['countryCode']
-          # rescue SocketError # SocketError: getaddrinfo: nodename nor servname provided, or not known. NOT SURE WHAT THE FAILURE IS HERE. WILL SEE IF IT HAPPENS AGAIN
-          #   puts " 417. Failing for api.find_nearby_place_name(lat: lat, lng: lon).first #{lat} #{lon} \nfor #{src}\n"
-          #   $stderr.print  $! # Thomas p. 108
+            countryCodeGeo = api.find_nearby_place_name(lat: lat, lng: lon).first # works for Turkey
+            countryCode  = countryCodeGeo['countryCode']
+          rescue SocketError # SocketError: getaddrinfo: nodename nor servname provided, or not known. NOT SURE WHAT THE FAILURE IS HERE. WILL SEE IF IT HAPPENS AGAIN
+            puts " 417. Failing for api.find_nearby_place_name(lat: lat, lng: lon).first #{lat} #{lon} \nfor #{src}\n"
+            $stderr.print  $! # Thomas p. 108
           end
         end
        
