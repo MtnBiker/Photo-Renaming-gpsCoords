@@ -69,7 +69,7 @@ res = pashua_run(config, 'utf8')
 if res['cb'] == "1"
   puts "Looks like the dialog was cancelled"
 else
-  puts "Pashua returned the following values:"
+  puts "Pashua returned the following values [line 72. lib/LatestDownloadsFolderEmpty_Pashua.rb]:"
   puts " cb  = #{res['cb']}"
   puts " pop  = #{res['pop']}"
   puts " rb   = #{res['rb']}"
