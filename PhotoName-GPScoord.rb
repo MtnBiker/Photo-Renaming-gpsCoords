@@ -227,7 +227,7 @@ def copyAndMove(srcHD,destPhoto,destOrig)
       puts "\n#{lineNum}. A file already existed with this name so it was changed to fnf: #{fnf}"
     else # no copies, so move
       FileUtils.move(fn, fnf)
-      puts "#{lineNum}..#{photoFinalCount}. #{fn} moved to #{fnf}"
+      puts "#{photoFinalCount} (#{lineNum}). #{fn} moved to #{fnf}"
     end
     # "#{lineNum}.. #{photoFinalCount + delCount} #{fn}"
     itemPrev = item
@@ -352,7 +352,7 @@ def rename(src, timeZonesFile)
       fnp = src + fileBaseName + File.extname(fn).downcase
       File.rename(fn,fnp)   
       count += 1
-      puts "#{lineNum}. #{count}. #{item} was renamed to #{fileBaseName}"  #{timeStamp(timeNowWas)}    
+      puts "#{count} (#{lineNum}). #{item} was renamed to #{fileBaseName}"  #{timeStamp(timeNowWas)}    
     end # 3. if File
   end # 2. Find  
 end # renaming photo files in the downloads folder and writing in original time.
@@ -511,7 +511,7 @@ def addLocation(src, geoNamesUser)
       # Now have lat and long and now get some location names
     end    
   end 
-  puts "\n498. Location information found for #{countLoc} of #{countTotal} photos processed" 
+  puts "\n#{lineNum}. Location information found for #{countLoc} of #{countTotal} photos processed" 
 end
 
 def indoLocation(lat,lon) # Could modiby for other countries. Uses file loaded into PGadmin
