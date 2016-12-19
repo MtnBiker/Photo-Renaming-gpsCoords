@@ -122,7 +122,7 @@ end
 
 def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) 
   # some of the above counter variables could be set at the beginning of this script and used locally
-  puts "\n#{lineNum}. Copying photos from an SD card starting with #{sdFolderFile}/#{lastPhotoReadTextFile}"
+  puts "\n#{lineNum}. Copying photos from an SD card starting with #{sdFolderFile}/#{lastPhotoReadTextFile} or from another value manually entered"
   cardCount = 0
   cardCountCopied = 0
   doAgain = true # name isn't great, now means do it. A no doubt crude way to run back through the copy loop if we moved to another folder.
@@ -227,7 +227,7 @@ def copyAndMove(srcHD,destPhoto,destOrig)
       puts "\n#{lineNum}. A file already existed with this name so it was changed to fnf: #{fnf}"
     else # no copies, so move
       FileUtils.move(fn, fnf)
-      puts "#{photoFinalCount} (#{lineNum}). #{fn} moved to #{fnf}"
+      # puts "#{photoFinalCount} (#{lineNum}). #{fn} moved to #{fnf}"
     end
     # "#{lineNum}.. #{photoFinalCount + delCount} #{fn}"
     itemPrev = item
@@ -268,11 +268,11 @@ def fileAnnotate(fn, fileEXIF, fileDateUTCstr, tzoLoc)  # writing original filen
   # writing original filename and dateTimeOrig to the photo file.
   # ---- XMP-photoshop: Instructions  May not need, but it does show up if look at all EXIF, but not sure can see it in Aperture
   # SEEMS SLOPPY THAT I'M OPENING THE FILE ELSEWHERE AND SAVING IT HERE
-  if fileEXIF.title.to_s.length < 2 # if exists then don't write. If avoid rewriting, then can eliminate this test. Was a test on comment, but not sure what that was and it wasn't working.
+  if fileEXIF.source.to_s.length < 2 # if exists then don't write. If avoid rewriting, then can eliminate this test. Was a test on comment, but not sure what that was and it wasn't working.
      fileEXIF.instructions = "#{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}"
     # fileEXIF.comment = "Capture date: #{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Doesn't show up in Aperture
     # fileEXIF.source = fileEXIF.title = "#{File.basename(fn)} original filename" # Source OK, but Title seemed a bit better
-    fileEXIF.title = "#{File.basename(fn)}"
+    fileEXIF.source = "#{File.basename(fn)}"
     fileEXIF.TimeZoneOffset = tzoLoc
     fileEXIF.save
   end
@@ -290,7 +290,7 @@ def timeZone(fileDateUTC, timeZones)
     theTime = timeZones[i]["timeGMT"]
     # puts "\nA. i: #{i}. theTime: #{theTime}" # i: 502. theTime: 2011-06-29T01-00-00Z
     theTime = Time.parse(theTime) # class: time Wed Jun 29 00:00:00 -0700 2011
-    # puts "\n217.. #{i}. fileDateUTC: #{fileDateUTC}. theTime: #{theTime}. fileDateUTC.class: #{theTime.class}. fileDateUTC.class: #{theTime.class}"
+    puts "\n293.. #{i}. fileDateUTC: #{fileDateUTC}. theTime: #{theTime}. fileDateUTC.class: #{theTime.class}. fileDateUTC.class: #{theTime.class}"
     # puts "Note that these dates are supposed to be UTC, but are getting my local time zone attached."
     if fileDateUTC > theTime
       theTimeZone = timeZones[i]["zone"]
