@@ -290,7 +290,7 @@ def timeZone(fileDateUTC, timeZones)
     theTime = timeZones[i]["timeGMT"]
     # puts "\nA. i: #{i}. theTime: #{theTime}" # i: 502. theTime: 2011-06-29T01-00-00Z
     theTime = Time.parse(theTime) # class: time Wed Jun 29 00:00:00 -0700 2011
-    puts "\n293.. #{i}. fileDateUTC: #{fileDateUTC}. theTime: #{theTime}. fileDateUTC.class: #{theTime.class}. fileDateUTC.class: #{theTime.class}"
+    # puts "\n293.. #{i}. fileDateUTC: #{fileDateUTC}. theTime: #{theTime}. fileDateUTC.class: #{theTime.class}. fileDateUTC.class: #{theTime.class}"
     # puts "Note that these dates are supposed to be UTC, but are getting my local time zone attached."
     if fileDateUTC > theTime
       theTimeZone = timeZones[i]["zone"]
@@ -352,7 +352,7 @@ def rename(src, timeZonesFile)
       fnp = src + fileBaseName + File.extname(fn).downcase
       File.rename(fn,fnp)   
       count += 1
-      puts "#{count} (#{lineNum}). #{item} was renamed to #{fileBaseName}"  #{timeStamp(timeNowWas)}    
+      # puts "#{count} (#{lineNum}). #{item} was renamed to #{fileBaseName}"  #{timeStamp(timeNowWas)}
     end # 3. if File
   end # 2. Find  
 end # renaming photo files in the downloads folder and writing in original time.

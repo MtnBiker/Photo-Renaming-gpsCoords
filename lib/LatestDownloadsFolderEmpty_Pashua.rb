@@ -30,7 +30,7 @@ config = <<EOS
 
 # Introductory text
 txt.type = text
-txt.default = There are #{folderPhotoCount} photos in the Lastest Downloads Folder and they should be deleted or they will be reprocessed during the adding of gps coordinates.[return][return]You can delete them and the come back and continue. (Or this program could be set up to do that.)[return][return]The path to Latest Download Folder is:[return][return]#{destPhoto}[return][return]The files in the folder are:[return][return]#{Dir.entries(destPhoto)}
+txt.default = There are #{folderPhotoCount} photos in the Lastest Downloads Folder and they should be deleted or they will be reprocessed during the adding of gps coordinates.[return][return]You can delete them and the come back and continue. (Or this program could be set up to do that.)[return][return]The path to Latest Download Folder is:[return][return]#{destPhoto}[return][return]The first ten files in the folder are:[return][return]#{Dir.entries(destPhoto)[1..10]}
 txt.height = 476
 txt.width = 310
 txt.x = 44
