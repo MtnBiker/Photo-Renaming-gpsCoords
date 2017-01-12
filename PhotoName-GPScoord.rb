@@ -22,9 +22,13 @@ require_relative 'lib/Photo_Naming_Pashua–HD2'
 require_relative 'lib/gpsYesPashua'
 
 thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
-srcSDfolderAlt = "/Volumes/Untitled/DCIM/" # SD folder alternate since both this and one below occur 
-srcSDfolder    = "/Volumes/NO NAME/DCIM/" # SD folder 
+lastPhotoReadTextFile = "/Volumes/Untitled/DCIM/" # SD folder alternate since both this and one below occur 
+sdCardAlt   = "/Volumes/Untitled/"
+sdCard      = "/Volumes/NO NAME/"
+srcSDfolderAlt = sdCardAlt + "DCIM/" # SD folder alternate since both this and one below occur 
+srcSDfolder = sdCard + "DCIM/"  # SD folder 
 
+# Quit using this file and just get the folder name from the file name which will be stored on the card.
 sdFolderFile = thisScript + "currentData/SDfolder.txt" # shouldn't need full path
 
 # # Appropriate folders on Knobby Aperture NOT USING THIS AS MAIN PLACE ANYMORE
@@ -45,7 +49,7 @@ srcHD = "/Volumes/Knobby Aperture Two/_Download folder/ Drag Photos HERE/"  # Ph
 # downloadsFolders = "/Volumes/Daguerre/_Download folder/"
 downloadsFolders = "/Volumes/Knobby Aperture Two/_Download folder/"
 destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
-destOrig  = downloadsFolders + "_imported-archive/" # folder to move originals to if not done in 
+destOrig  = downloadsFolders + "_imported-archive" # folder to move originals to if not done in. No slash because getting double slash with one
 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
 geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wikipedia—most general and osm—maybe better for cities
@@ -122,7 +126,7 @@ end
 
 def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) 
   # some of the above counter variables could be set at the beginning of this script and used locally
-  puts "\n#{lineNum}. Copying photos from an SD card starting with #{sdFolderFile}/#{lastPhotoReadTextFile} or from another value manually entered"
+  puts "\n#{lineNum}. Copying photos from an SD card starting with #{lastPhotoReadTextFile} or from another value manually entered"
   cardCount = 0
   cardCountCopied = 0
   doAgain = true # name isn't great, now means do it. A no doubt crude way to run back through the copy loop if we moved to another folder.
@@ -149,16 +153,18 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
     if fileSDbasename[-3,3]=="999" # and NEXT PAIRED FILE DOES NOT EXIST, then can uncomment the two last lines of this if, but may also have to start the loop over, but it seems to be OK with mid calculation change.
         nextFolderNum = fileSDbasename[-7,3].to_i + 1 # getting first three digits of filename since that is also part of the folder name
         nextFolderName = nextFolderNum.to_s + "_PANA"
-        begin
-          # Writing which folder we're now in
-          # fileNow = File.open(thisScript + sdFolderFile, "w") # Was 2014.02.28 How could this have worked?
-          fileNow = File.open(sdFolderFile, "w")
-          fileNow.write(nextFolderName) 
-        rescue IOError => e
-          puts "Something went wrong. Could not write last photo read (#{nextFolderName}) to #{sdFolderFile}"
-        ensure
-            fileNow.close unless fileNow == nil
-        end # begin writing sdFolderFile
+        
+        # This begin rescue end not needed since now getting folder name from file name
+        # begin
+        #   # Writing which folder we're now in
+        #   # fileNow = File.open(thisScript + sdFolderFile, "w") # Was 2014.02.28 How could this have worked?
+        #   fileNow = File.open(sdFolderFile, "w")
+        #   fileNow.write(nextFolderName)
+        # rescue IOError => e
+        #   puts "Something went wrong. Could not write last photo read (#{nextFolderName}) to #{sdFolderFile}"
+        # ensure
+        #     fileNow.close unless fileNow == nil
+        # end # begin writing sdFolderFile
         # puts "\n#{nextFolderName} File.exist?(nextFolderName): #{File.exist?(nextFolderName)}" 
         src = srcSDfolder + nextFolderName + "/"
         if File.exist?(src)
@@ -224,7 +230,7 @@ def copyAndMove(srcHD,destPhoto,destOrig)
     if File.exists?(fnf)  # moving the original to _imported-archive, but not writing over existing files
       fnf = uniqueFileName(fnf)
       FileUtils.move(fn, fnf)
-      puts "\n#{lineNum}. A file already existed with this name so it was changed to fnf: #{fnf}"
+      puts "#{lineNum}. A file already existed with this name so it was changed to fnf: #{fnf}"
     else # no copies, so move
       FileUtils.move(fn, fnf)
       # puts "#{photoFinalCount} (#{lineNum}). #{fn} moved to #{fnf}"
@@ -248,6 +254,8 @@ def userCamCode(fn)
   case fileEXIF.model
   when "DMC-GX7"
     userCamCode = ".gs.P" # gs for photographer. P for *P*anasonic Lumix DMC-GX7
+  when "DMC-TS5"
+    userCamCode = ".gs.W" # gs for photographer. W for *w*aterproof Panasonic Lumix DMC-TS5
   when "DMC-G2"
     userCamCode = ".gs.L" # gs for photographer. L for Panasonic *L*umix DMC-G2
   when "Canon PowerShot S100"
@@ -305,24 +313,31 @@ def timeZone(fileDateUTC, timeZones)
 end # timeZone
 
 def rename(src, timeZonesFile)
-  # Dir.chdir(thisScript) # otherwise didn't know where it was to find folderGPX since used a chdir elsewhere in the script
+  # Until 2017, this assumed camera on UTC, but doesn't work well for camera's with a GPS (and has problems otherwise)
+  # Need an exception for my GPS camera, the TS5
   fileDatePrev = ""
   dupCount = 0
   count    = 0
   seqLetter = %w(a b c d e f g h i) # seems like this should be an array, not a list
-  Dir.foreach(src) do |item| 
+  Dir.foreach(src) do |item|
     next if ignoreNonFiles(item) == true # skipping file when true
-    # puts "309.. #{item} will be renamed. " # #{timeNowWas = timeStamp(timeNowWas)}
+    # puts "#{lineNum}. #{item} will be renamed. " # #{timeNowWas = timeStamp(timeNowWas)}
     fn = src + item
-       # puts "\n709. #{fileCount}. fn: #{fn}"
+    camModel = MiniExiftool.new(fn).model
+       # puts "\n#{lineNum}. #{fileCount}. fn: #{fn}"
     # puts "#{lineNum}.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
-    if File.file?(fn) # 
+    if File.file?(fn)
       # Determine the time and time zone where the photo was taken
       # puts "315.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}." #  #{timeNowWas = timeStamp(timeNowWas)}
       fileEXIF = MiniExiftool.new(fn)
       fileDateUTC = fileEXIF.dateTimeOriginal # class time, but adds the local time zone to the result although it is really UTC (or whatever zone my camera is set for)
       tzoLoc = timeZone(fileDateUTC, timeZonesFile)
-      timeChange = (3600*tzoLoc) # previously had error capture on this. Maybe for general cases which I'm not longer covering
+      # puts "#{lineNum}. fileDateUTC: #{fileDateUTC}. item: #{item}. tzoLoc: #{tzoLoc}. camModel: #{camModel}"
+      if camModel == "DMC-TS5"
+        timeChange = 0
+      else
+        timeChange = (3600*tzoLoc) # previously had error capture on this. Maybe for general cases which I'm not longer covering
+      end
       fileDate = fileDateUTC + timeChange # date in local time photo was taken
     
       fileDateUTCstr = fileDateUTC.to_s[0..-6]
@@ -549,11 +564,14 @@ puts "Fine naming and moving started  . . . . . . . . . . . . " # for trial runs
 # Two names for SD cards seem common
 unless File.directory?(srcSDfolder) # negative if,so if srcSDfolder exists skip, other wise change reference to …Alt
   srcSDfolder = srcSDfolderAlt
+  sdCard      = sdCardAlt
 end
+
+# need to determine this based on last file and that will have to be later
 srcSD = srcSDfolder + sdFolder(sdFolderFile)
 
 if !File.exists?(downloadsFolders) # if Daguerre isn't mounted use folders on laptop
-  puts "\n497. #{downloadsFolders} isn't mounted, so will use local folders to process"
+  puts "\n#{lineNum}. #{downloadsFolders} isn't mounted, so will use local folders to process"
   # Daguerre folders location loaded by default, changed as needed
   downloadsFolders = laptopDownloadsFolder
   destPhoto = laptopDestination
@@ -566,11 +584,10 @@ end
 folderPhotoCount = Dir.entries(destPhoto).count - 3 # -3 is a crude way to take care of ., .., .. Crude is probably OK since this isn't critical. If one real photo is there, not a big problem
 if folderPhotoCount > 0
   downloadsFolderEmpty(destPhoto, folderPhotoCount) # Pashua window
-  puts "558. downloadsFolders: #{downloadsFolders}"
+  puts "#{lineNum}. downloadsFolders: #{downloadsFolders}"
 else
   puts "\n#{lineNum}. Downloads folder is empty and script will continue."
 end
-
 
 # Ask whether working with photo files from SD card or HD
 fromWhere = whichLoc() # This is pulling in first Pashua window (1. ), SDorHD.rb which has been required
@@ -578,9 +595,11 @@ whichDrive = fromWhere["whichDrive"][0].chr # only using the first character
 # puts "#{lineNum}.. whichDrive: #{whichDrive}"
 # Set the return into a more friendly variable and set the src of the photos to be processed
 whichOne = whichOne(whichDrive) # parsing result to get HD or SD
-if whichOne=="SD" # otherwise it's HD, probably should be case to be cleaner coding
+if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner coding
   # read in last filename copied from card previously
   begin
+    # Redefining to read from SD card
+    lastPhotoReadTextFile = sdCard + "/lastPhotoRead.txt" 
     file = File.new(lastPhotoReadTextFile, "r")
     lastPhotoFilename = file.gets # apparently grabbing a return. maybe not the best reading method.
     puts "\n#{lineNum}. lastPhotoFilename: #{lastPhotoFilename.chop}. Read from #{lastPhotoReadTextFile}. Value can be changed by user, so this may not be the final value."
@@ -589,8 +608,11 @@ if whichOne=="SD" # otherwise it's HD, probably should be case to be cleaner cod
   rescue => err
     puts "Exception: #{err}. Not critical as value can be entered manually by user."
   end
+  
+  srcSD = srcSDfolder + lastPhotoFilename.chop.slice(1,3) + "_PANA"
+# Don't know if this is needed, why not use srcSD directly
   src = srcSD
-  prefsPhoto = pPashua2(src,lastPhotoFilename,destPhoto,destOrig) # calling Photo_Handling_Pashua-SD
+  prefsPhoto = pPashua2(src,lastPhotoFilename,destPhoto,destOrig) # calling Photo_Handling_Pashua-SD. (Titled: 2. SD card photo downloading options)
   # to get a value use prefsPhoto("theNameInFileNamingEtcPashue.rb"), nothing to do with the name above
   # puts "Prefs as set by pPashua"
   # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
@@ -629,7 +651,7 @@ copyAndMove(srcHD,destPhoto,destOrig)
 timeNowWas = timeStamp(timeNowWas)
 
 puts "\n#{lineNum}. Rename the photo files with date and an ID for the camera or photographer. #{timeNowWas}\n"
-rename(destPhoto, timeZones)
+rename(destPhoto, timeZones, )
 
 timeNowWas = timeStamp(timeNowWas)
 
