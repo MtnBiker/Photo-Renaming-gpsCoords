@@ -323,19 +323,19 @@ def rename(src, timeZonesFile)
     next if ignoreNonFiles(item) == true # skipping file when true
     # puts "#{lineNum}. #{item} will be renamed. " # #{timeNowWas = timeStamp(timeNowWas)}
     fn = src + item
-    camModel = MiniExiftool.new(fn).model
+    fileEXIF = MiniExiftool.new(fn)
+    camModel = fileEXIF.model
        # puts "\n#{lineNum}. #{fileCount}. fn: #{fn}"
     # puts "#{lineNum}.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
     if File.file?(fn)
       # Determine the time and time zone where the photo was taken
       # puts "315.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}." #  #{timeNowWas = timeStamp(timeNowWas)}
-      fileEXIF = MiniExiftool.new(fn)
       fileDateUTC = fileEXIF.dateTimeOriginal # class time, but adds the local time zone to the result although it is really UTC (or whatever zone my camera is set for)
-      tzoLoc = timeZone(fileDateUTC, timeZonesFile)
       # puts "#{lineNum}. fileDateUTC: #{fileDateUTC}. item: #{item}. tzoLoc: #{tzoLoc}. camModel: #{camModel}"
       if camModel == "DMC-TS5"
         timeChange = 0
       else
+        tzoLoc = timeZone(fileDateUTC, timeZonesFile)
         timeChange = (3600*tzoLoc) # previously had error capture on this. Maybe for general cases which I'm not longer covering
       end
       fileDate = fileDateUTC + timeChange # date in local time photo was taken
@@ -651,7 +651,7 @@ copyAndMove(srcHD,destPhoto,destOrig)
 timeNowWas = timeStamp(timeNowWas)
 
 puts "\n#{lineNum}. Rename the photo files with date and an ID for the camera or photographer. #{timeNowWas}\n"
-rename(destPhoto, timeZones, )
+rename(destPhoto, timeZones)
 
 timeNowWas = timeStamp(timeNowWas)
 
