@@ -57,7 +57,7 @@ timeZonesFile = "/Users/gscar/Dropbox/scriptsEtc/Greg camera time zones.yml"
 timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with
 gpsPhotoPerl = thisScript + "/lib/gpsPhoto.pl"
 folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2016 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
-puts "56. Must manually set folderGPX for GPX file folders. Set also at lines 362 and 364. Particularly important at start of new year.\n "
+puts "60. Must manually set folderGPX for GPX file folders. Set also at lines 362 and 364. Particularly important at start of new year.\n "
 geoNamesUser    = "geonames@web.knobby.ws" # Good but may use it up. Ran out after about 300 photos per hour.
 geoNamesUser2   = "geonamestwo@web.knobby.ws" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
 
@@ -67,7 +67,7 @@ def lineNum()
   caller_infos = caller.first.split(":")
   # Note caller_infos[0] is file name
   caller_infos[1]
-end
+end # line numbers of this file, useful for debugging
 
 def ignoreNonFiles(item) # invisible files that shouldn't be processed
   item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon '
@@ -312,18 +312,20 @@ def timeZone(fileDateUTC, timeZones)
   return theTimeZone
 end # timeZone
 
-def rename(src, timeZonesFile)
+def rename(src, timeZonesFile, timeNowWas)
+  # src is destPhoto folder
   # Until 2017, this assumed camera on UTC, but doesn't work well for camera's with a GPS (and has problems otherwise)
   # Need an exception for my GPS camera, the TS5
+  # timeNowWas used for timing process. Took 1 sec. per file. Not normally used
   fileDatePrev = ""
   dupCount = 0
   count    = 0
-  seqLetter = %w(a b c d e f g h i) # seems like this should be an array, not a list
+  seqLetter = %w(a b c d e f g h i j k l m n o p q r s t u v w x y z aa bb cc) # seems like this should be an array, not a list
   Dir.foreach(src) do |item|
     next if ignoreNonFiles(item) == true # skipping file when true
     # puts "#{lineNum}. #{item} will be renamed. " # #{timeNowWas = timeStamp(timeNowWas)}
     fn = src + item
-    fileEXIF = MiniExiftool.new(fn)
+    fileEXIF = MiniExiftool.new(fn) # used at least twice
     camModel = fileEXIF.model
        # puts "\n#{lineNum}. #{fileCount}. fn: #{fn}"
     # puts "#{lineNum}.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
@@ -331,13 +333,12 @@ def rename(src, timeZonesFile)
       # Determine the time and time zone where the photo was taken
       # puts "315.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}." #  #{timeNowWas = timeStamp(timeNowWas)}
       fileDateUTC = fileEXIF.dateTimeOriginal # class time, but adds the local time zone to the result although it is really UTC (or whatever zone my camera is set for)
-      # puts "#{lineNum}. fileDateUTC: #{fileDateUTC}. item: #{item}. tzoLoc: #{tzoLoc}. camModel: #{camModel}"
       if camModel == "DMC-TS5"
         timeChange = 0
       else
         tzoLoc = timeZone(fileDateUTC, timeZonesFile)
         timeChange = (3600*tzoLoc) # previously had error capture on this. Maybe for general cases which I'm not longer covering
-      end
+      end # if camModel
       fileDate = fileDateUTC + timeChange # date in local time photo was taken
     
       fileDateUTCstr = fileDateUTC.to_s[0..-6]
@@ -357,17 +358,15 @@ def rename(src, timeZonesFile)
         dupCount = 0 # resets dupCount after having a group of photos in the same second
         fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S")  + userCamCode(fn)
       end # if oneBack
-      # puts "#{lineNum}.. #{timeStamp(timeNowWas)}"
       fileDatePrev = fileDate
       fileBaseNamePrev = fileBaseName
    
       # File renaming and/or moving happens here
-      # puts "fn: #{fn}. imageFile: #{imageFile}. fileDateUTC: #{fileDateUTC}. tzoLoc:#{tzoLoc}"
+      puts "#{lineNum}. #{count+1}. dateTimeOriginal: #{fileDateUTC}. item: #{item}. camModel: #{camModel}" # . #{timeNowWas = timeStamp(timeNowWas)} # took 1 sec per file
       fileAnnotate(fn, fileEXIF, fileDateUTCstr, tzoLoc) # adds original file name, capture date and time zone to EXIF. Comments which I think show up as instructions in Aperture
       fnp = src + fileBaseName + File.extname(fn).downcase
       File.rename(fn,fnp)   
       count += 1
-      # puts "#{count} (#{lineNum}). #{item} was renamed to #{fileBaseName}"  #{timeStamp(timeNowWas)}
     end # 3. if File
   end # 2. Find  
 end # renaming photo files in the downloads folder and writing in original time.
@@ -418,9 +417,18 @@ def addLocation(src, geoNamesUser)
         # Get lat and lon from photo file
         puts "#{lineNum}. No gps information for #{item}. #{fileEXIF.title}" if fileEXIF.specialinstructions == nil
         next if fileEXIF.specialinstructions == nil # can I combine this step and the one above into one step or if statement? 
+        # puts "#{lineNum}. fileEXIF.specialinstructions: #{fileEXIF.specialinstructions}"
         gps = fileEXIF.specialinstructions.split(", ") # or some way of getting lat and lon. This is a good start. Look at input form needed
         lat = gps[0][4,11] # Capture long numbers like -123.123456, but short ones aren't that long, but nothing is there
         lon = gps[1][4,11].split(" ")[0] # needs to 11 long to capture when -xxx.xxxxxx, but then can capture the - when it's xx.xxxxxx. Then grab whats between the first two spaces. Still need the 4,11 because there seems to be a space at the beginning if leave out [4,11]
+
+        # puts " #{lineNum}. #{lat} #{lon} for #{fn}" # put here because of fail with TS5 file with erroneous lat lon
+        # puts " #{lineNum}. #{lat.to_i} #{lon.to_i} for #{fn}" # put here because of fail with TS5 file with erroneous lat lon        
+        # Quick and dirty to block erroneous TS5 results, but need to fix coordinates earlier.
+        if lat.to_i > 180 
+          puts "#{lineNum}. file #{fn} This is a TS5 photo with erroneous GPS data, but the script needs tob be fixed to add data"
+        end
+        next if lat.to_i > 180 # takes care of erroneous GPS coords in TS5 photos, but need to fix
         countLoc += 1 # gives an error here or at the end.
         # puts "#{lineNum}..#{countTotal}. Use geonames to determine city, state, country, and location for #{item}"
         api = GeoNames.new(username: geoNamesUser)
@@ -440,7 +448,7 @@ def addLocation(src, geoNamesUser)
             puts "#{lineNum}.. countryCodeGeo:\n#{countryCodeGeo}"
             countryCode  = countryCodeGeo['countryCode']
           rescue SocketError # SocketError: getaddrinfo: nodename nor servname provided, or not known. NOT SURE WHAT THE FAILURE IS HERE. WILL SEE IF IT HAPPENS AGAIN
-            puts " #{lineNum}. Failing for api.find_nearby_place_name(lat: lat, lng: lon).first #{lat} #{lon} \nfor #{src}\n"
+            puts " #{lineNum}. Failing for api.find_nearby_place_name(lat: lat, lng: lon).first #{lat} #{lon} \nfor #{fn}\n"
             $stderr.print  $! # Thomas p. 108
           end
         end
@@ -619,7 +627,7 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
   src = prefsPhoto["srcSelect"]  + "/"
   lastPhotoFilename = prefsPhoto["lastPhoto"]
   destPhoto = prefsPhoto["destPhotoP"]
-  destOrig  = prefsPhoto["destOrig"]
+  destOrig  = prefsPhoto["destOrig"] + "/" # without / changes file name with folder name
 else # whichOne=="HD", but what
   src = srcHD
   prefsPhoto = pGUI(src, destPhoto, destOrig) # is this only sending values in? 
@@ -651,7 +659,7 @@ copyAndMove(srcHD,destPhoto,destOrig)
 timeNowWas = timeStamp(timeNowWas)
 
 puts "\n#{lineNum}. Rename the photo files with date and an ID for the camera or photographer. #{timeNowWas}\n"
-rename(destPhoto, timeZones)
+rename(destPhoto, timeZones, timeNowWas)
 
 timeNowWas = timeStamp(timeNowWas)
 
