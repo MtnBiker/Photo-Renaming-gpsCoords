@@ -1,8 +1,7 @@
 #!/usr/bin/env ruby
+# Works with Ruby 2.4.0
+# Can't be made to work with TS5 completely because GPS coordinates are batch added and TS5 photos missing coordinates have different time stamp than other cameras, so have to modify --timeoffset in Perl script by hand for batch of TS5 photos
 # Refactored new version 2013.12.10
-
-#  A log of first and last processed would be good.
-
 require 'rubygems' # # Needed by rbosa, mini_exiftool, and maybe by appscript. Not needed if correct path set somewhere.
 require 'mini_exiftool' # Requires Ruby ≥1.9. A wrapper for the Perl ExifTool
 require 'fileutils'
@@ -11,6 +10,7 @@ require 'find'
 require 'yaml'
 require "time"
 require 'shellwords'
+require 'irb' # binding.irb where error checking is desired
 # require 'geonames'
 load 'geonames.rb'
 require 'pg' # https://bitbucket.org/ged/ruby-pg/wiki/Home for using PostGIS for geonames local files
@@ -277,14 +277,23 @@ def fileAnnotate(fn, fileEXIF, fileDateUTCstr, tzoLoc)  # writing original filen
   # ---- XMP-photoshop: Instructions  May not need, but it does show up if look at all EXIF, but not sure can see it in Aperture
   # SEEMS SLOPPY THAT I'M OPENING THE FILE ELSEWHERE AND SAVING IT HERE
   if fileEXIF.source.to_s.length < 2 # if exists then don't write. If avoid rewriting, then can eliminate this test. Was a test on comment, but not sure what that was and it wasn't working.
-     fileEXIF.instructions = "#{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}"
+     fileEXIF.instructions = "#{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc} unless TS5?"
     # fileEXIF.comment = "Capture date: #{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Doesn't show up in Aperture
     # fileEXIF.source = fileEXIF.title = "#{File.basename(fn)} original filename" # Source OK, but Title seemed a bit better
     fileEXIF.source = "#{File.basename(fn)}"
     fileEXIF.TimeZoneOffset = tzoLoc
+    
+    # Wiping out bad GPS data on TS5. Maybe should test for TS5 to save checking all other files
+    lat = fileEXIF.gps_latitude
+    # puts "#{lineNum}. #{lat}"
+    if lat.to_i > 180 
+      puts "#{lineNum}. #{File.basename(fn)} has bad GPS data, e.g., lat = #{lat} and will be blanked out\n"
+      fileEXIF.gps_latitude = fileEXIF.gps_longitude = fileEXIF.gps_altitude = ""
+    end
+    
     fileEXIF.save
   end
-end # fileAnnotate. writing original filename and dateTimeOrig to the photo file.
+end # fileAnnotate. writing original filename and dateTimeOrig to the photo file and cleaning up TS5 photos with bad (no) GPS data.
 
 # With the fileDateUTC for the photo, find the time zone based on the log.
 # The log is in numerical order and used as index here. The log is a YAML file
@@ -325,7 +334,7 @@ def rename(src, timeZonesFile, timeNowWas)
     next if ignoreNonFiles(item) == true # skipping file when true
     # puts "#{lineNum}. #{item} will be renamed. " # #{timeNowWas = timeStamp(timeNowWas)}
     fn = src + item
-    fileEXIF = MiniExiftool.new(fn) # used at least twice
+    fileEXIF = MiniExiftool.new(fn) # used several times
     camModel = fileEXIF.model
        # puts "\n#{lineNum}. #{fileCount}. fn: #{fn}"
     # puts "#{lineNum}.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
@@ -363,7 +372,7 @@ def rename(src, timeZonesFile, timeNowWas)
    
       # File renaming and/or moving happens here
       puts "#{lineNum}. #{count+1}. dateTimeOriginal: #{fileDateUTC}. item: #{item}. camModel: #{camModel}" # . #{timeNowWas = timeStamp(timeNowWas)} # took 1 sec per file
-      fileAnnotate(fn, fileEXIF, fileDateUTCstr, tzoLoc) # adds original file name, capture date and time zone to EXIF. Comments which I think show up as instructions in Aperture
+      fileAnnotate(fn, fileEXIF, fileDateUTCstr, tzoLoc) # adds original file name, capture date and time zone to EXIF. Comments which I think show up as instructions in Aperture. Also wiping out bad GPS data on TS5
       fnp = src + fileBaseName + File.extname(fn).downcase
       File.rename(fn,fnp)   
       count += 1
@@ -373,19 +382,19 @@ end # renaming photo files in the downloads folder and writing in original time.
 
 def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop)
   # Remember writing a command line command, so telling perl, then which perl file, then the gpsphoto.pl script options
+  # --timeoffset seconds     Camera time + seconds = GMT. No default. 8 x 3600 = 28000
   # maxTimeDiff = 50000 # seconds, default 120, but I changed it 2011.07.26 to allow for pictures taken at night but GPS off. Distance still has to be reasonable, that is the GPS had to be at the same place in the morning as the night before as set by the variable below
-  # Need to add a note to file with large time diff
   # This works, put in because having problems with file locations
   # perlOutput = `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`
   puts "\n#{lineNum}. gpsPhotoPerl.shellescape: #{gpsPhotoPerl.shellescape}. but can't figure out how to make this work [later, looks right to me]. So done manually"
-  # puts "\n340.. `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`" # probably can't double quote inside the backticks
+  puts "\n#{lineNum}. `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`" # probably can't double quote inside the backticks
   puts "\n#{lineNum}. Finding all gps points from all the gpx files using gpsPhoto.pl. This may take a while. \n"
   # Since have to manually craft the perl call, need one for with Daguerre and one for on laptop
   # Daguerre version. /Volumes/Daguerre/_Download folder/Latest Download/
-  if loadingToLaptop
-    perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Users/gscar/Pictures/_Photo Processing Folders/Processed\ photos\ to\ be\ imported\ to\ Aperture/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2016\ Massaged/' --timeoffset 0 --maxtimediff 50000`
-  else # default location on Daguerre
-    perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby Aperture Two/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2016\ Massaged/' --timeoffset 0 --maxtimediff 50000`
+  if loadingToLaptop 
+    perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Users/gscar/Pictures/_Photo Processing Folders/Processed\ photos\ to\ be\ imported\ to\ Aperture/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2017\ Massaged/' --timeoffset 0 --maxtimediff 50000`
+  else # default location on Daguerre or Knobby Aperture Two
+    perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby Aperture Two/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2017\ Massaged/' --timeoffset 0 --maxtimediff 50000`
   # perlOutput = "`perl #{gpsPhotoPerl.shellescape} --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`"
   end
       
@@ -412,7 +421,7 @@ def addLocation(src, geoNamesUser)
       fn = src + item
       if File.file?(fn) 
         countTotal += 1
-        puts "\n#{lineNum}. #{countTotal}. #{item}. Adding location information using geonames based on coordinates. " # amounts to a progress bar, even if a bit verbose #{timeStamp(timeNowWas)}
+        puts "#{lineNum}. #{countTotal}. #{item}. Adding location information using geonames based on coordinates. " # amounts to a progress bar, even if a bit verbose #{timeStamp(timeNowWas)}
         fileEXIF = MiniExiftool.new(fn)
         # Get lat and lon from photo file
         puts "#{lineNum}. No gps information for #{item}. #{fileEXIF.title}" if fileEXIF.specialinstructions == nil
@@ -426,7 +435,7 @@ def addLocation(src, geoNamesUser)
         # puts " #{lineNum}. #{lat.to_i} #{lon.to_i} for #{fn}" # put here because of fail with TS5 file with erroneous lat lon        
         # Quick and dirty to block erroneous TS5 results, but need to fix coordinates earlier.
         if lat.to_i > 180 
-          puts "#{lineNum}. file #{fn} This is a TS5 photo with erroneous GPS data, but the script needs tob be fixed to add data"
+          puts "#{lineNum}. #{fn} is a TS5 photo with erroneous GPS data, but the script needs to be fixed to add data"
         end
         next if lat.to_i > 180 # takes care of erroneous GPS coords in TS5 photos, but need to fix
         countLoc += 1 # gives an error here or at the end.
