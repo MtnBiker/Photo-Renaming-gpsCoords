@@ -1,9 +1,14 @@
 #!/usr/bin/env ruby
 # Works with Ruby 2.4.0
-# Can't be made to work with TS5 completely because GPS coordinates are batch added and TS5 photos missing coordinates have different time stamp than other cameras, so have to modify --timeoffset in Perl script by hand for batch of TS5 photos
+# Can be made to work with TS5 completely because GPS coordinates are batch added and TS5 photos missing coordinates have different time stamp than other cameras, so have to modify --timeoffset in Perl script by hand for batch of TS5 photos
 # Refactored new version 2013.12.10
+
+#  Look at speeding up with https://github.com/tonytonyjan/exif for rename and annotate which is rather slow. 8 min. for 326 photos
+#  CAN'T READ PANASONIC RW2 (.rw2) files
+
 require 'rubygems' # # Needed by rbosa, mini_exiftool, and maybe by appscript. Not needed if correct path set somewhere.
 require 'mini_exiftool' # Requires Ruby ≥1.9. A wrapper for the Perl ExifTool
+# require 'exif' # added later. A partial implementation of ExifTool, but faster than mini_exiftool. Commented out since doesn't work with Panasonic Raw
 require 'fileutils'
 include FileUtils
 require 'find'
@@ -13,7 +18,7 @@ require 'shellwords'
 require 'irb' # binding.irb where error checking is desired
 # require 'geonames'
 load 'geonames.rb'
-require 'pg' # https://bitbucket.org/ged/ruby-pg/wiki/Home for using PostGIS for geonames local files
+require 'pg' # https://bitbucket.org/ged/ruby-pg/wiki/Home for using PostGIS for geonames local files. Doesn't make sense now?
 
 require_relative 'lib/LatestDownloadsFolderEmpty_Pashua'
 require_relative 'lib/SDorHD'
@@ -55,8 +60,8 @@ lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
 geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wikipedia—most general and osm—maybe better for cities
 timeZonesFile = "/Users/gscar/Dropbox/scriptsEtc/Greg camera time zones.yml"
 timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with
-gpsPhotoPerl = thisScript + "/lib/gpsPhoto.pl"
-folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2016 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
+gpsPhotoPerl = thisScript + "lib/gpsPhoto.pl"
+folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2017 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
 puts "60. Must manually set folderGPX for GPX file folders. Set also at lines 362 and 364. Particularly important at start of new year.\n "
 geoNamesUser    = "geonames@web.knobby.ws" # Good but may use it up. Ran out after about 300 photos per hour.
 geoNamesUser2   = "geonamestwo@web.knobby.ws" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
@@ -126,7 +131,7 @@ end
 
 def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) 
   # some of the above counter variables could be set at the beginning of this script and used locally
-  puts "\n#{lineNum}. Copying photos from an SD card starting with #{lastPhotoReadTextFile} or from another value manually entered"
+  puts "\n#{lineNum}. Copying photos from an SD card starting with #{lastPhotoFilename} or from another value manually entered"
   cardCount = 0
   cardCountCopied = 0
   doAgain = true # name isn't great, now means do it. A no doubt crude way to run back through the copy loop if we moved to another folder.
@@ -142,7 +147,7 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
       fnp = srcHD + "/" + item # using srcHD as the put files here place, might cause problems later
       # get filename and make select later than already downloaded
       fileSDbasename = File.basename(item,".*")
-      # puts "#{lineNum}. #{cardCount}. item: #{item}. fileSDbasename: #{fileSDbasename}, fn: #{fn}"
+      # puts "#{lineNum}. #{cardCount}. item: #{item}. fn: #{fn}"
       next if item == '.' or item == '..' or fileSDbasename <= lastPhotoFilename # don't need the first two with Dir.glob, but doesn't slow things down much overall for this script
       FileUtils.copy(fn, fnp) # Copy from card to hard drive. , preserve = true gives and error. But preserve also preserves permissions, so that may not be a good thing. If care will have to manually change creation date
       cardCountCopied += 1
@@ -284,10 +289,8 @@ def fileAnnotate(fn, fileEXIF, fileDateUTCstr, tzoLoc)  # writing original filen
     fileEXIF.TimeZoneOffset = tzoLoc
     
     # Wiping out bad GPS data on TS5. Maybe should test for TS5 to save checking all other files
-    lat = fileEXIF.gps_latitude
-    # puts "#{lineNum}. #{lat}"
-    if lat.to_i > 180 
-      puts "#{lineNum}. #{File.basename(fn)} has bad GPS data, e.g., lat = #{lat} and will be blanked out\n"
+    if !fileEXIF.GPSDateTime  # i.e. == "false" # condition if bad data for TS5. Note is nil for GX7. Not changing because can use as flag
+      # puts "#{lineNum}. #{File.basename(fn)} has bad GPS data  (GPSDateTime is false), and will be blanked out\n"
       fileEXIF.gps_latitude = fileEXIF.gps_longitude = fileEXIF.gps_altitude = ""
     end
     
@@ -335,13 +338,14 @@ def rename(src, timeZonesFile, timeNowWas)
     # puts "#{lineNum}. #{item} will be renamed. " # #{timeNowWas = timeStamp(timeNowWas)}
     fn = src + item
     fileEXIF = MiniExiftool.new(fn) # used several times
+    # fileEXIF = Exif::Data.new(fn) # see if can just make this change, probably break something. 2017.01.13 doesn't work with Raw, but developer is working it.
     camModel = fileEXIF.model
        # puts "\n#{lineNum}. #{fileCount}. fn: #{fn}"
     # puts "#{lineNum}.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
     if File.file?(fn)
       # Determine the time and time zone where the photo was taken
       # puts "315.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}." #  #{timeNowWas = timeStamp(timeNowWas)}
-      fileDateUTC = fileEXIF.dateTimeOriginal # class time, but adds the local time zone to the result although it is really UTC (or whatever zone my camera is set for)
+      fileDateUTC = fileEXIF.dateTimeOriginal # class time, but adds the local time zone to the result although it is really UTC (or whatever zone my camera is set for. For TS5, the time date is accurate with time zone)
       if camModel == "DMC-TS5"
         timeChange = 0
       else
@@ -371,7 +375,7 @@ def rename(src, timeZonesFile, timeNowWas)
       fileBaseNamePrev = fileBaseName
    
       # File renaming and/or moving happens here
-      puts "#{lineNum}. #{count+1}. dateTimeOriginal: #{fileDateUTC}. item: #{item}. camModel: #{camModel}" # . #{timeNowWas = timeStamp(timeNowWas)} # took 1 sec per file
+      # puts "#{lineNum}. #{count+1}. dateTimeOriginal: #{fileDateUTC}. item: #{item}. camModel: #{camModel}" # . #{timeNowWas = timeStamp(timeNowWas)} # took 1 sec per file
       fileAnnotate(fn, fileEXIF, fileDateUTCstr, tzoLoc) # adds original file name, capture date and time zone to EXIF. Comments which I think show up as instructions in Aperture. Also wiping out bad GPS data on TS5
       fnp = src + fileBaseName + File.extname(fn).downcase
       File.rename(fn,fnp)   
@@ -382,21 +386,53 @@ end # renaming photo files in the downloads folder and writing in original time.
 
 def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop)
   # Remember writing a command line command, so telling perl, then which perl file, then the gpsphoto.pl script options
-  # --timeoffset seconds     Camera time + seconds = GMT. No default. 8 x 3600 = 28000
+  # --timeoffset seconds     Camera time + seconds = GMT. No default.  
   # maxTimeDiff = 50000 # seconds, default 120, but I changed it 2011.07.26 to allow for pictures taken at night but GPS off. Distance still has to be reasonable, that is the GPS had to be at the same place in the morning as the night before as set by the variable below
   # This works, put in because having problems with file locations
   # perlOutput = `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`
-  puts "\n#{lineNum}. gpsPhotoPerl.shellescape: #{gpsPhotoPerl.shellescape}. but can't figure out how to make this work [later, looks right to me]. So done manually"
-  puts "\n#{lineNum}. `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`" # probably can't double quote inside the backticks
+
+# Assuming all the photos are from the same camera, get info on one and use that information. destPhoto is where they are. Can I get the third file in the folder (to avoid)
+# GX7 is UST
+# TS5. Need to determine time zone so can determine offset. 
+  camModel = ""
+  timeOffset = 0
+  Dir.foreach(destPhoto) do |item|
+    # This is only run once, so efficiency doesn't matter
+    count = 0
+    next if ignoreNonFiles(item)  # skipping file when true == true
+    fn = destPhoto + item
+    fileEXIF = MiniExiftool.new(fn) # used several times
+    camModel = fileEXIF.model
+    # timeOffset = 0 # could leave this in and remove the else     
+    if File.file?(fn)
+      if camModel  == "DMC-TS5"
+        # Offset sign is same as GMT offset, eg, we are -8, but need to increase the time to match UST, therefore negative
+        timeOffset = - fileEXIF.dateTimeOriginal.utc_offset # Time zone is set in camera
+      else # GX7 time is UTC
+        timeOffset = 0 # camelCase, but perl variable is lowercase
+      end # if camModel
+      puts "#{lineNum}. timeOffset: #{timeOffset}. camModel: #{camModel}. #{item}. "
+      fileEXIF.save 
+      count += 1   
+    end # if File.file
+    break if count == 1 # once have a real photo file, can get out of this
+  end # Dir.foreach 
+   
   puts "\n#{lineNum}. Finding all gps points from all the gpx files using gpsPhoto.pl. This may take a while. \n"
   # Since have to manually craft the perl call, need one for with Daguerre and one for on laptop
   # Daguerre version. /Volumes/Daguerre/_Download folder/Latest Download/
-  if loadingToLaptop 
-    perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Users/gscar/Pictures/_Photo Processing Folders/Processed\ photos\ to\ be\ imported\ to\ Aperture/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2017\ Massaged/' --timeoffset 0 --maxtimediff 50000`
-  else # default location on Daguerre or Knobby Aperture Two
-    perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby Aperture Two/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2017\ Massaged/' --timeoffset 0 --maxtimediff 50000`
-  # perlOutput = "`perl #{gpsPhotoPerl.shellescape} --dir #{destPhoto.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`"
-  end
+    if loadingToLaptop 
+      # perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Users/gscar/Pictures/_Photo Processing Folders/Processed\ photos\ to\ be\ imported\ to\ Aperture/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2017\ Massaged/' --timeoffset #{timeOffset} --maxtimediff 50000` # saved in case something goes wrong. This works
+      perlOutput = `perl '#{gpsPhotoPerl}' --dir '#{destPhoto}' --gpsdir '#{folderGPX}' --timeoffset #{timeOffset} --maxtimediff 50000`
+    else # default location on Daguerre or Knobby Aperture Two
+      # perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby Aperture Two/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2017\ Massaged/' --timeoffset #{timeOffset} --maxtimediff 50000` # this works, saving in case the following doesn't
+      perlOutput = `perl '#{gpsPhotoPerl}' --dir '#{destPhoto}' --gpsdir '#{folderGPX}' --timeoffset #{timeOffset} --maxtimediff 50000`
+      # Double quotes needed for variables to be evalated
+      # perlOutput = "`perl \'#{gpsPhotoPerl.shellescape}\' --dir \'#{destPhoto.shellescape}\' --gpsdir \'#{folderGPX.shellescape}\' --timeoffset #{timeOffset} --maxtimediff 50000`" #  2>&1
+      # perlOutput = "`perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby Aperture Two/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2017\ Massaged/' --timeoffset #{timeOffset} --maxtimediff 50000 2>&1` " #  2>&1 is needed to capture output, but not to run
+      
+      puts "#{lineNum}. perlOutput: #{perlOutput}"
+    end
       
   # puts "\n374.. perlOutput: \n#{perlOutput} \n\nEnd of perlOutput ================… end 374\n\n" # This didn't seem to be happening with 2>&1 appended? But w/o it, error not captured
   # perlOutput =~ /timediff\=([0-9]+)/
@@ -410,7 +446,7 @@ def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop)
   #   timeDiffReport = ""
   # end # timediff.to…
   return perlOutput
-end
+end # addCoordinates
 
 def addLocation(src, geoNamesUser)
   # read coords and add a hierarchy of choices for location information. Look at GPS Log Renaming for what works.
@@ -423,8 +459,8 @@ def addLocation(src, geoNamesUser)
         countTotal += 1
         puts "#{lineNum}. #{countTotal}. #{item}. Adding location information using geonames based on coordinates. " # amounts to a progress bar, even if a bit verbose #{timeStamp(timeNowWas)}
         fileEXIF = MiniExiftool.new(fn)
-        # Get lat and lon from photo file
-        puts "#{lineNum}. No gps information for #{item}. #{fileEXIF.title}" if fileEXIF.specialinstructions == nil
+        # Get lat and lon from photo file. What is this fileEXIF.specialinstructions. What about 
+        puts "#{lineNum}. No gps information for #{item}. #{fileEXIF.title}. fileEXIF.specialinstructions: #{fileEXIF.specialinstructions}" if fileEXIF.specialinstructions == nil
         next if fileEXIF.specialinstructions == nil # can I combine this step and the one above into one step or if statement? 
         # puts "#{lineNum}. fileEXIF.specialinstructions: #{fileEXIF.specialinstructions}"
         gps = fileEXIF.specialinstructions.split(", ") # or some way of getting lat and lon. This is a good start. Look at input form needed
@@ -619,7 +655,7 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
     lastPhotoReadTextFile = sdCard + "/lastPhotoRead.txt" 
     file = File.new(lastPhotoReadTextFile, "r")
     lastPhotoFilename = file.gets # apparently grabbing a return. maybe not the best reading method.
-    puts "\n#{lineNum}. lastPhotoFilename: #{lastPhotoFilename.chop}. Read from #{lastPhotoReadTextFile}. Value can be changed by user, so this may not be the final value."
+    puts "\n#{lineNum}. lastPhotoFilename: #{lastPhotoFilename.chop}. Value can be changed by user, so this may not be the value used."
     file.close
   # rescue Exception => err # Not good to rescue Exception
   rescue => err
@@ -630,7 +666,7 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
 # Don't know if this is needed, why not use srcSD directly
   src = srcSD
   prefsPhoto = pPashua2(src,lastPhotoFilename,destPhoto,destOrig) # calling Photo_Handling_Pashua-SD. (Titled: 2. SD card photo downloading options)
-  # to get a value use prefsPhoto("theNameInFileNamingEtcPashue.rb"), nothing to do with the name above
+  # to get a value use prefsPhoto("theNameInFileNamingEtcPashua.rb"), nothing to do with the name above
   # puts "Prefs as set by pPashua"
   # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
   src = prefsPhoto["srcSelect"]  + "/"
