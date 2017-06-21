@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 # Works with Ruby 2.4.0
+# 2017.06.21 Changed from Knobby Aperture Two to Daguerre because the latter had gone south.
+# 
 # Can be made to work with TS5 completely because GPS coordinates are batch added and TS5 photos missing coordinates have different time stamp than other cameras, so have to modify --timeoffset in Perl script by hand for batch of TS5 photos
 # Refactored new version 2013.12.10
 
@@ -50,9 +52,9 @@ laptopDestOrig        = laptopLocation + "Originals to archive/"
 
 # Folders on portable drive: Daguerre
 # srcHD = "/Volumes/Daguerre/_Download folder/ Drag Photos HERE/"  # Photos copied from original location such as camera or sent by others
-srcHD = "/Volumes/Knobby Aperture Two/_Download folder/ Drag Photos HERE/"  # Photos copied from original location such as camera or sent by others
-# downloadsFolders = "/Volumes/Daguerre/_Download folder/"
-downloadsFolders = "/Volumes/Knobby Aperture Two/_Download folder/"
+downloadsFolders = "/Volumes/Daguerre/_Download folder/"
+# downloadsFolders = "/Volumes/Knobby Aperture Two/_Download folder/" # Went south early 2017
+srcHD     = downloadsFolders + " Drag Photos HERE/"  # Photos copied from camera, sent by others, etc.
 destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
 destOrig  = downloadsFolders + "_imported-archive" # folder to move originals to if not done in. No slash because getting double slash with one
 
@@ -252,6 +254,23 @@ def copyAndMove(srcHD,destPhoto,destOrig)
   end
   puts "\n#{lineNum}. #{photoFinalCount} photos have been moved and are ready for renaming and gpsing#{comment}"
 end # copyAndMove: copy to the final destination where the renaming will be done and the original moved to an archive (_imported-archive folder)
+
+def unmountCard(card)
+  puts "#{lineNum}. card: #{card}" 
+  card = card[-8, 7]
+  puts "#{lineNum}. card: #{card}" 
+  card  = "\"" + card + "\""
+  disk =  `diskutil list |grep #{card} 2>&1`
+  puts "\n#{lineNum}. disk: #{disk}"
+  # Getting confused because grabbing the last 7 twice. And naming sucks (mjy fault)
+  driveID = disk[-8, 7] # not sure this syntax is precise, but it's working.
+  puts "#{lineNum} Unmount #{card}. May have to code this better. See if card name is already a variable. This is hard coded for a specific length of card name"
+  puts "#{lineNum}. driveID: #{driveID}. card: #{card}" 
+  cmd =  "diskutil unmount #{driveID} 2>&1"
+  puts "cmd: #{cmd}"
+  unmountResult = `diskutil unmount #{driveID} 2>&1`
+  puts "\n#{lineNum}. SD card, #{unmountResult}, unmounted."  
+end #unmountCard
 
 def userCamCode(fn)
   fileEXIF = MiniExiftool.new(fn)
@@ -648,6 +667,7 @@ whichDrive = fromWhere["whichDrive"][0].chr # only using the first character
 # puts "#{lineNum}.. whichDrive: #{whichDrive}"
 # Set the return into a more friendly variable and set the src of the photos to be processed
 whichOne = whichOne(whichDrive) # parsing result to get HD or SD
+puts "#{lineNum}. fromWherefromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}"
 if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner coding
   # read in last filename copied from card previously
   begin
@@ -701,6 +721,10 @@ puts "\n#{lineNum}. Photos will now be moved and renamed."
 #  Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
 copyAndMove(srcHD,destPhoto,destOrig)
 
+# unmount card. Test if using the SD
+puts "\n#{lineNum}. fromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}"
+whichOne=="SD" ? unmountCard(sdCard) : ""
+
 timeNowWas = timeStamp(timeNowWas)
 
 puts "\n#{lineNum}. Rename the photo files with date and an ID for the camera or photographer. #{timeNowWas}\n"
@@ -724,5 +748,6 @@ timeNowWas = timeStamp(timeNowWas)
 
 # Add location information to photo file
 addLocation(destPhoto, geoNamesUser)
-puts "\n#{lineNum}.-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -All done"
+
 timeNowWas = timeStamp(timeNowWas)
+puts "\n#{lineNum}.-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -All done"
