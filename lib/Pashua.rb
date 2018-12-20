@@ -16,7 +16,7 @@ module Pashua
 
   def pashua_run(script, encoding = '', path = '')
     pbin = pashua_locate(path) or return nil
-   	encoding = "-e " + encoding + " " if encoding != ''
+   	encoding = encoding + " " if encoding != ''
     res = Hash.new
     tmp = Tempfile.open('Pashua')
     tmp.puts script

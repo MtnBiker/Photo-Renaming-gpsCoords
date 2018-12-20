@@ -1,15 +1,13 @@
 #!/usr/bin/env ruby
 # Works with Ruby 2.4.0
-# 2017.06.21 Changed from Knobby Aperture Two to Daguerre because the latter had gone south.
-# 
 # Can be made to work with TS5 completely because GPS coordinates are batch added and TS5 photos missing coordinates have different time stamp than other cameras, so have to modify --timeoffset in Perl script by hand for batch of TS5 photos
-# Refactored new version 2013.12.10
 
 #  Look at speeding up with https://github.com/tonytonyjan/exif for rename and annotate which is rather slow. 8 min. for 326 photos
 #  CAN'T READ PANASONIC RW2 (.rw2) files
 
 require 'rubygems' # # Needed by rbosa, mini_exiftool, and maybe by appscript. Not needed if correct path set somewhere.
-require 'mini_exiftool' # Requires Ruby ≥1.9. A wrapper for the Perl ExifTool
+system ('gem env') # for debugging problem with gem not loading https://stackoverflow.com/questions/53202164/textmate-chruby-and-ruby-gems
+puts "\nGem.path: #{Gem.path}"
 # require 'exif' # added later. A partial implementation of ExifTool, but faster than mini_exiftool. Commented out since doesn't work with Panasonic Raw
 require 'fileutils'
 include FileUtils
@@ -18,9 +16,13 @@ require 'yaml'
 require "time"
 require 'shellwords'
 require 'irb' # binding.irb where error checking is desired
+require 'mini_exiftool' # doesn't work, so some path isn't being set right,
+# require '/Users/gscar/.gem/ruby/2.5.1/gems/mini_exiftool-2.9.0/lib/mini_exiftool.rb' # This just pushes the problem to another gem that won't load
+
 # require 'geonames'
-load 'geonames.rb'
-require 'pg' # https://bitbucket.org/ged/ruby-pg/wiki/Home for using PostGIS for geonames local files. Doesn't make sense now?
+# require_relative '/Users/gscar/Documents/GitHub/addressable/lib/addressable' # needed by geonames. Addressable is installed. Need to GET THIS PATH THING RIGHT, BECAUSE THIS IS CALLED BY ANOTHER GEM AND SHOULD BE FOUND AUTOMATICALLY
+load 'geonames.rb' # Note this is a file, not a gem. 
+# require 'pg' # https://bitbucket.org/ged/ruby-pg/wiki/Home for using PostGIS for geonames local files. Doesn't make sense now?
 
 require_relative 'lib/LatestDownloadsFolderEmpty_Pashua'
 require_relative 'lib/SDorHD'
@@ -51,8 +53,8 @@ laptopDestination     = laptopLocation + "Processed photos to be imported to Ape
 laptopDestOrig        = laptopLocation + "Originals to archive/"
 
 # Folders on portable drive: Daguerre
-# srcHD = "/Volumes/Daguerre/_Download folder/ Drag Photos HERE/"  # Photos copied from original location such as camera or sent by others
 downloadsFolders = "/Volumes/Daguerre/_Download folder/"
+downloadsFolders = "/Volumes/Daguerre/_Download folder/Ethiopia 2018/" # temp for Ethiopia 
 # downloadsFolders = "/Volumes/Knobby Aperture Two/_Download folder/" # Went south early 2017
 srcHD     = downloadsFolders + " Drag Photos HERE/"  # Photos copied from camera, sent by others, etc.
 destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
@@ -63,7 +65,7 @@ geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wiki
 timeZonesFile = "/Users/gscar/Dropbox/scriptsEtc/Greg camera time zones.yml"
 timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with
 gpsPhotoPerl = thisScript + "lib/gpsPhoto.pl"
-folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2017 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
+folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2018 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
 puts "60. Must manually set folderGPX for GPX file folders. Set also at lines 362 and 364. Particularly important at start of new year.\n "
 geoNamesUser    = "geonames@web.knobby.ws" # Good but may use it up. Ran out after about 300 photos per hour.
 geoNamesUser2   = "geonamestwo@web.knobby.ws" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
@@ -137,7 +139,7 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
   cardCount = 0
   cardCountCopied = 0
   doAgain = true # name isn't great, now means do it. A no doubt crude way to run back through the copy loop if we moved to another folder.
-  timesThrough = 1 
+  # timesThrough = 1
   fileSDbasename = "" # got an error at puts fileSDbasename
   while doAgain==true # and timesThrough<=2 
     Dir.chdir(src) # needed for glob
@@ -216,15 +218,15 @@ def copyAndMove(srcHD,destPhoto,destOrig)
   Dir.foreach(srcHD) do |item| 
     # puts "#{lineNum}.. photoFinalCount: #{photoFinalCount + 1}. item: #{item}."
     next if item == '.' or item == '..' or item == '.DS_Store' 
-    fileExt = File.extname(item)
+    # fileExt = File.extname(item)
     if File.basename(itemPrev, ".*") == File.basename(item,".*") && photoFinalCount != 0
      #  The following shouldn't be necessary, but is a check in case another kind of raw or who know what else. Only the FileUtils.rm(itemPrev) should be needed
      # puts "#{lineNum}.. itemPrev: #{itemPrev}"
-     if File.extname(itemPrev) ==".JPG"
-       FileUtils.rm(fnp)
-       # puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} will not be transferred because it's a jpg duplicate of a RAW version." # Is this slow? Turned off to try. Not sure.
-       delCount += 1
-       photoFinalCount -= 1
+      if File.extname(itemPrev) ==".JPG"
+        FileUtils.rm(fnp)
+        # puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} will not be transferred because it's a jpg duplicate of a RAW version." # Is this slow? Turned off to try. Not sure.
+        delCount += 1
+        photoFinalCount -= 1
       else
         puts "#{lineNum}. Something very wrong here with trying to remove JPGs when there is a corresponding .RW2"
       end # File.extname  
@@ -239,8 +241,8 @@ def copyAndMove(srcHD,destPhoto,destOrig)
       FileUtils.move(fn, fnf)
       puts "#{lineNum}. A file already existed with this name so it was changed to fnf: #{fnf}"
     else # no copies, so move
-      FileUtils.move(fn, fnf)
       # puts "#{photoFinalCount} (#{lineNum}). #{fn} moved to #{fnf}"
+      FileUtils.move(fn, fnf)
     end
     # "#{lineNum}.. #{photoFinalCount + delCount} #{fn}"
     itemPrev = item
@@ -280,9 +282,7 @@ def userCamCode(fn)
     userCamCode = ".gs.P" # gs for photographer. P for *P*anasonic Lumix DMC-GX7
   when "DMC-TS5"
     userCamCode = ".gs.W" # gs for photographer. W for *w*aterproof Panasonic Lumix DMC-TS5
-  when "DMC-G2"
-    userCamCode = ".gs.L" # gs for photographer. L for Panasonic *L*umix DMC-G2
-  when "Canon PowerShot S100"
+cd  when "Canon PowerShot S100"
     userCamCode = ".lb" # initials of the photographer who usually shoots with the S100
   else
     userCamCode = ".xx"
@@ -375,7 +375,7 @@ def rename(src, timeZonesFile, timeNowWas)
     
       fileDateUTCstr = fileDateUTC.to_s[0..-6]
 
-      filePrev = fn
+      # filePrev = fn
       # Working out if files at the same time
       # puts "\nxx.. #{fileCount}. oneBack: #{oneBack}."
       # Determine dupCount, i.e., 0 if not in same second, otherwise the number of the sequence for the same time
@@ -391,7 +391,7 @@ def rename(src, timeZonesFile, timeNowWas)
         fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S")  + userCamCode(fn)
       end # if oneBack
       fileDatePrev = fileDate
-      fileBaseNamePrev = fileBaseName
+      # fileBaseNamePrev = fileBaseName
    
       # File renaming and/or moving happens here
       # puts "#{lineNum}. #{count+1}. dateTimeOriginal: #{fileDateUTC}. item: #{item}. camModel: #{camModel}" # . #{timeNowWas = timeStamp(timeNowWas)} # took 1 sec per file
@@ -586,7 +586,7 @@ def addLocation(src, geoNamesUser)
         distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance'].to_f
         puts "493.. location:     #{location}. distance: #{distance}. If distance > 0.3km location not used"
         location = "" if distance < 0.3
-    end # if countryCode
+      end # if countryCode
       location = "" if city == location # cases where they where the same (Myers Flat, Callahan and Etna). Could try to find a location with some other find, maybe Wikipedia, but would want a distance check
       # puts "#{lineNum}.. Use MiniExiftool to write location info to photo files\n" # Have already set fileEXIF
       fileEXIF.CountryCode = countryCode  # Aperture: IPTC: Country-PrimaryLocationCode
@@ -599,7 +599,7 @@ def addLocation(src, geoNamesUser)
     end    
   end 
   puts "\n#{lineNum}. Location information found for #{countLoc} of #{countTotal} photos processed" 
-end
+end # addLocation
 
 def indoLocation(lat,lon) # Could modiby for other countries. Uses file loaded into PGadmin
   conn = PG.connect( dbname: 'Indonesia' )
@@ -667,7 +667,7 @@ whichDrive = fromWhere["whichDrive"][0].chr # only using the first character
 # puts "#{lineNum}.. whichDrive: #{whichDrive}"
 # Set the return into a more friendly variable and set the src of the photos to be processed
 whichOne = whichOne(whichDrive) # parsing result to get HD or SD
-puts "#{lineNum}. fromWherefromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}"
+# puts "#{lineNum}. fromWherefromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}"
 if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner coding
   # read in last filename copied from card previously
   begin
@@ -722,7 +722,7 @@ puts "\n#{lineNum}. Photos will now be moved and renamed."
 copyAndMove(srcHD,destPhoto,destOrig)
 
 # unmount card. Test if using the SD
-puts "\n#{lineNum}. fromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}"
+# puts "\n#{lineNum}. fromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}"
 whichOne=="SD" ? unmountCard(sdCard) : ""
 
 timeNowWas = timeStamp(timeNowWas)
