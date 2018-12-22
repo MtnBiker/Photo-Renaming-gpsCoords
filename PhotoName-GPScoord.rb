@@ -1,13 +1,12 @@
 #!/usr/bin/env ruby
-# Works with Ruby 2.4.0
-# Can be made to work with TS5 completely because GPS coordinates are batch added and TS5 photos missing coordinates have different time stamp than other cameras, so have to modify --timeoffset in Perl script by hand for batch of TS5 photos
-
+# Works with Ruby 2.4.0. Getting errors about some Ignoring <some gems which aren't being used by this script> because its extensions are not built.
+# Can be made to work with TS5 completely because GPS coordinates are batch added and TS5 photos missing coordinates have different time stamp than other cameras, so have to modify --timeoffset in Perl script by hand for batch of TS5 photos. Is still true since added options for travel and TS5?
+# Relabeling of mp4 works with this script.
 #  Look at speeding up with https://github.com/tonytonyjan/exif for rename and annotate which is rather slow. 8 min. for 326 photos
 
 require 'rubygems' # # Needed by rbosa, mini_exiftool, and maybe by appscript. Not needed if correct path set somewhere.
 system ('gem env') # for debugging problem with gem not loading https://stackoverflow.com/questions/53202164/textmate-chruby-and-ruby-gems
 puts "\nGem.path: #{Gem.path}"
-# require 'exif' # added later. A partial implementation of ExifTool, but faster than mini_exiftool. Commented out since doesn't work with Panasonic Raw
 require 'fileutils'
 include FileUtils
 require 'find'
@@ -16,9 +15,9 @@ require "time"
 require 'shellwords'
 require 'irb' # binding.irb where error checking is desired
 require 'mini_exiftool'
+# require 'exif' # added later. A partial implementation of ExifTool, but faster than mini_exiftool. Commented out since doesn't work with Panasonic Raw
 # require 'geonames'
-load 'geonames.rb' # Note this is a file, not a gem. 
-# require 'pg' # https://bitbucket.org/ged/ruby-pg/wiki/Home for using PostGIS for geonames local files. Doesn't make sense now?
+load 'geonames.rb' # Note this is a file, not a gem. I guess the gem didn't work?
 
 require_relative 'lib/LatestDownloadsFolderEmpty_Pashua'
 require_relative 'lib/SDorHD'
@@ -36,13 +35,8 @@ srcSDfolder = sdCard + "DCIM/"  # SD folder
 # Quit using this file and just get the folder name from the file name which will be stored on the card.
 sdFolderFile = thisScript + "currentData/SDfolder.txt" # shouldn't need full path
 
-# # Appropriate folders on Knobby Aperture NOT USING THIS AS MAIN PLACE ANYMORE
-# downloadsFolders = "/Volumes/Daguerre/_Download folder/"
-# destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
-# destOrig  = downloadsFolders + "_already imported/" # folder to move originals to if not done in
-
 # Appropriate temporary folders on laptop
-# srcHD = "/Users/gscar/Pictures/_Photo Processing Folders/Download folder/" # for laptop use. NEED TO SET UP TRAVEL OPTION
+# srcHD = "/Users/gscar/Pictures/_Photo Processing Folders/Download folder/" # for laptop use. NEED TO SET UP TRAVEL OPTION/ ?? Dec 2018 doesn't make sense anymore. Maybe it does for traveling with MBP
 laptopLocation = "/Users/gscar/Pictures/_Photo Processing Folders/"
 laptopDownloadsFolder = laptopLocation + "Download folder/"
 laptopDestination     = laptopLocation + "Processed photos to be imported to Aperture/"
@@ -51,33 +45,30 @@ laptopDestOrig        = laptopLocation + "Originals to archive/"
 # Folders on portable drive: Daguerre
 downloadsFolders = "/Volumes/Daguerre/_Download folder/"
 downloadsFolders = "/Volumes/Daguerre/_Download folder/Ethiopia 2018/" # temp for Ethiopia 
-# downloadsFolders = "/Volumes/Knobby Aperture Two/_Download folder/" # Went south early 2017
 srcHD     = downloadsFolders + " Drag Photos HERE/"  # Photos copied from camera, sent by others, etc.
 destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
 destOrig  = downloadsFolders + "_imported-archive" # folder to move originals to if not done in. No slash because getting double slash with one
-
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
-puts "64. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. "
+puts "52. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. "
 geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wikipedia—most general and osm—maybe better for cities
 timeZonesFile = "/Users/gscar/Dropbox/scriptsEtc/Greg camera time zones.yml"
 timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with
 gpsPhotoPerl = thisScript + "lib/gpsPhoto.pl"
 folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2018 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
-puts "60. Must manually set folderGPX for GPX file folders. Set also at lines 362 and 364. Particularly important at start of new year.\n "
+puts "58. Must manually set folderGPX for GPX file folders. Particularly important at start of new year.\n "
 geoNamesUser    = "geonames@web.knobby.ws" # Good but may use it up. Ran out after about 300 photos per hour.
 geoNamesUser2   = "geonamestwo@web.knobby.ws" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
-
-# puts "RUBY_DESCRIPTION: #{RUBY_DESCRIPTION}\n\n" # probably isn't always accurate. Just look in the purple on the window
 
 def lineNum()
   caller_infos = caller.first.split(":")
   # Note caller_infos[0] is file name
   caller_infos[1]
-end # line numbers of this file, useful for debugging
+end # line numbers of this file, useful for debugging and logging info to progress screen
 
 def ignoreNonFiles(item) # invisible files that shouldn't be processed
   item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon '
   # This is true when it should not be processed i.e. next if ignoreNonFiles(item) == true
+  # next if ignoreNonFiles(item) == true # how to use this
 end
 
 def gpsFilesUpToDate(folderGPX)
@@ -91,9 +82,9 @@ def timeStamp(timeNowWas)
   seconds = Time.now-timeNowWas
   minutes = seconds/60
   if minutes < 2
-    report = "#{seconds.to_i} seconds"
+    report = "#{lineNum}. #{seconds.to_i} seconds"
   else
-    report = "#{minutes.to_i} minutes"
+    report = "#{lineNum}. #{minutes.to_i} minutes"
   end   
   puts "-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -   #{report}. #{Time.now.strftime("%I:%M:%S %p")}   -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  "
   Time.now
@@ -142,7 +133,8 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
     Dir.chdir(src) # needed for glob
     Dir.glob("P*") do |item| 
       cardCount += 1
-      print(".") # crude activity bar
+      print(".") # crude activity bar. This doesn't happen
+      # put cardCount # another try at activity bar
       # puts "#{lineNum}.. src/item: #{src}#{item}."
       fn = src + item
       fnp = srcHD + "/" + item # using srcHD as the put files here place, might cause problems later
@@ -205,20 +197,22 @@ def uniqueFileName(filename)
 end
 
 def copyAndMove(srcHD,destPhoto,destOrig)
-  puts "\n#{lineNum}. Copy photos from #{srcHD}\n  to #{destPhoto} where the renaming will be done, \n  and the originals moved to an archive folder (#{destOrig})" 
+  puts "\n#{lineNum}. Copy photos from #{srcHD}\n      to #{destPhoto} where the renaming will be done, \n      and the originals moved to an archive folder (#{destOrig})" 
   #  Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
+  # Guess this method is slow because files are being copied
   # THIS METHOD WILL NOT WORK IF THE RAW FILE FORMAT ALPHABETICALLY COMES BEFORE JPG. SHOULD MAKE THIS MORE ROBUST
   photoFinalCount = 0
   delCount = 1
   itemPrev = "" # need something for first time through
-  fnp = "" # when looped back got error "undefined local variable or method ‘fnp’ for main:Object", so needs to be set here to remember it. Yes, this works, without this statement get an error 
-  Dir.foreach(srcHD) do |item| 
-    # puts "#{lineNum}.. photoFinalCount: #{photoFinalCount + 1}. item: #{item}."
-    next if item == '.' or item == '..' or item == '.DS_Store' 
+  fnp = "" # when looped back got error "undefined local variable or method ‘fnp’ for main:Object", so needs to be set here to remember it. Yes, this works, without this statement get an error
+  # puts "#{lineNum}. Files in #{srcHD}: #{Dir.entries(srcHD).sort}" # list of files to be processed
+  Dir.entries(srcHD).sort.each do |item| # This construct goes through each in order. Sometimes the files are not in order with Dir.foreach or Dir.entries without sort
+    # puts "\n#{lineNum}.. photoFinalCount: #{photoFinalCount + 1}. item: #{item}." # kind of a progress bar
+    next if item == '.' or item == '..' or item == '.DS_Store'
+    # next if ignoreNonFiles(item) == true
     # fileExt = File.extname(item)
     if File.basename(itemPrev, ".*") == File.basename(item,".*") && photoFinalCount != 0
      #  The following shouldn't be necessary, but is a check in case another kind of raw or who know what else. Only the FileUtils.rm(itemPrev) should be needed
-     # puts "#{lineNum}.. itemPrev: #{itemPrev}"
       if File.extname(itemPrev) ==".JPG"
         FileUtils.rm(fnp)
         # puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} will not be transferred because it's a jpg duplicate of a RAW version." # Is this slow? Turned off to try. Not sure.
@@ -230,21 +224,24 @@ def copyAndMove(srcHD,destPhoto,destOrig)
     end   # File.basename
     fn  = srcHD     + item # sourced from Drag Photos Here
     fnp = destPhoto + item # new file in Latest Download
-    # puts "#{lineNum}.. fnp: #{fnp}"
+    # puts "#{lineNum}. Copy from fn: #{fn}"  # debugging
     fnf = destOrig  + item # to already imported
+    # puts "#{lineNum}. to fnp: #{fnp}" # debuggin
     FileUtils.copy(fn, fnp) # making a copy in the Latest Downloads folder for further action
+    # puts "#{lineNum}.#{photoFinalCount}. #{fn} copied to #{fnp}" # dubugging
     if File.exists?(fnf)  # moving the original to _imported-archive, but not writing over existing files
       fnf = uniqueFileName(fnf)
       FileUtils.move(fn, fnf)
       puts "#{lineNum}. A file already existed with this name so it was changed to fnf: #{fnf}"
     else # no copies, so move
-      # puts "#{photoFinalCount} (#{lineNum}). #{fn} moved to #{fnf}"
+      # puts "#{lineNum}.#{photoFinalCount}. #{fn} moved to #{fnf}" # dubugging
       FileUtils.move(fn, fnf)
     end
-    # "#{lineNum}.. #{photoFinalCount + delCount} #{fn}"
+    # "#{lineNum}.. #{photoFinalCount + delCount} #{fn}" # More for debugging, but maybe OK as progress in this slow process
     itemPrev = item
     photoFinalCount += 1
-  end # Dir.foreach
+    print "." # Trying to get a progress bar
+  end # Dir.entries
   # puts "\#{lineNum}. #{photoFinalCount} photos have been moved and are ready for renaming and gpsing. #{delCount-1} duplicate jpg were not
   if delCount > 1
     comment = ". #{delCount-1} duplicate jpg were not moved."
@@ -277,6 +274,8 @@ def userCamCode(fn)
   case fileEXIF.model
   when "DMC-GX8"
     userCamCode = ".gs.P" # gs for photographer. P for *P*anasonic Lumix
+  when "iPhone X"
+    userCamCode = ".i" # gs for photographer. i for iPhone
   when "DMC-GX7"
     userCamCode = ".gs.P" # gs for photographer. P for *P*anasonic Lumix
   when "DMC-TS5"
@@ -295,7 +294,7 @@ cd  when "Canon PowerShot S100"
   return userCamCode
 end # userCamCode
 
-def fileAnnotate(fn, fileEXIF, fileDateUTCstr, tzoLoc)  # writing original filename and dateTimeOrig to the photo file.
+def fileAnnotate(fn, fileEXIF, fileDateTimeOriginalstr, tzoLoc)  # writing original filename and dateTimeOrig to the photo file.
   # Called from rename
   # writing original filename and dateTimeOrig to the photo file.
   # SEEMS SLOPPY THAT I'M OPENING THE FILE ELSEWHERE AND SAVING IT HERE
@@ -306,12 +305,13 @@ def fileAnnotate(fn, fileEXIF, fileDateUTCstr, tzoLoc)  # writing original filen
     else
       tzoLocPrint = "+" + tzoLoc.to_s
     end
-     fileEXIF.instructions = "#{fileDateUTCstr} #{tzoLocPrint}" # Time zone of photo is GMT #{tzoLoc} unless TS5?"
-    # fileEXIF.comment = "Capture date: #{fileDateUTCstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Doesn't show up in Aperture
+     fileEXIF.instructions = "#{fileDateTimeOriginalstr} #{tzoLocPrint}" # Time zone of photo is GMT #{tzoLoc} unless TS5?" or travel
+    # fileEXIF.comment = "Capture date: #{fileDateTimeOriginalstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Doesn't show up in Aperture
     # fileEXIF.source = fileEXIF.title = "#{File.basename(fn)} original filename" # Source OK, but Title seemed a bit better
     fileEXIF.source = "#{File.basename(fn)}"
-    fileEXIF.TimeZoneOffset = tzoLoc # Can't find this in EXIF data, but why no error
-    fileEXIF.TimeZoneOffset = 3.6
+    fileEXIF.TimeZoneOffset = tzoLoc # Time Zone Offset, (1 or 2 values: 1. The time zone offset of DateTimeOriginal from GMT in hours, 2. If present, the time zone offset of ModifyDate)
+    # Am I misusing this? I may using it as the TimeZone for photos taken GMT 0 TODO
+    # OffsetTimeOriginal	(time zone for DateTimeOriginal) TODO 
     
     # Wiping out bad GPS data on TS5. Maybe should test for TS5 to save checking all other files
     if !fileEXIF.GPSDateTime  # i.e. == "false" # condition if bad data for TS5. Note is nil for GX7. Not changing because can use as flag
@@ -323,9 +323,9 @@ def fileAnnotate(fn, fileEXIF, fileDateUTCstr, tzoLoc)  # writing original filen
   end
 end # fileAnnotate. writing original filename and dateTimeOrig to the photo file and cleaning up TS5 photos with bad (no) GPS data.
 
-# With the fileDateUTC for the photo, find the time zone based on the log.
+# With the fileDateTimeOriginal for the photo, find the time zone based on the log.
 # The log is in numerical order and used as index here. The log is a YAML file
-def timeZone(fileDateUTC, timeZones)
+def timeZone(fileDateTimeOriginal, timeZones)
   # theTimeAhead = "2050-01-01T00:00:00Z"
   # puts "276. timeZones: #{timeZones}. "
   # timeZones = YAML.load(File.read(timeZonesFile)) # should we do this once somewhere else? Let's try that in this new version
@@ -335,29 +335,31 @@ def timeZone(fileDateUTC, timeZones)
     theTime = timeZones[i]["timeGMT"]
     # puts "\nA. i: #{i}. theTime: #{theTime}" # i: 502. theTime: 2011-06-29T01-00-00Z
     theTime = Time.parse(theTime) # class: time Wed Jun 29 00:00:00 -0700 2011
-    # puts "\n293.. #{i}. fileDateUTC: #{fileDateUTC}. theTime: #{theTime}. fileDateUTC.class: #{theTime.class}. fileDateUTC.class: #{theTime.class}"
+    # puts "\n293.. #{i}. fileDateTimeOriginal: #{fileDateTimeOriginal}. theTime: #{theTime}. fileDateTimeOriginal.class: #{theTime.class}. fileDateTimeOriginal.class: #{theTime.class}"
     # puts "Note that these dates are supposed to be UTC, but are getting my local time zone attached."
-    if fileDateUTC > theTime
+    if fileDateTimeOriginal > theTime
       theTimeZone = timeZones[i]["zone"]
-      # puts "C. #{i}. fileDateUTC: #{fileDateUTC} fileDateUTC.class: #{fileDateUTC.class}. theTimeZone: #{theTimeZone}."
+      # puts "C. #{i}. fileDateTimeOriginal: #{fileDateTimeOriginal} fileDateTimeOriginal.class: #{fileDateTimeOriginal.class}. theTimeZone: #{theTimeZone}."
       return theTimeZone
     else
       i= (i.to_i-1).to_s
     end
   end # loop
-  # puts "D. #{i}. fileDateUTC: #{fileDateUTC} fileDateUTC.class: #{fileDateUTC.class}. theTimeZone: #{theTimeZone}. "
+  # puts "D. #{i}. fileDateTimeOriginal: #{fileDateTimeOriginal} fileDateTimeOriginal.class: #{fileDateTimeOriginal.class}. theTimeZone: #{theTimeZone}. "
   return theTimeZone
 end # timeZone
 
 def rename(src, timeZonesFile, timeNowWas)
   # src is destPhoto folder
   # Until 2017, this assumed camera on UTC, but doesn't work well for camera's with a GPS (and has problems otherwise)
+  # 60 minutes for ~1000 photos to rename
   # Need an exception for my GPS camera, the TS5
   # timeNowWas used for timing process. Took 1 sec. per file. Not normally used
   fileDatePrev = ""
   dupCount = 0
   count    = 0
-  tzoLoc = "" # trying to get this variable to be available as result and scoping seems to be a problem  seqLetter = %w(a b c d e f g h i j k l m n o p q r s t u v w x y z aa bb cc) # seems like this should be an array, not a list
+  tzoLoc = "" # trying to get this variable to be available as result and scoping seems to be a problem  
+  seqLetter = %w(a b c d e f g h i j k l m n o p q r s t u v w x y z aa bb cc) # seems like this should be an array, not a list
   Dir.foreach(src) do |item|
     next if ignoreNonFiles(item) == true # skipping file when true
     # puts "#{lineNum}. #{item} will be renamed. " # #{timeNowWas = timeStamp(timeNowWas)}
@@ -370,21 +372,27 @@ def rename(src, timeZonesFile, timeNowWas)
     if File.file?(fn)
       # Determine the time and time zone where the photo was taken
       # puts "315.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}." #  #{timeNowWas = timeStamp(timeNowWas)}
-      fileDateUTC = fileEXIF.dateTimeOriginal # class time, but adds the local time zone to the result although it is really UTC (or whatever zone my camera is set for. For TS5, the time date is accurate with time zone and for other Panasonics using local time as with travel)
-      panasonicLocation = fileEXIF.location # Defined if on trip. If defined then time stamp is that local time
-      tzoLoc = timeZone(fileDateUTC, timeZonesFile)
-      puts count == 1 ?  "\n#{lineNum}. panasonicLocation: #{panasonicLocation}. tzoLoc: #{tzoLoc}" : ""# Just to show one value, otherwise without if prints for each file
-
+      fileDateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
+      panasonicLocation = fileEXIF.location # Defined by Panasonic if on trip. If defined then time stamp is that local time
+      tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # the time zone the picture was taken in, doesn't say anything about what times are recorded in the photo's EXIF. I'm doing this slightly wrong, because it's using the photo's recorded date which could be either GMT or local time. But only wrong if the photo was taken too close to the time when camera changed time zones
+      puts count == 1 ? "\n#{lineNum}. panasonicLocation: #{panasonicLocation}. tzoLoc: #{tzoLoc}" : ""# Just to show one value, otherwise without if prints for each file
+      # Also determine Time Zone TODO and write to file OffsetTimeOriginal	(time zone for DateTimeOriginal). Either GMT or use tzoLoc if recorded in local time as determined below
       if camModel == "DMC-TS5"
         timeChange = 0
-      elsif panasonicLocation.length > 0
+        fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
+      elsif panasonicLocation.length > 0 # DateTimeOriginal is in local time. Look at https://sno.phy.queensu.ca/~phil/exiftool/TagNames/Panasonic.html for other Tags that could be used
         timeChange = 0
+        fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
+      elsif camModel == "iPhone X"  # DateTimeOriginal is in local time
+        timeChange = 0
+        fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
       else
         timeChange = (3600*tzoLoc) # previously had error capture on this. Maybe for general cases which I'm not longer covering
+        fileEXIF.OffsetTimeOriginal = "GMT"
       end # if camModel
 
-      fileDate = fileDateUTC + timeChange # date in local time photo was taken    
-      fileDateUTCstr = fileDateUTC.to_s[0..-6]
+      fileDate = fileDateTimeOriginal + timeChange # date in local time photo was taken    
+      fileDateTimeOriginalstr = fileDateTimeOriginal.to_s[0..-6]
 
       # filePrev = fn
       # Working out if files at the same time
@@ -405,20 +413,20 @@ def rename(src, timeZonesFile, timeNowWas)
       # fileBaseNamePrev = fileBaseName
    
       # File renaming and/or moving happens here
-      # puts "#{lineNum}. #{count+1}. dateTimeOriginal: #{fileDateUTC}. item: #{item}. camModel: #{camModel}" # . #{timeNowWas = timeStamp(timeNowWas)} # took 1 sec per file
-      fileAnnotate(fn, fileEXIF, fileDateUTCstr, tzoLoc) # adds original file name, capture date and time zone to EXIF. Comments which I think show up as instructions in Aperture. Also wiping out bad GPS data on TS5
+      # puts "#{lineNum}. #{count+1}. dateTimeOriginal: #{fileDateTimeOriginal}. item: #{item}. camModel: #{camModel}" # . #{timeNowWas = timeStamp(timeNowWas)} # took 1 sec per file
+      fileAnnotate(fn, fileEXIF, fileDateTimeOriginalstr, tzoLoc) # adds original file name, capture date and time zone to EXIF. Comments which I think show up as instructions in Aperture. Also wiping out bad GPS data on TS5
       fnp = src + fileBaseName + File.extname(fn).downcase
       File.rename(fn,fnp)   
       count += 1
-      # puts "#{lineNum}.#{count}. Got to here. tzoLoc: #{tzoLoc}"
-      # temp = tzoLoc
+      # print " #{count}" Trying for  progress indicator
+      # puts "#{lineNum}.#{count} #{timeNowWas = timeStamp(timeNowWas)}. #{fileBaseName}" # temp to see how long taking. 1 to 4 seconds on MBP accessing photos on attached portable drive
     end # 3. if File
     # puts "#{lineNum}. Got to here. tzoLoc: #{tzoLoc}"
     
   end # 2. Find
   # return tzoLoc # used by ?
   # puts "#{lineNum}. Got to here. tzoLoc: #{tzoLoc}" # tzoLoc doesn't exist here
-  return tzoLoc
+  return tzoLoc # the time zone the picture was taken in,
 end # renaming photo files in the downloads folder and writing in original time.
 
 def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop, tzoLoc)
@@ -446,13 +454,13 @@ def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop, tzoLoc)
       if camModel  == "DMC-TS5"
         # Offset sign is same as GMT offset, eg, we are -8, but need to increase the time to match UST, therefore negative
         timeOffset = - fileEXIF.dateTimeOriginal.utc_offset # Time zone is set in camera
-        puts "#{lineNum}. timeOffset: #{timeOffset}"
+        puts "#{lineNum}. timeOffset: #{timeOffset} for DMC-TS5 photos stamped in local time."
       elsif panasonicLocation.length > 0 # Panasonic in Travel Mode
         timeOffset = tzoLoc * 3600
-        puts "#{lineNum}. timeOffset: #{timeOffset}"
+        puts "#{lineNum}. timeOffset: #{timeOffset} with photos stamped in local time."
       else # GX7 time is UTC
         timeOffset = 0 # camelCase, but perl variable is lowercase
-        puts "#{lineNum}. timeOffset: #{timeOffset}"
+        puts "#{lineNum}. timeOffset: #{timeOffset} with photos stamped in GMT"
       end # if camModel
       
       fileEXIF.save 
@@ -654,7 +662,8 @@ def writeTimeDiff(perlOutput)
 end #  Write timeDiff to the photo files
 
 ## The "program" #################
-timeNowWas = timeStamp(Time.now) # this first use of timeStamp is different
+timeNowWas = timeStamp(Time.now) # Initializing. Later calls are different
+# timeNowWas = timeStamp(timeNowWas)
 puts "Are the gps logs up to date?" # Should check for this since I don't see the message
 puts "Fine naming and moving started  . . . . . . . . . . . . " # for trial runs  #{timeNowWas}
 
@@ -680,8 +689,8 @@ end
 # Check if photos are already in Latest Download folder. A problem because they get reprocessed by gps coordinate adding.
 folderPhotoCount = Dir.entries(destPhoto).count - 3 # -3 is a crude way to take care of ., .., .. Crude is probably OK since this isn't critical. If one real photo is there, not a big problem
 if folderPhotoCount > 0
+  puts "#{lineNum}. downloadsFolders: #{downloadsFolders}. Check if Pashua warning window appears"
   downloadsFolderEmpty(destPhoto, folderPhotoCount) # Pashua window
-  puts "#{lineNum}. downloadsFolders: #{downloadsFolders}"
 else
   puts "\n#{lineNum}. Downloads folder is empty and script will continue."
 end
@@ -730,9 +739,9 @@ else # whichOne=="HD", but what
   destOrig  = prefsPhoto["destOrig"]
 end # whichOne=="SD"
 
-puts "\n#{lineNum}. Intialization complete. File renaming and copying/moving beginning. Time below is responding to options requests via Pashua"
+puts "\n#{lineNum}. Intialization complete. File renaming and copying/moving beginning. Time below is responding to options requests via Pashua if coping an SD card, otherwise times will be the same"
 
-timeNowWas = timeStamp(Time.now) # Initial time stamp is different. Had this off and no time for start when copying from SD card
+timeNowWas = timeStamp(timeNowWas)
 
 #  If working from SD card, copy or move files to " Drag Photos HERE Drag Photos HERE" folder, then will process from there.
 # puts "#{lineNum}..   src: #{src} \nsrcHD: #{srcHD}"
@@ -749,16 +758,16 @@ copyAndMove(srcHD,destPhoto,destOrig)
 
 # unmount card. Test if using the SD
 # puts "\n#{lineNum}. fromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}"
-whichOne=="SD" ? unmountCard(sdCard) : ""
+whichOne =="SD" ? unmountCard(sdCard) : ""
 
 timeNowWas = timeStamp(timeNowWas)
 
 puts "\n#{lineNum}. Rename the photo files with date and an ID for the camera or photographer. #{timeNowWas}\n"
-# tzoLoc = timeZone(fileDateUTC, timeZonesFile) # Second time this variable name is used, other is in a method
-tzoLoc = -rename(destPhoto, timeZones, timeNowWas) # should figure logic of negative, maybe should be done in rename.Needs to be negative, but shows minus for GMT plus—confusing
+# tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # Second time this variable name is used, other is in a method
+tzoLoc = - rename(destPhoto, timeZones, timeNowWas) # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
 timeNowWas = timeStamp(timeNowWas)
 
-puts "\n#{lineNum}. Using perl script to add gps coordinates. Will take a while as all the gps files for the year will be processed and then all the photos. tzoLoc: #{tzoLoc}"
+puts "\n#{lineNum}. Using perl script to add gps coordinates. Will take a while as all the gps files for the year will be processed and then all the photos. -tzoLoc, `i.e.: GMT #{-tzoLoc}"
 
 # Add GPS coordinates. Will add location later using some options depending on which country since different databases are relevant.
 perlOutput = addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop, tzoLoc)
