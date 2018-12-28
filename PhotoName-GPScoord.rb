@@ -29,9 +29,9 @@ require_relative 'lib/Photo_Naming_Pashua–HD2'
 require_relative 'lib/SDorHD'
 
 thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
-lastPhotoReadTextFile = "/Volumes/Untitled/DCIM/" # SD folder alternate since both this and one below occur 
-sdCardAlt   = "/Volumes/Untitled/"
-sdCard      = "/Volumes/NO NAME/"
+lastPhotoReadTextFile = "/Volumes/LUMIX/DCIM/" # SD folder alternate since both this and one below occur 
+sdCardAlt   = "/Volumes/NO NAME/"
+sdCard      = "/Volumes/LUMIX/"
 srcSDfolderAlt = sdCardAlt + "DCIM/" # SD folder alternate since both this and one below occur 
 srcSDfolder = sdCard + "DCIM/"  # SD folder 
 
@@ -50,8 +50,8 @@ downloadsFolders = "/Volumes/Daguerre/_Download folder/"
 downloadsFolders = "/Users/gscar/Pictures/_Download folder iMac/" # temp on iMac until Daguerre is back
 srcHD     = downloadsFolders + " Drag Photos HERE/"  # Photos copied from camera, sent by others, etc.
 destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
-# destOrig  = downloadsFolders + "_imported-archive" # folder to move originals to if not done in. No slash because getting double slash with one
-destOrig  = "/Users/gscar/Documents/◊ Pre-trash/duplicates" # TEMP FOR REDOING
+destOrig  = downloadsFolders + "_imported-archive" # folder to move originals to if not done in. No slash because getting double slash with one
+# destOrig  = "/Users/gscar/Documents/◊ Pre-trash/duplicates" # TEMP FOR REDOING
 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
 puts "52. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. "
@@ -345,7 +345,7 @@ def timeZone(fileDateTimeOriginal, timeZones)
     theTime = timeZones[i]["timeGMT"]
     # puts "\nA. i: #{i}. theTime: #{theTime}" # i: 502. theTime: 2011-06-29T01-00-00Z
     theTime = Time.parse(theTime) # class: time Wed Jun 29 00:00:00 -0700 2011
-    puts "\n#{lineNum}.. #{i}. fileDateTimeOriginal: #{fileDateTimeOriginal}. theTime: #{theTime}. fileDateTimeOriginal.class: #{theTime.class}. fileDateTimeOriginal.class: #{theTime.class}"
+    # puts "\n#{lineNum}.. #{i}. fileDateTimeOriginal: #{fileDateTimeOriginal}. theTime: #{theTime}. fileDateTimeOriginal.class: #{theTime.class}. fileDateTimeOriginal.class: #{theTime.class}"
     # puts "Note that these dates are supposed to be UTC, but are getting my local time zone attached."
     if fileDateTimeOriginal > theTime
       theTimeZone = timeZones[i]["zone"]
@@ -383,18 +383,18 @@ def rename(src, timeZonesFile, timeNowWas)
       # Determine the time and time zone where the photo was taken
       # puts "315.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}." #  #{timeNowWas = timeStamp(timeNowWas)}
       fileDateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
-      if fileDateTimeOriginal == nil
+      if fileDateTimeOriginal == nil # TODO This probably could be cleaned up, but then normally not used
         fileDateTimeOriginal = fileEXIF.DateCreated  # PNG don't have dateTimeOriginal
-        camModel ="PNG" # Dummy value for test below
+        camModel ="MISC" # Dummy value for test below
         fileDateTimeOriginal == nil ? fileDateTimeOriginal = fileEXIF.CreationDate : "" # now fixing .mov files
         fileDateTimeOriginal == nil ? fileDateTimeOriginal = fileEXIF.MediaCreateDate : "" # now fixing .mp4 files. Has other dates, but at least for iPhone mp4s the gps info exists
       end
       panasonicLocation = fileEXIF.location # Defined by Panasonic if on trip. If defined then time stamp is that local time
-      puts "#{lineNum}. panasonicLocation: #{panasonicLocation}"
+      # puts "#{lineNum}. panasonicLocation: #{panasonicLocation}"
       tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # the time zone the picture was taken in, doesn't say anything about what times are recorded in the photo's EXIF. I'm doing this slightly wrong, because it's using the photo's recorded date which could be either GMT or local time. But only wrong if the photo was taken too close to the time when camera changed time zones
       puts count == 1 ? "\n#{lineNum}. panasonicLocation: #{panasonicLocation}. tzoLoc: #{tzoLoc}" : ""# Just to show one value, otherwise without if prints for each file
       # Also determine Time Zone TODO and write to file OffsetTimeOriginal	(time zone for DateTimeOriginal). Either GMT or use tzoLoc if recorded in local time as determined below
-      if camModel == "DMC-TS5" or "PNG"
+      if camModel == "DMC-TS5" or camModel ==  "MISC"
         timeChange = 0
         fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
       elsif camModel.include?("DMC") and panasonicLocation.length > 0 # DateTimeOriginal is in local time. Look at https://sno.phy.queensu.ca/~phil/exiftool/TagNames/Panasonic.html for other Tags that could be used
