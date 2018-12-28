@@ -1,10 +1,9 @@
 #!/usr/bin/env ruby
-# Works with Ruby 2.4.0. Getting errors about some Ignoring <some gems which aren't being used by this script> because its extensions are not built.
 # Can be made to work with TS5 completely because GPS coordinates are batch added and TS5 photos missing coordinates have different time stamp than other cameras, so have to modify --timeoffset in Perl script by hand for batch of TS5 photos. Is still true since added options for travel and TS5?
 # Relabeling of mp4 works with this script.
 #  Look at speeding up with https://github.com/tonytonyjan/exif for rename and annotate which is rather slow. 8 min. for 326 photos
 
-require 'rubygems' # # Needed by rbosa, mini_exiftool, and maybe by appscript. Not needed if correct path set somewhere.
+# require 'rubygems' # # Needed by rbosa, mini_exiftool, and maybe by appscript. Not needed if correct path set somewhere.
 system ('gem env') # for debugging problem with gem not loading https://stackoverflow.com/questions/53202164/textmate-chruby-and-ruby-gems
 puts "\nGem.path: #{Gem.path}"
 require 'fileutils'
@@ -15,15 +14,19 @@ require "time"
 require 'shellwords'
 require 'irb' # binding.irb where error checking is desired
 require 'mini_exiftool'
+# require '/Library/Ruby/Gems/2.3.0/gems/mini_exiftool-2.9.0/lib/mini_exiftool.rb'
 # require 'exif' # added later. A partial implementation of ExifTool, but faster than mini_exiftool. Commented out since doesn't work with Panasonic Raw
 # require 'geonames'
-load 'geonames.rb' # Note this is a file, not a gem. I guess the gem didn't work?
+# require '/Library/Ruby/Gems/2.3.0/gems/addressable-2.5.2/lib/addressable/template.rb'
+# require '/Library/Ruby/Gems/2.3.0/gems/addressable-2.5.2/lib/addressable/version.rb'
+# load 'geonames.rb' # Note this is a file, not a gem. I guess the gem didn't work?
+load '/Users/gscar/Documents/Ruby/Garmin Log renaming/geonames.rb' # above fails from command line. Even if move file there; currently it is an alias
 
+require_relative 'lib/gpsYesPashua'
 require_relative 'lib/LatestDownloadsFolderEmpty_Pashua'
-require_relative 'lib/SDorHD'
 require_relative 'lib/Photo_Naming_Pashua-SD2'
 require_relative 'lib/Photo_Naming_Pashua–HD2'
-require_relative 'lib/gpsYesPashua'
+require_relative 'lib/SDorHD'
 
 thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
 lastPhotoReadTextFile = "/Volumes/Untitled/DCIM/" # SD folder alternate since both this and one below occur 
@@ -44,10 +47,12 @@ laptopDestOrig        = laptopLocation + "Originals to archive/"
 
 # Folders on portable drive: Daguerre
 downloadsFolders = "/Volumes/Daguerre/_Download folder/"
-downloadsFolders = "/Volumes/Daguerre/_Download folder/Ethiopia 2018/" # temp for Ethiopia 
+downloadsFolders = "/Users/gscar/Pictures/_Download folder iMac/" # temp on iMac until Daguerre is back
 srcHD     = downloadsFolders + " Drag Photos HERE/"  # Photos copied from camera, sent by others, etc.
 destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
-destOrig  = downloadsFolders + "_imported-archive" # folder to move originals to if not done in. No slash because getting double slash with one
+# destOrig  = downloadsFolders + "_imported-archive" # folder to move originals to if not done in. No slash because getting double slash with one
+destOrig  = "/Users/gscar/Documents/◊ Pre-trash/duplicates" # TEMP FOR REDOING
+
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
 puts "52. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. "
 geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wikipedia—most general and osm—maybe better for cities
@@ -197,7 +202,7 @@ def uniqueFileName(filename)
 end
 
 def copyAndMove(srcHD,destPhoto,destOrig)
-  puts "\n#{lineNum}. Copy photos from #{srcHD}\n      to #{destPhoto} where the renaming will be done, \n      and the originals moved to an archive folder (#{destOrig})" 
+  puts "\n#{lineNum}. Copy photos from #{srcHD}\n      to #{destPhoto} where the renaming will be done, \n      and the originals moved to an archive folder (#{destOrig})\n Running dots are progress bar" 
   #  Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
   # Guess this method is slow because files are being copied
   # THIS METHOD WILL NOT WORK IF THE RAW FILE FORMAT ALPHABETICALLY COMES BEFORE JPG. SHOULD MAKE THIS MORE ROBUST
@@ -207,26 +212,31 @@ def copyAndMove(srcHD,destPhoto,destOrig)
   fnp = "" # when looped back got error "undefined local variable or method ‘fnp’ for main:Object", so needs to be set here to remember it. Yes, this works, without this statement get an error
   # puts "#{lineNum}. Files in #{srcHD}: #{Dir.entries(srcHD).sort}" # list of files to be processed
   Dir.entries(srcHD).sort.each do |item| # This construct goes through each in order. Sometimes the files are not in order with Dir.foreach or Dir.entries without sort
+    # Item is the file name
     # puts "\n#{lineNum}.. photoFinalCount: #{photoFinalCount + 1}. item: #{item}." # kind of a progress bar
     next if item == '.' or item == '..' or item == '.DS_Store'
     # next if ignoreNonFiles(item) == true
     # fileExt = File.extname(item)
     if File.basename(itemPrev, ".*") == File.basename(item,".*") && photoFinalCount != 0
      #  The following shouldn't be necessary, but is a check in case another kind of raw or who know what else. Only the FileUtils.rm(itemPrev) should be needed
-      if File.extname(itemPrev) ==".JPG"
-        FileUtils.rm(fnp)
-        # puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} will not be transferred because it's a jpg duplicate of a RAW version." # Is this slow? Turned off to try. Not sure.
+     itemPrevExtName = File.extname(itemPrev) # since reusing below
+      if itemPrevExtName == ".JPG" or itemPrevExtName == ".jpg" # added lower case for iPhone to sort HEIC
+        FileUtils.rm(fnp) # Removing the jpg file from LatestDownload which is "duplicate" of a RAW that we're now considering
+        puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} will not be transferred because it's a jpg duplicate of a RAW version." # Is this slow? Turned off to try. Not sure.
         delCount += 1
         photoFinalCount -= 1
       else
-        puts "#{lineNum}. Something very wrong here with trying to remove JPGs when there is a corresponding .RW2"
+        puts "#{lineNum}. Something very wrong here with trying to remove JPGs when there is a corresponding .RW2. itemPrev: #{itemPrev}. item: #{item}."
+        if itemPrevExtName == ".HEIC"
+          FileUtils.rm(destPhoto + itemPrev)
+        end
       end # File.extname  
     end   # File.basename
     fn  = srcHD     + item # sourced from Drag Photos Here
     fnp = destPhoto + item # new file in Latest Download
     # puts "#{lineNum}. Copy from fn: #{fn}"  # debugging
     fnf = destOrig  + item # to already imported
-    # puts "#{lineNum}. to fnp: #{fnp}" # debuggin
+    # puts "#{lineNum}. to fnp: #{fnp}" # debugging
     FileUtils.copy(fn, fnp) # making a copy in the Latest Downloads folder for further action
     # puts "#{lineNum}.#{photoFinalCount}. #{fn} copied to #{fnp}" # dubugging
     if File.exists?(fnf)  # moving the original to _imported-archive, but not writing over existing files
@@ -335,7 +345,7 @@ def timeZone(fileDateTimeOriginal, timeZones)
     theTime = timeZones[i]["timeGMT"]
     # puts "\nA. i: #{i}. theTime: #{theTime}" # i: 502. theTime: 2011-06-29T01-00-00Z
     theTime = Time.parse(theTime) # class: time Wed Jun 29 00:00:00 -0700 2011
-    # puts "\n293.. #{i}. fileDateTimeOriginal: #{fileDateTimeOriginal}. theTime: #{theTime}. fileDateTimeOriginal.class: #{theTime.class}. fileDateTimeOriginal.class: #{theTime.class}"
+    puts "\n#{lineNum}.. #{i}. fileDateTimeOriginal: #{fileDateTimeOriginal}. theTime: #{theTime}. fileDateTimeOriginal.class: #{theTime.class}. fileDateTimeOriginal.class: #{theTime.class}"
     # puts "Note that these dates are supposed to be UTC, but are getting my local time zone attached."
     if fileDateTimeOriginal > theTime
       theTimeZone = timeZones[i]["zone"]
@@ -373,14 +383,22 @@ def rename(src, timeZonesFile, timeNowWas)
       # Determine the time and time zone where the photo was taken
       # puts "315.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}." #  #{timeNowWas = timeStamp(timeNowWas)}
       fileDateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
+      if fileDateTimeOriginal == nil
+        fileDateTimeOriginal = fileEXIF.DateCreated  # PNG don't have dateTimeOriginal
+        camModel ="PNG" # Dummy value for test below
+        fileDateTimeOriginal == nil ? fileDateTimeOriginal = fileEXIF.CreationDate : "" # now fixing .mov files
+        fileDateTimeOriginal == nil ? fileDateTimeOriginal = fileEXIF.MediaCreateDate : "" # now fixing .mp4 files. Has other dates, but at least for iPhone mp4s the gps info exists
+      end
       panasonicLocation = fileEXIF.location # Defined by Panasonic if on trip. If defined then time stamp is that local time
+      puts "#{lineNum}. panasonicLocation: #{panasonicLocation}"
       tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # the time zone the picture was taken in, doesn't say anything about what times are recorded in the photo's EXIF. I'm doing this slightly wrong, because it's using the photo's recorded date which could be either GMT or local time. But only wrong if the photo was taken too close to the time when camera changed time zones
       puts count == 1 ? "\n#{lineNum}. panasonicLocation: #{panasonicLocation}. tzoLoc: #{tzoLoc}" : ""# Just to show one value, otherwise without if prints for each file
       # Also determine Time Zone TODO and write to file OffsetTimeOriginal	(time zone for DateTimeOriginal). Either GMT or use tzoLoc if recorded in local time as determined below
-      if camModel == "DMC-TS5"
+      if camModel == "DMC-TS5" or "PNG"
         timeChange = 0
         fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
-      elsif panasonicLocation.length > 0 # DateTimeOriginal is in local time. Look at https://sno.phy.queensu.ca/~phil/exiftool/TagNames/Panasonic.html for other Tags that could be used
+      elsif camModel.include?("DMC") and panasonicLocation.length > 0 # DateTimeOriginal is in local time. Look at https://sno.phy.queensu.ca/~phil/exiftool/TagNames/Panasonic.html for other Tags that could be used
+        # Above first checking that is a Panasonic Lumix, otherwise will error on second test which checks if using travel
         timeChange = 0
         fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
       elsif camModel == "iPhone X"  # DateTimeOriginal is in local time
@@ -455,7 +473,7 @@ def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop, tzoLoc)
         # Offset sign is same as GMT offset, eg, we are -8, but need to increase the time to match UST, therefore negative
         timeOffset = - fileEXIF.dateTimeOriginal.utc_offset # Time zone is set in camera
         puts "#{lineNum}. timeOffset: #{timeOffset} for DMC-TS5 photos stamped in local time."
-      elsif panasonicLocation.length > 0 # Panasonic in Travel Mode
+      elsif camModel.include?("DMC") and panasonicLocation.length > 0 # Panasonic in Travel Mode
         timeOffset = tzoLoc * 3600
         puts "#{lineNum}. timeOffset: #{timeOffset} with photos stamped in local time."
       else # GX7 time is UTC
@@ -539,15 +557,15 @@ def addLocation(src, geoNamesUser)
           countryCode  = countryCodeGeo['countryCode']
           # puts "#{lineNum}.. countryCode #{countryCode}"
         rescue
-          begin
-            # Commented out because of errors with Phillipines
+          # begin
+   #          # Commented out because of errors with "invalid user"
             countryCodeGeo = api.find_nearby_place_name(lat: lat, lng: lon).first # works for Turkey
-            puts "#{lineNum}.. countryCodeGeo:\n#{countryCodeGeo}"
-            countryCode  = countryCodeGeo['countryCode']
-          rescue SocketError # SocketError: getaddrinfo: nodename nor servname provided, or not known. NOT SURE WHAT THE FAILURE IS HERE. WILL SEE IF IT HAPPENS AGAIN
-            puts " #{lineNum}. Failing for api.find_nearby_place_name(lat: lat, lng: lon).first #{lat} #{lon} \nfor #{fn}\n"
-            $stderr.print  $! # Thomas p. 108
-          end
+   #          puts "#{lineNum}.. countryCodeGeo:\n#{countryCodeGeo}"
+   #          countryCode  = countryCodeGeo['countryCode']
+   #        rescue SocketError # SocketError: getaddrinfo: nodename nor servname provided, or not known. NOT SURE WHAT THE FAILURE IS HERE. WILL SEE IF IT HAPPENS AGAIN
+   #          puts " #{lineNum}. Failing for api.find_nearby_place_name(lat: lat, lng: lon).first #{lat} #{lon} \nfor #{fn}\n"
+   #          $stderr.print  $! # Thomas p. 108
+   #        end
         end
        
       # puts "#{lineNum}.. countryCode:  #{countryCode}"
@@ -785,4 +803,4 @@ timeNowWas = timeStamp(timeNowWas)
 addLocation(destPhoto, geoNamesUser)
 
 timeNowWas = timeStamp(timeNowWas)
-puts "\n#{lineNum}.-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -All done"
+puts "\n#{lineNum}.-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - All done"
