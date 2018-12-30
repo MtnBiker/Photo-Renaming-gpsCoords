@@ -62,7 +62,7 @@ gpsPhotoPerl = thisScript + "lib/gpsPhoto.pl"
 folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2018 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
 puts "58. Must manually set folderGPX for GPX file folders. Particularly important at start of new year.\n "
 geoNamesUser    = "MtnBiker" # This is login, user shows up as MtnBiker; but used to work with this. Good but may use it up. Ran out after about 300 photos per hour. This fixed it.
-geoNamesUser2   = "geonamestwo@web.knobby.ws" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
+geoNamesUser2   = "geonamestwo" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
 
 def lineNum()
   caller_infos = caller.first.split(":")
@@ -392,7 +392,7 @@ def rename(src, timeZonesFile, timeNowWas)
       panasonicLocation = fileEXIF.location # Defined by Panasonic if on trip. If defined then time stamp is that local time
       # puts "#{lineNum}. panasonicLocation: #{panasonicLocation}"
       tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # the time zone the picture was taken in, doesn't say anything about what times are recorded in the photo's EXIF. I'm doing this slightly wrong, because it's using the photo's recorded date which could be either GMT or local time. But only wrong if the photo was taken too close to the time when camera changed time zones
-      puts count == 1 ? "\n#{lineNum}. panasonicLocation: #{panasonicLocation}. tzoLoc: #{tzoLoc}" : ""# Just to show one value, otherwise without if prints for each file
+      puts count == 1 ? "#{lineNum}. panasonicLocation: #{panasonicLocation}. tzoLoc: #{tzoLoc}" : ""# Just to show one value, otherwise without if prints for each file
       # Also determine Time Zone TODO and write to file OffsetTimeOriginal	(time zone for DateTimeOriginal). Either GMT or use tzoLoc if recorded in local time as determined below
       if camModel == "DMC-TS5" or camModel ==  "MISC"
         timeChange = 0
@@ -623,20 +623,32 @@ def addLocation(src, geoNamesUser)
  #          country = ""
  #        end
                  
-        # off for Indonesia
-        findNearbyPostalCodes = api.find_nearby_postal_codes(lat: lat, lng: lon, maxRows: 1).first
-        state = findNearbyPostalCodes['adminName1']
-        puts "#{lineNum}.. state (outside US): #{state}"
-        city = findNearbyPostalCodes['placeName'] # close to city, but misses Dubrovnik and Zagreb
-        # Below was normal I think, but turned off to try to get Canada to work
-        city = api.find_nearby_place_name(lat: lat, lng: lon, maxRows: 1).first['toponymName'] # name or adminName1 could work too
-        puts "#{lineNum}.. city (outside US):  #{city}"
+        # off for Indonesia and Ethiopia, just skip if         
+        begin
+          findNearbyPostalCodes = api.find_nearby_postal_codes(lat: lat, lng: lon, maxRows: 1).first
+          state = findNearbyPostalCodes['adminName1']
+          puts "#{lineNum}.. state (outside US): #{state}"
+          city = findNearbyPostalCodes['placeName'] # close to city, but misses Dubrovnik and Zagreb
+          # Below was normal I think, but turned off to try to get Canada to work
+          city = api.find_nearby_place_name(lat: lat, lng: lon, maxRows: 1).first['toponymName'] # name or adminName1 could work too
+          puts "#{lineNum}.. city (outside US):  #{city}"
+        rescue
+          puts "#{lineNum}. findNearbyPostalCodes failed, probably in a foreign country"
+        end
+        
         # puts city =  api.find_nearby_wikipedia(lat: lat, lng: lon)["geonames"].first["title"] # the third item is a city, maybe could regex wikipedia, but doubt it's consistent enough to work
         puts "#{lineNum}.. Four lines below commented out for Canada"
         location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']
-        distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance'].to_f
-        puts "493.. location:     #{location}. distance: #{distance}. If distance > 0.3km location not used"
-        location = "" if distance < 0.3
+        begin # put this in with failure anotating Ethiopia photos
+          distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance'].to_f
+          puts "#{lineNum}. location:     #{location}. distance: #{distance}. If distance > 0.3km location not used"
+          location = "" if distance < 0.3
+        rescue 
+          puts "#{lineNum}. find api.find_nearby_wikipedia failed. Maybe a foreign country? "
+          location = "" # added this to help prevent failure on test below. May not be necessary
+        end
+        
+        
       end # if countryCode
       location = "" if city == location # cases where they where the same (Myers Flat, Callahan and Etna). Could try to find a location with some other find, maybe Wikipedia, but would want a distance check
       # puts "#{lineNum}.. Use MiniExiftool to write location info to photo files\n" # Have already set fileEXIF
