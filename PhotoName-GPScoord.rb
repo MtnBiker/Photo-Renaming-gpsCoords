@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# Working with Ruby 2.3.7, the system version. Except the problem of GeoNames::APIError: {"message"=>"invalid user", "value"=>10}
 # Can be made to work with TS5 completely because GPS coordinates are batch added and TS5 photos missing coordinates have different time stamp than other cameras, so have to modify --timeoffset in Perl script by hand for batch of TS5 photos. Is still true since added options for travel and TS5?
 # Relabeling of mp4 works with this script.
 #  Look at speeding up with https://github.com/tonytonyjan/exif for rename and annotate which is rather slow. 8 min. for 326 photos
@@ -13,8 +14,7 @@ require 'yaml'
 require "time"
 require 'shellwords'
 require 'irb' # binding.irb where error checking is desired
-require 'mini_exiftool'
-# require '/Library/Ruby/Gems/2.3.0/gems/mini_exiftool-2.9.0/lib/mini_exiftool.rb'
+require 'mini_exiftool' # PATH in TM to $PATH:/usr/local/bin for exiftool to be seen (careful easy to mix mini_exiftool and exiftool issues)
 # require 'exif' # added later. A partial implementation of ExifTool, but faster than mini_exiftool. Commented out since doesn't work with Panasonic Raw
 # require 'geonames'
 # require '/Library/Ruby/Gems/2.3.0/gems/addressable-2.5.2/lib/addressable/template.rb'
@@ -553,9 +553,9 @@ def addLocation(src, geoNamesUser)
         begin
           # doesn't work for Istanbul, works for Croatia, Canada
           countryCodeGeo = api.country_code(lat: lat, lng: lon) # doesn't work in Turkey
-          # puts "#{lineNum}.. countryCodeGeo: #{countryCodeGeo}"
+          puts "#{lineNum}.. countryCodeGeo: #{countryCodeGeo}"
           countryCode  = countryCodeGeo['countryCode']
-          # puts "#{lineNum}.. countryCode #{countryCode}"
+          puts "#{lineNum}.. countryCode #{countryCode}"
         rescue
           # begin
    #          # Commented out because of errors with "invalid user"

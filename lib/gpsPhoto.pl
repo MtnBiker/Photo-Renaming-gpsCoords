@@ -2,6 +2,7 @@
 
 # BEGIN { unshift @INC, "/usr/bin/lib/" }
 BEGIN { unshift @INC, "/usr/local/bin/lib/" }
+# /usr/local/bin/lib/Image/ExifTool/Exif.pm # Path Dec 2018
 # /usr/local/bin/lib/Image/ExifTool Path found 2015.11.12
 # The above line was in a previous version. Couldn't find Exif.pm without this line.
 
