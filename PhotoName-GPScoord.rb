@@ -61,7 +61,7 @@ timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get 
 gpsPhotoPerl = thisScript + "lib/gpsPhoto.pl"
 folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2018 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
 puts "58. Must manually set folderGPX for GPX file folders. Particularly important at start of new year.\n "
-geoNamesUser    = "geonames@web.knobby.ws" # Good but may use it up. Ran out after about 300 photos per hour.
+geoNamesUser    = "MtnBiker" # This is login, user shows up as MtnBiker; but used to work with this. Good but may use it up. Ran out after about 300 photos per hour. This fixed it.
 geoNamesUser2   = "geonamestwo@web.knobby.ws" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
 
 def lineNum()
