@@ -59,7 +59,7 @@ geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wiki
 timeZonesFile = "/Users/gscar/Dropbox/scriptsEtc/Greg camera time zones.yml"
 timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with
 gpsPhotoPerl = thisScript + "lib/gpsPhoto.pl"
-folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2018 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
+folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2019 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
 puts "58. Must manually set folderGPX for GPX file folders. Particularly important at start of new year.\n "
 geoNamesUser    = "MtnBiker" # This is login, user shows up as MtnBiker; but used to work with this. Good but may use it up. Ran out after about 300 photos per hour. This fixed it.
 geoNamesUser2   = "geonamestwo" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
@@ -203,7 +203,7 @@ end
 
 def copyAndMove(srcHD,destPhoto,destOrig)
   puts "\n#{lineNum}. Copy photos from #{srcHD}\n      to #{destPhoto} where the renaming will be done, \n      and the originals moved to an archive folder (#{destOrig})\n Running dots are progress bar" 
-  #  Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
+  # Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
   # Guess this method is slow because files are being copied
   # THIS METHOD WILL NOT WORK IF THE RAW FILE FORMAT ALPHABETICALLY COMES BEFORE JPG. SHOULD MAKE THIS MORE ROBUST
   photoFinalCount = 0
@@ -220,16 +220,17 @@ def copyAndMove(srcHD,destPhoto,destOrig)
     if File.basename(itemPrev, ".*") == File.basename(item,".*") && photoFinalCount != 0
      #  The following shouldn't be necessary, but is a check in case another kind of raw or who know what else. Only the FileUtils.rm(itemPrev) should be needed
      itemPrevExtName = File.extname(itemPrev) # since reusing below
+     # TODO Add an option to keep jpgs. May want to see how camera is converting them
       if itemPrevExtName == ".JPG" or itemPrevExtName == ".jpg" # added lower case for iPhone to sort HEIC
         FileUtils.rm(fnp) # Removing the jpg file from LatestDownload which is "duplicate" of a RAW that we're now considering
         puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} will not be transferred because it's a jpg duplicate of a RAW version." # Is this slow? Turned off to try. Not sure.
         delCount += 1
         photoFinalCount -= 1
-      else
-        puts "#{lineNum}. Something very wrong here with trying to remove JPGs when there is a corresponding .RW2. itemPrev: #{itemPrev}. item: #{item}."
+      elsif
         if itemPrevExtName == ".HEIC"
           FileUtils.rm(destPhoto + itemPrev)
         end
+        puts "#{lineNum}. Something very wrong here with trying to remove JPGs when there is a corresponding .RW2 or .HEIC. itemPrev: #{itemPrev}. item: #{item}."
       end # File.extname  
     end   # File.basename
     fn  = srcHD     + item # sourced from Drag Photos Here
@@ -246,7 +247,7 @@ def copyAndMove(srcHD,destPhoto,destOrig)
     else # no copies, so move
       # puts "#{lineNum}.#{photoFinalCount}. #{fn} moved to #{fnf}" # dubugging
       FileUtils.move(fn, fnf)
-    end
+    end # File.exists?
     # "#{lineNum}.. #{photoFinalCount + delCount} #{fn}" # More for debugging, but maybe OK as progress in this slow process
     itemPrev = item
     photoFinalCount += 1
@@ -321,7 +322,7 @@ def fileAnnotate(fn, fileEXIF, fileDateTimeOriginalstr, tzoLoc)  # writing origi
     fileEXIF.source = "#{File.basename(fn)}"
     fileEXIF.TimeZoneOffset = tzoLoc # Time Zone Offset, (1 or 2 values: 1. The time zone offset of DateTimeOriginal from GMT in hours, 2. If present, the time zone offset of ModifyDate)
     # Am I misusing this? I may using it as the TimeZone for photos taken GMT 0 TODO
-    # OffsetTimeOriginal	(time zone for DateTimeOriginal) TODO 
+    # OffsetTimeOriginal	(time zone for DateTimeOriginal) which may or may not be the time zone the photo was taken in TODO 
     
     # Wiping out bad GPS data on TS5. Maybe should test for TS5 to save checking all other files
     if !fileEXIF.GPSDateTime  # i.e. == "false" # condition if bad data for TS5. Note is nil for GX7. Not changing because can use as flag
@@ -361,19 +362,20 @@ end # timeZone
 
 def rename(src, timeZonesFile, timeNowWas)
   # src is destPhoto folder
-  # Until 2017, this assumed camera on UTC, but doesn't work well for camera's with a GPS (and has problems otherwise)
+  # timeZonesFile is my log of which time zones I was in when
+  # timeNowWas used for timing various parts of the script. 
+  # Until 2017, this assumed camera on UTC, but doesn't work well for cameras with a GPS or set to local time
+  # So have to ascertain what time zone the camera is set to by other means in this script, none of them foolproof
   # 60 minutes for ~1000 photos to rename
-  # Need an exception for my GPS camera, the TS5
-  # timeNowWas used for timing process. Took 1 sec. per file. Not normally used
   fileDatePrev = ""
   dupCount = 0
   count    = 0
-  tzoLoc = "" # trying to get this variable to be available as result and scoping seems to be a problem  
+  tzoLoc = ""
   seqLetter = %w(a b c d e f g h i j k l m n o p q r s t u v w x y z aa bb cc) # seems like this should be an array, not a list
-  Dir.foreach(src) do |item|
-    next if ignoreNonFiles(item) == true # skipping file when true
+  Dir.foreach(src) do |item| # for each photo file
+    next if ignoreNonFiles(item) == true # skipping file when true, i.e., not a file
     # puts "#{lineNum}. #{item} will be renamed. " # #{timeNowWas = timeStamp(timeNowWas)}
-    fn = src + item
+    fn = src + item # long file name
     fileEXIF = MiniExiftool.new(fn) # used several times
     # fileEXIF = Exif::Data.new(fn) # see if can just make this change, probably break something. 2017.01.13 doesn't work with Raw, but developer is working it.
     camModel = fileEXIF.model
@@ -383,24 +385,28 @@ def rename(src, timeZonesFile, timeNowWas)
       # Determine the time and time zone where the photo was taken
       # puts "315.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}." #  #{timeNowWas = timeStamp(timeNowWas)}
       fileDateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
-      if fileDateTimeOriginal == nil # TODO This probably could be cleaned up, but then normally not used
+      if fileDateTimeOriginal == nil # TODO This probably could be cleaned up, but then normally not used, movie files don't have this field
         fileDateTimeOriginal = fileEXIF.DateCreated  # PNG don't have dateTimeOriginal
         camModel ="MISC" # Dummy value for test below
         fileDateTimeOriginal == nil ? fileDateTimeOriginal = fileEXIF.CreationDate : "" # now fixing .mov files
         fileDateTimeOriginal == nil ? fileDateTimeOriginal = fileEXIF.MediaCreateDate : "" # now fixing .mp4 files. Has other dates, but at least for iPhone mp4s the gps info exists
       end
-      panasonicLocation = fileEXIF.location # Defined by Panasonic if on trip. If defined then time stamp is that local time
+      panasonicLocation = fileEXIF.location # Defined by Panasonic if on trip (and also may exist for photos exported from other apps such as Photos). If defined then time stamp is that local time
       # puts "#{lineNum}. panasonicLocation: #{panasonicLocation}"
       tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # the time zone the picture was taken in, doesn't say anything about what times are recorded in the photo's EXIF. I'm doing this slightly wrong, because it's using the photo's recorded date which could be either GMT or local time. But only wrong if the photo was taken too close to the time when camera changed time zones
       puts count == 1 ? "#{lineNum}. panasonicLocation: #{panasonicLocation}. tzoLoc: #{tzoLoc}" : ""# Just to show one value, otherwise without if prints for each file
       # Also determine Time Zone TODO and write to file OffsetTimeOriginal	(time zone for DateTimeOriginal). Either GMT or use tzoLoc if recorded in local time as determined below
-      if camModel == "DMC-TS5" or camModel ==  "MISC"
+      # puts "#{lineNum}.. camModel: #{camModel}. #{tzoLoc} is the time zone where photo was taken. Script assumes GX8 on local time "
+      # Could set timeChange = 0 here and remove from below except of course where it is set to something else
+      if camModel ==  "MISC" # MISC is for photos without fileDateTimeOriginal, e.g., movies
         timeChange = 0
         fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
-      elsif camModel.include?("DMC") and panasonicLocation.length > 0 # DateTimeOriginal is in local time. Look at https://sno.phy.queensu.ca/~phil/exiftool/TagNames/Panasonic.html for other Tags that could be used
-        # Above first checking that is a Panasonic Lumix, otherwise will error on second test which checks if using travel
+      elsif camModel.include?("DMC-GX7") and panasonicLocation.length > 0 or camModel == "DMC-TS5" or camModel == "DMC-GX8" or  # DateTimeOriginal is in local time. Look at https://sno.phy.queensu.ca/~phil/exiftool/TagNames/Panasonic.html for other Tags that could be used
+        # Above first checking that is a Panasonic Lumix GX7 using travel, otherwise will error on second test which checks if using travel, 
+        ### first criteria won't work for files exported from another app using GX7
         timeChange = 0
         fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
+#       puts "#{lineNum}: camModel: #{camModel}. tzoLoc: #{tzoLoc}. timeChange.class: #{timeChange.class} timeChange: #{timeChange.to_i}"
       elsif camModel == "iPhone X"  # DateTimeOriginal is in local time
         timeChange = 0
         fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
@@ -408,8 +414,9 @@ def rename(src, timeZonesFile, timeNowWas)
         timeChange = (3600*tzoLoc) # previously had error capture on this. Maybe for general cases which I'm not longer covering
         fileEXIF.OffsetTimeOriginal = "GMT"
       end # if camModel
+      # puts "#{lineNum}.. timeChange: #{timeChange}"
 
-      fileDate = fileDateTimeOriginal + timeChange # date in local time photo was taken    
+      fileDate = fileDateTimeOriginal + timeChange.to_i # date in local time photo was taken. No idea why have to change this to i, but was nil class even though zero  
       fileDateTimeOriginalstr = fileDateTimeOriginal.to_s[0..-6]
 
       # filePrev = fn
@@ -471,9 +478,10 @@ def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop, tzoLoc)
     if File.file?(fn)
       if camModel  == "DMC-TS5"
         # Offset sign is same as GMT offset, eg, we are -8, but need to increase the time to match UST, therefore negative
-        timeOffset = - fileEXIF.dateTimeOriginal.utc_offset # Time zone is set in camera
+        timeOffset = - fileEXIF.dateTimeOriginal.utc_offset # Time zone is set in camera, i.e. local time in this case
+        # What does utc_offset do for the above. dateTimeOriginal is just a time, e.g., 2018:12:31 21:38:32, which is the time the camera thinks it is. Camera doesn't know about zone. Camera may, but from dateTimeOriginal, can't tell the time zone.
         puts "#{lineNum}. timeOffset: #{timeOffset} for DMC-TS5 photos stamped in local time."
-      elsif camModel.include?("DMC") and panasonicLocation.length > 0 # Panasonic in Travel Mode
+      elsif camModel.include?("DMC") and panasonicLocation.length > 0 or camModel == "DMC-GX8 "# Panasonic in Travel Mode, but also some photos exported from Photos. Assumes GX8 always on local time
         timeOffset = tzoLoc * 3600
         puts "#{lineNum}. timeOffset: #{timeOffset} with photos stamped in local time."
       else # GX7 time is UTC
@@ -527,7 +535,7 @@ def addLocation(src, geoNamesUser)
       fn = src + item
       if File.file?(fn) 
         countTotal += 1
-        puts "#{lineNum}. #{countTotal}. #{item}. Adding location information using geonames based on coordinates. " # amounts to a progress bar, even if a bit verbose #{timeStamp(timeNowWas)}
+        puts "\n#{lineNum}. #{countTotal}. #{item}. Adding location information using geonames based on coordinates. " # amounts to a progress bar, even if a bit verbose #{timeStamp(timeNowWas)}
         fileEXIF = MiniExiftool.new(fn)
         # Get lat and lon from photo file. What is this fileEXIF.specialinstructions. What about 
         puts "#{lineNum}. No gps information for #{item}. #{fileEXIF.title}. fileEXIF.specialinstructions: #{fileEXIF.specialinstructions}" if fileEXIF.specialinstructions == nil
@@ -553,9 +561,9 @@ def addLocation(src, geoNamesUser)
         begin
           # doesn't work for Istanbul, works for Croatia, Canada
           countryCodeGeo = api.country_code(lat: lat, lng: lon) # doesn't work in Turkey
-          puts "#{lineNum}.. countryCodeGeo: #{countryCodeGeo}"
+          # puts "#{lineNum}.. countryCodeGeo: #{countryCodeGeo}"
           countryCode  = countryCodeGeo['countryCode']
-          puts "#{lineNum}.. countryCode #{countryCode}"
+          puts "#{lineNum}.. countryCode #{countryCode}."
         rescue
           # begin
    #          # Commented out because of errors with "invalid user"
@@ -638,13 +646,14 @@ def addLocation(src, geoNamesUser)
         
         # puts city =  api.find_nearby_wikipedia(lat: lat, lng: lon)["geonames"].first["title"] # the third item is a city, maybe could regex wikipedia, but doubt it's consistent enough to work
         puts "#{lineNum}.. Four lines below commented out for Canada"
-        location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']
+        
         begin # put this in with failure anotating Ethiopia photos
+          location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']
           distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance'].to_f
           puts "#{lineNum}. location:     #{location}. distance: #{distance}. If distance > 0.3km location not used"
           location = "" if distance < 0.3
-        rescue 
-          puts "#{lineNum}. find api.find_nearby_wikipedia failed. Maybe a foreign country? "
+        rescue
+          puts "#{lineNum}. #{item} find api.find_nearby_wikipedia failed. Maybe a foreign country? "
           location = "" # added this to help prevent failure on test below. May not be necessary
         end
         
