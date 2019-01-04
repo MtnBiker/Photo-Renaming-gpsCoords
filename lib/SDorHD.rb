@@ -11,7 +11,6 @@ include Pashua
 
 # This file is called first. If GPS info is to be added gpsYesPashua is then called from the main script
 
-
 def whichLoc()  
   # Need a symlink to Pashua in this folder too, include and require moved to top
 

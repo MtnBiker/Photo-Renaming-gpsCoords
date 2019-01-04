@@ -220,9 +220,9 @@ def copyAndMove(srcHD,destPhoto,destOrig)
     if File.basename(itemPrev, ".*") == File.basename(item,".*") && photoFinalCount != 0
      #  The following shouldn't be necessary, but is a check in case another kind of raw or who know what else. Only the FileUtils.rm(itemPrev) should be needed
      itemPrevExtName = File.extname(itemPrev) # since reusing below
-     # TODO Add an option to keep jpgs. May want to see how camera is converting them
+     # TODO Add an option to keep jpgs. May want to see how camera is converting them. May end up having problem with labeling as then would have two photos taken at the same time and the Raw will always be a .b
       if itemPrevExtName == ".JPG" or itemPrevExtName == ".jpg" # added lower case for iPhone to sort HEIC
-        FileUtils.rm(fnp) # Removing the jpg file from LatestDownload which is "duplicate" of a RAW that we're now considering
+        FileUtils.rm(fnp) # Removing the jpg file from LatestDownload which is "duplicate" of a RAW that we're now considering. Can comment this out to keep both
         puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} will not be transferred because it's a jpg duplicate of a RAW version." # Is this slow? Turned off to try. Not sure.
         delCount += 1
         photoFinalCount -= 1
@@ -398,17 +398,18 @@ def rename(src, timeZonesFile, timeNowWas)
       # Also determine Time Zone TODO and write to file OffsetTimeOriginal	(time zone for DateTimeOriginal). Either GMT or use tzoLoc if recorded in local time as determined below
       # puts "#{lineNum}.. camModel: #{camModel}. #{tzoLoc} is the time zone where photo was taken. Script assumes GX8 on local time "
       # Could set timeChange = 0 here and remove from below except of course where it is set to something else
+      timeChange = 0 # setting it outside the loops below and get reset each time through. But can get changed
       if camModel ==  "MISC" # MISC is for photos without fileDateTimeOriginal, e.g., movies
-        timeChange = 0
+        # timeChange = 0
         fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
       elsif camModel.include?("DMC-GX7") and panasonicLocation.length > 0 or camModel == "DMC-TS5" or camModel == "DMC-GX8" or  # DateTimeOriginal is in local time. Look at https://sno.phy.queensu.ca/~phil/exiftool/TagNames/Panasonic.html for other Tags that could be used
         # Above first checking that is a Panasonic Lumix GX7 using travel, otherwise will error on second test which checks if using travel, 
         ### first criteria won't work for files exported from another app using GX7
-        timeChange = 0
+        # timeChange = 0
         fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
 #       puts "#{lineNum}: camModel: #{camModel}. tzoLoc: #{tzoLoc}. timeChange.class: #{timeChange.class} timeChange: #{timeChange.to_i}"
       elsif camModel == "iPhone X"  # DateTimeOriginal is in local time
-        timeChange = 0
+        # timeChange = 0
         fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
       else
         timeChange = (3600*tzoLoc) # previously had error capture on this. Maybe for general cases which I'm not longer covering
