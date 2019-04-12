@@ -1,9 +1,7 @@
 #!/usr/bin/env ruby
-# Working with Ruby 2.3.7, the system version. Except the problem of GeoNames::APIError: {"message"=>"invalid user", "value"=>10}
+# Running from MBP until can fix missing mini_exiftool problem
 # Can be made to work with TS5 completely because GPS coordinates are batch added and TS5 photos missing coordinates have different time stamp than other cameras, so have to modify --timeoffset in Perl script by hand for batch of TS5 photos. Is still true since added options for travel and TS5?
-# Relabeling of mp4 works with this script.
 #  Look at speeding up with https://github.com/tonytonyjan/exif for rename and annotate which is rather slow. 8 min. for 326 photos
-
 # require 'rubygems' # # Needed by rbosa, mini_exiftool, and maybe by appscript. Not needed if correct path set somewhere.
 system ('gem env') # for debugging problem with gem not loading https://stackoverflow.com/questions/53202164/textmate-chruby-and-ruby-gems
 puts "\nGem.path: #{Gem.path}"
@@ -47,7 +45,7 @@ laptopDestOrig        = laptopLocation + "Originals to archive/"
 
 # Folders on portable drive: Daguerre
 downloadsFolders = "/Volumes/Daguerre/_Download folder/"
-downloadsFolders = "/Users/gscar/Pictures/_Download folder iMac/" # temp on iMac until Daguerre is back
+# downloadsFolders = "/Users/gscar/Pictures/_Download folder iMac/" # temp on iMac until Daguerre is back
 srcHD     = downloadsFolders + " Drag Photos HERE/"  # Photos copied from camera, sent by others, etc.
 destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
 destOrig  = downloadsFolders + "_imported-archive" # folder to move originals to if not done in. No slash because getting double slash with one
@@ -287,11 +285,11 @@ def userCamCode(fn)
     userCamCode = ".gs.P" # gs for photographer. P for *P*anasonic Lumix
   when "iPhone X"
     userCamCode = ".i" # gs for photographer. i for iPhone
-  when "DMC-GX7"
-    userCamCode = ".gs.P" # gs for photographer. P for *P*anasonic Lumix
+  # when "DMC-GX7"
+  #   userCamCode = ".gs.P" # gs for photographer. P for *P*anasonic Lumix
   when "DMC-TS5"
     userCamCode = ".gs.W" # gs for photographer. W for *w*aterproof Panasonic Lumix DMC-TS5
-cd  when "Canon PowerShot S100"
+  when "Canon PowerShot S100"
     userCamCode = ".lb" # initials of the photographer who usually shoots with the S100
   else
     userCamCode = ".xx"
@@ -316,7 +314,7 @@ def fileAnnotate(fn, fileEXIF, fileDateTimeOriginalstr, tzoLoc)  # writing origi
     else
       tzoLocPrint = "+" + tzoLoc.to_s
     end
-     fileEXIF.instructions = "#{fileDateTimeOriginalstr} #{tzoLocPrint}" # Time zone of photo is GMT #{tzoLoc} unless TS5?" or travel
+    fileEXIF.instructions = "#{fileDateTimeOriginalstr} #{tzoLocPrint}" # Time zone of photo is GMT #{tzoLoc} unless TS5?" or travel
     # fileEXIF.comment = "Capture date: #{fileDateTimeOriginalstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Doesn't show up in Aperture
     # fileEXIF.source = fileEXIF.title = "#{File.basename(fn)} original filename" # Source OK, but Title seemed a bit better
     fileEXIF.source = "#{File.basename(fn)}"
@@ -328,8 +326,7 @@ def fileAnnotate(fn, fileEXIF, fileDateTimeOriginalstr, tzoLoc)  # writing origi
     if !fileEXIF.GPSDateTime  # i.e. == "false" # condition if bad data for TS5. Note is nil for GX7. Not changing because can use as flag
       # puts "#{lineNum}. #{File.basename(fn)} has bad GPS data  (GPSDateTime is false), and will be blanked out\n"
       fileEXIF.gps_latitude = fileEXIF.gps_longitude = fileEXIF.gps_altitude = ""
-    end
-    
+    end    
     fileEXIF.save
   end
 end # fileAnnotate. writing original filename and dateTimeOrig to the photo file and cleaning up TS5 photos with bad (no) GPS data.
@@ -708,7 +705,7 @@ puts "Are the gps logs up to date?" # Should check for this since I don't see th
 puts "Fine naming and moving started  . . . . . . . . . . . . " # for trial runs  #{timeNowWas}
 
 # Two names for SD cards seem common
-unless File.directory?(srcSDfolder) # negative if,so if srcSDfolder exists skip, other wise change reference to …Alt
+unless File.directory?(srcSDfolder) # negative if, so if srcSDfolder exists skip, other wise change reference to …Alt
   srcSDfolder = srcSDfolderAlt
   sdCard      = sdCardAlt
 end
@@ -724,6 +721,8 @@ if !File.exists?(downloadsFolders) # if Daguerre isn't mounted use folders on la
   destOrig  = laptopDestOrig
   srcHD = downloadsFolders
   loadingToLaptop = true
+else # Debugging an error created when?
+  puts "#{lineNum}. Should be using Daguerre, but something is wrong! File.exists?(downloadsFolders (#{downloadsFolders})): #{File.exists?(downloadsFolders)}"
 end
 
 # Check if photos are already in Latest Download folder. A problem because they get reprocessed by gps coordinate adding.
@@ -766,7 +765,7 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
   # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
   src = prefsPhoto["srcSelect"]  + "/"
   lastPhotoFilename = prefsPhoto["lastPhoto"]
-  destPhoto = prefsPhoto["destPhotoP"]
+  destPhoto = prefsPhoto["destPhotoP"] + "/" # a swag since had a problem
   destOrig  = prefsPhoto["destOrig"] + "/" # without / changes file name with folder name
 else # whichOne=="HD", but what
   src = srcHD
