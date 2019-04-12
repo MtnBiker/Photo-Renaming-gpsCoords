@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Running from MBP until can fix missing mini_exiftool problem
+# Can't run from TextMate on iMac, must use iTerm
 # Can be made to work with TS5 completely because GPS coordinates are batch added and TS5 photos missing coordinates have different time stamp than other cameras, so have to modify --timeoffset in Perl script by hand for batch of TS5 photos. Is still true since added options for travel and TS5?
 #  Look at speeding up with https://github.com/tonytonyjan/exif for rename and annotate which is rather slow. 8 min. for 326 photos
 # require 'rubygems' # # Needed by rbosa, mini_exiftool, and maybe by appscript. Not needed if correct path set somewhere.
@@ -376,22 +376,23 @@ def rename(src, timeZonesFile, timeNowWas)
     fileEXIF = MiniExiftool.new(fn) # used several times
     # fileEXIF = Exif::Data.new(fn) # see if can just make this change, probably break something. 2017.01.13 doesn't work with Raw, but developer is working it.
     camModel = fileEXIF.model
-       # puts "\n#{lineNum}. #{fileCount}. fn: #{fn}"
+    # puts "\n#{lineNum}. #{fileCount}. fn: #{fn}"
     # puts "#{lineNum}.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
     if File.file?(fn)
       # Determine the time and time zone where the photo was taken
       # puts "315.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}." #  #{timeNowWas = timeStamp(timeNowWas)}
       fileDateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
-      if fileDateTimeOriginal == nil # TODO This probably could be cleaned up, but then normally not used, movie files don't have this field
+      if fileDateTimeOriginal == nil 
+        # TODO This probably could be cleaned up, but then normally not used, movie files don't have this field
         fileDateTimeOriginal = fileEXIF.DateCreated  # PNG don't have dateTimeOriginal
         camModel ="MISC" # Dummy value for test below
         fileDateTimeOriginal == nil ? fileDateTimeOriginal = fileEXIF.CreationDate : "" # now fixing .mov files
         fileDateTimeOriginal == nil ? fileDateTimeOriginal = fileEXIF.MediaCreateDate : "" # now fixing .mp4 files. Has other dates, but at least for iPhone mp4s the gps info exists
-      end
+      end # if fileDateTimeOriginal == nil
       panasonicLocation = fileEXIF.location # Defined by Panasonic if on trip (and also may exist for photos exported from other apps such as Photos). If defined then time stamp is that local time
       # puts "#{lineNum}. panasonicLocation: #{panasonicLocation}"
       tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # the time zone the picture was taken in, doesn't say anything about what times are recorded in the photo's EXIF. I'm doing this slightly wrong, because it's using the photo's recorded date which could be either GMT or local time. But only wrong if the photo was taken too close to the time when camera changed time zones
-      puts count == 1 ? "#{lineNum}. panasonicLocation: #{panasonicLocation}. tzoLoc: #{tzoLoc}" : ""# Just to show one value, otherwise without if prints for each file
+      puts count == 1 ? "#{lineNum}. panasonicLocation: #{panasonicLocation}. tzoLoc: #{tzoLoc} Time zone photo was taken in from Greg camera time zones.yml" : ""# Just to show one value, otherwise without if prints for each file
       # Also determine Time Zone TODO and write to file OffsetTimeOriginal	(time zone for DateTimeOriginal). Either GMT or use tzoLoc if recorded in local time as determined below
       # puts "#{lineNum}.. camModel: #{camModel}. #{tzoLoc} is the time zone where photo was taken. Script assumes GX8 on local time "
       # Could set timeChange = 0 here and remove from below except of course where it is set to something else
@@ -479,12 +480,15 @@ def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop, tzoLoc)
         timeOffset = - fileEXIF.dateTimeOriginal.utc_offset # Time zone is set in camera, i.e. local time in this case
         # What does utc_offset do for the above. dateTimeOriginal is just a time, e.g., 2018:12:31 21:38:32, which is the time the camera thinks it is. Camera doesn't know about zone. Camera may, but from dateTimeOriginal, can't tell the time zone.
         puts "#{lineNum}. timeOffset: #{timeOffset} for DMC-TS5 photos stamped in local time."
-      elsif camModel.include?("DMC") and panasonicLocation.length > 0 or camModel == "DMC-GX8 "# Panasonic in Travel Mode, but also some photos exported from Photos. Assumes GX8 always on local time
+      elsif camModel == "DMC-GX8"# Assumes GX8 always on local time. Made if's a bit more complex, but keeping logic simpler
         timeOffset = tzoLoc * 3600
-        puts "#{lineNum}. timeOffset: #{timeOffset} with photos stamped in local time."
+        puts "#{lineNum}. timeOffset: #{timeOffset} with GX-8 photos stamped in local time."
+      elsif camModel.include?("DMC") and panasonicLocation.length > 0 # Panasonic in Travel Mode, but also some photos exported from Photos. 
+        timeOffset = tzoLoc * 3600
+        puts "#{lineNum}. timeOffset: #{timeOffset} sec (#{tzoLoc} hours) with photos stamped in local time."
       else # GX7 time is UTC
         timeOffset = 0 # camelCase, but perl variable is lowercase
-        puts "#{lineNum}. timeOffset: #{timeOffset} with photos stamped in GMT"
+        puts "#{lineNum}. timeOffset: #{timeOffset} sec (#{tzoLoc} hours) with photos stamped in GMT"
       end # if camModel
       
       fileEXIF.save 
@@ -698,7 +702,7 @@ def writeTimeDiff(perlOutput)
   end
 end #  Write timeDiff to the photo files
 
-## The "program" #################
+## The "PROGRAM" #################
 timeNowWas = timeStamp(Time.now) # Initializing. Later calls are different
 # timeNowWas = timeStamp(timeNowWas)
 puts "Are the gps logs up to date?" # Should check for this since I don't see the message
@@ -713,7 +717,7 @@ end
 # need to determine this based on last file and that will have to be later
 srcSD = srcSDfolder + sdFolder(sdFolderFile)
 
-if !File.exists?(downloadsFolders) # if Daguerre isn't mounted use folders on laptop
+if !File.exists?(downloadsFolders) # if Daguerre isn't mounted use folders on laptop. Why the negative, TODO get rid of the ! and switch the if and else
   puts "\n#{lineNum}. #{downloadsFolders} isn't mounted, so will use local folders to process"
   # Daguerre folders location loaded by default, changed as needed
   downloadsFolders = laptopDownloadsFolder
@@ -721,8 +725,8 @@ if !File.exists?(downloadsFolders) # if Daguerre isn't mounted use folders on la
   destOrig  = laptopDestOrig
   srcHD = downloadsFolders
   loadingToLaptop = true
-else # Debugging an error created when?
-  puts "#{lineNum}. Should be using Daguerre, but something is wrong! File.exists?(downloadsFolders (#{downloadsFolders})): #{File.exists?(downloadsFolders)}"
+else
+  puts "#{lineNum}. Using Daguerre. File.exists?(downloadsFolders (#{downloadsFolders})): #{File.exists?(downloadsFolders)}"
 end
 
 # Check if photos are already in Latest Download folder. A problem because they get reprocessed by gps coordinate adding.
@@ -804,6 +808,8 @@ timeNowWas = timeStamp(timeNowWas)
 puts "\n#{lineNum}. Rename the photo files with date and an ID for the camera or photographer. #{timeNowWas}\n"
 # tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # Second time this variable name is used, other is in a method
 tzoLoc = - rename(destPhoto, timeZones, timeNowWas) # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
+
+puts "#{lineNum} tzoLoc: #{tzoLoc}. Because GX8 and some other cameras use local time and not GMT as this script was originally written for. All photos must be in same time zone."
 timeNowWas = timeStamp(timeNowWas)
 
 puts "\n#{lineNum}. Using perl script to add gps coordinates. Will take a while as all the gps files for the year will be processed and then all the photos. -tzoLoc, `i.e.: GMT #{-tzoLoc}"
