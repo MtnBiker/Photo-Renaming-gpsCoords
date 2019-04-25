@@ -4235,7 +4235,7 @@ Prints the manual page and exits.
 
 =head1 SEE ALSO
 
-Homepage at L<http://www.carto.net/projects/photoTools/gpsPhoto/>.
+Homepage at L<http://old.carto.net/projects/photoTools/gpsPhoto/>. 
 
 Project Page at L<http://sourceforge.net/projects/gps2photo>.
 

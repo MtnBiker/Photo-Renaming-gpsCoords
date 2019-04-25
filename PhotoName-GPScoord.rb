@@ -1,22 +1,25 @@
 #!/usr/bin/env ruby
-# Can't run from TextMate on iMac, must use iTerm
+# Can't run from TextMate on iMac unless use System Ruby, i.e. not variables set in TM
 # Can be made to work with TS5 completely because GPS coordinates are batch added and TS5 photos missing coordinates have different time stamp than other cameras, so have to modify --timeoffset in Perl script by hand for batch of TS5 photos. Is still true since added options for travel and TS5?
 #  Look at speeding up with https://github.com/tonytonyjan/exif for rename and annotate which is rather slow. 8 min. for 326 photos
-# require 'rubygems' # # Needed by rbosa, mini_exiftool, and maybe by appscript. Not needed if correct path set somewhere.
-system ('gem env') # for debugging problem with gem not loading https://stackoverflow.com/questions/53202164/textmate-chruby-and-ruby-gems
+# require 'rubygems' # # Needed by rbosa, mini_exiftool, and maybe by appscript. Not needed if correct path set somewhere. Doesn't help when using with v2.6.2`
+puts "Ruby v#{RUBY_VERSION}p#{RUBY_PATCHLEVEL} as reported by Ruby\nAnd as reported by \`system ('gem env')\`:" # A Ruby constant
+# system ('gem env') # for debugging problem with gem not loading https://stackoverflow.com/questions/53202164/textmate-chruby-and-ruby-gems
+
 puts "\nGem.path: #{Gem.path}"
+# puts "\ngem list:"
+# system ('gem list') # for debugging problem with mini_exiftool not loading
+
 require 'fileutils'
 include FileUtils
 require 'find'
 require 'yaml'
 require "time"
-require 'shellwords'
+# require 'shellwords'
 require 'irb' # binding.irb where error checking is desired
-require 'mini_exiftool' # PATH in TM to $PATH:/usr/local/bin for exiftool to be seen (careful easy to mix mini_exiftool and exiftool issues)
+require 'mini_exiftool'
 # require 'exif' # added later. A partial implementation of ExifTool, but faster than mini_exiftool. Commented out since doesn't work with Panasonic Raw
 # require 'geonames'
-# require '/Library/Ruby/Gems/2.3.0/gems/addressable-2.5.2/lib/addressable/template.rb'
-# require '/Library/Ruby/Gems/2.3.0/gems/addressable-2.5.2/lib/addressable/version.rb'
 # load 'geonames.rb' # Note this is a file, not a gem. I guess the gem didn't work?
 load '/Users/gscar/Documents/Ruby/Garmin Log renaming/geonames.rb' # above fails from command line. Even if move file there; currently it is an alias
 
@@ -49,16 +52,15 @@ downloadsFolders = "/Volumes/Daguerre/_Download folder/"
 srcHD     = downloadsFolders + " Drag Photos HERE/"  # Photos copied from camera, sent by others, etc.
 destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
 destOrig  = downloadsFolders + "_imported-archive" # folder to move originals to if not done in. No slash because getting double slash with one
-# destOrig  = "/Users/gscar/Documents/◊ Pre-trash/duplicates" # TEMP FOR REDOING
 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
-puts "52. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. "
+puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. "
 geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wikipedia—most general and osm—maybe better for cities
 timeZonesFile = "/Users/gscar/Dropbox/scriptsEtc/Greg camera time zones.yml"
 timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with
 gpsPhotoPerl = thisScript + "lib/gpsPhoto.pl"
 folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2019 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
-puts "58. Must manually set folderGPX for GPX file folders. Particularly important at start of new year.\n "
+puts "#{lineNum}. Must manually set folderGPX for GPX file folders. Particularly important at start of new year.\n "
 geoNamesUser    = "MtnBiker" # This is login, user shows up as MtnBiker; but used to work with this. Good but may use it up. Ran out after about 300 photos per hour. This fixed it.
 geoNamesUser2   = "geonamestwo" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
 
@@ -81,7 +83,7 @@ def gpsFilesUpToDate(folderGPX)
   # Have to do after select location of files
 end
 
-def timeStamp(timeNowWas)  
+def timeStamp(timeNowWas, fromWhere)  
   seconds = Time.now-timeNowWas
   minutes = seconds/60
   if minutes < 2
@@ -89,7 +91,7 @@ def timeStamp(timeNowWas)
   else
     report = "#{lineNum}. #{minutes.to_i} minutes"
   end   
-  puts "-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -   #{report}. #{Time.now.strftime("%I:%M:%S %p")}   -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  "
+  puts "#{fromWhere}-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -   #{report}. #{Time.now.strftime("%I:%M:%S %p")}   -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  "
   Time.now
 end
 
@@ -281,18 +283,18 @@ def userCamCode(fn)
   fileEXIF = MiniExiftool.new(fn)
   ## not very well thought out and the order of the tests matters
   case fileEXIF.model
-  when "DMC-GX8"
-    userCamCode = ".gs.P" # gs for photographer. P for *P*anasonic Lumix
-  when "iPhone X"
-    userCamCode = ".i" # gs for photographer. i for iPhone
-  # when "DMC-GX7"
-  #   userCamCode = ".gs.P" # gs for photographer. P for *P*anasonic Lumix
-  when "DMC-TS5"
-    userCamCode = ".gs.W" # gs for photographer. W for *w*aterproof Panasonic Lumix DMC-TS5
-  when "Canon PowerShot S100"
-    userCamCode = ".lb" # initials of the photographer who usually shoots with the S100
-  else
-    userCamCode = ".xx"
+    when "DMC-GX8"
+      userCamCode = ".gs.P" # gs for photographer. P for *P*anasonic Lumix
+    when "iPhone X"
+      userCamCode = ".i" # gs for photographer. i for iPhone
+    when "DMC-GX7"
+    #   userCamCode = ".gs.P" # gs for photographer. P for *P*anasonic Lumix
+    when "DMC-TS5"
+      userCamCode = ".gs.W" # gs for photographer. W for *w*aterproof Panasonic Lumix DMC-TS5
+    when "Canon PowerShot S100"
+      userCamCode = ".lb" # initials of the photographer who usually shoots with the S100
+    else
+      userCamCode = ".xx"
   end # case
   if fileEXIF.fileType(fn) == "??"
     userCamCode = ".gs.L"
@@ -363,7 +365,7 @@ def rename(src, timeZonesFile, timeNowWas)
   # timeNowWas used for timing various parts of the script. 
   # Until 2017, this assumed camera on UTC, but doesn't work well for cameras with a GPS or set to local time
   # So have to ascertain what time zone the camera is set to by other means in this script, none of them foolproof
-  # 60 minutes for ~1000 photos to rename
+  # 60 minutes for ~1000 photos to rename TODO ie, very slow
   fileDatePrev = ""
   dupCount = 0
   count    = 0
@@ -392,7 +394,12 @@ def rename(src, timeZonesFile, timeNowWas)
       panasonicLocation = fileEXIF.location # Defined by Panasonic if on trip (and also may exist for photos exported from other apps such as Photos). If defined then time stamp is that local time
       # puts "#{lineNum}. panasonicLocation: #{panasonicLocation}"
       tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # the time zone the picture was taken in, doesn't say anything about what times are recorded in the photo's EXIF. I'm doing this slightly wrong, because it's using the photo's recorded date which could be either GMT or local time. But only wrong if the photo was taken too close to the time when camera changed time zones
-      puts count == 1 ? "#{lineNum}. panasonicLocation: #{panasonicLocation}. tzoLoc: #{tzoLoc} Time zone photo was taken in from Greg camera time zones.yml" : ""# Just to show one value, otherwise without if prints for each file
+      if count == 1 | 1*100
+        puts "#{lineNum}. panasonicLocation: #{panasonicLocation}. tzoLoc: #{tzoLoc} Time zone photo was taken in from Greg camera time zones.yml"
+      else
+        print "."
+      end
+      # count == 1 | 1*100 ?  :  puts "."  Just to show one value, otherwise without if prints for each file; now prints every 100 time since this call seemed to create some line breaks and added periods.
       # Also determine Time Zone TODO and write to file OffsetTimeOriginal	(time zone for DateTimeOriginal). Either GMT or use tzoLoc if recorded in local time as determined below
       # puts "#{lineNum}.. camModel: #{camModel}. #{tzoLoc} is the time zone where photo was taken. Script assumes GX8 on local time "
       # Could set timeChange = 0 here and remove from below except of course where it is set to something else
@@ -541,7 +548,7 @@ def addLocation(src, geoNamesUser)
         fileEXIF = MiniExiftool.new(fn)
         # Get lat and lon from photo file. What is this fileEXIF.specialinstructions. What about 
         puts "#{lineNum}. No gps information for #{item}. #{fileEXIF.title}. fileEXIF.specialinstructions: #{fileEXIF.specialinstructions}" if fileEXIF.specialinstructions == nil
-        next if fileEXIF.specialinstructions == nil # can I combine this step and the one above into one step or if statement? 
+        next if fileEXIF.specialinstructions == nil # can I combine this step and the one above into one step or if statement? I think I'm writing GPS coords to this field because easier to parse?
         # puts "#{lineNum}. fileEXIF.specialinstructions: #{fileEXIF.specialinstructions}"
         gps = fileEXIF.specialinstructions.split(", ") # or some way of getting lat and lon. This is a good start. Look at input form needed
         lat = gps[0][4,11] # Capture long numbers like -123.123456, but short ones aren't that long, but nothing is there
@@ -568,15 +575,22 @@ def addLocation(src, geoNamesUser)
           puts "#{lineNum}.. countryCode #{countryCode}."
         rescue
           # begin
-   #          # Commented out because of errors with "invalid user"
-            countryCodeGeo = api.find_nearby_place_name(lat: lat, lng: lon).first # works for Turkey
-   #          puts "#{lineNum}.. countryCodeGeo:\n#{countryCodeGeo}"
-   #          countryCode  = countryCodeGeo['countryCode']
-   #        rescue SocketError # SocketError: getaddrinfo: nodename nor servname provided, or not known. NOT SURE WHAT THE FAILURE IS HERE. WILL SEE IF IT HAPPENS AGAIN
-   #          puts " #{lineNum}. Failing for api.find_nearby_place_name(lat: lat, lng: lon).first #{lat} #{lon} \nfor #{fn}\n"
-   #          $stderr.print  $! # Thomas p. 108
-   #        end
-        end
+           $stderr.print
+           puts "#{lineNum}. $$stderr: #{$stderr}"
+           strMessage = message.to_s # e.message.to_s ng
+           if strMessage.include?("the hourly limit") 
+             puts "#{lineNum}. #{e.message}, so we will wait an hour"
+             sleep(1.hour)
+           else
+                    countryCodeGeo = api.find_nearby_place_name(lat: lat, lng: lon).first # works for Turkey
+           #          puts "#{lineNum}.. countryCodeGeo:\n#{countryCodeGeo}"
+           #          countryCode  = countryCodeGeo['countryCode']
+           #        rescue SocketError # SocketError: getaddrinfo: nodename nor servname provided, or not known. NOT SURE WHAT THE FAILURE IS HERE. WILL SEE IF IT HAPPENS AGAIN
+           #          puts " #{lineNum}. Failing for api.find_nearby_place_name(lat: lat, lng: lon).first #{lat} #{lon} \nfor #{fn}\n"
+           #          $stderr.print  $! # Thomas p. 108
+           #        end
+           end
+        end # rescue
        
       # puts "#{lineNum}.. countryCode:  #{countryCode}"
       # puts "#{lineNum}. NEED TO UNCOMMENT THIS AFTER INDONESIA ##############################################"
@@ -584,7 +598,7 @@ def addLocation(src, geoNamesUser)
       # puts "#{lineNum}.. country:      #{country}"
       #
       # Determine city, state, location
-      if countryCode == "US"
+      if countryCode == "US" # geocodio works in US and Canada, could use as an option to geocode.org
         begin # state
           postalCodes = api.find_nearby_postal_codes(lat: lat, lng: lon, maxRows: 1) # this comes up blank for some locations in the US eg P1230119, so did find_nearest_address 
           state = postalCodes.first['adminName1']
@@ -617,7 +631,6 @@ def addLocation(src, geoNamesUser)
             location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']
             puts "#{lineNum}.. location:     #{location}. distance: #{distance}" # may need to screen as for outside US
           end # of within a rescue
-  
         end # begin rescue outer
         
       else # outside US. Doesn't work in Indonesia
@@ -643,18 +656,27 @@ def addLocation(src, geoNamesUser)
           city = api.find_nearby_place_name(lat: lat, lng: lon, maxRows: 1).first['toponymName'] # name or adminName1 could work too
           puts "#{lineNum}.. city (outside US):  #{city}"
         rescue
-          puts "#{lineNum}. findNearbyPostalCodes failed, probably in a foreign country"
+          puts "#{lineNum}. findNearbyPostalCodes failed, therefore try getting location from Wikipedia" # This can work outside the US, maybe fails when not near a city.
         end
         
         # puts city =  api.find_nearby_wikipedia(lat: lat, lng: lon)["geonames"].first["title"] # the third item is a city, maybe could regex wikipedia, but doubt it's consistent enough to work
-        puts "#{lineNum}.. Four lines below commented out for Canada"
+        # puts "#{lineNum}.. Four lines below must be commented out for Canada"
         
         begin # put this in with failure anotating Ethiopia photos
           location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']
           distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance'].to_f
+          locationDistance = "#{location} is #{distance}km away."
           puts "#{lineNum}. location:     #{location}. distance: #{distance}. If distance > 0.3km location not used"
-          location = "" if distance < 0.3
+          if  distance < 0.3
+            location = ""
+          elsif fileEXIF.caption == nil
+            fileEXIF.caption = locationDistance
+          else
+            fileEXIF.usercomment = locationDistance
+          end # if distance
         rescue
+          # maybe this whole exception needs reworking
+        ensure
           puts "#{lineNum}. #{item} find api.find_nearby_wikipedia failed. Maybe a foreign country? "
           location = "" # added this to help prevent failure on test below. May not be necessary
         end
@@ -669,7 +691,6 @@ def addLocation(src, geoNamesUser)
       fileEXIF.city = city # Aperture: IPTC: City
       fileEXIF.location = location # Aperture: IPTC: Sub-location
       fileEXIF.save
-      # Now have lat and long and now get some location names
     end    
   end 
   puts "\n#{lineNum}. Location information found for #{countLoc} of #{countTotal} photos processed" 
@@ -703,7 +724,7 @@ def writeTimeDiff(perlOutput)
 end #  Write timeDiff to the photo files
 
 ## The "PROGRAM" #################
-timeNowWas = timeStamp(Time.now) # Initializing. Later calls are different
+timeNowWas = timeStamp(Time.now, lineNum) # Initializing. Later calls are different
 # timeNowWas = timeStamp(timeNowWas)
 puts "Are the gps logs up to date?" # Should check for this since I don't see the message
 puts "Fine naming and moving started  . . . . . . . . . . . . " # for trial runs  #{timeNowWas}
@@ -748,9 +769,9 @@ whichOne = whichOne(whichDrive) # parsing result to get HD or SD
 if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner coding
   # read in last filename copied from card previously
   begin
-    # Redefining to read from SD card
+    # Read from SD card
     lastPhotoReadTextFile = sdCard + "/lastPhotoRead.txt" # But this doesn't work if a new card. 
-    puts "\n#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. If a new card this will be missing. What did I have in mind?"
+    puts "\n#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. NEED an error here if card not mounted!!"
     file = File.new(lastPhotoReadTextFile, "r")
     lastPhotoFilename = file.gets # apparently grabbing a return. maybe not the best reading method.
     puts "\n#{lineNum}. lastPhotoFilename: #{lastPhotoFilename.chop}. Value can be changed by user, so this may not be the value used."
@@ -767,10 +788,6 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
   # to get a value use prefsPhoto("theNameInFileNamingEtcPashua.rb"), nothing to do with the name above
   # puts "Prefs as set by pPashua"
   # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
-  src = prefsPhoto["srcSelect"]  + "/"
-  lastPhotoFilename = prefsPhoto["lastPhoto"]
-  destPhoto = prefsPhoto["destPhotoP"] + "/" # a swag since had a problem
-  destOrig  = prefsPhoto["destOrig"] + "/" # without / changes file name with folder name
 else # whichOne=="HD", but what
   src = srcHD
   prefsPhoto = pGUI(src, destPhoto, destOrig) # is this only sending values in? 
@@ -778,13 +795,14 @@ else # whichOne=="HD", but what
   # puts "Prefs as set by pGUI"
   # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
   src = prefsPhoto["srcSelect"]  + "/"
-  destPhoto = prefsPhoto["destPhotoP"]
-  destOrig  = prefsPhoto["destOrig"]
 end # whichOne=="SD"
+destPhoto = prefsPhoto["destPhotoP"] + "/" 
+destOrig  = prefsPhoto["destOrig"] + "/"
+# Above are true whether SD or from another folder
 
 puts "\n#{lineNum}. Intialization complete. File renaming and copying/moving beginning. Time below is responding to options requests via Pashua if coping an SD card, otherwise times will be the same"
 
-timeNowWas = timeStamp(timeNowWas)
+timeNowWas = timeStamp(timeNowWas, lineNum)
 
 #  If working from SD card, copy or move files to " Drag Photos HERE Drag Photos HERE" folder, then will process from there.
 # puts "#{lineNum}..   src: #{src} \nsrcHD: #{srcHD}"
@@ -792,7 +810,7 @@ timeNowWas = timeStamp(timeNowWas)
 copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
 #  Note that file creation date is the time of copying. May want to fix this. Maybe a mv is a copy and move which is sort of a recreation. 
 
-timeNowWas = timeStamp(timeNowWas)
+timeNowWas = timeStamp(timeNowWas, lineNum)
 puts "\n#{lineNum}. Photos will now be moved and renamed."
 
 # puts "First will copy to the final destination where the renaming will be done and the original moved to an archive (_imported-archive folder)"
@@ -803,31 +821,34 @@ copyAndMove(srcHD,destPhoto,destOrig)
 # puts "\n#{lineNum}. fromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}"
 whichOne =="SD" ? unmountCard(sdCard) : ""
 
-timeNowWas = timeStamp(timeNowWas)
+timeNowWas = timeStamp(timeNowWas, lineNum)
 
-puts "\n#{lineNum}. Rename the photo files with date and an ID for the camera or photographer. #{timeNowWas}\n"
+puts "\n#{lineNum}. Rename [tzoLoc = rename(…)] the photo files with date and an ID for the camera or photographer. #{timeNowWas}\n"
 # tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # Second time this variable name is used, other is in a method
-tzoLoc = - rename(destPhoto, timeZones, timeNowWas) # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
+tzoLoc = - rename(destPhoto, timeZones, timeNowWas).to_i # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
+# puts "#{lineNum}. tzoLoc, but not used" # this only for hand runs
+# tzoLoc = -8 # for reprocessing old files when had to put in by hand. Have a separate sort by time zone to select
+# puts "#{lineNum}. Change lines 812 and 813 since they are locking the time zone. Also look at source of gpx tracks"
 
 puts "#{lineNum} tzoLoc: #{tzoLoc}. Because GX8 and some other cameras use local time and not GMT as this script was originally written for. All photos must be in same time zone."
-timeNowWas = timeStamp(timeNowWas)
+timeNowWas = timeStamp(timeNowWas, lineNum)
 
 puts "\n#{lineNum}. Using perl script to add gps coordinates. Will take a while as all the gps files for the year will be processed and then all the photos. -tzoLoc, `i.e.: GMT #{-tzoLoc}"
 
 # Add GPS coordinates. Will add location later using some options depending on which country since different databases are relevant.
 perlOutput = addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop, tzoLoc)
 
-timeNowWas = timeStamp(timeNowWas)
+timeNowWas = timeStamp(timeNowWas, lineNum)
 
 # Write timeDiff to the photo files
 puts "\n#{lineNum}. Write timeDiff to the photo files"
 writeTimeDiff(perlOutput)
 
-timeNowWas = timeStamp(timeNowWas)
+timeNowWas = timeStamp(timeNowWas, lineNum)
 # Parce perlOutput and add maxTimeDiff info to photo files
 
 # Add location information to photo file
 addLocation(destPhoto, geoNamesUser)
 
-timeNowWas = timeStamp(timeNowWas)
+timeNowWas = timeStamp(timeNowWas, lineNum)
 puts "\n#{lineNum}.-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - All done"
