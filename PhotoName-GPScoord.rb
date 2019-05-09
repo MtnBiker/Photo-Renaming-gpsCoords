@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 # Can't run from TextMate on iMac unless use System Ruby, i.e. not variables set in TM
+#  Look at https://github.com/txus/kleisli for getting location information from geonames.
 # Can be made to work with TS5 completely because GPS coordinates are batch added and TS5 photos missing coordinates have different time stamp than other cameras, so have to modify --timeoffset in Perl script by hand for batch of TS5 photos. Is still true since added options for travel and TS5?
 #  Look at speeding up with https://github.com/tonytonyjan/exif for rename and annotate which is rather slow. 8 min. for 326 photos
 # require 'rubygems' # # Needed by rbosa, mini_exiftool, and maybe by appscript. Not needed if correct path set somewhere. Doesn't help when using with v2.6.2`
@@ -20,20 +21,25 @@ require 'irb' # binding.irb where error checking is desired
 require 'mini_exiftool'
 # require 'exif' # added later. A partial implementation of ExifTool, but faster than mini_exiftool. Commented out since doesn't work with Panasonic Raw
 # require 'geonames'
-# load 'geonames.rb' # Note this is a file, not a gem. I guess the gem didn't work?
-load '/Users/gscar/Documents/Ruby/Garmin Log renaming/geonames.rb' # above fails from command line. Even if move file there; currently it is an alias
+load 'geonames.rb' # Note this is a file, not a gem. I guess the gem didn't work?
+# load '/Users/gscar/Documents/Ruby/Garmin Log renaming/geonames.rb' # above fails from command line. Even if move file there; currently it is an alias
 
 require_relative 'lib/gpsYesPashua'
 require_relative 'lib/LatestDownloadsFolderEmpty_Pashua'
 require_relative 'lib/Photo_Naming_Pashua-SD2'
 require_relative 'lib/Photo_Naming_Pashua–HD2'
 require_relative 'lib/SDorHD'
+def lineNum() # Had to move this to above the first call or it didn't work. Didn't think that was necessary
+  caller_infos = caller.first.split(":")
+  # Note caller_infos[0] is file name
+  caller_infos[1]
+end # line numbers of this file, useful for debugging and logging info to progress screen
 
 thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
 lastPhotoReadTextFile = "/Volumes/LUMIX/DCIM/" # SD folder alternate since both this and one below occur 
 sdCardAlt   = "/Volumes/NO NAME/"
 sdCard      = "/Volumes/LUMIX/"
-srcSDfolderAlt = sdCardAlt + "DCIM/" # SD folder alternate since both this and one below occur 
+srcSDfolderAlt = sdCardAlt + "DCIM/" # SD folder alternate since both this and one below occur. Used at line 740
 srcSDfolder = sdCard + "DCIM/"  # SD folder 
 
 # Quit using this file and just get the folder name from the file name which will be stored on the card.
@@ -55,7 +61,7 @@ destOrig  = downloadsFolders + "_imported-archive" # folder to move originals to
 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
 puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. "
-geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wikipedia—most general and osm—maybe better for cities
+# geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wikipedia—most general and osm—maybe better for cities # not being used May 2019
 timeZonesFile = "/Users/gscar/Dropbox/scriptsEtc/Greg camera time zones.yml"
 timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with
 gpsPhotoPerl = thisScript + "lib/gpsPhoto.pl"
@@ -64,11 +70,6 @@ puts "#{lineNum}. Must manually set folderGPX for GPX file folders. Particularly
 geoNamesUser    = "MtnBiker" # This is login, user shows up as MtnBiker; but used to work with this. Good but may use it up. Ran out after about 300 photos per hour. This fixed it.
 geoNamesUser2   = "geonamestwo" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
 
-def lineNum()
-  caller_infos = caller.first.split(":")
-  # Note caller_infos[0] is file name
-  caller_infos[1]
-end # line numbers of this file, useful for debugging and logging info to progress screen
 
 def ignoreNonFiles(item) # invisible files that shouldn't be processed
   item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon '
@@ -141,11 +142,11 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
       print(".") # crude activity bar. This doesn't happen
       # put cardCount # another try at activity bar
       # puts "#{lineNum}.. src/item: #{src}#{item}."
-      fn = src + item
+      fn = src + "/" + item # 2019.05.08 added /. Hadn't had it before. Maybe the problem is with src
       fnp = srcHD + "/" + item # using srcHD as the put files here place, might cause problems later
       # get filename and make select later than already downloaded
       fileSDbasename = File.basename(item,".*")
-      # puts "#{lineNum}. #{cardCount}. item: #{item}. fn: #{fn}"
+      puts "#{lineNum}. #{cardCount}. item: #{item}. fn: #{fn}"
       next if item == '.' or item == '..' or fileSDbasename <= lastPhotoFilename # don't need the first two with Dir.glob, but doesn't slow things down much overall for this script
       FileUtils.copy(fn, fnp) # Copy from card to hard drive. , preserve = true gives and error. But preserve also preserves permissions, so that may not be a good thing. If care will have to manually change creation date
       cardCountCopied += 1
@@ -217,21 +218,26 @@ def copyAndMove(srcHD,destPhoto,destOrig)
     next if item == '.' or item == '..' or item == '.DS_Store'
     # next if ignoreNonFiles(item) == true
     # fileExt = File.extname(item)
+    # I think the following if is about not bringing jpg's into whatever program I'm using which is now Mylio. Now being used at the moment, so all commented out
     if File.basename(itemPrev, ".*") == File.basename(item,".*") && photoFinalCount != 0
      #  The following shouldn't be necessary, but is a check in case another kind of raw or who know what else. Only the FileUtils.rm(itemPrev) should be needed
      itemPrevExtName = File.extname(itemPrev) # since reusing below
-     # TODO Add an option to keep jpgs. May want to see how camera is converting them. May end up having problem with labeling as then would have two photos taken at the same time and the Raw will always be a .b
-      if itemPrevExtName == ".JPG" or itemPrevExtName == ".jpg" # added lower case for iPhone to sort HEIC
+     # TODO Add an option to keep or not keep jpgs. May want to see how camera is converting them. May end up having problem with labeling as then would have two photos taken at the same time and the Raw will always be a .b
+     # Now just keeping them
+       # FileUtils.rm(destPhoto + itemPrev) if itemPrevExtName == ".HEIC" # could uncomment this if a problem for Mylio.
+        # All the commented out lines below since keeping jpgs. Not sure about what how to handle HEIC
+      if itemPrevExtName.downcase ==  ".jpg" # Downcased and removed this (".JPG" or itemPrevExtName ==) added lower case for iPhone to sort HEIC
         FileUtils.rm(fnp) # Removing the jpg file from LatestDownload which is "duplicate" of a RAW that we're now considering. Can comment this out to keep both
         puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} will not be transferred because it's a jpg duplicate of a RAW version." # Is this slow? Turned off to try. Not sure.
         delCount += 1
         photoFinalCount -= 1
-      elsif
+      elsif # not a jpg and check for HEIC--what am I doing with this
         if itemPrevExtName == ".HEIC"
           FileUtils.rm(destPhoto + itemPrev)
-        end
+        end # itemPrevExtName-just one line
         puts "#{lineNum}. Something very wrong here with trying to remove JPGs when there is a corresponding .RW2 or .HEIC. itemPrev: #{itemPrev}. item: #{item}."
-      end # File.extname  
+      end # itemPrevExtName a bunch of lines
+      # end # File.extname  
     end   # File.basename
     fn  = srcHD     + item # sourced from Drag Photos Here
     fnp = destPhoto + item # new file in Latest Download
@@ -258,26 +264,26 @@ def copyAndMove(srcHD,destPhoto,destOrig)
     comment = ". #{delCount-1} duplicate jpg were not moved."
   else
     comment = ""
-  end
+  end # if delCount
   puts "\n#{lineNum}. #{photoFinalCount} photos have been moved and are ready for renaming and adding GPS coordinates and locations#{comment}"
 end # copyAndMove: copy to the final destination where the renaming will be done and the original moved to an archive (_imported-archive folder)
 
-def unmountCard(card)
-  puts "#{lineNum}. card: #{card}" 
-  card = card[-8, 7]
-  puts "#{lineNum}. card: #{card}" 
-  card  = "\"" + card + "\""
-  disk =  `diskutil list |grep #{card} 2>&1`
-  puts "\n#{lineNum}. disk: #{disk}"
-  # Getting confused because grabbing the last 7 twice. And naming sucks (mjy fault)
-  driveID = disk[-8, 7] # not sure this syntax is precise, but it's working.
-  puts "#{lineNum} Unmount #{card}. May have to code this better. See if card name is already a variable. This is hard coded for a specific length of card name"
-  puts "#{lineNum}. driveID: #{driveID}. card: #{card}" 
-  cmd =  "diskutil unmount #{driveID} 2>&1"
-  puts "cmd: #{cmd}"
-  unmountResult = `diskutil unmount #{driveID} 2>&1`
-  puts "\n#{lineNum}. SD card, #{unmountResult}, unmounted."  
-end #unm
+# def unmountCard(card)
+#   puts "#{lineNum}. card: #{card}"
+#   card = card[-8, 7]
+#   puts "#{lineNum}. card: #{card}"
+#   card  = "\"" + card + "\""
+#   disk =  `diskutil list |grep #{card} 2>&1`
+#   puts "\n#{lineNum}. disk: #{disk}"
+#   # Getting confused because grabbing the last 7 twice. And naming sucks (mjy fault)
+#   driveID = disk[-8, 7] # not sure this syntax is precise, but it's working.
+#   puts "#{lineNum} Unmount #{card}. May have to code this better. See if card name is already a variable. This is hard coded for a specific length of card name"
+#   puts "#{lineNum}. driveID: #{driveID}. card: #{card}"
+#   cmd =  "diskutil unmount #{driveID} 2>&1"
+#   puts "cmd: #{cmd}"
+#   unmountResult = `diskutil unmount #{driveID} 2>&1`
+#   puts "\n#{lineNum}. SD card, #{unmountResult}, unmounted."
+# end #unm
 
 def userCamCode(fn)
   fileEXIF = MiniExiftool.new(fn)
@@ -287,12 +293,12 @@ def userCamCode(fn)
       userCamCode = ".gs.P" # gs for photographer. P for *P*anasonic Lumix
     when "iPhone X"
       userCamCode = ".i" # gs for photographer. i for iPhone
-    when "DMC-GX7"
-    #   userCamCode = ".gs.P" # gs for photographer. P for *P*anasonic Lumix
-    when "DMC-TS5"
-      userCamCode = ".gs.W" # gs for photographer. W for *w*aterproof Panasonic Lumix DMC-TS5
     when "Canon PowerShot S100"
       userCamCode = ".lb" # initials of the photographer who usually shoots with the S100
+    when "DMC-GX7" # no longer using, but may reprocess some photos
+      userCamCode = ".gs.P" # gs for photographer. P for *P*anasonic Lumix
+    when "DMC-TS5"
+      userCamCode = ".gs.W" # gs for photographer. W for *w*aterproof Panasonic Lumix DMC-TS5/
     else
       userCamCode = ".xx"
   end # case
@@ -384,6 +390,8 @@ def rename(src, timeZonesFile, timeNowWas)
       # Determine the time and time zone where the photo was taken
       # puts "315.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}." #  #{timeNowWas = timeStamp(timeNowWas)}
       fileDateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
+      fileSubSecTimeOriginal = fileEXIF.SubSecTimeOriginal # no error if doesn't exist
+      subSecExists = fileEXIF.SubSecTimeOriginal.to_s.length > 2 # 
       if fileDateTimeOriginal == nil 
         # TODO This probably could be cleaned up, but then normally not used, movie files don't have this field
         fileDateTimeOriginal = fileEXIF.DateCreated  # PNG don't have dateTimeOriginal
@@ -432,14 +440,20 @@ def rename(src, timeZonesFile, timeNowWas)
       # puts "#{lineNum}.. #{timeStamp(timeNowWas)}"
       # Now the fileBaseName. Simple if not in the same second, otherwise an added sequence number
       oneBack = fileDate == fileDatePrev # true if previous file at the same time calculated in local time
-      # puts "#{lineNum}.. oneBack: #{oneBack}. #{item}"
-      if oneBack
-        dupCount =+ 1
-        fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  seqLetter[dupCount] + userCamCode(fn)            
-      else # normal condition that this photo is at a different time than previous photo
-        dupCount = 0 # resets dupCount after having a group of photos in the same second
-        fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S")  + userCamCode(fn)
-      end # if oneBack
+      puts "#{lineNum}.. oneBack: #{oneBack}. #{item}"
+      if subSecExists # mainly GX8
+          fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "." + fileSubSecTimeOriginal.to_s + userCamCode(fn)
+      else # not GX8
+          if oneBack # at the moment only handles two in the same second
+          dupCount =+ 1
+          fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  seqLetter[dupCount] + userCamCode(fn)
+          puts "#{lineNum}. fn: #{fn} in 'if oneBack'.     fileBaseName: #{fileBaseName}."
+        else # normal condition that this photo is at a different time than previous photo
+          dupCount = 0 # resets dupCount after having a group of photos in the same second
+          fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S")  + userCamCode(fn)
+          puts "#{lineNum}. fn: #{fn} in 'if oneBack-else'.    fileBaseName: #{fileBaseName}"
+        end # if oneBack
+      end # if subSecExists
       fileDatePrev = fileDate
       # fileBaseNamePrev = fileBaseName
    
@@ -771,7 +785,7 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
   begin
     # Read from SD card
     lastPhotoReadTextFile = sdCard + "/lastPhotoRead.txt" # But this doesn't work if a new card. 
-    puts "\n#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. NEED an error here if card not mounted!!"
+    puts "\n#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. NEED an error here if card not mounted!!. Have a kludge fix in the next rescue."
     file = File.new(lastPhotoReadTextFile, "r")
     lastPhotoFilename = file.gets # apparently grabbing a return. maybe not the best reading method.
     puts "\n#{lineNum}. lastPhotoFilename: #{lastPhotoFilename.chop}. Value can be changed by user, so this may not be the value used."
@@ -781,7 +795,13 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
     puts "Exception: #{err}. Not critical as value can be entered manually by user."
   end
   
-  srcSD = srcSDfolder + lastPhotoFilename.chop.slice(1,3) + "_PANA"
+  begin
+    srcSD = srcSDfolder + lastPhotoFilename.chop.slice(1,3) + "_PANA"
+  rescue Exception => e
+    puts "#{lineNum} +++++++++++++ SD card not available, so will EXIT.++++++++++. Probably selected wrong option."
+    exit
+  end
+  
 # Don't know if this is needed, why not use srcSD directly
   src = srcSD
   prefsPhoto = pPashua2(src,lastPhotoFilename,destPhoto,destOrig) # calling Photo_Handling_Pashua-SD. (Titled: 2. SD card photo downloading options)
@@ -790,11 +810,13 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
   # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
 else # whichOne=="HD", but what
   src = srcHD
+   puts "#{lineNum}. src: #{src}. Does it have a slash?"
   prefsPhoto = pGUI(src, destPhoto, destOrig) # is this only sending values in? 
   # to get a value use prefsPhoto("theNameInFileNamingEtcPashue.rb"), nothing to do with the name above
   # puts "Prefs as set by pGUI"
   # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
   src = prefsPhoto["srcSelect"]  + "/"
+  puts "#{lineNum}. src: #{src}. Does it have a slash?"
 end # whichOne=="SD"
 destPhoto = prefsPhoto["destPhotoP"] + "/" 
 destOrig  = prefsPhoto["destOrig"] + "/"
@@ -819,7 +841,7 @@ copyAndMove(srcHD,destPhoto,destOrig)
 
 # unmount card. Test if using the SD
 # puts "\n#{lineNum}. fromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}"
-whichOne =="SD" ? unmountCard(sdCard) : ""
+# whichOne =="SD" ? unmountCard(sdCard) : "" # not working so turned off TODO
 
 timeNowWas = timeStamp(timeNowWas, lineNum)
 
