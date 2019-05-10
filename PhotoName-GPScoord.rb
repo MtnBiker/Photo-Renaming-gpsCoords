@@ -35,6 +35,7 @@ def lineNum() # Had to move this to above the first call or it didn't work. Didn
   caller_infos[1]
 end # line numbers of this file, useful for debugging and logging info to progress screen
 
+photosArray = [] # can create intially, but I don't know how to add to a file already on the list. I'll be better off with an indexed data base. I suppose could delete the existing item for that index and then put in revised.
 thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
 lastPhotoReadTextFile = "/Volumes/LUMIX/DCIM/" # SD folder alternate since both this and one below occur 
 sdCardAlt   = "/Volumes/NO NAME/"
@@ -57,6 +58,7 @@ downloadsFolders = "/Volumes/Daguerre/_Download folder/"
 # downloadsFolders = "/Users/gscar/Pictures/_Download folder iMac/" # temp on iMac until Daguerre is back
 srcHD     = downloadsFolders + " Drag Photos HERE/"  # Photos copied from camera, sent by others, etc.
 destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
+destJpg   = downloadsFolders + "Latest Downloads jpg/"
 destOrig  = downloadsFolders + "_imported-archive" # folder to move originals to if not done in. No slash because getting double slash with one
 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
@@ -202,7 +204,7 @@ def uniqueFileName(filename)
   unique_name
 end
 
-def copyAndMove(srcHD,destPhoto,destOrig)
+def copyAndMove(srcHD,destPhoto, destJpg, destOrig, photosArray)
   puts "\n#{lineNum}. Copy photos from #{srcHD}\n      to #{destPhoto} where the renaming will be done, \n      and the originals moved to an archive folder (#{destOrig})\n Running dots are progress bar" 
   # Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
   # Guess this method is slow because files are being copied
@@ -211,6 +213,7 @@ def copyAndMove(srcHD,destPhoto,destOrig)
   delCount = 1
   itemPrev = "" # need something for first time through
   fnp = "" # when looped back got error "undefined local variable or method ‘fnp’ for main:Object", so needs to be set here to remember it. Yes, this works, without this statement get an error
+  jpgMove = false
   # puts "#{lineNum}. Files in #{srcHD}: #{Dir.entries(srcHD).sort}" # list of files to be processed
   Dir.entries(srcHD).sort.each do |item| # This construct goes through each in order. Sometimes the files are not in order with Dir.foreach or Dir.entries without sort
     # Item is the file name
@@ -227,10 +230,13 @@ def copyAndMove(srcHD,destPhoto,destOrig)
        # FileUtils.rm(destPhoto + itemPrev) if itemPrevExtName == ".HEIC" # could uncomment this if a problem for Mylio.
         # All the commented out lines below since keeping jpgs. Not sure about what how to handle HEIC
       if itemPrevExtName.downcase ==  ".jpg" # Downcased and removed this (".JPG" or itemPrevExtName ==) added lower case for iPhone to sort HEIC
-        FileUtils.rm(fnp) # Removing the jpg file from LatestDownload which is "duplicate" of a RAW that we're now considering. Can comment this out to keep both
-        puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} will not be transferred because it's a jpg duplicate of a RAW version." # Is this slow? Turned off to try. Not sure.
+        # Mark for moving to destJpg
+        jpgMove = true
+        # FileUtils.rm(fnp) # Removing the jpg file from LatestDownload which is "duplicate" of a RAW that we're now considering. Can comment this out to keep both
+        # puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} will not be transferred because it's a jpg duplicate of a RAWversion." # Is this slow? Turned off to try. Not sure.
+        # puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} was moved to #{destJpg} it's a jpg duplicate of a RAW version and needs to be processed separately." # Is this slow? Turned off to try. Not sure.
         delCount += 1
-        photoFinalCount -= 1
+        # photoFinalCount -= 1 # commented out since now included
       elsif # not a jpg and check for HEIC--what am I doing with this
         if itemPrevExtName == ".HEIC"
           FileUtils.rm(destPhoto + itemPrev)
@@ -241,6 +247,7 @@ def copyAndMove(srcHD,destPhoto,destOrig)
     end   # File.basename
     fn  = srcHD     + item # sourced from Drag Photos Here
     fnp = destPhoto + item # new file in Latest Download
+    fnp = destJpg   + item if !jpgMove # seems like ! is backwards but this works
     # puts "#{lineNum}. Copy from fn: #{fn}"  # debugging
     fnf = destOrig  + item # to already imported
     # puts "#{lineNum}. to fnp: #{fnp}" # debugging
@@ -256,16 +263,21 @@ def copyAndMove(srcHD,destPhoto,destOrig)
     end # File.exists?
     # "#{lineNum}.. #{photoFinalCount + delCount} #{fn}" # More for debugging, but maybe OK as progress in this slow process
     itemPrev = item
+    jpgMove = false
     photoFinalCount += 1
+    arrayIndex = photoFinalCount - 1 # Need spaces around the minus
+    photosArray << [arrayIndex, item, fnp, itemPrevExtName] # count minus one, so indexed like an array starting at zero
     print "." # Trying to get a progress bar
   end # Dir.entries
   # puts "\#{lineNum}. #{photoFinalCount} photos have been moved and are ready for renaming and gpsing. #{delCount-1} duplicate jpg were not
   if delCount > 1
-    comment = ". #{delCount-1} duplicate jpg were not moved."
+#   comment = "#{lineNum}. #{delCount-1} duplicate jpg were not moved."
+    comment = "#{lineNum}. #{delCount-1} jpegs were moved to #{destJpg} for processing separately."
   else
     comment = ""
   end # if delCount
   puts "\n#{lineNum}. #{photoFinalCount} photos have been moved and are ready for renaming and adding GPS coordinates and locations#{comment}"
+  return photosArray
 end # copyAndMove: copy to the final destination where the renaming will be done and the original moved to an archive (_imported-archive folder)
 
 # def unmountCard(card)
@@ -372,11 +384,13 @@ def rename(src, timeZonesFile, timeNowWas)
   # Until 2017, this assumed camera on UTC, but doesn't work well for cameras with a GPS or set to local time
   # So have to ascertain what time zone the camera is set to by other means in this script, none of them foolproof
   # 60 minutes for ~1000 photos to rename TODO ie, very slow
+  fn = fnp = fnpPrev = "" # must declare variable or they won't be available everywhere in the module
+  subSecPrev = subSec = ""
   fileDatePrev = ""
   dupCount = 0
   count    = 0
   tzoLoc = ""
-  seqLetter = %w(a b c d e f g h i j k l m n o p q r s t u v w x y z aa bb cc) # seems like this should be an array, not a list
+  seqLetter = %w(a b c d e f ) # seems like this should be an array, not a list
   Dir.foreach(src) do |item| # for each photo file
     next if ignoreNonFiles(item) == true # skipping file when true, i.e., not a file
     # puts "#{lineNum}. #{item} will be renamed. " # #{timeNowWas = timeStamp(timeNowWas)}
@@ -389,8 +403,11 @@ def rename(src, timeZonesFile, timeNowWas)
     if File.file?(fn)
       # Determine the time and time zone where the photo was taken
       # puts "315.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}." #  #{timeNowWas = timeStamp(timeNowWas)}
+      fileExt = File.extname(fn).tr(".","").downcase  # needed later for determining if dups at same time. Will be lowercase jpg or rw2 or whatever
+      fileExtPrev = ""
       fileDateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
       fileSubSecTimeOriginal = fileEXIF.SubSecTimeOriginal # no error if doesn't exist
+      subSec = "." + fileSubSecTimeOriginal.to_s[0..1] #Truncating to 2 figs (could round but would need to make a float, divide by 10 and round or something. This should be close enough)
       subSecExists = fileEXIF.SubSecTimeOriginal.to_s.length > 2 # 
       if fileDateTimeOriginal == nil 
         # TODO This probably could be cleaned up, but then normally not used, movie files don't have this field
@@ -439,40 +456,62 @@ def rename(src, timeZonesFile, timeNowWas)
       # Determine dupCount, i.e., 0 if not in same second, otherwise the number of the sequence for the same time
       # puts "#{lineNum}.. #{timeStamp(timeNowWas)}"
       # Now the fileBaseName. Simple if not in the same second, otherwise an added sequence number
-      oneBack = fileDate == fileDatePrev # true if previous file at the same time calculated in local time
-      puts "#{lineNum}.. oneBack: #{oneBack}. #{item}"
-      if subSecExists # mainly GX8
-          fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "." + fileSubSecTimeOriginal.to_s + userCamCode(fn)
-      else # not GX8
-          if oneBack # at the moment only handles two in the same second
-          dupCount =+ 1
+      # oneBack = fileDate == fileDatePrev # true if previous file at the same time calculated in local time
+      oneBack = fileDate == fileDatePrev && fileExt != fileExtPrev # at the moment this is meaningless because all ofne type
+      puts "\n#{lineNum}.#{count}. oneBack: #{oneBack}. #{item}. dupCount: #{dupCount}"
+      # if subSecExists # mainly GX8. Too heavy handed, every GX8 files get subSec which is too much
+#           fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "." + fileSubSecTimeOriginal.to_s + userCamCode(fn)
+#           puts "#{lineNum}. fn: #{fn} in 'if subSecExists'.     fileBaseName: #{fileBaseName}."
+      # else # not GX8
+      if oneBack # at the moment only handles two in the same second
+        dupCount += 1
+          
+        if subSecExists # mainly GX8.
+          fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  subSec + userCamCode(fn) # this doesn't happen for the first one in the same second.
+          puts "#{lineNum}. fn: #{fn} in 'if subSecExists'.     fileBaseName: #{fileBaseName}. dupCount: #{dupCount}"
+          # Need a test for the second time here
+          if dupCount == 1
+            # Can use old fileDate because it's the same and userCamCode. 
+            fnp = src + fileDate.strftime("%Y.%m.%d-%H.%M.%S") + subSecPrev + userCamCode(fn)+  File.extname(fn).downcase
+            puts "#{lineNum}. We will relabel #{fnpPrev} to #{fnp} since it didn't get subSecPrev: #{subSecPrev}. dupCount: #{dupCount} " 
+            # /Volumes/Daguerre/_Download folder/Latest Download//2019.05.08-16.27.33.gs.P.rw2 to
+            # /Volumes/Daguerre/_Download folder/Latest Download//2019.05.08-16.27.33.gs.P.rw2 since it didn't getsubSecs. dupCount: 1
+            File.rename(fnpPrev,fnp) # NOT HAPPENING
+          end # if dup count
+        else # photos without subsecs, pre GX8
           fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  seqLetter[dupCount] + userCamCode(fn)
           puts "#{lineNum}. fn: #{fn} in 'if oneBack'.     fileBaseName: #{fileBaseName}."
-        else # normal condition that this photo is at a different time than previous photo
-          dupCount = 0 # resets dupCount after having a group of photos in the same second
-          fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S")  + userCamCode(fn)
-          puts "#{lineNum}. item: #{item} in 'if oneBack-else'.    fileBaseName: #{fileBaseName}"
-        end # if oneBack
-      end # if subSecExists
+        end # subSecExists
+        # fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  seqLetter[dupCount] + userCamCode(fn)
+#           puts "#{lineNum}. fn: #{fn} in 'if oneBack'.     fileBaseName: #{fileBaseName}."
+      else # normal condition that this photo is at a different time than previous photo
+        dupCount = 0 # resets dupCount after having a group of photos in the same second
+        fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S")  + userCamCode(fn)
+        puts "#{lineNum}. item: #{item} is at different time as previous.    fileBaseName: #{fileBaseName}"
+      end # if oneBack
+      # end # if subSecExists
       fileDatePrev = fileDate
+      fileExtPrev = fileExt
       # fileBaseNamePrev = fileBaseName
    
       # File renaming and/or moving happens here
       # puts "#{lineNum}. #{count+1}. dateTimeOriginal: #{fileDateTimeOriginal}. item: #{item}. camModel: #{camModel}" # . #{timeNowWas = timeStamp(timeNowWas)} # took 1 sec per file
       fileAnnotate(fn, fileEXIF, fileDateTimeOriginalstr, tzoLoc) # adds original file name, capture date and time zone to EXIF. Comments which I think show up as instructions in Aperture. Also wiping out bad GPS data on TS5
-      fnp = src + fileBaseName + File.extname(fn).downcase
-      File.rename(fn,fnp)   
+      fnp = fnpPrev = src + fileBaseName + File.extname(fn).downcase unless 
+      puts "#{lineNum}. fn: #{fn}. fnp: #{fnp}. fnpPrev: #{fnpPrev}. subSec: #{subSec}"
+      subSecPrev = subSec.to_s
+      File.rename(fn,fnp)
       count += 1
       # print " #{count}" Trying for  progress indicator
       # puts "#{lineNum}.#{count} #{timeNowWas = timeStamp(timeNowWas)}. #{fileBaseName}" # temp to see how long taking. 1 to 4 seconds on MBP accessing photos on attached portable drive
     end # 3. if File
     # puts "#{lineNum}. Got to here. tzoLoc: #{tzoLoc}"
     
-  end # 2. Find
+  end # 2. Dir.foreach(src)
   # return tzoLoc # used by ?
   # puts "#{lineNum}. Got to here. tzoLoc: #{tzoLoc}" # tzoLoc doesn't exist here
   return tzoLoc # the time zone the picture was taken in,
-end # renaming photo files in the downloads folder and writing in original time.
+end # rename ing photo files in the downloads folder and writing in original time.
 
 def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop, tzoLoc)
   # Remember writing a command line command, so telling perl, then which perl file, then the gpsphoto.pl script options
@@ -836,8 +875,13 @@ timeNowWas = timeStamp(timeNowWas, lineNum)
 puts "\n#{lineNum}. Photos will now be moved and renamed."
 
 # puts "First will copy to the final destination where the renaming will be done and the original moved to an archive (_imported-archive folder)"
-#  Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
-copyAndMove(srcHD,destPhoto,destOrig)
+#  Copy jpg to destJpg if there is a corresponding raw, and rename later 
+photosArray = copyAndMove(srcHD,destPhoto, destJpg, destOrig, photosArray)
+puts "#{lineNum}. photosArray:" # Arrays seem to get mixed up if put in a {}
+# puts photosArray
+#  To see how it looks
+puts "\n#{lineNum}. photosArray[2]: #{photosArray[2]}. Sample of photosArray. This line within brackets, below just a puts # Shows everything
+puts photosArray[2] # only the index (3) shows up
 
 # unmount card. Test if using the SD
 # puts "\n#{lineNum}. fromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}"
