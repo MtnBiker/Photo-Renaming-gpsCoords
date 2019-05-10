@@ -1,8 +1,8 @@
 #!/usr/bin/env ruby
 # Can't run from TextMate on iMac unless use System Ruby, i.e. not variables set in TM
-#  Look at https://github.com/txus/kleisli for getting location information from geonames.
-# Can be made to work with TS5 completely because GPS coordinates are batch added and TS5 photos missing coordinates have different time stamp than other cameras, so have to modify --timeoffset in Perl script by hand for batch of TS5 photos. Is still true since added options for travel and TS5?
-#  Look at speeding up with https://github.com/tonytonyjan/exif for rename and annotate which is rather slow. 8 min. for 326 photos
+# Look at https://github.com/txus/kleisli for getting location information from geonames.
+# Look at speeding up with https://github.com/tonytonyjan/exif for rename and annotate which is rather slow. 8 min. for 326 photos
+#  2019/05/10 installed libexif and tried to use. Got error File not readable or no EXIF data in file. (Exif::NotReadable). Issue still open after two years at tonytonyjan
 # require 'rubygems' # # Needed by rbosa, mini_exiftool, and maybe by appscript. Not needed if correct path set somewhere. Doesn't help when using with v2.6.2`
 puts "Ruby v#{RUBY_VERSION}p#{RUBY_PATCHLEVEL} as reported by Ruby\nAnd as reported by \`system ('gem env')\`:" # A Ruby constant
 # system ('gem env') # for debugging problem with gem not loading https://stackoverflow.com/questions/53202164/textmate-chruby-and-ruby-gems
@@ -35,7 +35,7 @@ def lineNum() # Had to move this to above the first call or it didn't work. Didn
   caller_infos[1]
 end # line numbers of this file, useful for debugging and logging info to progress screen
 
-photosArray = [] # can create intially, but I don't know how to add to a file already on the list. I'll be better off with an indexed data base. I suppose could delete the existing item for that index and then put in revised.
+photosArray = [] # can create intially, but I don't know how to add other "fields" to a file already on the list. I'll be better off with an indexed data base. I suppose could delete the existing item for that index and then put in revised.
 thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
 lastPhotoReadTextFile = "/Volumes/LUMIX/DCIM/" # SD folder alternate since both this and one below occur 
 sdCardAlt   = "/Volumes/NO NAME/"
@@ -72,7 +72,7 @@ puts "#{lineNum}. Must manually set folderGPX for GPX file folders. Particularly
 geoNamesUser    = "MtnBiker" # This is login, user shows up as MtnBiker; but used to work with this. Good but may use it up. Ran out after about 300 photos per hour. This fixed it.
 geoNamesUser2   = "geonamestwo" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
 
-
+# MODULES
 def ignoreNonFiles(item) # invisible files that shouldn't be processed
   item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon '
   # This is true when it should not be processed i.e. next if ignoreNonFiles(item) == true
@@ -458,25 +458,21 @@ def rename(src, timeZonesFile, timeNowWas)
       # Now the fileBaseName. Simple if not in the same second, otherwise an added sequence number
       # oneBack = fileDate == fileDatePrev # true if previous file at the same time calculated in local time
       oneBack = fileDate == fileDatePrev && fileExt != fileExtPrev # at the moment this is meaningless because all ofne type
-      puts "\n#{lineNum}.#{count}. oneBack: #{oneBack}. #{item}. dupCount: #{dupCount}"
+      # puts "\n#{lineNum}.#{count}. oneBack: #{oneBack}. #{item}. dupCount: #{dupCount}"
       # if subSecExists # mainly GX8. Too heavy handed, every GX8 files get subSec which is too much
 #           fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "." + fileSubSecTimeOriginal.to_s + userCamCode(fn)
 #           puts "#{lineNum}. fn: #{fn} in 'if subSecExists'.     fileBaseName: #{fileBaseName}."
       # else # not GX8
       if oneBack # at the moment only handles two in the same second
         dupCount += 1
-          
         if subSecExists # mainly GX8.
           fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  subSec + userCamCode(fn) # this doesn't happen for the first one in the same second.
-          puts "#{lineNum}. fn: #{fn} in 'if subSecExists'.     fileBaseName: #{fileBaseName}. dupCount: #{dupCount}"
-          # Need a test for the second time here
+          # puts "#{lineNum}. fn: #{fn} in 'if subSecExists'.     fileBaseName: #{fileBaseName}. dupCount: #{dupCount}"
           if dupCount == 1
             # Can use old fileDate because it's the same and userCamCode. 
             fnp = src + fileDate.strftime("%Y.%m.%d-%H.%M.%S") + subSecPrev + userCamCode(fn)+  File.extname(fn).downcase
-            puts "#{lineNum}. We will relabel #{fnpPrev} to #{fnp} since it didn't get subSecPrev: #{subSecPrev}. dupCount: #{dupCount} " 
-            # /Volumes/Daguerre/_Download folder/Latest Download//2019.05.08-16.27.33.gs.P.rw2 to
-            # /Volumes/Daguerre/_Download folder/Latest Download//2019.05.08-16.27.33.gs.P.rw2 since it didn't getsubSecs. dupCount: 1
-            File.rename(fnpPrev,fnp) # NOT HAPPENING
+            # puts "#{lineNum}. We will relabel #{fnpPrev} to #{fnp} since it didn't get subSecPrev: #{subSecPrev}. dupCount: #{dupCount} "
+            File.rename(fnpPrev,fnp)
           end # if dup count
         else # photos without subsecs, pre GX8
           fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  seqLetter[dupCount] + userCamCode(fn)
@@ -487,7 +483,7 @@ def rename(src, timeZonesFile, timeNowWas)
       else # normal condition that this photo is at a different time than previous photo
         dupCount = 0 # resets dupCount after having a group of photos in the same second
         fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S")  + userCamCode(fn)
-        puts "#{lineNum}. item: #{item} is at different time as previous.    fileBaseName: #{fileBaseName}"
+        # puts "#{lineNum}. item: #{item} is at different time as previous.    fileBaseName: #{fileBaseName}"
       end # if oneBack
       # end # if subSecExists
       fileDatePrev = fileDate
@@ -880,7 +876,7 @@ photosArray = copyAndMove(srcHD,destPhoto, destJpg, destOrig, photosArray)
 puts "#{lineNum}. photosArray:" # Arrays seem to get mixed up if put in a {}
 # puts photosArray
 #  To see how it looks
-puts "\n#{lineNum}. photosArray[2]: #{photosArray[2]}. Sample of photosArray. This line within brackets, below just a puts # Shows everything
+puts "\n#{lineNum}. photosArray[2]: #{photosArray[2]}. Sample of photosArray. This line within brackets, below just a puts" # Shows everything
 puts photosArray[2] # only the index (3) shows up
 
 # unmount card. Test if using the SD
