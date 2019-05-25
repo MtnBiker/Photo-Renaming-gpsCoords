@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
-# Moving jpgs back to " Drag Photos HERE/" folder to be processed.
+# Moving jpgs back to " Drag Photos HERE/" folder to be processed. Shouldn't be needed now.
+
 require 'find'
 require 'fileutils'
 include FileUtils
