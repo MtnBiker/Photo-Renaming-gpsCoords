@@ -1001,7 +1001,7 @@ def copyAndMove(srcHD,destPhoto, destJpg, destOrig, photosArray)
   delCount = 1
   itemPrev = "" # need something for first time through
   fnp = "" # when looped back got error "undefined local variable or method ‘fnp’ for main:Object", so needs to be set here to remember it. Yes, this works, without this statement get an error
-  jpgMove = false
+  jpgMove = false # Define
   # puts "#{lineNum}. Files in #{srcHD}: #{Dir.entries(srcHD).sort}" # list of files to be processed
   Dir.entries(srcHD).sort.each do |item| # This construct goes through each in order. Sometimes the files are not in order with Dir.foreach or Dir.entries without sort
     # Item is the file name
@@ -1022,7 +1022,7 @@ def copyAndMove(srcHD,destPhoto, destJpg, destOrig, photosArray)
         jpgMove = true
         # FileUtils.rm(fnp) # Removing the jpg file from LatestDownload which is "duplicate" of a RAW that we're now considering. Can comment this out to keep both
         # puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} will not be transferred because it's a jpg duplicate of a RAWversion." # Is this slow? Turned off to try. Not sure.
-        # puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} was moved to #{destJpg} it's a jpg duplicate of a RAW version and needs to be processed separately." # Is this slow? Turned off to try. Not sure.
+        puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} was moved to #{destJpg} it's a jpg duplicate of a RAW version and needs to be processed separately." # Is this slow? Turned off to try. Not sure.
         delCount += 1
         # photoFinalCount -= 1 # commented out since now included
       elsif # not a jpg and check for HEIC--what am I doing with this
@@ -1036,11 +1036,11 @@ def copyAndMove(srcHD,destPhoto, destJpg, destOrig, photosArray)
     fn  = srcHD     + item # sourced from Drag Photos Here
     fnp = destPhoto + item # new file in Latest Download
     fnp = destJpg   + item if !jpgMove # seems like ! is backwards but this works
-    # puts "#{lineNum}. Copy from fn: #{fn}"  # debugging
+    puts "#{lineNum}. Copy from fn: #{fn}"  # debugging
     fnf = destOrig  + item # to already imported
-    # puts "#{lineNum}. to fnp: #{fnp}" # debugging
+    puts "#{lineNum}. to fnp: #{fnp}" # debugging
     FileUtils.copy(fn, fnp) # making a copy in the Latest Downloads folder for further action
-    # puts "#{lineNum}.#{photoFinalCount}. #{fn} copied to #{fnp}" # dubugging
+    puts "#{lineNum}.#{photoFinalCount}. #{fn} copied to #{fnp}" # dubugging
     if File.exists?(fnf)  # moving the original to _imported-archive, but not writing over existing files
       fnf = uniqueFileName(fnf)
       FileUtils.move(fn, fnf)
