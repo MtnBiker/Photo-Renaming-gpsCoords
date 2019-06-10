@@ -861,8 +861,8 @@ geoNamesUser    = "MtnBiker" # This is login, user shows up as MtnBiker; but use
 geoNamesUser2   = "geonamestwo" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
 
 # Allowing options do only do partial changes. Used to have this but took out.
-renameDo = false
-gpsDo = false
+renameDo = false # Not used as of 2019.06.10. Used an alternate  way
+gpsDo = false # Haven't implemented
 locationDo = false
 
 # MODULES
@@ -904,8 +904,10 @@ def sdFolder(sdFolderFile)
 end
 
 def whichOne(whichOne)
-  if whichOne=="S"
+  if whichOne=="S" # First letter of this option
     whichOne = "SD"
+  # elsif whichOne = "R" # Rename
+  #   whichOne = "Rename"
   else # Hard drive
     whichOne = "HD"
   end 
@@ -1149,7 +1151,9 @@ end # fileAnnotate. writing original filename and dateTimeOrig to the photo file
 def timeZone(fileDateTimeOriginal, timeZones)
   # theTimeAhead = "2050-01-01T00:00:00Z"
   # puts "276. timeZones: #{timeZones}. "
-  # timeZones = YAML.load(File.read(timeZonesFile)) # should we do this once somewhere else? Let's try that in this new version
+  # puts "#{lineNum}. timeZones:  #{timeZones}."
+  timeZones = YAML.load(File.read(timeZones)) # should we do this once somewhere else? Let's try that in this new version
+  # puts "#{lineNum}. timeZones.keys:  #{timeZones.keys}."
   i = timeZones.keys.max # e.g. 505
   j = timeZones.keys.min # e.g. 488
   while i > j # make sure I really get to the end 
@@ -1184,9 +1188,15 @@ def rename(src, timeZonesFile, timeNowWas)
   count    = 0
   tzoLoc = ""
   seqLetter = %w(a b c d e f ) # seems like this should be an array, not a list
+  # puts "#{lineNum}. Entered rename and ready to enter foreach. src: #{src}"
+ #  puts "#{lineNum}. Dir.entries(src). #{Dir.entries(src)}" # Debugging. Turned out I was trying to work on an empty folder.
   Dir.foreach(src) do |item| # for each photo file
     next if ignoreNonFiles(item) == true # skipping file when true, i.e., not a file
-    # puts "#{lineNum}. #{item} will be renamed. " # #{timeNowWas = timeStamp(timeNowWas)}
+    if item.start_with?("20") 
+      puts "#{lineNum}. File skipped because already renamed, i.e., the filename starts with 20xx #{item.start_with?("20")}"
+    end
+    next if item.start_with?("20") # Skipping files that have already been renamed.
+    puts "#{lineNum}. #{item} will be renamed. " # #{timeNowWas = timeStamp(timeNowWas)}
     fn = src + item # long file name
     fileEXIF = MiniExiftool.new(fn) # used several times
     # fileEXIF = Exif::Data.new(fn) # see if can just make this change, probably break something. 2017.01.13 doesn't work with Raw, but developer is working it.
@@ -1195,7 +1205,7 @@ def rename(src, timeZonesFile, timeNowWas)
     # puts "#{lineNum}.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
     if File.file?(fn)
       # Determine the time and time zone where the photo was taken
-      # puts "315.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}." #  #{timeNowWas = timeStamp(timeNowWas)}
+      # puts "#{lineNum}.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}." #  #{timeNowWas = timeStamp(timeNowWas)}
       fileExt = File.extname(fn).tr(".","").downcase  # needed later for determining if dups at same time. Will be lowercase jpg or rw2 or whatever
       fileExtPrev = ""
       fileDateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
@@ -1601,21 +1611,29 @@ else
   puts "\n#{lineNum}. Downloads folder is empty and script will continue."
 end
 
-# Only rename files in place and skip the rest. Not sure right location because not sure about when Pashua is run
-# if renameDo?
-#   rename(src, timeZonesFile, timeNowWas)
-#   break
-# end
-
-
-
 # Ask whether working with photo files from SD card or HD
 fromWhere = whichLoc() # This is pulling in first Pashua window (1. ), SDorHD.rb which has been required
 whichDrive = fromWhere["whichDrive"][0].chr # only using the first character
-# puts "#{lineNum}.. whichDrive: #{whichDrive}"
+puts "#{lineNum}.. whichDrive: #{whichDrive}"
 # Set the return into a more friendly variable and set the src of the photos to be processed
 whichOne = whichOne(whichDrive) # parsing result to get HD or SD
-# puts "#{lineNum}. fromWherefromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}"
+# puts "#{lineNum}. fromWherefromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}" # fromWhere not defined
+# renameDo = false if whichOne == "Rename"
+# Only rename files in place and skip the rest. Not sure right location because not sure about when Pashua is run
+# is renameDo selected?
+puts "#{lineNum}. whichOne: #{whichOne}"
+# # puts whichLoc()
+puts "#{lineNum} renameDo: #{renameDo}"
+if whichDrive == "R"
+  src = srcSD # a SWAG
+  src = "/Users/gscar/Documents/◊ Pre-trash/renameDoTest/" # TEMP For Testing
+  puts "#{lineNum}. src: #{src}"
+  rename(src, timeZonesFile, timeNowWas)
+  # abort # break gives compile error
+  abort if (whichDrive == "R") # break doesn't work, but abort seems to
+end
+
+
 if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner coding
   # read in last filename copied from card previously
   begin
@@ -1646,7 +1664,7 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
   # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
 else # whichOne=="HD", but what
   src = srcHD
-   puts "#{lineNum}. src: #{src}. Does it have a slash?"
+  puts "#{lineNum}.  `srcHD`: #{src}. Does it have a slash?"
   prefsPhoto = pGUI(src, destPhoto, destOrig) # is this only sending values in? 
   # to get a value use prefsPhoto("theNameInFileNamingEtcPashue.rb"), nothing to do with the name above
   # puts "Prefs as set by pGUI"

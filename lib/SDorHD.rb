@@ -34,7 +34,16 @@ whichDrive.width = 310
 whichDrive.option = SD card to be selected in the next window
 whichDrive.option = Already downloaded to a folder on a hard drive to be selected in the next window
 whichDrive.default = SD card to be selected in the next window
+whichDrive.option = ______________Meaningless button to create a space_____________
+whichDrive.default = Folder where the photos are selected in next window.
+
+tx.type = text
+tx.default = Select the above to rename the files without moving.[return]This text entry is trying to figure out how to get a blank line to separate. TODO. Change to checkbox so can select more than one. But may cause other problems. https://www.bluem.net/pashua-docs-latest.html#faq.multipleelements 
 whichDrive.option = Rename the files only and do not move. TODO Need a divider space above.
+whichDrive.default = Folder where the photos are selected in next window.
+whichDrive.option = GPS coordinates add while leaving the files in place. (Awkward name to get first letter as G)
+whichDrive.default = Folder where the photos are selected in next window.
+whichDrive.option = Location information added while leaving the files in place. (Awkward name to get first letter as L)
 whichDrive.default = Folder where the photos are selected in next window.
 
 
