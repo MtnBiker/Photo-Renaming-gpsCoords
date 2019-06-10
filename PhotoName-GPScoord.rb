@@ -860,6 +860,11 @@ puts "#{lineNum}. Must manually set folderGPX for GPX file folders. Particularly
 geoNamesUser    = "MtnBiker" # This is login, user shows up as MtnBiker; but used to work with this. Good but may use it up. Ran out after about 300 photos per hour. This fixed it.
 geoNamesUser2   = "geonamestwo" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
 
+# Allowing options do only do partial changes. Used to have this but took out.
+renameDo = false
+gpsDo = false
+locationDo = false
+
 # MODULES
 def ignoreNonFiles(item) # invisible files that shouldn't be processed
   item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon '
@@ -1596,6 +1601,14 @@ else
   puts "\n#{lineNum}. Downloads folder is empty and script will continue."
 end
 
+# Only rename files in place and skip the rest. Not sure right location because not sure about when Pashua is run
+# if renameDo?
+#   rename(src, timeZonesFile, timeNowWas)
+#   break
+# end
+
+
+
 # Ask whether working with photo files from SD card or HD
 fromWhere = whichLoc() # This is pulling in first Pashua window (1. ), SDorHD.rb which has been required
 whichDrive = fromWhere["whichDrive"][0].chr # only using the first character
@@ -1638,11 +1651,11 @@ else # whichOne=="HD", but what
   # to get a value use prefsPhoto("theNameInFileNamingEtcPashue.rb"), nothing to do with the name above
   # puts "Prefs as set by pGUI"
   # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
-  src = prefsPhoto["srcSelect"]  + "/"
+  src = prefsPhoto["srcSelect"].to_s  + "/"
   puts "#{lineNum}. src: #{src}. Does it have a slash?"
 end # whichOne=="SD"
-destPhoto = prefsPhoto["destPhotoP"] + "/" 
-destOrig  = prefsPhoto["destOrig"] + "/"
+destPhoto = prefsPhoto["destPhotoP"].to_s + "/" 
+destOrig  = prefsPhoto["destOrig"].to_s + "/"
 # Above are true whether SD or from another folder
 
 puts "\n#{lineNum}. Intialization complete. File renaming and copying/moving beginning. Time below is responding to options requests via Pashua if coping an SD card, otherwise times will be the same"

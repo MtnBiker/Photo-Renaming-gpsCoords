@@ -25,7 +25,7 @@ config = <<end_of_string
 
 # Introductory text
 txt.type = text
-txt.default = Deciding whether to copy photos from SD card or use the files already copied to the a folder on the computer. In the next window you'll select the exact location of the photos.
+txt.default = Deciding whether to copy photos from SD card or use the files already copied to the a folder on the computer. In the next window you'll select the exact location of the photos. Or if do a file renaming, gpsCoordinates, and/or add location information without moving the files.
 
 # Moving photos. I think the first letter is used later to select the option. So first letter must be unit
 whichDrive.type = radiobutton
@@ -34,6 +34,9 @@ whichDrive.width = 310
 whichDrive.option = SD card to be selected in the next window
 whichDrive.option = Already downloaded to a folder on a hard drive to be selected in the next window
 whichDrive.default = SD card to be selected in the next window
+whichDrive.option = Rename the files only and do not move. TODO Need a divider space above.
+whichDrive.default = Folder where the photos are selected in next window.
+
 
 # Add a cancel button with default label
 cb.type = cancelbutton

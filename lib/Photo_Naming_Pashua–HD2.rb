@@ -40,13 +40,13 @@ srcSelect.default = #{srcPhoto}
 
 # Photo folder destination
 destPhotoP.type = openbrowser
-destPhotoP.label = Select the destination folder for the photos:
+destPhotoP.label = Select the destination folder for the photos (IGNORED if not moving.):
 destPhotoP.width=700
 destPhotoP.default = #{destPhoto}
 
 # Move originals to another folder destination
 destOrig.type = openbrowser
-destOrig.label = Select the destination folder for the original files for the last option below:
+destOrig.label = Select the destination folder for the original files for the last option below (IGNORED if not moving.):
 destOrig.width=700
 destOrig.default = #{destOrig}
 
