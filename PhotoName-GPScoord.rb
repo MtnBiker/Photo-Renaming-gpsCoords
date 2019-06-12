@@ -1637,7 +1637,7 @@ puts "\n#{lineNum}.. whichDrive: #{whichDrive}. (A: already downloaded. S: SD ca
 whichOne = whichOne(whichDrive) # parsing result to get HD or SD
 # puts "#{lineNum}. fromWherefromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}" # fromWhere not defined
 # Only rename files in place and skip the rest. Not sure right location because not sure about when Pashua is run
-# puts "#{lineNum}. whichOne: #{whichOne}"
+puts "#{lineNum}. whichOne: #{whichOne}"
 # # puts whichLoc()
 
 # Getting the folder selected in the dialog box, but also sending the default
@@ -1645,7 +1645,8 @@ whichOne = whichOne(whichDrive) # parsing result to get HD or SD
 
 # puts "\n#{lineNum}. renameFolder: #{renameFolder}"
 
-# Option for just renaming files in place
+# Three option for partial processing, then go to either HD or SD
+# Option for renaming files while not moving photos
 if fromWhere["rename"] == "1" # Renaming only or could use if whichOne == "Rename"
   renameFolder = renameGUI(srcRename) 
   srcRename = renameFolder["srcSelect"].to_s  + "/" # Name in dialog box which may be different than default
@@ -1679,8 +1680,10 @@ if fromWhere["gpsLocation"] == "1"
 end
 
 lastPhotoReadTextFile = sdCard + "/lastPhotoRead.txt"
-if File.exist?(lastPhotoReadTextFile) # If SD card not mounted. TODO logic with else to try again
+# if File.exist?(lastPhotoReadTextFile) # If SD card not mounted. TODO logic with else to try again
   if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner coding
+    # if File.exist?(lastPhotoReadTextFile) # If SD card not mounted. TODO logic with else to try again
+    # TODO Put up a dialog to remind to mount the SD card and return to here.
     # read in last filename copied from card previously
     begin
       # Read from SD card
@@ -1718,10 +1721,11 @@ if File.exist?(lastPhotoReadTextFile) # If SD card not mounted. TODO logic with 
     src = prefsPhoto["srcSelect"].to_s  + "/"
     puts "#{lineNum}. src: #{src}. Does it have a slash?"
   end # whichOne=="SD"
-else
-  puts "#{lineNum}. SD card not mounted. (=== Some logic so can mount and try again. ===)"
-  abort
-end #SD card mounted
+# else
+#   puts "#{lineNum}. SD card not mounted. (=== Some logic so can mount and try again. ===)"
+#   abort
+# end #SD card mounted
+
 destPhoto = prefsPhoto["destPhotoP"].to_s + "/" 
 destOrig  = prefsPhoto["destOrig"].to_s + "/"
 # Above are true whether SD or from another folder
