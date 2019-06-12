@@ -24,28 +24,36 @@ config = <<end_of_string
 *.title = 1. SD card or photos on hard drive
 
 # Introductory text
-txt.type = text
-txt.default = Deciding whether to copy photos from SD card or use the files already copied to the a folder on the computer. In the next window you'll select the exact location of the photos. Or if do a file renaming, gpsCoordinates, and/or add location information without moving the files.
+txt1.type = text
+txt1.width = 500
+txt1.default = Select whether to copy photos from SD card or use the files already copied to the a folder on the computer.[return[In the next window you'll select the exact location of the photos.[return]Other options below the thin line
 
-# Moving photos. I think the first letter is used later to select the option. So first letter must be unit
+# Moving photos. I think the first letter is used later to select the option. So first letter must be unique
 whichDrive.type = radiobutton
 whichDrive.label = Do you want photos on an SD card or already copied to the hard drive?
 whichDrive.width = 310
+
 whichDrive.option = SD card to be selected in the next window
+
 whichDrive.option = Already downloaded to a folder on a hard drive to be selected in the next window
 whichDrive.default = SD card to be selected in the next window
-whichDrive.option = ______________Meaningless button to create a space_____________
-whichDrive.default = Folder where the photos are selected in next window.
+-
+txt2.type = text
+txt2.width = 500
+txt2.default = ••  Select options below to perform one or more operations.   ••[return]••  If you want them all, select one of the two options above   ••
+#  https://www.bluem.net/pashua-docs-latest.html#faq.multipleelements 
 
-tx.type = text
-tx.default = Select the above to rename the files without moving.[return]This text entry is trying to figure out how to get a blank line to separate. TODO. Change to checkbox so can select more than one. But may cause other problems. https://www.bluem.net/pashua-docs-latest.html#faq.multipleelements 
-whichDrive.option = Rename the files only and do not move. TODO Need a divider space above.
-whichDrive.default = Folder where the photos are selected in next window.
-whichDrive.option = GPS coordinates add while leaving the files in place. (Awkward name to get first letter as G)
-whichDrive.default = Folder where the photos are selected in next window.
-whichDrive.option = Location information added while leaving the files in place. (Awkward name to get first letter as L)
-whichDrive.default = Folder where the photos are selected in next window.
+# Selecting if just want to do only selected operations
+rename.type = checkbox
+rename.label = Rename the files only and do not move.
+rename.tooltip = More than one can be selected
+  
+gpsCoords.type = checkbox
+gpsCoords.label = GPS coordinates add while leaving the files in place. (Awkward name to get first letter as G)
 
+gpsLocation.type = checkbox
+gpsLocation.label = Location information added while leaving the files in place. (Awkward name to get first letter as L)
+gpsLocation.default = Folder where the photos are selected in next window.
 
 # Add a cancel button with default label
 cb.type = cancelbutton

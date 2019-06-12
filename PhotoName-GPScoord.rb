@@ -817,6 +817,11 @@ require_relative 'lib/LatestDownloadsFolderEmpty_Pashua'
 require_relative 'lib/Photo_Naming_Pashua-SD2'
 require_relative 'lib/Photo_Naming_Pashua–HD2'
 require_relative 'lib/SDorHD'
+require_relative 'lib/renamePashua' # Dialog for renaming without moving
+require_relative 'lib/gpsCoordsPashua' # Dialog for adding GPS coordinates without moving
+require_relative 'lib/gpsAddLocationPashua' # Dialog for adding location information based GPS coordinates in file EXIF without moving
+
+
 def lineNum() # Had to move this to above the first call or it didn't work. Didn't think that was necessary
   caller_infos = caller.first.split(":")
   # Note caller_infos[0] is file name
@@ -841,16 +846,21 @@ laptopDownloadsFolder = laptopLocation + "Download folder/"
 laptopDestination     = laptopLocation + "Processed photos to be imported to Aperture/"
 laptopDestOrig        = laptopLocation + "Originals to archive/"
 
+
 # Folders on portable drive: Daguerre
 downloadsFolders = "/Volumes/Daguerre/_Download folder/"
 # downloadsFolders = "/Users/gscar/Pictures/_Download folder iMac/" # temp on iMac until Daguerre is back
 srcHD     = downloadsFolders + " Drag Photos HERE/"  # Photos copied from camera, sent by others, etc.
 destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
-destJpg   = downloadsFolders + "Latest Downloads jpg/"
+tempJpg   = downloadsFolders + "Latest Downloads jpg/"
 destOrig  = downloadsFolders + "_imported-archive" # folder to move originals to if not done in. No slash because getting double slash with one
+srcRename = "/Volumes/Seagate 8TB Backup/Mylio_87103a/Greg Scarich’s iPhone Library/" # Frequent location to perfom this. iPhone photos brought into Mylio
+#  Below is temporary file location for testing
+srcGpsAdd = "/Users/gscar/Documents/◊ Pre-trash/Cheeseboro/" # srcRename # Could to another location for convenience
+srcAddLocation  = "/Users/gscar/Documents/◊ Pre-trash/Cheeseboro/" # = srcRename # Change to another location for convenience. This location picked so don't screw up a bunch of files
 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
-puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. "
+puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}."
 # geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wikipedia—most general and osm—maybe better for cities # not being used May 2019
 timeZonesFile = "/Users/gscar/Dropbox/scriptsEtc/Greg camera time zones.yml"
 timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with
@@ -861,13 +871,14 @@ geoNamesUser    = "MtnBiker" # This is login, user shows up as MtnBiker; but use
 geoNamesUser2   = "geonamestwo" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
 
 # Allowing options do only do partial changes. Used to have this but took out.
-renameDo = false # Not used as of 2019.06.10. Used an alternate  way
 gpsDo = false # Haven't implemented
 locationDo = false
 
 # MODULES
 def ignoreNonFiles(item) # invisible files that shouldn't be processed
-  item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon '
+  # puts "#{lineNum}. item: #{item}. item.slice(0,6): #{item.slice(0,7)}"
+  item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon ' or item.slice(0,7) == ".MYLock"
+  # .MYLock... is a Mylio file of some kind
   # This is true when it should not be processed i.e. next if ignoreNonFiles(item) == true
   # next if ignoreNonFiles(item) == true # how to use this
 end
@@ -903,10 +914,10 @@ def sdFolder(sdFolderFile)
   sdFolder
 end
 
-def whichOne(whichOne)
-  if whichOne=="S" # First letter of this option
+def whichOne(whichOne)  # suspect could do without this with minor changes
+  if whichOne =="S" # First letter of this option
     whichOne = "SD"
-  # elsif whichOne = "R" # Rename
+  # elsif whichOne == "R" # Rename
   #   whichOne = "Rename"
   else # Hard drive
     whichOne = "HD"
@@ -999,7 +1010,7 @@ def uniqueFileName(filename)
   unique_name
 end
 
-def copyAndMove(srcHD,destPhoto, destJpg, destOrig, photosArray)
+def copyAndMove(srcHD,destPhoto, tempJpg, destOrig, photosArray)
   puts "\n#{lineNum}. Copy photos from #{srcHD}\n      to #{destPhoto} where the renaming will be done, \n      and the originals moved to an archive folder (#{destOrig})\n Running dots are progress bar" 
   # Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
   # Guess this method is slow because files are being copied
@@ -1025,11 +1036,11 @@ def copyAndMove(srcHD,destPhoto, destJpg, destOrig, photosArray)
        # FileUtils.rm(destPhoto + itemPrev) if itemPrevExtName == ".HEIC" # could uncomment this if a problem for Mylio.
         # All the commented out lines below since keeping jpgs. Not sure about what how to handle HEIC
       if itemPrevExtName.downcase ==  ".jpg" # Downcased and removed this (".JPG" or itemPrevExtName ==) added lower case for iPhone to sort HEIC
-        # Mark for moving to destJpg
+        # Mark for moving to tempJpg
         jpgMove = true
         # FileUtils.rm(fnp) # Removing the jpg file from LatestDownload which is "duplicate" of a RAW that we're now considering. Can comment this out to keep both
         # puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} will not be transferred because it's a jpg duplicate of a RAWversion." # Is this slow? Turned off to try. Not sure.
-        puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} was moved to #{destJpg} it's a jpg duplicate of a RAW version and needs to be processed separately." # Is this slow? Turned off to try. Not sure.
+        puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} was moved to #{tempJpg} it's a jpg duplicate of a RAW version and needs to be processed separately." # Is this slow? Turned off to try. Not sure.
         delCount += 1
         # photoFinalCount -= 1 # commented out since now included
       elsif # not a jpg and check for HEIC--what am I doing with this
@@ -1042,7 +1053,7 @@ def copyAndMove(srcHD,destPhoto, destJpg, destOrig, photosArray)
     end   # File.basename
     fn  = srcHD     + item # sourced from Drag Photos Here
     fnp = destPhoto + item # new file in Latest Download
-    fnp = destJpg   + item if !jpgMove # seems like ! is backwards but this works
+    fnp = tempJpg   + item if !jpgMove # seems like ! is backwards but this works
     puts "#{lineNum}. Copy from fn: #{fn}"  # debugging
     fnf = destOrig  + item # to already imported
     puts "#{lineNum}. to fnp: #{fnp}" # debugging
@@ -1067,7 +1078,7 @@ def copyAndMove(srcHD,destPhoto, destJpg, destOrig, photosArray)
   # puts "\#{lineNum}. #{photoFinalCount} photos have been moved and are ready for renaming and gpsing. #{delCount-1} duplicate jpg were not
   if delCount > 1
 #   comment = "#{lineNum}. #{delCount-1} duplicate jpg were not moved."
-    comment = "#{lineNum}. #{delCount-1} jpegs were moved to #{destJpg} for processing separately."
+    comment = "#{lineNum}. #{delCount-1} jpegs were moved to #{tempJpg} for processing separately."
   else
     comment = ""
   end # if delCount
@@ -1193,10 +1204,11 @@ def rename(src, timeZonesFile, timeNowWas)
   Dir.foreach(src) do |item| # for each photo file
     next if ignoreNonFiles(item) == true # skipping file when true, i.e., not a file
     if item.start_with?("20") 
-      puts "#{lineNum}. File skipped because already renamed, i.e., the filename starts with 20xx #{item.start_with?("20")}"
+      # puts "#{lineNum}. File skipped because already renamed, i.e., the filename starts with 20xx #{item.start_with?("20")}"
     end
     next if item.start_with?("20") # Skipping files that have already been renamed.
-    puts "#{lineNum}. #{item} will be renamed. " # #{timeNowWas = timeStamp(timeNowWas)}
+    next if item.end_with?("xmp") # Skipping .xmp files in Mylio and elsewhere. The files may become orphans
+    # puts "#{lineNum}. #{item} will be renamed. " # #{timeNowWas = timeStamp(timeNowWas)}
     fn = src + item # long file name
     fileEXIF = MiniExiftool.new(fn) # used several times
     # fileEXIF = Exif::Data.new(fn) # see if can just make this change, probably break something. 2017.01.13 doesn't work with Raw, but developer is working it.
@@ -1268,7 +1280,7 @@ def rename(src, timeZonesFile, timeNowWas)
       # else # not GX8
       if oneBack # at the moment only handles two in the same second
         dupCount += 1
-        if subSecExists # mainly GX8.
+        if subSecExists # mainly GX8. and maybe iPhone bursts
           fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  subSec + userCamCode(fn) # this doesn't happen for the first one in the same second.
           # puts "#{lineNum}. fn: #{fn} in 'if subSecExists'.     fileBaseName: #{fileBaseName}. dupCount: #{dupCount}"
           if dupCount == 1
@@ -1297,7 +1309,7 @@ def rename(src, timeZonesFile, timeNowWas)
       # puts "#{lineNum}. #{count+1}. dateTimeOriginal: #{fileDateTimeOriginal}. item: #{item}. camModel: #{camModel}" # . #{timeNowWas = timeStamp(timeNowWas)} # took 1 sec per file
       fileAnnotate(fn, fileEXIF, fileDateTimeOriginalstr, tzoLoc) # adds original file name, capture date and time zone to EXIF. Comments which I think show up as instructions in Aperture. Also wiping out bad GPS data on TS5
       fnp = fnpPrev = src + fileBaseName + File.extname(fn).downcase unless 
-      puts "#{lineNum}. fn: #{fn}. fnp: #{fnp}. fnpPrev: #{fnpPrev}. subSec: #{subSec}"
+      # puts "#{lineNum}. fn: #{fn}. fnp: #{fnp}. fnpPrev: #{fnpPrev}. subSec: #{subSec}"
       subSecPrev = subSec.to_s
       File.rename(fn,fnp)
       count += 1
@@ -1612,71 +1624,109 @@ else
 end
 
 # Ask whether working with photo files from SD card or HD
-fromWhere = whichLoc() # This is pulling in first Pashua window (1. ), SDorHD.rb which has been required
+# fromWhere are the photos?
+fromWhere = whichLoc() # This is pulling in first Pashua window (1. ), SDorHD.rb which has been required # 
+# puts "#{lineNum}. fromWhere: #{fromWhere}" #{"rename"=>"1", "whichDrive"=>"SD card to be selected in the next window", "gpsLocation"=>"0", "gpsCoords"=>"0", "cb"=>"0"}
+puts "\n#{lineNum}. fromWhere[\"rename\"]: #{fromWhere["rename"]}"
+puts "#{lineNum}. fromWhere[\"gpsCoords\"]: #{fromWhere["gpsCoords"]}"
+puts "#{lineNum}. fromWhere[\"gpsLocation\"]: #{fromWhere["gpsLocation"]}"
 whichDrive = fromWhere["whichDrive"][0].chr # only using the first character
-puts "#{lineNum}.. whichDrive: #{whichDrive}"
+# A: already downloaded. S: SD card. 
+puts "\n#{lineNum}.. whichDrive: #{whichDrive}. (A: already downloaded. S: SD card.)" #\nWill convert to SD or HD
 # Set the return into a more friendly variable and set the src of the photos to be processed
 whichOne = whichOne(whichDrive) # parsing result to get HD or SD
 # puts "#{lineNum}. fromWherefromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}" # fromWhere not defined
-# renameDo = false if whichOne == "Rename"
 # Only rename files in place and skip the rest. Not sure right location because not sure about when Pashua is run
-# is renameDo selected?
-puts "#{lineNum}. whichOne: #{whichOne}"
+# puts "#{lineNum}. whichOne: #{whichOne}"
 # # puts whichLoc()
-puts "#{lineNum} renameDo: #{renameDo}"
-if whichDrive == "R"
-  src = srcSD # a SWAG
-  src = "/Users/gscar/Documents/◊ Pre-trash/renameDoTest/" # TEMP For Testing
-  puts "#{lineNum}. src: #{src}"
-  rename(src, timeZonesFile, timeNowWas)
+
+# Getting the folder selected in the dialog box, but also sending the default
+
+
+# puts "\n#{lineNum}. renameFolder: #{renameFolder}"
+
+# Option for just renaming files in place
+if fromWhere["rename"] == "1" # Renaming only or could use if whichOne == "Rename"
+  renameFolder = renameGUI(srcRename) 
+  srcRename = renameFolder["srcSelect"].to_s  + "/" # Name in dialog box which may be different than default
+  puts "\n#{lineNum}. Photos in #{srcRename} will be renamed using date and time."
+  rename(srcRename, timeZonesFile, timeNowWas)
   # abort # break gives compile error
   abort if (whichDrive == "R") # break doesn't work, but abort seems to
 end
 
+# Option for adding GPS coordinates while not moving photos
+if fromWhere["gpsCoords"] == "1" # Renaming only or could use if whichOne == "Rename"
+  srcGpsAdd = gpsCoordsGUI(srcGpsAdd) # Puts up dialog box, sends default file location and retrieves selected file location
+  srcGpsAdd = srcGpsAdd["srcSelect"].to_s  + "/" # Name in dialog box which may be different than default
+  puts "\n#{lineNum}. Photos in #{srcGpsAdd} will have GPS coordinates added in place. NOT IMPLEMENTED."
+  puts "PAY ATTENTION TO YEAR AS NOT SURE MORE THAN ONE YEAR IS INCLUDED IN MY MODULE"
+  puts "Haven't sorted out the variables passed"
+  # addCoordinates(srcGpsAdd, folderGPX, gpsPhotoPerl, loadingToLaptop, tzoLoc)
+  abort # break gives compile error
+  # abort if (whichDrive == "R") # break doesn't work, but abort seems to
+end
 
-if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner coding
-  # read in last filename copied from card previously
-  begin
-    # Read from SD card
-    lastPhotoReadTextFile = sdCard + "/lastPhotoRead.txt" # But this doesn't work if a new card. 
-    puts "\n#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. NEED an error here if card not mounted!!. Have a kludge fix in the next rescue."
-    file = File.new(lastPhotoReadTextFile, "r")
-    lastPhotoFilename = file.gets # apparently grabbing a return. maybe not the best reading method.
-    puts "\n#{lineNum}. lastPhotoFilename: #{lastPhotoFilename.chop}. Value can be changed by user, so this may not be the value used."
-    file.close
-  # rescue Exception => err # Not good to rescue Exception
-  rescue => err
-    puts "Exception: #{err}. Not critical as value can be entered manually by user."
-  end
+# Option for adding location information based on GPS coordinates while not moving photos
+if fromWhere["gpsLocation"] == "1"
+  srcAddLocation = addLocationGUI(srcAddLocation)  # Puts up dialog box, sends default file location and retrieves selected file location. reusing variable. One above made new temporary variable
+  srcAddLocation = srcAddLocation["srcSelect"].to_s  + "/" # Name in dialog box which may be different than default
+  puts "\n#{lineNum}. Photos in #{srcAddLocation} will have location information added based onGPS coordinates in EXIF data without moving the file. NOT IMPLEMENTED."
+  puts "#{lineNum}. Need to confirm that the following works. May need to change year of folder for gpx tracks"
+  addLocation(srcAddLocation, geoNamesUser)
+  abort # break gives compile error
+  # abort if (whichDrive == "R") # break doesn't work, but abort seems to
+end
+
+lastPhotoReadTextFile = sdCard + "/lastPhotoRead.txt"
+if File.exist?(lastPhotoReadTextFile) # If SD card not mounted. TODO logic with else to try again
+  if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner coding
+    # read in last filename copied from card previously
+    begin
+      # Read from SD card
+      # lastPhotoReadTextFile = sdCard + "/lastPhotoRead.txt" # But this doesn't work if a new card.
+      puts "\n#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. NEED an error here if card not mounted!!. Have a kludge fix in the next rescue."
+      file = File.new(lastPhotoReadTextFile, "r")
+      lastPhotoFilename = file.gets # apparently grabbing a return. maybe not the best reading method.
+      puts "\n#{lineNum}. lastPhotoFilename: #{lastPhotoFilename.chop}. Value can be changed by user, so this may not be the value used."
+      file.close
+    # rescue Exception => err # Not good to rescue Exception
+    rescue => err
+      puts "Exception: #{err}. Not critical as value can be entered manually by user."
+    end
   
-  begin
-    srcSD = srcSDfolder + lastPhotoFilename.chop.slice(1,3) + "_PANA"
-  rescue Exception => e
-    puts "#{lineNum} +++++++++++++ SD card not available, so will EXIT.++++++++++. Probably selected wrong option."
-    exit
-  end
+    begin
+      srcSD = srcSDfolder + lastPhotoFilename.chop.slice(1,3) + "_PANA"
+    rescue Exception => e
+      puts "#{lineNum} +++++++++++++ SD card not available, so will EXIT.++++++++++. Probably selected wrong option."
+      exit
+    end
   
-# Don't know if this is needed, why not use srcSD directly
-  src = srcSD
-  prefsPhoto = pPashua2(src,lastPhotoFilename,destPhoto,destOrig) # calling Photo_Handling_Pashua-SD. (Titled: 2. SD card photo downloading options)
-  # to get a value use prefsPhoto("theNameInFileNamingEtcPashua.rb"), nothing to do with the name above
-  # puts "Prefs as set by pPashua"
-  # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
-else # whichOne=="HD", but what
-  src = srcHD
-  puts "#{lineNum}.  `srcHD`: #{src}. Does it have a slash?"
-  prefsPhoto = pGUI(src, destPhoto, destOrig) # is this only sending values in? 
-  # to get a value use prefsPhoto("theNameInFileNamingEtcPashue.rb"), nothing to do with the name above
-  # puts "Prefs as set by pGUI"
-  # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
-  src = prefsPhoto["srcSelect"].to_s  + "/"
-  puts "#{lineNum}. src: #{src}. Does it have a slash?"
-end # whichOne=="SD"
+  # Don't know if this is needed, why not use srcSD directly
+    src = srcSD
+    prefsPhoto = pPashua2(src,lastPhotoFilename,destPhoto,destOrig) # calling Photo_Handling_Pashua-SD. (Titled: 2. SD card photo downloading options)
+    # to get a value use prefsPhoto("theNameInFileNamingEtcPashua.rb"), nothing to do with the name above
+    # puts "Prefs as set by pPashua"
+    # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
+  else # whichOne=="HD", but what
+    src = srcHD
+    puts "#{lineNum}.  `srcHD`: #{src}. Does it have a slash?"
+    prefsPhoto = pGUI(src, destPhoto, destOrig) # is this only sending values in? 
+    # to get a value use prefsPhoto("theNameInFileNamingEtcPashue.rb"), nothing to do with the name above
+    # puts "Prefs as set by pGUI"
+    # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
+    src = prefsPhoto["srcSelect"].to_s  + "/"
+    puts "#{lineNum}. src: #{src}. Does it have a slash?"
+  end # whichOne=="SD"
+else
+  puts "#{lineNum}. SD card not mounted. (=== Some logic so can mount and try again. ===)"
+  abort
+end #SD card mounted
 destPhoto = prefsPhoto["destPhotoP"].to_s + "/" 
 destOrig  = prefsPhoto["destOrig"].to_s + "/"
 # Above are true whether SD or from another folder
 
-puts "\n#{lineNum}. Intialization complete. File renaming and copying/moving beginning. Time below is responding to options requests via Pashua if coping an SD card, otherwise times will be the same"
+puts "\n#{lineNum}. Initialization complete. File renaming and copying/moving beginning. Time below is responding to options requests via Pashua if coping an SD card, otherwise times will be the same"
 
 timeNowWas = timeStamp(timeNowWas, lineNum)
 
@@ -1690,8 +1740,10 @@ timeNowWas = timeStamp(timeNowWas, lineNum)
 puts "\n#{lineNum}. Photos will now be moved and renamed."
 
 # puts "First will copy to the final destination where the renaming will be done and the original moved to an archive (_imported-archive folder)"
-#  Copy jpg to destJpg if there is a corresponding raw, and rename later 
-photosArray = copyAndMove(srcHD,destPhoto, destJpg, destOrig, photosArray)
+#  Copy jpg to tempJpg if there is a corresponding raw, and rename later
+photosArray = copyAndMove(srcHD, destPhoto, tempJpg, destOrig, photosArray)
+# Now do the same for the jpg files. Going to tempJpg and moving files to same places, except no jpg's will move to tempJpg
+photosArray = copyAndMove(tempJpg,destPhoto, tempJpg, destOrig, photosArray)
 puts "#{lineNum}. photosArray:" # Arrays seem to get mixed up if put in a {}
 # puts photosArray
 #  To see how it looks
