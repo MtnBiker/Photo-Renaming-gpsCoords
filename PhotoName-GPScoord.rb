@@ -1,14 +1,12 @@
 #!/usr/bin/env ruby
-# Can't run from TextMate on iMac unless use System Ruby, i.e. not variables set in TM
 # Look at https://github.com/txus/kleisli for getting location information from geonames.
 # Look at speeding up with https://github.com/tonytonyjan/exif for rename and annotate which is rather slow. 8 min. for 326 photos
 #  2019/05/10 installed libexif and tried to use. Got error File not readable or no EXIF data in file. (Exif::NotReadable). Issue still open after two years at tonytonyjan
-# require 'rubygems' # # Needed by rbosa, mini_exiftool, and maybe by appscript. Not needed if correct path set somewhere. Doesn't help when using with v2.6.2`
-puts "Ruby v#{RUBY_VERSION}p#{RUBY_PATCHLEVEL} as reported by Ruby\nAnd as reported by \`system ('gem env')\`:" # A Ruby constant
+# puts "Ruby v#{RUBY_VERSION}p#{RUBY_PATCHLEVEL} as reported by Ruby\nAnd as reported by \`system ('gem env')\`:" # A Ruby constant
 # system ('gem env') # for debugging problem with gem not loading https://stackoverflow.com/questions/53202164/textmate-chruby-and-ruby-gems
 
-puts "\nGem.path: #{Gem.path}"
-# puts "\ngem list:"
+# puts "\n10. Gem.path: #{Gem.path}"
+# puts "\ngem list:" # Can't figure out how to do this in one line.
 # system ('gem list') # for debugging problem with mini_exiftool not loading
 
 
@@ -866,7 +864,7 @@ timeZonesFile = "/Users/gscar/Dropbox/scriptsEtc/Greg camera time zones.yml"
 timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with
 gpsPhotoPerl = thisScript + "lib/gpsPhoto.pl"
 folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2019 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
-puts "#{lineNum}. Must manually set folderGPX for GPX file folders. Particularly important at start of new year.\n "
+puts "#{lineNum}. Must manually set folderGPX for GPX file folders. Particularly important at start of new year AND if working on photos not in current year.\nUsing: #{folderGPX}\n"
 geoNamesUser    = "MtnBiker" # This is login, user shows up as MtnBiker; but used to work with this. Good but may use it up. Ran out after about 300 photos per hour. This fixed it.
 geoNamesUser2   = "geonamestwo" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
 
@@ -1618,7 +1616,7 @@ end
 folderPhotoCount = Dir.entries(destPhoto).count - 3 # -3 is a crude way to take care of ., .., .. Crude is probably OK since this isn't critical. If one real photo is there, not a big problem
 if folderPhotoCount > 0
   puts "#{lineNum}. downloadsFolders: #{downloadsFolders}. Check if Pashua warning window appears"
-  downloadsFolderEmpty(destPhoto, folderPhotoCount) # Pashua window
+  # downloadsFolderEmpty(destPhoto, folderPhotoCount) # Pashua window
 else
   puts "\n#{lineNum}. Downloads folder is empty and script will continue."
 end
@@ -1627,9 +1625,9 @@ end
 # fromWhere are the photos?
 fromWhere = whichLoc() # This is pulling in first Pashua window (1. ), SDorHD.rb which has been required # 
 # puts "#{lineNum}. fromWhere: #{fromWhere}" #{"rename"=>"1", "whichDrive"=>"SD card to be selected in the next window", "gpsLocation"=>"0", "gpsCoords"=>"0", "cb"=>"0"}
-puts "\n#{lineNum}. fromWhere[\"rename\"]: #{fromWhere["rename"]}"
-puts "#{lineNum}. fromWhere[\"gpsCoords\"]: #{fromWhere["gpsCoords"]}"
-puts "#{lineNum}. fromWhere[\"gpsLocation\"]: #{fromWhere["gpsLocation"]}"
+# puts "\n#{lineNum}. fromWhere[\"rename\"]: #{fromWhere["rename"]}"
+# puts "#{lineNum}. fromWhere[\"gpsCoords\"]: #{fromWhere["gpsCoords"]}"
+# puts "#{lineNum}. fromWhere[\"gpsLocation\"]: #{fromWhere["gpsLocation"]}"
 whichDrive = fromWhere["whichDrive"][0].chr # only using the first character
 # A: already downloaded. S: SD card. 
 puts "\n#{lineNum}.. whichDrive: #{whichDrive}. (A: already downloaded. S: SD card.)" #\nWill convert to SD or HD
