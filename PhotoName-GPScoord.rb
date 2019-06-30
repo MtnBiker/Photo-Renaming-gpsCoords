@@ -986,10 +986,13 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
     end
   end # if doAgain…
   # Writing which file on the card we ended on
+  # Plan to write this to the top of the file, but since don't know now how to append to beginning I'm just replacing, it is the first line, but there are no others
+  firstLine = fileSDbasename + " was the last file read on " + Time.now.to_s
   begin
-      fileNow = File.open(lastPhotoReadTextFile, "w") # must use explicit path, otherwise will use wherever we are are on the SD card
-      fileNow.puts fileSDbasename
-      fileNow.close
+    file_prepend(lastPhotoReadTextFile, firstLine)
+      # fileNow = File.open(lastPhotoReadTextFile, "w") # must use explicit path, otherwise will use wherever we are are on the SD card
+    #   fileNow.puts firstLine
+    #   fileNow.close
       puts "\n#{lineNum}. The last file processed. fileSDbasename, #{fileSDbasename}, written to  #{fileSDbasename}."
   rescue IOError => e
     puts "Something went wrong. Could not write last photo read (#{fileSDbasename}) to #{fileNow}"
@@ -1055,7 +1058,7 @@ def copyAndMove(srcHD,destPhoto, tempJpg, destOrig, photosArray)
     puts "#{lineNum}. Copy from fn: #{fn}"  # debugging
     fnf = destOrig  + item # to already imported
     puts "#{lineNum}. to fnp: #{fnp}" # debugging
-    FileUtils.copy(fn, fnp) # making a copy in the Latest Downloads folder for further action
+    FileUtils.copy(fn, fnp) if fn!=fnp # making a copy in the Latest Downloads folder for further action
     puts "#{lineNum}.#{photoFinalCount}. #{fn} copied to #{fnp}" # dubugging
     if File.exists?(fnf)  # moving the original to _imported-archive, but not writing over existing files
       fnf = uniqueFileName(fnf)
@@ -1585,6 +1588,21 @@ def writeTimeDiff(perlOutput)
   end
 end #  Write timeDiff to the photo files
 
+def file_prepend(file, str)
+  # For adding the last photo processed to beginning of file.
+  # https://stackoverflow.com/questions/8623231/prepend-a-single-line-to-file-with-ruby Copied
+  new_contents = ""
+  str = str + "\n" # not in original, but needed to put this return in somewhere
+  File.open(file, 'r') do |fd|
+    contents = fd.read
+    new_contents = str << contents
+  end
+  # Overwrite file but now with prepended string on it
+  File.open(file, 'w') do |fd| 
+    fd.write(new_contents)
+  end
+end
+
 ## The "PROGRAM" #################
 timeNowWas = timeStamp(Time.now, lineNum) # Initializing. Later calls are different
 # timeNowWas = timeStamp(timeNowWas)
@@ -1690,6 +1708,10 @@ lastPhotoReadTextFile = sdCard + "/lastPhotoRead.txt"
       file = File.new(lastPhotoReadTextFile, "r")
       lastPhotoFilename = file.gets # apparently grabbing a return. maybe not the best reading method.
       puts "\n#{lineNum}. lastPhotoFilename: #{lastPhotoFilename.chop}. Value can be changed by user, so this may not be the value used."
+      # lastPhotoFilename is 8 characters long (P plus 7 digits) at present.
+      # Adding date to this line, so will take first 12 characters (would be cleaner if made the write an array or json and worked with that, but this is the quick and dirty)
+      lastPhotoFilename = lastPhotoFilename[0..7]
+      puts "#{lineNum}. lastPhotoFilename: #{lastPhotoFilename}. Confirming new method of reading. Should look like line above. Not implemented as haven't found an easy way to write to the beginning of the file."
       file.close
     # rescue Exception => err # Not good to rescue Exception
     rescue => err
