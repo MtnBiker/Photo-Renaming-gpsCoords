@@ -1310,8 +1310,9 @@ def rename(src, timeZonesFile, timeNowWas)
       # File renaming and/or moving happens here
       # puts "#{lineNum}. #{count+1}. dateTimeOriginal: #{fileDateTimeOriginal}. item: #{item}. camModel: #{camModel}" # . #{timeNowWas = timeStamp(timeNowWas)} # took 1 sec per file
       fileAnnotate(fn, fileEXIF, fileDateTimeOriginalstr, tzoLoc) # adds original file name, capture date and time zone to EXIF. Comments which I think show up as instructions in Aperture. Also wiping out bad GPS data on TS5
-      fnp = fnpPrev = src + fileBaseName + File.extname(fn).downcase unless 
-      # puts "#{lineNum}. fn: #{fn}. fnp: #{fnp}. fnpPrev: #{fnpPrev}. subSec: #{subSec}"
+      fnp = fnpPrev = src + fileBaseName + File.extname(fn).downcase # unless #Why was the unless here?
+      # puts "Place holder to make the script work. where did the unless come from"
+#       puts "#{lineNum}. fn: #{fn}. fnp (fnpPrev): #{fnp}. subSec: #{subSec}"
       subSecPrev = subSec.to_s
       File.rename(fn,fnp)
       count += 1
