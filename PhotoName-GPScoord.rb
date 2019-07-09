@@ -952,7 +952,7 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
       fnp = srcHD + "/" + item # using srcHD as the put files here place, might cause problems later
       # get filename and make select later than already downloaded
       fileSDbasename = File.basename(item,".*")
-      puts "#{lineNum}. #{cardCount}. item: #{item}. fn: #{fn}"
+      # puts "#{lineNum}. #{cardCount}. item: #{item}. fn: #{fn}"
       next if item == '.' or item == '..' or fileSDbasename <= lastPhotoFilename # don't need the first two with Dir.glob, but doesn't slow things down much overall for this script
       FileUtils.copy(fn, fnp) # Copy from card to hard drive. , preserve = true gives and error. But preserve also preserves permissions, so that may not be a good thing. If care will have to manually change creation date
       cardCountCopied += 1
@@ -986,11 +986,11 @@ def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoRe
     end
   end # if doAgain…
   # Writing which file on the card we ended on
-  # Plan to write this to the top of the file, but since don't know now how to append to beginning I'm just replacing, it is the first line, but there are no others
   firstLine = fileSDbasename + " was the last file read on " + Time.now.to_s
   begin
     file_prepend(lastPhotoReadTextFile, firstLine)
-      # fileNow = File.open(lastPhotoReadTextFile, "w") # must use explicit path, otherwise will use wherever we are are on the SD card
+    # Following just puts in the last file and wipes out the rest. Can delete all of this
+    # fileNow = File.open(lastPhotoReadTextFile, "w") # must use explicit path, otherwise will use wherever we are are on the SD card
     #   fileNow.puts firstLine
     #   fileNow.close
       puts "\n#{lineNum}. The last file processed. fileSDbasename, #{fileSDbasename}, written to  #{fileSDbasename}."
@@ -1049,7 +1049,7 @@ def copyAndMove(srcHD,destPhoto, tempJpg, destOrig, photosArray)
           FileUtils.rm(destPhoto + itemPrev)
         end # itemPrevExtName-just one line
         puts "#{lineNum}. Something very wrong here with trying to remove JPGs when there is a corresponding .RW2 or .HEIC. itemPrev: #{itemPrev}. item: #{item}."
-      end # itemPrevExtName a bunch of lines
+      end # itemPrevExtName.downcase a bunch of lines
       # end # File.extname  
     end   # File.basename
     fn  = srcHD     + item # sourced from Drag Photos Here
@@ -1059,13 +1059,15 @@ def copyAndMove(srcHD,destPhoto, tempJpg, destOrig, photosArray)
     fnf = destOrig  + item # to already imported
     puts "#{lineNum}. to fnp: #{fnp}" # debugging
     FileUtils.copy(fn, fnp) if fn!=fnp # making a copy in the Latest Downloads folder for further action
-    puts "#{lineNum}.#{photoFinalCount}. #{fn} copied to #{fnp}" # dubugging
+    # puts "#{lineNum}.#{photoFinalCount}. #{fn} copied to #{fnp}" # dubugging
+    puts "#{lineNum}.#{photoFinalCount}. item: #{item}. #{fn} copied to #{fnp}" # dubugging
+    
     if File.exists?(fnf)  # moving the original to _imported-archive, but not writing over existing files
       fnf = uniqueFileName(fnf)
       FileUtils.move(fn, fnf)
       puts "#{lineNum}. A file already existed with this name so it was changed to fnf: #{fnf}"
     else # no copies, so move
-      # puts "#{lineNum}.#{photoFinalCount}. #{fn} moved to #{fnf}" # dubugging
+      puts "#{lineNum}.#{photoFinalCount}. #{fn} moved to #{fnf}" # dubugging
       FileUtils.move(fn, fnf)
     end # File.exists?
     # "#{lineNum}.. #{photoFinalCount + delCount} #{fn}" # More for debugging, but maybe OK as progress in this slow process
@@ -1162,9 +1164,8 @@ end # fileAnnotate. writing original filename and dateTimeOrig to the photo file
 # The log is in numerical order and used as index here. The log is a YAML file
 def timeZone(fileDateTimeOriginal, timeZones)
   # theTimeAhead = "2050-01-01T00:00:00Z"
-  # puts "276. timeZones: #{timeZones}. "
   # puts "#{lineNum}. timeZones:  #{timeZones}."
-  timeZones = YAML.load(File.read(timeZones)) # should we do this once somewhere else? Let's try that in this new version
+  # timeZones = YAML.load(File.read(timeZonesFile)) # should we do this once somewhere else? Let's try that in this new version
   # puts "#{lineNum}. timeZones.keys:  #{timeZones.keys}."
   i = timeZones.keys.max # e.g. 505
   j = timeZones.keys.min # e.g. 488
@@ -1234,7 +1235,7 @@ def rename(src, timeZonesFile, timeNowWas)
       end # if fileDateTimeOriginal == nil
       panasonicLocation = fileEXIF.location # Defined by Panasonic if on trip (and also may exist for photos exported from other apps such as Photos). If defined then time stamp is that local time
       # puts "#{lineNum}. panasonicLocation: #{panasonicLocation}"
-      tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # the time zone the picture was taken in, doesn't say anything about what times are recorded in the photo's EXIF. I'm doing this slightly wrong, because it's using the photo's recorded date which could be either GMT or local time. But only wrong if the photo was taken too close to the time when camera changed time zones
+      tzoLoc = timeZone(fileDateTimeOriginal, timeZones) # the time zone the picture was taken in, doesn't say anything about what times are recorded in the photo's EXIF. I'm doing this slightly wrong, because it's using the photo's recorded date which could be either GMT or local time. But only wrong if the photo was taken too close to the time when camera changed time zones
       if count == 1 | 1*100
         puts "#{lineNum}. panasonicLocation: #{panasonicLocation}. tzoLoc: #{tzoLoc} Time zone photo was taken in from Greg camera time zones.yml"
       else
@@ -1761,18 +1762,20 @@ copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTe
 #  Note that file creation date is the time of copying. May want to fix this. Maybe a mv is a copy and move which is sort of a recreation. 
 
 timeNowWas = timeStamp(timeNowWas, lineNum)
-puts "\n#{lineNum}. Photos will now be moved and renamed."
+# puts "\n#{lineNum}. Photos will now be moved and renamed."
 
 # puts "First will copy to the final destination where the renaming will be done and the original moved to an archive (_imported-archive folder)"
 #  Copy jpg to tempJpg if there is a corresponding raw, and rename later
+puts "\n#{lineNum}. Photos will now be moved and renamed."
 photosArray = copyAndMove(srcHD, destPhoto, tempJpg, destOrig, photosArray)
 # Now do the same for the jpg files. Going to tempJpg and moving files to same places, except no jpg's will move to tempJpg
-photosArray = copyAndMove(tempJpg,destPhoto, tempJpg, destOrig, photosArray)
-puts "#{lineNum}. photosArray:" # Arrays seem to get mixed up if put in a {}
+puts "\n#{lineNum}. JPGs will now be moved from #{tempJpg} and renamed.THIS PART NEEDS WORK, SO IS TURNED OFF" # tempJpg twice ??
+# photosArray = copyAndMove(tempJpg, destPhoto, tempJpg, destOrig, photosArray)
+# puts "#{lineNum}. photosArray:" # Arrays seem to get mixed up if put in a {}
 # puts photosArray
 #  To see how it looks
-puts "\n#{lineNum}. photosArray[2]: #{photosArray[2]}. Sample of photosArray. This line within brackets, below just a puts" # Shows everything
-puts photosArray[2] # only the index (3) shows up
+puts "\n#{lineNum}. photosArray[2]: #{photosArray[2]}. Sample of photosArray." # Shows everything
+# puts "photosArray[2]: " + photosArray[2] # only the index (3) shows up, not now
 
 # unmount card. Test if using the SD
 # puts "\n#{lineNum}. fromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}"
