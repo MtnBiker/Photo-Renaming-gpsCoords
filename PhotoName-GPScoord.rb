@@ -861,7 +861,7 @@ lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
 puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}."
 # geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wikipedia—most general and osm—maybe better for cities # not being used May 2019
 timeZonesFile = "/Users/gscar/Dropbox/scriptsEtc/Greg camera time zones.yml"
-timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with
+# timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with. Only use once, so this just confused things
 gpsPhotoPerl = thisScript + "lib/gpsPhoto.pl"
 folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2019 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
 puts "#{lineNum}. Must manually set folderGPX for GPX file folders. Particularly important at start of new year AND if working on photos not in current year.\nUsing: #{folderGPX}\n"
@@ -1162,10 +1162,10 @@ end # fileAnnotate. writing original filename and dateTimeOrig to the photo file
 
 # With the fileDateTimeOriginal for the photo, find the time zone based on the log.
 # The log is in numerical order and used as index here. The log is a YAML file
-def timeZone(fileDateTimeOriginal, timeZones)
+def timeZone(fileDateTimeOriginal, timeZonesFile )
   # theTimeAhead = "2050-01-01T00:00:00Z"
   # puts "#{lineNum}. timeZones:  #{timeZones}."
-  # timeZones = YAML.load(File.read(timeZonesFile)) # should we do this once somewhere else? Let's try that in this new version
+  timeZones = YAML.load(File.read(timeZonesFile)) # should we do this once somewhere else? Let's try that in this new version
   # puts "#{lineNum}. timeZones.keys:  #{timeZones.keys}."
   i = timeZones.keys.max # e.g. 505
   j = timeZones.keys.min # e.g. 488
@@ -1235,7 +1235,7 @@ def rename(src, timeZonesFile, timeNowWas)
       end # if fileDateTimeOriginal == nil
       panasonicLocation = fileEXIF.location # Defined by Panasonic if on trip (and also may exist for photos exported from other apps such as Photos). If defined then time stamp is that local time
       # puts "#{lineNum}. panasonicLocation: #{panasonicLocation}"
-      tzoLoc = timeZone(fileDateTimeOriginal, timeZones) # the time zone the picture was taken in, doesn't say anything about what times are recorded in the photo's EXIF. I'm doing this slightly wrong, because it's using the photo's recorded date which could be either GMT or local time. But only wrong if the photo was taken too close to the time when camera changed time zones
+      tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile ) # the time zone the picture was taken in, doesn't say anything about what times are recorded in the photo's EXIF. I'm doing this slightly wrong, because it's using the photo's recorded date which could be either GMT or local time. But only wrong if the photo was taken too close to the time when camera changed time zones
       if count == 1 | 1*100
         puts "#{lineNum}. panasonicLocation: #{panasonicLocation}. tzoLoc: #{tzoLoc} Time zone photo was taken in from Greg camera time zones.yml"
       else
@@ -1785,7 +1785,7 @@ timeNowWas = timeStamp(timeNowWas, lineNum)
 
 puts "\n#{lineNum}. Rename [tzoLoc = rename(…)] the photo files with date and an ID for the camera or photographer. #{timeNowWas}\n"
 # tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # Second time this variable name is used, other is in a method
-tzoLoc = - rename(destPhoto, timeZones, timeNowWas).to_i # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
+tzoLoc = - rename(destPhoto, timeZonesFile , timeNowWas).to_i # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
 # puts "#{lineNum}. tzoLoc, but not used" # this only for hand runs
 # tzoLoc = -8 # for reprocessing old files when had to put in by hand. Have a separate sort by time zone to select
 # puts "#{lineNum}. Change lines 812 and 813 since they are locking the time zone. Also look at source of gpx tracks"
