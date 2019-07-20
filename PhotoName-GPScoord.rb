@@ -1330,7 +1330,7 @@ def rename(src, timeZonesFile, timeNowWas)
   return tzoLoc # the time zone the picture was taken in,
 end # rename ing photo files in the downloads folder and writing in original time.
 
-def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop, tzoLoc)
+def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, tzoLoc)
   # Remember writing a command line command, so telling perl, then which perl file, then the gpsphoto.pl script options
   # --timeoffset seconds     Camera time + seconds = GMT. No default.  
   # maxTimeDiff = 50000 # seconds, default 120, but I changed it 2011.07.26 to allow for pictures taken at night but GPS off. Distance still has to be reasonable, that is the GPS had to be at the same place in the morning as the night before as set by the variable below
@@ -1378,18 +1378,21 @@ def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop, tzoLoc)
   puts "\n#{lineNum}. Finding all gps points from all the gpx files using gpsPhoto.pl. This may take a while. \n"
   # Since have to manually craft the perl call, need one for with Daguerre and one for on laptop
   # Daguerre version. /Volumes/Daguerre/_Download folder/Latest Download/
-    if loadingToLaptop 
-      # perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Users/gscar/Pictures/_Photo Processing Folders/Processed\ photos\ to\ be\ imported\ to\ Aperture/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2017\ Massaged/' --timeoffset #{timeOffset} --maxtimediff 50000` # saved in case something goes wrong. This works
-      perlOutput = `perl '#{gpsPhotoPerl}' --dir '#{destPhoto}' --gpsdir '#{folderGPX}' --timeoffset #{timeOffset} --maxtimediff 50000`
-    else # default location on Daguerre or Knobby Aperture Two
-      # perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby Aperture Two/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2017\ Massaged/' --timeoffset #{timeOffset} --maxtimediff 50000` # this works, saving in case the following doesn't
-      perlOutput = `perl '#{gpsPhotoPerl}' --dir '#{destPhoto}' --gpsdir '#{folderGPX}' --timeoffset #{timeOffset} --maxtimediff 50000`
-      # Double quotes needed for variables to be evalated
-      # perlOutput = "`perl \'#{gpsPhotoPerl.shellescape}\' --dir \'#{destPhoto.shellescape}\' --gpsdir \'#{folderGPX.shellescape}\' --timeoffset #{timeOffset} --maxtimediff 50000`" #  2>&1
-      # perlOutput = "`perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby Aperture Two/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2017\ Massaged/' --timeoffset #{timeOffset} --maxtimediff 50000 2>&1` " #  2>&1 is needed to capture output, but not to run
-      
-      puts "#{lineNum}. perlOutput: #{perlOutput}"
-    end
+  
+  perlOutput = `perl '#{gpsPhotoPerl}' --dir '#{destPhoto}' --gpsdir '#{folderGPX}' --timeoffset #{timeOffset} --maxtimediff 50000`
+  # The following is identical, so apparently was taken care of elsewhere. So now use the single line above
+    # if loadingToLaptop
+    #   # perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Users/gscar/Pictures/_Photo Processing Folders/Processed\ photos\ to\ be\ imported\ to\ Aperture/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2017\ Massaged/' --timeoffset #{timeOffset} --maxtimediff 50000` # saved in case something goes wrong. This works
+    #   perlOutput = `perl '#{gpsPhotoPerl}' --dir '#{destPhoto}' --gpsdir '#{folderGPX}' --timeoffset #{timeOffset} --maxtimediff 50000`
+    # else # default location on Daguerre or Knobby Aperture Two
+    #   # perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby Aperture Two/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2017\ Massaged/' --timeoffset #{timeOffset} --maxtimediff 50000` # this works, saving in case the following doesn't
+    #   perlOutput = `perl '#{gpsPhotoPerl}' --dir '#{destPhoto}' --gpsdir '#{folderGPX}' --timeoffset #{timeOffset} --maxtimediff 50000`
+    #   # Double quotes needed for variables to be evalated
+    #   # perlOutput = "`perl \'#{gpsPhotoPerl.shellescape}\' --dir \'#{destPhoto.shellescape}\' --gpsdir \'#{folderGPX.shellescape}\' --timeoffset #{timeOffset} --maxtimediff 50000`" #  2>&1
+    #   # perlOutput = "`perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby Aperture Two/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2017\ Massaged/' --timeoffset #{timeOffset} --maxtimediff 50000 2>&1` " #  2>&1 is needed to capture output, but not to run
+    #
+    #   puts "#{lineNum}. perlOutput: #{perlOutput}"
+    # end
       
   # puts "\n374.. perlOutput: \n#{perlOutput} \n\nEnd of perlOutput ================… end 374\n\n" # This didn't seem to be happening with 2>&1 appended? But w/o it, error not captured
   # perlOutput =~ /timediff\=([0-9]+)/
@@ -1623,20 +1626,6 @@ end
 # need to determine this based on last file and that will have to be later
 srcSD = srcSDfolder + sdFolder(sdFolderFile)
 
-# Delete as is now below
-# if !File.exists?(downloadsFolders) # if Daguerre isn't mounted use folders on laptop. Why the negative, TODO get rid of the ! and switch the if and else
-#   puts "\n#{lineNum}. #{downloadsFolders} isn't mounted, so will use local laptop folders to process"
-#   # Daguerre folders location loaded by default, changed as needed
-#   downloadsFolders = laptopDownloadsFolder # line ~844
-#   destPhoto        = laptopDestination
-#   destOrig         = laptopDestOrig
-#   tempJpg          = laptopTempJpg
-#   srcHD            = downloadsFolders
-#   loadingToLaptop = true
-# else
-#   puts "#{lineNum}. Using Daguerre. File.exists?(downloadsFolders (#{downloadsFolders})): #{File.exists?(downloadsFolders)}"
-# end
-
 # if Daguerre isn't mounted use folders on laptop. 
 if File.exists?(downloadsFolders)
   puts "#{lineNum}. Using Daguerre. File.exists?(downloadsFolders (#{downloadsFolders})): #{File.exists?(downloadsFolders)}"
@@ -1647,10 +1636,9 @@ else
   destPhoto        = laptopDestination
   destOrig         = laptopDestOrig
   tempJpg          = laptopTempJpg
-  srcHD            = downloadsFolders
-  loadingToLaptop = true 
+  srcHD            = downloadsFolders # is this being used?
+  # loadingToLaptop = true # No longer used
 end
-
 
 # Check if photos are already in Latest Download folder. A problem because they get reprocessed by gps coordinate adding.
 folderPhotoCount = Dir.entries(destPhoto).count - 3 # -3 is a crude way to take care of ., .., .. Crude is probably OK since this isn't critical. If one real photo is there, not a big problem
@@ -1833,7 +1821,7 @@ timeNowWas = timeStamp(timeNowWas, lineNum)
 puts "\n#{lineNum}. Using perl script to add gps coordinates. Will take a while as all the gps files for the year will be processed and then all the photos. -tzoLoc, `i.e.: GMT #{-tzoLoc}"
 
 # Add GPS coordinates. Will add location later using some options depending on which country since different databases are relevant.
-perlOutput = addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, loadingToLaptop, tzoLoc)
+perlOutput = addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, tzoLoc)
 
 timeNowWas = timeStamp(timeNowWas, lineNum)
 
