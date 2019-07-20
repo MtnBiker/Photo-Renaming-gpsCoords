@@ -838,19 +838,18 @@ srcSDfolder = sdCard + "DCIM/"  # SD folder
 sdFolderFile = thisScript + "currentData/SDfolder.txt" # shouldn't need full path
 photoArrayFile = thisScript + "currentData/photoArray.txt"
 
-# Appropriate temporary folders on laptop
-# srcHD = "/Users/gscar/Pictures/_Photo Processing Folders/Download folder/" # for laptop use. NEED TO SET UP TRAVEL OPTION/ ?? Dec 2018 doesn't make sense anymore. Maybe it does for traveling with MBP
-laptopLocation = "/Users/gscar/Pictures/_Photo Processing Folders/"
+# Folders on laptop. Somewhat assumes that MtnBikerSSD exist and files will be upload to Mylio on that drive
+laptopLocation        = "/Users/gscar/Pictures/_Photo Processing Folders/"
 laptopDownloadsFolder = laptopLocation + "Download folder/"
-laptopDestination     = laptopLocation + "Processed photos to be imported to Aperture/"
+laptopDestination     = laptopLocation + "Processed photos to be imported to Mylio/"
 laptopDestOrig        = laptopLocation + "Originals to archive/"
 
-# Folders on portable drive: Daguerre
+# Folders on portable drive: Daguerre. This is the normal location with Daguerre plugged into iMac
 downloadsFolders = "/Volumes/Daguerre/_Download folder/"
 # downloadsFolders = "/Users/gscar/Pictures/_Download folder iMac/" # temp on iMac until Daguerre is back
 srcHD     = downloadsFolders + " Drag Photos HERE/"  # Photos copied from camera, sent by others, etc.
 destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
-tempJpg   = downloadsFolders + "Latest Downloads jpg/"
+tempJpg   = downloadsFolders + "Latest Downloads temp jpg/"
 destOrig  = downloadsFolders + "_imported-archive" # folder to move originals to if not done in. No slash because getting double slash with one
 srcRename = "/Volumes/Seagate 8TB Backup/Mylio_87103a/Greg Scarich’s iPhone Library/" # Frequent location to perfom this. iPhone photos brought into Mylio
 #  Below is temporary file location for testing
@@ -1621,12 +1620,12 @@ end
 srcSD = srcSDfolder + sdFolder(sdFolderFile)
 
 if !File.exists?(downloadsFolders) # if Daguerre isn't mounted use folders on laptop. Why the negative, TODO get rid of the ! and switch the if and else
-  puts "\n#{lineNum}. #{downloadsFolders} isn't mounted, so will use local folders to process"
+  puts "\n#{lineNum}. #{downloadsFolders} isn't mounted, so will use local laptop folders to process"
   # Daguerre folders location loaded by default, changed as needed
-  downloadsFolders = laptopDownloadsFolder
-  destPhoto = laptopDestination
-  destOrig  = laptopDestOrig
-  srcHD = downloadsFolders
+  downloadsFolders = laptopDownloadsFolder # line ~844
+  destPhoto        = laptopDestination
+  destOrig         = laptopDestOrig
+  srcHD            = downloadsFolders
   loadingToLaptop = true
 else
   puts "#{lineNum}. Using Daguerre. File.exists?(downloadsFolders (#{downloadsFolders})): #{File.exists?(downloadsFolders)}"
@@ -1769,6 +1768,7 @@ timeNowWas = timeStamp(timeNowWas, lineNum)
 #  Copy jpg to tempJpg if there is a corresponding raw, and rename later
 puts "\n#{lineNum}. Photos will now be moved and renamed."
 # COPY AND MOVE and sort jpgs
+# Which drive has already been decided. (this note because it hadn't yet if Daguerre wasn't available)
 photosArray = copyAndMove(srcHD, destPhoto, tempJpg, destOrig, photosArray)
 # Now do the same for the jpg files. Going to tempJpg and moving files to same places, except no jpg's will move to tempJpg
 puts "\n#{lineNum}. JPGs will now be moved from #{tempJpg} and renamed.THIS PART NEEDS WORK, SO IS TURNED OFF, but I'm doing it a different way. Can delete this and the next few lines when get it sorted" # tempJpg twice ??
