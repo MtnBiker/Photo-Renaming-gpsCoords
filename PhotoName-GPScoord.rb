@@ -1,4 +1,7 @@
 #!/usr/bin/env ruby
+
+# Which folders to use on Daguerre or laptop a mess. Need DRYing
+
 # Look at https://github.com/txus/kleisli for getting location information from geonames.
 # Look at speeding up with https://github.com/tonytonyjan/exif for rename and annotate which is rather slow. 8 min. for 326 photos
 #  2019/05/10 installed libexif and tried to use. Got error File not readable or no EXIF data in file. (Exif::NotReadable). Issue still open after two years at tonytonyjan
@@ -843,6 +846,7 @@ laptopLocation        = "/Users/gscar/Pictures/_Photo Processing Folders/"
 laptopDownloadsFolder = laptopLocation + "Download folder/"
 laptopDestination     = laptopLocation + "Processed photos to be imported to Mylio/"
 laptopDestOrig        = laptopLocation + "Originals to archive/"
+laptopTempJpg         = laptopLocation + "Latest Downloads temp jpg/"
 
 # Folders on portable drive: Daguerre. This is the normal location with Daguerre plugged into iMac
 downloadsFolders = "/Volumes/Daguerre/_Download folder/"
@@ -1011,7 +1015,7 @@ def uniqueFileName(filename)
 end
 
 def copyAndMove(srcHD, destPhoto, tempJpg, destOrig, photosArray)
-  puts "\n#{lineNum}. Copy photos from #{srcHD}\n      to #{destPhoto} where the renaming will be done, \n      and the originals moved to an archive folder (#{destOrig})\n Running dots are progress bar" 
+  puts "\n#{lineNum}. Copy photos from \n#{srcHD}\n                  to #{destPhoto} where the renaming will be done, \n      and the originals moved to an archive folder (#{destOrig})\n Running dots are progress bar" 
   # Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
   # Guess this method is slow because files are being copied
   # THIS METHOD WILL NOT WORK IF THE RAW FILE FORMAT ALPHABETICALLY COMES BEFORE JPG. SHOULD MAKE THIS MORE ROBUST
@@ -1625,6 +1629,7 @@ if !File.exists?(downloadsFolders) # if Daguerre isn't mounted use folders on la
   downloadsFolders = laptopDownloadsFolder # line ~844
   destPhoto        = laptopDestination
   destOrig         = laptopDestOrig
+  tempJpg          = laptopTempJpg
   srcHD            = downloadsFolders
   loadingToLaptop = true
 else
