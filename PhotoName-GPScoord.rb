@@ -1,7 +1,5 @@
 #!/usr/bin/env ruby
 
-# Which folders to use on Daguerre or laptop a mess. Need DRYing
-
 # Look at https://github.com/txus/kleisli for getting location information from geonames.
 # Look at speeding up with https://github.com/tonytonyjan/exif for rename and annotate which is rather slow. 8 min. for 326 photos
 #  2019/05/10 installed libexif and tried to use. Got error File not readable or no EXIF data in file. (Exif::NotReadable). Issue still open after two years at tonytonyjan
@@ -829,7 +827,7 @@ def lineNum() # Had to move this to above the first call or it didn't work. Didn
   caller_infos[1]
 end # line numbers of this file, useful for debugging and logging info to progress screen
 
-photosArray = [] # can create intially, but I don't know how to add other "fields" to a file already on the list. I'll be better off with an indexed data base. I suppose could delete the existing item for that index and then put in revised.
+photosArray = [] # can create intially, but I don't know how to add other "fields" to a file already on the list. I'll be better off with an indexed data base. I suppose could delete the existing item for that index and then put in revised. Not using this, but maybe some day
 thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
 lastPhotoReadTextFile = "/Volumes/LUMIX/DCIM/" # SD folder alternate since both this and one below occur
 sdCardAlt   = "/Volumes/NO NAME/"
@@ -838,7 +836,7 @@ srcSDfolderAlt = sdCardAlt + "DCIM/" # SD folder alternate since both this and o
 srcSDfolder = sdCard + "DCIM/"  # SD folder 
 
 # Quit using this file and just get the folder name from the file name which will be stored on the card.
-sdFolderFile = thisScript + "currentData/SDfolder.txt" # shouldn't need full path
+# sdFolderFile = thisScript + "currentData/SDfolder.txt" # shouldn't need full path
 photoArrayFile = thisScript + "currentData/photoArray.txt"
 
 # Folders on laptop. Somewhat assumes that MtnBikerSSD exist and files will be upload to Mylio on that drive
@@ -903,17 +901,18 @@ def timeStamp(timeNowWas, fromWhere)
   Time.now
 end
 
-def sdFolder(sdFolderFile)  
-  begin
-    file = File.new(sdFolderFile, "r")
-    sdFolder = file.gets
-    file.close
-  # rescue Exception => err # Shouldn't rescue and Exception
-  rescue StandardError => err # or can write "rescue => err" since Ruby assumes it's standard error
-    puts "Exception: #{err}. Could not read which folder is current on the SD card from #{sdFolderFile}"
-  end
-  sdFolder
-end
+# No longer used 2019.07.20
+# def sdFolder(sdFolderFile)
+#   begin
+#     file = File.new(sdFolderFile, "r")
+#     sdFolder = file.gets
+#     file.close
+#   # rescue Exception => err # Shouldn't rescue and Exception
+#   rescue StandardError => err # or can write "rescue => err" since Ruby assumes it's standard error
+#     puts "Exception: #{err}. Could not read which folder is current on the SD card from #{sdFolderFile}"
+#   end
+#   sdFolder
+# end
 
 def whichOne(whichOne)  # suspect could do without this with minor changes
   if whichOne =="S" # First letter of this option
@@ -936,7 +935,7 @@ def whichSource(whichOne,prefsPhoto)
   src
 end
 
-def copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) 
+def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) 
   # some of the above counter variables could be set at the beginning of this script and used locally
   puts "\n#{lineNum}. Copying photos from an SD card starting with #{lastPhotoFilename} or from another value manually entered"
   cardCount = 0
@@ -1623,8 +1622,8 @@ unless File.directory?(srcSDfolder) # negative if, so if srcSDfolder exists skip
   sdCard      = sdCardAlt
 end
 
-# need to determine this based on last file and that will have to be later
-srcSD = srcSDfolder + sdFolder(sdFolderFile)
+# need to determine this based on last file and that will have to be later Which has been done so commented out 2019.07.20
+# srcSD = srcSDfolder + sdFolder(sdFolderFile)
 
 # if Daguerre isn't mounted use folders on laptop. 
 if File.exists?(downloadsFolders)
@@ -1767,7 +1766,7 @@ timeNowWas = timeStamp(timeNowWas, lineNum)
 #  If working from SD card, copy or move files to " Drag Photos HERE Drag Photos HERE" folder, then will process from there.
 # puts "#{lineNum}..   src: #{src} \nsrcHD: #{srcHD}"
 
-copySD(src, srcHD, sdFolderFile, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
+copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
 #  Note that file creation date is the time of copying. May want to fix this. Maybe a mv is a copy and move which is sort of a recreation. 
 
 timeNowWas = timeStamp(timeNowWas, lineNum)
