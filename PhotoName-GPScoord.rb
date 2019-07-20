@@ -828,7 +828,7 @@ end # line numbers of this file, useful for debugging and logging info to progre
 
 photosArray = [] # can create intially, but I don't know how to add other "fields" to a file already on the list. I'll be better off with an indexed data base. I suppose could delete the existing item for that index and then put in revised.
 thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
-lastPhotoReadTextFile = "/Volumes/LUMIX/DCIM/" # SD folder alternate since both this and one below occur 
+lastPhotoReadTextFile = "/Volumes/LUMIX/DCIM/" # SD folder alternate since both this and one below occur
 sdCardAlt   = "/Volumes/NO NAME/"
 sdCard      = "/Volumes/LUMIX/"
 srcSDfolderAlt = sdCardAlt + "DCIM/" # SD folder alternate since both this and one below occur. Used at line 740
@@ -836,6 +836,7 @@ srcSDfolder = sdCard + "DCIM/"  # SD folder
 
 # Quit using this file and just get the folder name from the file name which will be stored on the card.
 sdFolderFile = thisScript + "currentData/SDfolder.txt" # shouldn't need full path
+photoArrayFile = thisScript + "currentData/photoArray.txt"
 
 # Appropriate temporary folders on laptop
 # srcHD = "/Users/gscar/Pictures/_Photo Processing Folders/Download folder/" # for laptop use. NEED TO SET UP TRAVEL OPTION/ ?? Dec 2018 doesn't make sense anymore. Maybe it does for traveling with MBP
@@ -843,7 +844,6 @@ laptopLocation = "/Users/gscar/Pictures/_Photo Processing Folders/"
 laptopDownloadsFolder = laptopLocation + "Download folder/"
 laptopDestination     = laptopLocation + "Processed photos to be imported to Aperture/"
 laptopDestOrig        = laptopLocation + "Originals to archive/"
-
 
 # Folders on portable drive: Daguerre
 downloadsFolders = "/Volumes/Daguerre/_Download folder/"
@@ -1011,7 +1011,7 @@ def uniqueFileName(filename)
   unique_name
 end
 
-def copyAndMove(srcHD,destPhoto, tempJpg, destOrig, photosArray)
+def copyAndMove(srcHD, destPhoto, tempJpg, destOrig, photosArray)
   puts "\n#{lineNum}. Copy photos from #{srcHD}\n      to #{destPhoto} where the renaming will be done, \n      and the originals moved to an archive folder (#{destOrig})\n Running dots are progress bar" 
   # Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
   # Guess this method is slow because files are being copied
@@ -1020,7 +1020,7 @@ def copyAndMove(srcHD,destPhoto, tempJpg, destOrig, photosArray)
   delCount = 1
   itemPrev = "" # need something for first time through
   fnp = "" # when looped back got error "undefined local variable or method ‘fnp’ for main:Object", so needs to be set here to remember it. Yes, this works, without this statement get an error
-  jpgMove = false # Define
+  jpgMove = false # Define outside of the 'each do' loop
   # puts "#{lineNum}. Files in #{srcHD}: #{Dir.entries(srcHD).sort}" # list of files to be processed
   Dir.entries(srcHD).sort.each do |item| # This construct goes through each in order. Sometimes the files are not in order with Dir.foreach or Dir.entries without sort
     # Item is the file name
@@ -1056,7 +1056,7 @@ def copyAndMove(srcHD,destPhoto, tempJpg, destOrig, photosArray)
     fnp = destPhoto + item # new file in Latest Download
     fnp = tempJpg   + item if !jpgMove # seems like ! is backwards but this works
     puts "#{lineNum}. Copy from fn: #{fn}"  # debugging
-    fnf = destOrig  + item # to already imported
+    fnf = destOrig  + item # to already imported for archiving
     puts "#{lineNum}. to fnp: #{fnp}" # debugging
     FileUtils.copy(fn, fnp) if fn!=fnp # making a copy in the Latest Downloads folder for further action
     # puts "#{lineNum}.#{photoFinalCount}. #{fn} copied to #{fnp}" # dubugging
@@ -1768,28 +1768,43 @@ timeNowWas = timeStamp(timeNowWas, lineNum)
 # puts "First will copy to the final destination where the renaming will be done and the original moved to an archive (_imported-archive folder)"
 #  Copy jpg to tempJpg if there is a corresponding raw, and rename later
 puts "\n#{lineNum}. Photos will now be moved and renamed."
+# COPY AND MOVE and sort jpgs
 photosArray = copyAndMove(srcHD, destPhoto, tempJpg, destOrig, photosArray)
 # Now do the same for the jpg files. Going to tempJpg and moving files to same places, except no jpg's will move to tempJpg
-puts "\n#{lineNum}. JPGs will now be moved from #{tempJpg} and renamed.THIS PART NEEDS WORK, SO IS TURNED OFF" # tempJpg twice ??
+puts "\n#{lineNum}. JPGs will now be moved from #{tempJpg} and renamed.THIS PART NEEDS WORK, SO IS TURNED OFF, but I'm doing it a different way. Can delete this and the next few lines when get it sorted" # tempJpg twice ??
+
 # photosArray = copyAndMove(tempJpg, destPhoto, tempJpg, destOrig, photosArray)
 # puts "#{lineNum}. photosArray:" # Arrays seem to get mixed up if put in a {}
 # puts photosArray
 #  To see how it looks
 puts "\n#{lineNum}. photosArray[2]: #{photosArray[2]}. Sample of photosArray." # Shows everything
 # puts "photosArray[2]: " + photosArray[2] # only the index (3) shows up, not now
-
+puts "#{lineNum}. Next should write photosArray to #{photoArrayFile}"
+File.write(photoArrayFile, photosArray) # A list of all the files processed. Saved with script. Work with this later
 # unmount card. Test if using the SD
 # puts "\n#{lineNum}. fromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}"
 # whichOne =="SD" ? unmountCard(sdCard) : "" # not working so turned off TODO
 
 timeNowWas = timeStamp(timeNowWas, lineNum)
 
-puts "\n#{lineNum}. Rename [tzoLoc = rename(…)] the photo files with date and an ID for the camera or photographer. #{timeNowWas}\n"
+puts "\n#{lineNum}. Rename [tzoLoc = rename(…)] the photo files with date and an ID for the camera or photographer (except for the paired jpgs in #{tempJpg}). #{timeNowWas}\n"
 # tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # Second time this variable name is used, other is in a method
+# RENAME Raw
 tzoLoc = - rename(destPhoto, timeZonesFile , timeNowWas).to_i # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
-# puts "#{lineNum}. tzoLoc, but not used" # this only for hand runs
-# tzoLoc = -8 # for reprocessing old files when had to put in by hand. Have a separate sort by time zone to select
-# puts "#{lineNum}. Change lines 812 and 813 since they are locking the time zone. Also look at source of gpx tracks"
+
+timeNowWas = timeStamp(timeNowWas, lineNum)
+#Rename the jpgs and then move to Latest Download
+puts "#{lineNum}. Rename the jpgs in #{tempJpg} and then move to #{destPhoto}. #{timeNowWas}"
+rename(tempJpg, timeZonesFile, timeNowWas)
+#  Move the jpgs to destPhoto (Latest Download)
+jpgsMovedCount = 0 # Initializing for debugging puts
+Dir.foreach(tempJpg) do |item|
+  next if ignoreNonFiles(item) == true
+  fn  = tempJpg   + item # sourced from temporary storage for jpgs 
+  fnp = destPhoto + item # new jpg file in Latest Download
+  # puts "#{lineNum}.#{jpgsMovedCount += 1}. #{fn} moved to #{fnp}" # dubugging
+  FileUtils.move(fn, fnp)
+end
 
 puts "#{lineNum} tzoLoc: #{tzoLoc}. Because GX8 and some other cameras use local time and not GMT as this script was originally written for. All photos must be in same time zone."
 timeNowWas = timeStamp(timeNowWas, lineNum)
