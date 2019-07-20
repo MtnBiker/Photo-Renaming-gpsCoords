@@ -1623,18 +1623,34 @@ end
 # need to determine this based on last file and that will have to be later
 srcSD = srcSDfolder + sdFolder(sdFolderFile)
 
-if !File.exists?(downloadsFolders) # if Daguerre isn't mounted use folders on laptop. Why the negative, TODO get rid of the ! and switch the if and else
-  puts "\n#{lineNum}. #{downloadsFolders} isn't mounted, so will use local laptop folders to process"
+# Delete as is now below
+# if !File.exists?(downloadsFolders) # if Daguerre isn't mounted use folders on laptop. Why the negative, TODO get rid of the ! and switch the if and else
+#   puts "\n#{lineNum}. #{downloadsFolders} isn't mounted, so will use local laptop folders to process"
+#   # Daguerre folders location loaded by default, changed as needed
+#   downloadsFolders = laptopDownloadsFolder # line ~844
+#   destPhoto        = laptopDestination
+#   destOrig         = laptopDestOrig
+#   tempJpg          = laptopTempJpg
+#   srcHD            = downloadsFolders
+#   loadingToLaptop = true
+# else
+#   puts "#{lineNum}. Using Daguerre. File.exists?(downloadsFolders (#{downloadsFolders})): #{File.exists?(downloadsFolders)}"
+# end
+
+# if Daguerre isn't mounted use folders on laptop. 
+if File.exists?(downloadsFolders)
+  puts "#{lineNum}. Using Daguerre. File.exists?(downloadsFolders (#{downloadsFolders})): #{File.exists?(downloadsFolders)}"
+else
+   puts "\n#{lineNum}. #{downloadsFolders} isn't mounted, so will use local laptop folders to process"
   # Daguerre folders location loaded by default, changed as needed
   downloadsFolders = laptopDownloadsFolder # line ~844
   destPhoto        = laptopDestination
   destOrig         = laptopDestOrig
   tempJpg          = laptopTempJpg
   srcHD            = downloadsFolders
-  loadingToLaptop = true
-else
-  puts "#{lineNum}. Using Daguerre. File.exists?(downloadsFolders (#{downloadsFolders})): #{File.exists?(downloadsFolders)}"
+  loadingToLaptop = true 
 end
+
 
 # Check if photos are already in Latest Download folder. A problem because they get reprocessed by gps coordinate adding.
 folderPhotoCount = Dir.entries(destPhoto).count - 3 # -3 is a crude way to take care of ., .., .. Crude is probably OK since this isn't critical. If one real photo is there, not a big problem
