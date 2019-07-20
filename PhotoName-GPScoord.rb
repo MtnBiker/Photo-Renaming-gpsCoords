@@ -1015,7 +1015,7 @@ def uniqueFileName(filename)
 end
 
 def copyAndMove(srcHD, destPhoto, tempJpg, destOrig, photosArray)
-  puts "\n#{lineNum}. Copy photos from \n#{srcHD}\n                  to #{destPhoto} where the renaming will be done, \n      and the originals moved to an archive folder (#{destOrig})\n Running dots are progress bar" 
+  puts "\n#{lineNum}. Copy photos\nfrom #{srcHD}\n  to #{destPhoto} where the renaming will be done, \n      and the originals moved to an archive folder (#{destOrig})\n Running dots are progress bar" 
   # Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
   # Guess this method is slow because files are being copied
   # THIS METHOD WILL NOT WORK IF THE RAW FILE FORMAT ALPHABETICALLY COMES BEFORE JPG. SHOULD MAKE THIS MORE ROBUST
