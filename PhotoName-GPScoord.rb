@@ -10,7 +10,6 @@
 # puts "\ngem list:" # Can't figure out how to do this in one line.
 # system ('gem list') # for debugging problem with mini_exiftool not loading
 
-
 require 'fileutils'
 include FileUtils
 require 'find'
@@ -835,11 +834,10 @@ sdCard      = "/Volumes/LUMIX/"
 srcSDfolderAlt = sdCardAlt + "DCIM/" # SD folder alternate since both this and one below occur. Used at line 740
 srcSDfolder = sdCard + "DCIM/"  # SD folder 
 
-# Quit using this file and just get the folder name from the file name which will be stored on the card.
-# sdFolderFile = thisScript + "currentData/SDfolder.txt" # shouldn't need full path
+# Temp file below that could be used to group some of the searches to geonames
 photoArrayFile = thisScript + "currentData/photoArray.txt"
 
-# Folders on laptop. Somewhat assumes that MtnBikerSSD exist and files will be upload to Mylio on that drive
+# Folders on laptop
 laptopLocation        = "/Users/gscar/Pictures/_Photo Processing Folders/"
 laptopDownloadsFolder = laptopLocation + "Download folder/"
 laptopDestination     = laptopLocation + "Processed photos to be imported to Mylio/"
@@ -848,7 +846,6 @@ laptopTempJpg         = laptopLocation + "Latest Downloads temp jpg/"
 
 # Folders on portable drive: Daguerre. This is the normal location with Daguerre plugged into iMac
 downloadsFolders = "/Volumes/Daguerre/_Download folder/"
-# downloadsFolders = "/Users/gscar/Pictures/_Download folder iMac/" # temp on iMac until Daguerre is back
 srcHD     = downloadsFolders + " Drag Photos HERE/"  # Photos copied from camera, sent by others, etc.
 destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
 tempJpg   = downloadsFolders + "Latest Downloads temp jpg/"
