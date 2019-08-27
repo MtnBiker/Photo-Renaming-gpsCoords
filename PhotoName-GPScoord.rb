@@ -808,7 +808,7 @@ class GeoNames
     [*query(:wikipediaSearch, params)['geonames']]
   end
   QUERY[:wikipediaSearch] = %w[q title lang maxRows]
-end # class GeoNames
+end # class GeoNames. Included because something in it won't load right.
 
 require_relative 'lib/gpsYesPashua'
 require_relative 'lib/LatestDownloadsFolderEmpty_Pashua'
@@ -819,6 +819,9 @@ require_relative 'lib/renamePashua' # Dialog for renaming without moving
 require_relative 'lib/gpsCoordsPashua' # Dialog for adding GPS coordinates without moving
 require_relative 'lib/gpsAddLocationPashua' # Dialog for adding location information based GPS coordinates in file EXIF without moving
 
+# For distanceMeters method
+RAD_PER_DEG = Math::PI / 180
+RM = 6371000 # Earth radius in meters
 
 def lineNum() # Had to move this to above the first call or it didn't work. Didn't think that was necessary
   caller_infos = caller.first.split(":")
@@ -847,13 +850,13 @@ laptopTempJpg         = laptopLocation + "Latest Downloads temp jpg/"
 # Folders on portable drive: Daguerre. This is the normal location with Daguerre plugged into iMac
 downloadsFolders = "/Volumes/Daguerre/_Download folder/"
 srcHD     = downloadsFolders + " Drag Photos HERE/"  # Photos copied from camera, sent by others, etc.
-destPhoto = downloadsFolders + "Latest Download/" #  These are relabeled and GPSed files.
+destPhoto = downloadsFolders + "Latest Processed photos-Import to Mylio/" # Was Latest Download. These are relabeled and GPSed files.
 tempJpg   = downloadsFolders + "Latest Downloads temp jpg/"
 destOrig  = downloadsFolders + "_imported-archive" # folder to move originals to if not done in. No slash because getting double slash with one
 srcRename = "/Volumes/Seagate 8TB Backup/Mylio_87103a/Greg Scarich’s iPhone Library/" # Frequent location to perfom this. iPhone photos brought into Mylio
 #  Below is temporary file location for testing
 srcGpsAdd = "/Users/gscar/Documents/◊ Pre-trash/Cheeseboro/" # srcRename # Could to another location for convenience
-srcAddLocation  = "/Users/gscar/Documents/◊ Pre-trash/Cheeseboro/" # = srcRename # Change to another location for convenience. This location picked so don't screw up a bunch of files
+srcAddLocation  = "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio/" # = srcRename # Change to another location for convenience. This location picked so don't screw up a bunch of files
 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
 puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}."
@@ -1040,7 +1043,7 @@ def copyAndMove(srcHD, destPhoto, tempJpg, destOrig, photosArray)
         jpgMove = true
         # FileUtils.rm(fnp) # Removing the jpg file from LatestDownload which is "duplicate" of a RAW that we're now considering. Can comment this out to keep both
         # puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} will not be transferred because it's a jpg duplicate of a RAWversion." # Is this slow? Turned off to try. Not sure.
-        puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} was moved to #{tempJpg} it's a jpg duplicate of a RAW version and needs to be processed separately." # Is this slow? Turned off to try. Not sure.
+        # puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} was moved to #{tempJpg} it's a jpg duplicate of a RAW version and needs to be processed separately." # Is this slow? Turned off to try. Not sure.
         delCount += 1
         # photoFinalCount -= 1 # commented out since now included
       elsif # not a jpg and check for HEIC--what am I doing with this
@@ -1054,19 +1057,19 @@ def copyAndMove(srcHD, destPhoto, tempJpg, destOrig, photosArray)
     fn  = srcHD     + item # sourced from Drag Photos Here
     fnp = destPhoto + item # new file in Latest Download
     fnp = tempJpg   + item if !jpgMove # seems like ! is backwards but this works
-    puts "#{lineNum}. Copy from fn: #{fn}"  # debugging
+    # puts "#{lineNum}. Copy from fn: #{fn}"  # debugging
     fnf = destOrig  + item # to already imported for archiving
-    puts "#{lineNum}. to fnp: #{fnp}" # debugging
+    # puts "#{lineNum}. to fnp: #{fnp}" # debugging
     FileUtils.copy(fn, fnp) if fn!=fnp # making a copy in the Latest Downloads folder for further action
     # puts "#{lineNum}.#{photoFinalCount}. #{fn} copied to #{fnp}" # dubugging
-    puts "#{lineNum}.#{photoFinalCount}. item: #{item}. #{fn} copied to #{fnp}" # dubugging
+    # puts "#{lineNum}.#{photoFinalCount}. item: #{item}. #{fn} copied to #{fnp}" # dubugging
     
     if File.exists?(fnf)  # moving the original to _imported-archive, but not writing over existing files
       fnf = uniqueFileName(fnf)
       FileUtils.move(fn, fnf)
       puts "#{lineNum}. A file already existed with this name so it was changed to fnf: #{fnf}"
     else # no copies, so move
-      puts "#{lineNum}.#{photoFinalCount}. #{fn} moved to #{fnf}" # dubugging
+      # puts "#{lineNum}.#{photoFinalCount}. #{fn} moved to #{fnf}" # dubugging
       FileUtils.move(fn, fnf)
     end # File.exists?
     # "#{lineNum}.. #{photoFinalCount + delCount} #{fn}" # More for debugging, but maybe OK as progress in this slow process
@@ -1142,14 +1145,14 @@ def fileAnnotate(fn, fileEXIF, fileDateTimeOriginalstr, tzoLoc)  # writing origi
     else
       tzoLocPrint = "+" + tzoLoc.to_s
     end
-    fileEXIF.instructions = "#{fileDateTimeOriginalstr} #{tzoLocPrint}" # Time zone of photo is GMT #{tzoLoc} unless TS5?" or travel
+    fileEXIF.instructions = "#{fileDateTimeOriginalstr} #{tzoLocPrint}" if !fileEXIF.DateTimeStamp # Time zone of photo is GMT #{tzoLoc} unless TS5?" or travel. TODO find out what this field is really for
     # fileEXIF.comment = "Capture date: #{fileDateTimeOriginalstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Doesn't show up in Aperture
     # fileEXIF.source = fileEXIF.title = "#{File.basename(fn)} original filename" # Source OK, but Title seemed a bit better
     fileEXIF.source = "#{File.basename(fn)}"
     fileEXIF.TimeZoneOffset = tzoLoc # Time Zone Offset, (1 or 2 values: 1. The time zone offset of DateTimeOriginal from GMT in hours, 2. If present, the time zone offset of ModifyDate)
     # Am I misusing this? I may using it as the TimeZone for photos taken GMT 0 TODO
     # OffsetTimeOriginal	(time zone for DateTimeOriginal) which may or may not be the time zone the photo was taken in TODO 
-    
+    # TODO write GMT time to
     # Wiping out bad GPS data on TS5. Maybe should test for TS5 to save checking all other files
     if !fileEXIF.GPSDateTime  # i.e. == "false" # condition if bad data for TS5. Note is nil for GX7. Not changing because can use as flag
       # puts "#{lineNum}. #{File.basename(fn)} has bad GPS data  (GPSDateTime is false), and will be blanked out\n"
@@ -1170,11 +1173,11 @@ def timeZone(fileDateTimeOriginal, timeZonesFile )
   j = timeZones.keys.min # e.g. 488
   while i > j # make sure I really get to the end 
     theTime = timeZones[i]["timeGMT"]
-    # puts "\nA. i: #{i}. theTime: #{theTime}" # i: 502. theTime: 2011-06-29T01-00-00Z
-    theTime = Time.parse(theTime) # class: time Wed Jun 29 00:00:00 -0700 2011
-    # puts "\n#{lineNum}.. #{i}. fileDateTimeOriginal: #{fileDateTimeOriginal}. theTime: #{theTime}. fileDateTimeOriginal.class: #{theTime.class}. fileDateTimeOriginal.class: #{theTime.class}"
+    # puts "\n#{lineNum}. (last entry in timeZonesFile) i: #{i}. theTime (of the last entry in GMT): #{theTime}. theTime.class: #{theTime.class}" # i: 502. theTime: 2011-06-29T01-00-00Z. theTime.class: String
+    theTime = Time.parse(theTime) # class: time Wed Jun 29 00:00:00 -0700 2011. Time.parse only seems to do the date part
+    # puts "\n#{lineNum}. #{i}. fileDateTimeOriginal: #{fileDateTimeOriginal}. theTime (in local time): #{theTime}. fileDateTimeOriginal.class: #{theTime.class}. fileDateTimeOriginal.class: #{theTime.class}"
     # puts "Note that these dates are supposed to be UTC, but are getting my local time zone attached."
-    if fileDateTimeOriginal > theTime
+    if fileDateTimeOriginal.to_s > theTime.to_s # What if neither was to_s? TODO
       theTimeZone = timeZones[i]["zone"]
       # puts "C. #{i}. fileDateTimeOriginal: #{fileDateTimeOriginal} fileDateTimeOriginal.class: #{fileDateTimeOriginal.class}. theTimeZone: #{theTimeZone}."
       return theTimeZone
@@ -1245,6 +1248,7 @@ def rename(src, timeZonesFile, timeNowWas)
       # puts "#{lineNum}.. camModel: #{camModel}. #{tzoLoc} is the time zone where photo was taken. Script assumes GX8 on local time "
       # Could set timeChange = 0 here and remove from below except of course where it is set to something else
       timeChange = 0 # setting it outside the loops below and get reset each time through. But can get changed
+      # puts "#{lineNum}. camModel: #{camModel}. fileEXIF.OffsetTimeOriginal: #{fileEXIF.OffsetTimeOriginal}"
       if camModel ==  "MISC" # MISC is for photos without fileDateTimeOriginal, e.g., movies
         # timeChange = 0
         fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
@@ -1257,7 +1261,6 @@ def rename(src, timeZonesFile, timeNowWas)
       elsif camModel == "iPhone X"  # DateTimeOriginal is in local time
         # timeChange = 0
         fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
-      else
         timeChange = (3600*tzoLoc) # previously had error capture on this. Maybe for general cases which I'm not longer covering
         fileEXIF.OffsetTimeOriginal = "GMT"
       end # if camModel
@@ -1345,6 +1348,7 @@ def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, tzoLoc)
     fn = destPhoto + item
     fileEXIF = MiniExiftool.new(fn) # used several times
     camModel = fileEXIF.model
+    puts "#{lineNum}. model: #{camModel} fn: #{fn}" # debug
     panasonicLocation = fileEXIF.location
     # timeOffset = 0 # could leave this in and remove the else     
     if File.file?(fn)
@@ -1359,7 +1363,7 @@ def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, tzoLoc)
       elsif camModel.include?("DMC") and panasonicLocation.length > 0 # Panasonic in Travel Mode, but also some photos exported from Photos. 
         timeOffset = tzoLoc * 3600
         puts "#{lineNum}. timeOffset: #{timeOffset} sec (#{tzoLoc} hours) with photos stamped in local time."
-      else # GX7 time is UTC
+      else # GX7 time is UTC. iPhone ends up here too
         timeOffset = 0 # camelCase, but perl variable is lowercase
         puts "#{lineNum}. timeOffset: #{timeOffset} sec (#{tzoLoc} hours) with photos stamped in GMT"
       end # if camModel
@@ -1404,10 +1408,25 @@ def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, tzoLoc)
   return perlOutput
 end # addCoordinates
 
+# Distance between two gps points. Used to reuse location information for nearby photos.
+def distanceMeters(lat1, lon1, lat2, lon2)
+  # https://stackoverflow.com/questions/12966638/how-to-calculate-the-distance-between-two-gps-coordinates-without-using-google-m
+  lat1_rad, lat2_rad = lat1 * RAD_PER_DEG, lat2 * RAD_PER_DEG
+  lon1_rad, lon2_rad = lon1 * RAD_PER_DEG, lon2 * RAD_PER_DEG
+
+  a = Math.sin((lat2_rad - lat1_rad) / 2) ** 2 + Math.cos(lat1_rad) * Math.cos(lat2_rad) * Math.sin((lon2_rad - lon1_rad) / 2) ** 2
+  c = 2 * Math::atan2(Math::sqrt(a), Math::sqrt(1 - a))
+
+  RM * c # Delta in meters  
+end
+
 def addLocation(src, geoNamesUser)
   # read coords and add a hierarchy of choices for location information. Look at GPS Log Renaming for what works.
     countTotal = 0 
     countLoc = 0
+    latPrev = 0.0
+    lonPrev = 0.0
+    countryCode = country = state = city = location = ""
     Dir.foreach(src) do |item| 
       next if ignoreNonFiles(item) == true # skipping file when true
       fn = src + item
@@ -1415,13 +1434,13 @@ def addLocation(src, geoNamesUser)
         countTotal += 1
         puts "\n#{lineNum}. #{countTotal}. #{item}. Adding location information using geonames based on coordinates. " # amounts to a progress bar, even if a bit verbose #{timeStamp(timeNowWas)}
         fileEXIF = MiniExiftool.new(fn)
-        # Get lat and lon from photo file. What is this fileEXIF.specialinstructions. What about 
+        # Get lat and lon from photo file. What is this fileEXIF.specialinstructions. This must be written by the perl script.
         puts "#{lineNum}. No gps information for #{item}. #{fileEXIF.title}. fileEXIF.specialinstructions: #{fileEXIF.specialinstructions}" if fileEXIF.specialinstructions == nil
-        next if fileEXIF.specialinstructions == nil # can I combine this step and the one above into one step or if statement? I think I'm writing GPS coords to this field because easier to parse?
+        next if fileEXIF.specialinstructions == nil # can I combine this step and the one above into one step or if statement? I think I'm writing GPS coords to this field because easier to parse? I think the perl script does it. I can't find where I did it.
         # puts "#{lineNum}. fileEXIF.specialinstructions: #{fileEXIF.specialinstructions}"
         gps = fileEXIF.specialinstructions.split(", ") # or some way of getting lat and lon. This is a good start. Look at input form needed
-        lat = gps[0][4,11] # Capture long numbers like -123.123456, but short ones aren't that long, but nothing is there
-        lon = gps[1][4,11].split(" ")[0] # needs to 11 long to capture when -xxx.xxxxxx, but then can capture the - when it's xx.xxxxxx. Then grab whats between the first two spaces. Still need the 4,11 because there seems to be a space at the beginning if leave out [4,11]
+        lat = (gps[0][4,11]).to_f # Capture long numbers like -123.123456, but short ones aren't that long, but nothing is there
+        lon = (gps[1][4,11].split(" ")[0]).to_f # needs to 11 long to capture when -xxx.xxxxxx, but then can capture the - when it's xx.xxxxxx. Then grab whats between the first two spaces. Still need the 4,11 because there seems to be a space at the beginning if leave out [4,11]
 
         # puts " #{lineNum}. #{lat} #{lon} for #{fn}" # put here because of fail with TS5 file with erroneous lat lon
         # puts " #{lineNum}. #{lat.to_i} #{lon.to_i} for #{fn}" # put here because of fail with TS5 file with erroneous lat lon        
@@ -1435,129 +1454,139 @@ def addLocation(src, geoNamesUser)
         api = GeoNames.new(username: geoNamesUser)
         # puts "#{lineNum}.. geoNamesUser: #{geoNamesUser}. api: #{api}"
 
-        # Determine country 
-        begin
-          # doesn't work for Istanbul, works for Croatia, Canada
-          countryCodeGeo = api.country_code(lat: lat, lng: lon) # doesn't work in Turkey
-          # puts "#{lineNum}.. countryCodeGeo: #{countryCodeGeo}"
-          countryCode  = countryCodeGeo['countryCode']
-          puts "#{lineNum}.. countryCode #{countryCode}."
-        rescue
-          # begin
-           $stderr.print
-           puts "#{lineNum}. $$stderr: #{$stderr}"
-           strMessage = message.to_s # e.message.to_s ng
-           if strMessage.include?("the hourly limit") 
-             puts "#{lineNum}. #{e.message}, so we will wait an hour"
-             sleep(1.hour)
-           else
-                    countryCodeGeo = api.find_nearby_place_name(lat: lat, lng: lon).first # works for Turkey
-           #          puts "#{lineNum}.. countryCodeGeo:\n#{countryCodeGeo}"
-           #          countryCode  = countryCodeGeo['countryCode']
-           #        rescue SocketError # SocketError: getaddrinfo: nodename nor servname provided, or not known. NOT SURE WHAT THE FAILURE IS HERE. WILL SEE IF IT HAPPENS AGAIN
-           #          puts " #{lineNum}. Failing for api.find_nearby_place_name(lat: lat, lng: lon).first #{lat} #{lon} \nfor #{fn}\n"
-           #          $stderr.print  $! # Thomas p. 108
-           #        end
-           end
-        end # rescue
+        # Work on reusing info for nearby points. Crude calculation of distance between the previous photo.
+        # puts "#{lineNum}. latPrev: #{latPrev}. latPrev.class: #{latPrev.class}. lat: #{lat}.  lat.class: #{lat.class}" # debug
+       #  distanceBetween = Math.sqrt((latPrev-lat)*(latPrev-lat) + (lonPrev-lon)*(lonPrev-lon)) * 1**6 # 1,000,000 m / degree
+       #  # Checking more accurate calculation
+       #  puts "#{lineNum}. accurate calc: #{distanceMeters(lat, lon, latPrev, lonPrev)}. Crude: #{distanceBetween}"
+       puts "#{lineNum}. meters between the current and previous photo: #{distanceMeters(lat, lon, latPrev, lonPrev)}" # Debug
+       if distanceMeters(lat, lon, latPrev, lonPrev) > 100.0 # distance between reference lat lon is greater than 100m recalculate location, otherwise use         # Determine country 
+          begin
+            # doesn't work for Istanbul, works for Croatia, Canada
+            countryCodeGeo = api.country_code(lat: lat, lng: lon) # doesn't work in Turkey
+            puts "#{lineNum}.. countryCodeGeo: #{countryCodeGeo}" # debug
+            countryCode  = countryCodeGeo['countryCode']
+            puts "#{lineNum}.. countryCode #{countryCode}."
+          rescue
+            # begin
+             $stderr.print
+             puts "#{lineNum}. $stderr: #{$stderr} for api.country_code (lat: #{lat}, lng: #{lon}) or countryCode  = countryCodeGeo['countryCode']."
+             # strMessage = message # e.message.to_s ng. message.to_s ng
+             if message.include?("the hourly limit") 
+               puts "#{lineNum}. #{e.message}, so we will wait an hour"
+               sleep(1.hour)
+             else
+               countryCodeGeo = api.find_nearby_place_name(lat: lat, lng: lon).first # works for Turkey
+             #          puts "#{lineNum}.. countryCodeGeo:\n#{countryCodeGeo}"
+             #          countryCode  = countryCodeGeo['countryCode']
+             #        rescue SocketError # SocketError: getaddrinfo: nodename nor servname provided, or not known. NOT SURE WHAT THE FAILURE IS HERE. WILL SEE IF IT HAPPENS AGAIN
+             #          puts " #{lineNum}. Failing for api.find_nearby_place_name(lat: lat, lng: lon).first #{lat} #{lon} \nfor #{fn}\n"
+             #          $stderr.print  $! # Thomas p. 108
+             #        end
+             end
+          end # rescue
        
-      # puts "#{lineNum}.. countryCode:  #{countryCode}"
-      # puts "#{lineNum}. NEED TO UNCOMMENT THIS AFTER INDONESIA ##############################################"
-      country = countryCodeGeo['countryName'] # works with both country_code  and find_nearby_place_name above
-      # puts "#{lineNum}.. country:      #{country}"
-      #
-      # Determine city, state, location
-      if countryCode == "US" # geocodio works in US and Canada, could use as an option to geocode.org
-        begin # state
-          postalCodes = api.find_nearby_postal_codes(lat: lat, lng: lon, maxRows: 1) # this comes up blank for some locations in the US eg P1230119, so did find_nearest_address 
-          state = postalCodes.first['adminName1']
-          # puts "#{lineNum}.. api.find_nearby_postal_codes worked"
-        rescue 
-          state = api.country_subdivision(lat: lat, lng: lon, maxRows: 1)['adminName1']
-          # puts "#{lineNum}. api.find_nearby_postal_codes failed, so used  api.country_subdivision"
-        end # if country code
-        # puts "#{lineNum}.. state:        #{state}"
+        # puts "#{lineNum}.. countryCode:  #{countryCode}"
+        # puts "#{lineNum}. NEED TO UNCOMMENT THIS AFTER INDONESIA ##############################################"
+        country = countryCodeGeo['countryName'] # works with both country_code  and find_nearby_place_name above
+        # puts "#{lineNum}.. country:      #{country}"
+        #
+        # Determine city, state, location
+        if countryCode == "US" # geocodio works in US and Canada, could use as an option to geocode.org
+          begin # state
+            postalCodes = api.find_nearby_postal_codes(lat: lat, lng: lon, maxRows: 1) # this comes up blank for some locations in the US eg P1230119, so did find_nearest_address 
+            state = postalCodes.first['adminName1']
+            # puts "#{lineNum}.. api.find_nearby_postal_codes worked"
+          rescue 
+            state = api.country_subdivision(lat: lat, lng: lon, maxRows: 1)['adminName1']
+            # puts "#{lineNum}. api.find_nearby_postal_codes failed, so used  api.country_subdivision"
+          end # if country code
+          # puts "#{lineNum}.. state:        #{state}"
         
-        begin  # city, location
-          neigh = api.neighbourhood(lat: lat, lng: lon) # errors outside the US and at other time
-          city =  neigh['city']
-          # puts "#{lineNum}.. city:         #{city}"
-          location = neigh['name']
-          # puts "386.. location:     #{location}"
-        rescue # could use api.find_nearby_postal_codes for some of this
-          # puts "344.  api.neighbourhood failed for #{lat} #{lon}"
+          begin  # city, location
+            neigh = api.neighbourhood(lat: lat, lng: lon) # errors outside the US and at other time
+            city =  neigh['city']
+            # puts "#{lineNum}.. city:         #{city}"
+            location = neigh['name']
+            # puts "386.. location:     #{location}"
+          rescue # could use api.find_nearby_postal_codes for some of this
+            # puts "344.  api.neighbourhood failed for #{lat} #{lon}"
           
-          begin # within a rescue
-            city = postalCodes.first['placeName'] # breaking for some points, but is it better than replacement? If so add another rescue
-            # puts "#{lineNum}.. city (rescue): #{city}"
-            findNearbyPlaceName = api.find_nearby_place_name(lat: lat, lng: lon)
-            location = findNearbyPlaceName.first['toponymName']
-            # puts "#{lineNum}.. location (rescue): #{location}"      
-          rescue # probably end up here for a remote place, so wikipedia may be the best
-            # puts "#{lineNum}.. find_nearby_postal_codes failed for city, so use Wikipedia to find a location"
-            city = ""
-            distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance']
-            location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']
-            puts "#{lineNum}.. location:     #{location}. distance: #{distance}" # may need to screen as for outside US
-          end # of within a rescue
-        end # begin rescue outer
+            begin # within a rescue
+              city = postalCodes.first['placeName'] # breaking for some points, but is it better than replacement? If so add another rescue
+              # puts "#{lineNum}.. city (rescue): #{city}"
+              findNearbyPlaceName = api.find_nearby_place_name(lat: lat, lng: lon)
+              location = findNearbyPlaceName.first['toponymName']
+              # puts "#{lineNum}.. location (rescue): #{location}"      
+            rescue # probably end up here for a remote place, so wikipedia may be the best
+              # puts "#{lineNum}.. find_nearby_postal_codes failed for city, so use Wikipedia to find a location"
+              city = ""
+              distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance']
+              location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']
+              puts "#{lineNum}.. location:     #{location}. distance: #{distance}" # may need to screen as for outside US
+            end # of within a rescue
+          end # begin rescue outer
         
-      else # outside US. Doesn't work in Indonesia
+        else # outside US. Doesn't work in Indonesia
         
-        # Uncomment below for Indonesia. Could probably generalize this for other countries. But it requires downloading the file to pgAdmin and building a database.
-        # locationIN  = indoLocation(lat,lon)
- #        countryCode  = locationIN[0]
- #        city         = locationIN[1]
- #        location     = locationIN[2]
- #        if countryCode == "ID"
- #          country = "Indonesia"
- #        else
- #          country = ""
- #        end
+          # Uncomment below for Indonesia. Could probably generalize this for other countries. But it requires downloading the file to pgAdmin and building a database.
+          # locationIN  = indoLocation(lat,lon)
+   #        countryCode  = locationIN[0]
+   #        city         = locationIN[1]
+   #        location     = locationIN[2]
+   #        if countryCode == "ID"
+   #          country = "Indonesia"
+   #        else
+   #          country = ""
+   #        end
                  
-        # off for Indonesia and Ethiopia, just skip if         
-        begin
-          findNearbyPostalCodes = api.find_nearby_postal_codes(lat: lat, lng: lon, maxRows: 1).first
-          state = findNearbyPostalCodes['adminName1']
-          puts "#{lineNum}.. state (outside US): #{state}"
-          city = findNearbyPostalCodes['placeName'] # close to city, but misses Dubrovnik and Zagreb
-          # Below was normal I think, but turned off to try to get Canada to work
-          city = api.find_nearby_place_name(lat: lat, lng: lon, maxRows: 1).first['toponymName'] # name or adminName1 could work too
-          puts "#{lineNum}.. city (outside US):  #{city}"
-        rescue
-          puts "#{lineNum}. findNearbyPostalCodes failed, therefore try getting location from Wikipedia" # This can work outside the US, maybe fails when not near a city.
-        end
+          # off for Indonesia and Ethiopia, just skip if         
+          begin
+            findNearbyPostalCodes = api.find_nearby_postal_codes(lat: lat, lng: lon, maxRows: 1).first
+            state = findNearbyPostalCodes['adminName1']
+            puts "#{lineNum}.. state (outside US): #{state}"
+            city = findNearbyPostalCodes['placeName'] # close to city, but misses Dubrovnik and Zagreb
+            # Below was normal I think, but turned off to try to get Canada to work
+            city = api.find_nearby_place_name(lat: lat, lng: lon, maxRows: 1).first['toponymName'] # name or adminName1 could work too
+            puts "#{lineNum}.. city (outside US):  #{city}"
+          rescue
+            puts "#{lineNum}. findNearbyPostalCodes failed, therefore try getting location from Wikipedia" # This can work outside the US, maybe fails when not near a city.
+          end
         
-        # puts city =  api.find_nearby_wikipedia(lat: lat, lng: lon)["geonames"].first["title"] # the third item is a city, maybe could regex wikipedia, but doubt it's consistent enough to work
-        # puts "#{lineNum}.. Four lines below must be commented out for Canada"
+          # puts city =  api.find_nearby_wikipedia(lat: lat, lng: lon)["geonames"].first["title"] # the third item is a city, maybe could regex wikipedia, but doubt it's consistent enough to work
+          # puts "#{lineNum}.. Four lines below must be commented out for Canada"
         
-        begin # put this in with failure anotating Ethiopia photos
-          location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']
-          distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance'].to_f
-          locationDistance = "#{location} is #{distance}km away."
-          puts "#{lineNum}. location:     #{location}. distance: #{distance}. If distance > 0.3km location not used"
-          if  distance < 0.3
-            location = ""
-          elsif fileEXIF.caption == nil
-            fileEXIF.caption = locationDistance
-          else
-            fileEXIF.usercomment = locationDistance
-          end # if distance
-        rescue
-          # maybe this whole exception needs reworking
-        ensure
-          puts "#{lineNum}. #{item} find api.find_nearby_wikipedia failed. Maybe a foreign country? "
-          location = "" # added this to help prevent failure on test below. May not be necessary
-        end
+          begin # put this in with failure anotating Ethiopia photos
+            location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']
+            distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance'].to_f
+            locationDistance = "#{location} is #{distance}km away."
+            puts "#{lineNum}. location:     #{location}. distance: #{distance}. If distance > 0.3km location not used"
+            if  distance < 0.3
+              location = ""
+            elsif fileEXIF.caption == nil
+              fileEXIF.caption = locationDistance
+            else
+              fileEXIF.usercomment = locationDistance
+            end # if distance
+          rescue
+            # maybe this whole exception needs reworking
+          ensure
+            puts "#{lineNum}. #{item} find api.find_nearby_wikipedia failed. Maybe a foreign country? "
+            location = "" # added this to help prevent failure on test below. May not be necessary
+          end
         
         
-      end # if countryCode
-      location = "" if city == location # cases where they where the same (Myers Flat, Callahan and Etna). Could try to find a location with some other find, maybe Wikipedia, but would want a distance check
+        end # if countryCode
+        location = "" if city == location # cases where they where the same (Myers Flat, Callahan and Etna). Could try to find a location with some other find, maybe Wikipedia, but would want a distance check
+        latPrev  = lat
+        lonPrev = lon
+      end # if > 100m (so if greater recalculated above, other wise just reuse below)  
+      
       # puts "#{lineNum}.. Use MiniExiftool to write location info to photo files\n" # Have already set fileEXIF
       fileEXIF.CountryCode = countryCode  # Aperture: IPTC: Country-PrimaryLocationCode
-      fileEXIF.country = country  # Aperture: IPTC: Country-Primary Location Name
-      fileEXIF.state = state # Aperture: IPTC: Province-State (XMP: Stqte)
-      fileEXIF.city = city # Aperture: IPTC: City
+      fileEXIF.country     = country  # Aperture: IPTC: Country-Primary Location Name
+      fileEXIF.state       = state # Aperture: IPTC: Province-State (XMP: Stqte)
+      fileEXIF.city =        city # Aperture: IPTC: City
       fileEXIF.location = location # Aperture: IPTC: Sub-location
       fileEXIF.save
     end    
@@ -1654,12 +1683,12 @@ fromWhere = whichLoc() # This is pulling in first Pashua window (1. ), SDorHD.rb
 # puts "#{lineNum}. fromWhere[\"gpsLocation\"]: #{fromWhere["gpsLocation"]}"
 whichDrive = fromWhere["whichDrive"][0].chr # only using the first character
 # A: already downloaded. S: SD card. 
-puts "\n#{lineNum}.. whichDrive: #{whichDrive}. (A: already downloaded. S: SD card.)" #\nWill convert to SD or HD
+# puts "\n#{lineNum}.. whichDrive: #{whichDrive}. (A: already downloaded. S: SD card.)" #\nWill convert to SD or HD
 # Set the return into a more friendly variable and set the src of the photos to be processed
 whichOne = whichOne(whichDrive) # parsing result to get HD or SD
 # puts "#{lineNum}. fromWherefromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}" # fromWhere not defined
 # Only rename files in place and skip the rest. Not sure right location because not sure about when Pashua is run
-puts "#{lineNum}. whichOne: #{whichOne}"
+# puts "#{lineNum}. whichOne: #{whichOne}" # debug
 # # puts whichLoc()
 
 # Getting the folder selected in the dialog box, but also sending the default
@@ -1669,6 +1698,7 @@ puts "#{lineNum}. whichOne: #{whichOne}"
 
 # Three option for partial processing, then go to either HD or SD
 # Option for renaming files while not moving photos
+# Now the logic is a mess, since for the three options below we stop and don't do any of the rest
 if fromWhere["rename"] == "1" # Renaming only or could use if whichOne == "Rename"
   renameFolder = renameGUI(srcRename) 
   srcRename = renameFolder["srcSelect"].to_s  + "/" # Name in dialog box which may be different than default
@@ -1682,10 +1712,11 @@ end
 if fromWhere["gpsCoords"] == "1" # Renaming only or could use if whichOne == "Rename"
   srcGpsAdd = gpsCoordsGUI(srcGpsAdd) # Puts up dialog box, sends default file location and retrieves selected file location
   srcGpsAdd = srcGpsAdd["srcSelect"].to_s  + "/" # Name in dialog box which may be different than default
-  puts "\n#{lineNum}. Photos in #{srcGpsAdd} will have GPS coordinates added in place. NOT IMPLEMENTED."
+  puts "\n#{lineNum}. NOT WORKING YET. Photos in #{srcGpsAdd} will have GPS coordinates added in place."
   puts "PAY ATTENTION TO YEAR AS NOT SURE MORE THAN ONE YEAR IS INCLUDED IN MY MODULE"
-  puts "Haven't sorted out the variables passed"
-  # addCoordinates(srcGpsAdd, folderGPX, gpsPhotoPerl, loadingToLaptop, tzoLoc)
+  puts "#{lineNum} Debugging.\n srcGpsAdd: #{srcGpsAdd} \n folderGPX: #{folderGPX}  \n gpsPhotoPerl: #{gpsPhotoPerl}  \n tzoLoc: #{tzoLoc} added manually. TODO ask for"
+  perlOutput = addCoordinates(srcGpsAdd, folderGPX, gpsPhotoPerl, tzoLoc) # Don't need perlOutput since abort
+  puts "#{lineNum}. Added coordinates to photos in #{srcGpsAdd}\nMultiline perlOutput follows:\n#{perlOutput}"
   abort # break gives compile error
   # abort if (whichDrive == "R") # break doesn't work, but abort seems to
 end
@@ -1694,7 +1725,7 @@ end
 if fromWhere["gpsLocation"] == "1"
   srcAddLocation = addLocationGUI(srcAddLocation)  # Puts up dialog box, sends default file location and retrieves selected file location. reusing variable. One above made new temporary variable
   srcAddLocation = srcAddLocation["srcSelect"].to_s  + "/" # Name in dialog box which may be different than default
-  puts "\n#{lineNum}. Photos in #{srcAddLocation} will have location information added based onGPS coordinates in EXIF data without moving the file. NOT IMPLEMENTED."
+  puts "\n#{lineNum}. NOT IMPLEMENTED. Photos in #{srcAddLocation} will have location information added based on GPS coordinates in EXIF data without moving the file. NOT IMPLEMENTED."
   puts "#{lineNum}. Need to confirm that the following works. May need to change year of folder for gpx tracks"
   addLocation(srcAddLocation, geoNamesUser)
   abort # break gives compile error
@@ -1703,50 +1734,51 @@ end
 
 lastPhotoReadTextFile = sdCard + "/lastPhotoRead.txt"
 # if File.exist?(lastPhotoReadTextFile) # If SD card not mounted. TODO logic with else to try again
-  if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner coding
-    # if File.exist?(lastPhotoReadTextFile) # If SD card not mounted. TODO logic with else to try again
-    # TODO Put up a dialog to remind to mount the SD card and return to here.
-    # read in last filename copied from card previously
-    begin
-      # Read from SD card
-      # lastPhotoReadTextFile = sdCard + "/lastPhotoRead.txt" # But this doesn't work if a new card.
-      puts "\n#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. NEED an error here if card not mounted!!. Have a kludge fix in the next rescue."
-      file = File.new(lastPhotoReadTextFile, "r")
-      lastPhotoFilename = file.gets # apparently grabbing a return. maybe not the best reading method.
-      puts "\n#{lineNum}. lastPhotoFilename: #{lastPhotoFilename.chop}. Value can be changed by user, so this may not be the value used."
-      # lastPhotoFilename is 8 characters long (P plus 7 digits) at present.
-      # Adding date to this line, so will take first 12 characters (would be cleaner if made the write an array or json and worked with that, but this is the quick and dirty)
-      lastPhotoFilename = lastPhotoFilename[0..7]
-      puts "#{lineNum}. lastPhotoFilename: #{lastPhotoFilename}. Confirming new method of reading. Should look like line above. Not implemented as haven't found an easy way to write to the beginning of the file."
-      file.close
-    # rescue Exception => err # Not good to rescue Exception
-    rescue => err
-      puts "Exception: #{err}. Not critical as value can be entered manually by user."
-    end
-  
-    begin
-      srcSD = srcSDfolder + lastPhotoFilename.chop.slice(1,3) + "_PANA"
-    rescue Exception => e
-      puts "#{lineNum} +++++++++++++ SD card not available, so will EXIT.++++++++++. Probably selected wrong option."
-      exit
-    end
-  
-  # Don't know if this is needed, why not use srcSD directly
-    src = srcSD
-    prefsPhoto = pPashua2(src,lastPhotoFilename,destPhoto,destOrig) # calling Photo_Handling_Pashua-SD. (Titled: 2. SD card photo downloading options)
-    # to get a value use prefsPhoto("theNameInFileNamingEtcPashua.rb"), nothing to do with the name above
-    # puts "Prefs as set by pPashua"
-    # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
-  else # whichOne=="HD", but what
-    src = srcHD
-    puts "#{lineNum}.  `srcHD`: #{src}. Does it have a slash?"
-    prefsPhoto = pGUI(src, destPhoto, destOrig) # is this only sending values in? 
-    # to get a value use prefsPhoto("theNameInFileNamingEtcPashue.rb"), nothing to do with the name above
-    # puts "Prefs as set by pGUI"
-    # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
-    src = prefsPhoto["srcSelect"].to_s  + "/"
-    puts "#{lineNum}. src: #{src}. Does it have a slash?"
-  end # whichOne=="SD"
+
+if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner coding
+  # if File.exist?(lastPhotoReadTextFile) # If SD card not mounted. TODO logic with else to try again
+  # TODO Put up a dialog to remind to mount the SD card and return to here.
+  # read in last filename copied from card previously
+  begin
+    # Read from SD card
+    # lastPhotoReadTextFile = sdCard + "/lastPhotoRead.txt" # But this doesn't work if a new card.
+    puts "\n#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. NEED an error here if card not mounted!!. Have a kludge fix in the next rescue."
+    file = File.new(lastPhotoReadTextFile, "r")
+    lastPhotoFilename = file.gets # apparently grabbing a return. maybe not the best reading method.
+    puts "\n#{lineNum}. lastPhotoFilename: #{lastPhotoFilename.chop}. Value can be changed by user, so this may not be the value used."
+    # lastPhotoFilename is 8 characters long (P plus 7 digits) at present.
+    # Adding date to this line, so will take first 12 characters (would be cleaner if made the write an array or json and worked with that, but this is the quick and dirty)
+    lastPhotoFilename = lastPhotoFilename[0..7]
+    puts "#{lineNum}. lastPhotoFilename: #{lastPhotoFilename}. Confirming new method of reading. Should look like line above. Not implemented as haven't found an easy way to write to the beginning of the file."
+    file.close
+  # rescue Exception => err # Not good to rescue Exception
+  rescue => err
+    puts "Exception: #{err}. Not critical as value can be entered manually by user."
+  end
+
+  begin
+    srcSD = srcSDfolder + lastPhotoFilename.chop.slice(1,3) + "_PANA"
+  rescue Exception => e
+    puts "#{lineNum} +++++++++++++ SD card not available, so will EXIT.++++++++++. Probably selected wrong option."
+    exit
+  end
+
+# Don't know if this is needed, why not use srcSD directly
+  src = srcSD
+  prefsPhoto = pPashua2(src,lastPhotoFilename,destPhoto,destOrig) # calling Photo_Handling_Pashua-SD. (Titled: 2. SD card photo downloading options)
+  # to get a value use prefsPhoto("theNameInFileNamingEtcPashua.rb"), nothing to do with the name above
+  # puts "Prefs as set by pPashua"
+  # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
+else # whichOne=="HD", but what
+  src = srcHD
+  puts "#{lineNum}.  `srcHD`: #{src}. Does it have a slash?"
+  prefsPhoto = pGUI(src, destPhoto, destOrig) # is this only sending values in? 
+  # to get a value use prefsPhoto("theNameInFileNamingEtcPashue.rb"), nothing to do with the name above
+  # puts "Prefs as set by pGUI"
+  # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
+  src = prefsPhoto["srcSelect"].to_s  + "/"
+  puts "#{lineNum}. src: #{src}. Does it have a slash?"
+end # whichOne=="SD"
 # else
 #   puts "#{lineNum}. SD card not mounted. (=== Some logic so can mount and try again. ===)"
 #   abort
