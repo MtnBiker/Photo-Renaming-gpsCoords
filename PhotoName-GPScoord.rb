@@ -865,7 +865,7 @@ timeZonesFile = "/Users/gscar/Dropbox/scriptsEtc/Greg camera time zones.yml"
 # timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with. Only use once, so this just confused things
 gpsPhotoPerl = thisScript + "lib/gpsPhoto.pl"
 folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2019 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
-puts "#{lineNum}. Must manually set folderGPX for GPX file folders. Particularly important at start of new year AND if working on photos not in current year.\nUsing: #{folderGPX}\n"
+puts "#{lineNum}. Must manually set folderGPX for GPX file folders. Particularly important at start of new year AND if working on photos not in current year.\n       Using: #{folderGPX}\n"
 geoNamesUser    = "MtnBiker" # This is login, user shows up as MtnBiker; but used to work with this. Good but may use it up. Ran out after about 300 photos per hour. This fixed it.
 geoNamesUser2   = "geonamestwo" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
 
@@ -935,7 +935,7 @@ def whichSource(whichOne,prefsPhoto)
   src
 end
 
-def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) 
+ def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) 
   # some of the above counter variables could be set at the beginning of this script and used locally
   puts "\n#{lineNum}. Copying photos from an SD card starting with #{lastPhotoFilename} or from another value manually entered"
   cardCount = 0
@@ -1014,7 +1014,7 @@ def uniqueFileName(filename)
 end
 
 def copyAndMove(srcHD, destPhoto, tempJpg, destOrig, photosArray)
-  puts "\n#{lineNum}. Copy photos\nfrom #{srcHD}\n  to #{destPhoto} where the renaming will be done, \n      and the originals moved to an archive folder (#{destOrig})\n Running dots are progress bar" 
+  puts "\n#{lineNum}. Copy photos\nfrom #{srcHD}\n  to #{destPhoto} where the renaming will be done, \n\n and the originals moved to an archive folder (#{destOrig})\n Running dots are progress bar" 
   # Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
   # Guess this method is slow because files are being copied
   # THIS METHOD WILL NOT WORK IF THE RAW FILE FORMAT ALPHABETICALLY COMES BEFORE JPG. SHOULD MAKE THIS MORE ROBUST
@@ -1087,7 +1087,7 @@ def copyAndMove(srcHD, destPhoto, tempJpg, destOrig, photosArray)
   else
     comment = ""
   end # if delCount
-  puts "\n#{lineNum}. #{photoFinalCount} photos have been moved and are ready for renaming and adding GPS coordinates and locations#{comment}"
+  puts "\n#{lineNum}. #{photoFinalCount} photos have been moved and are ready for renaming and adding GPS coordinates and locations \n#{comment}"
   return photosArray
 end # copyAndMove: copy to the final destination where the renaming will be done and the original moved to an archive (_imported-archive folder)
 
@@ -1202,14 +1202,13 @@ def rename(src, timeZonesFile, timeNowWas)
   dupCount = 0
   count    = 0
   tzoLoc = ""
-  seqLetter = %w(a b c d e f ) # seems like this should be an array, not a list
+  seqLetter = %w(a b c d e f ) # used when subsec doesn't exist
   # puts "#{lineNum}. Entered rename and ready to enter foreach. src: #{src}"
  #  puts "#{lineNum}. Dir.entries(src). #{Dir.entries(src)}" # Debugging. Turned out I was trying to work on an empty folder.
   Dir.foreach(src) do |item| # for each photo file
     next if ignoreNonFiles(item) == true # skipping file when true, i.e., not a file
-    if item.start_with?("20") 
-      # puts "#{lineNum}. File skipped because already renamed, i.e., the filename starts with 20xx #{item.start_with?("20")}"
-    end
+    # puts "#{lineNum}. File skipped because already renamed, i.e., the filename starts with 20xx #{item.start_with?("20")}"
+    # end
     next if item.start_with?("20") # Skipping files that have already been renamed.
     next if item.end_with?("xmp") # Skipping .xmp files in Mylio and elsewhere. The files may become orphans
     # puts "#{lineNum}. #{item} will be renamed. " # #{timeNowWas = timeStamp(timeNowWas)}
@@ -1454,13 +1453,10 @@ def addLocation(src, geoNamesUser)
         api = GeoNames.new(username: geoNamesUser)
         # puts "#{lineNum}.. geoNamesUser: #{geoNamesUser}. api: #{api}"
 
-        # Work on reusing info for nearby points. Crude calculation of distance between the previous photo.
+        # Reusing info for nearby points
         # puts "#{lineNum}. latPrev: #{latPrev}. latPrev.class: #{latPrev.class}. lat: #{lat}.  lat.class: #{lat.class}" # debug
-       #  distanceBetween = Math.sqrt((latPrev-lat)*(latPrev-lat) + (lonPrev-lon)*(lonPrev-lon)) * 1**6 # 1,000,000 m / degree
-       #  # Checking more accurate calculation
-       #  puts "#{lineNum}. accurate calc: #{distanceMeters(lat, lon, latPrev, lonPrev)}. Crude: #{distanceBetween}"
-       puts "#{lineNum}. meters between the current and previous photo: #{distanceMeters(lat, lon, latPrev, lonPrev)}" # Debug
-       if distanceMeters(lat, lon, latPrev, lonPrev) > 100.0 # distance between reference lat lon is greater than 100m recalculate location, otherwise use         # Determine country 
+       distanceMeters = distanceMeters(lat, lon, latPrev, lonPrev)
+       if distanceMeters > 100.0 # distance between reference lat lon is greater than 100m recalculate location, otherwise use         # Determine country 
           begin
             # doesn't work for Istanbul, works for Croatia, Canada
             countryCodeGeo = api.country_code(lat: lat, lng: lon) # doesn't work in Turkey
@@ -1490,7 +1486,7 @@ def addLocation(src, geoNamesUser)
         # puts "#{lineNum}. NEED TO UNCOMMENT THIS AFTER INDONESIA ##############################################"
         country = countryCodeGeo['countryName'] # works with both country_code  and find_nearby_place_name above
         # puts "#{lineNum}.. country:      #{country}"
-        #
+
         # Determine city, state, location
         if countryCode == "US" # geocodio works in US and Canada, could use as an option to geocode.org
           begin # state
@@ -1580,21 +1576,23 @@ def addLocation(src, geoNamesUser)
         location = "" if city == location # cases where they where the same (Myers Flat, Callahan and Etna). Could try to find a location with some other find, maybe Wikipedia, but would want a distance check
         latPrev  = lat
         lonPrev = lon
+      # else # commented out since not usng, but can for debug
+        # puts "#{lineNum}. #{distanceMeters.ceil}m between the current and previous photo and since less than 100m will use the location information from the previous photo." # Debug
       end # if > 100m (so if greater recalculated above, other wise just reuse below)  
       
       # puts "#{lineNum}.. Use MiniExiftool to write location info to photo files\n" # Have already set fileEXIF
-      fileEXIF.CountryCode = countryCode  # Aperture: IPTC: Country-PrimaryLocationCode
-      fileEXIF.country     = country  # Aperture: IPTC: Country-Primary Location Name
-      fileEXIF.state       = state # Aperture: IPTC: Province-State (XMP: Stqte)
-      fileEXIF.city =        city # Aperture: IPTC: City
-      fileEXIF.location = location # Aperture: IPTC: Sub-location
+      fileEXIF.CountryCode = countryCode
+      fileEXIF.country     = country
+      fileEXIF.state       = state
+      fileEXIF.city        = city
+      fileEXIF.location    = location
       fileEXIF.save
     end    
   end 
   puts "\n#{lineNum}. Location information found for #{countLoc} of #{countTotal} photos processed" 
 end # addLocation
 
-def indoLocation(lat,lon) # Could modiby for other countries. Uses file loaded into PGadmin
+def indoLocation(lat,lon) # Could modify for other countries. Uses file loaded into PGadmin
   conn = PG.connect( dbname: 'Indonesia' )
   #  lon/lat is the order for ST_GeomFromText
   indo  = conn.exec("SELECT * FROM indonesia ORDER BY ST_Distance(ST_GeomFromText('POINT(#{lon} #{lat})', 4326), geom) ASC LIMIT 1")
@@ -1636,7 +1634,7 @@ def file_prepend(file, str)
   end
 end
 
-## The "PROGRAM" #################
+## The "PROGRAM" ############ ##################### ###################### ##################### ##########################
 timeNowWas = timeStamp(Time.now, lineNum) # Initializing. Later calls are different
 # timeNowWas = timeStamp(timeNowWas)
 puts "Are the gps logs up to date?" # Should check for this since I don't see the message
@@ -1693,10 +1691,7 @@ whichOne = whichOne(whichDrive) # parsing result to get HD or SD
 
 # Getting the folder selected in the dialog box, but also sending the default
 
-
-# puts "\n#{lineNum}. renameFolder: #{renameFolder}"
-
-# Three option for partial processing, then go to either HD or SD
+# Three options for partial processing, then go to either HD or SD
 # Option for renaming files while not moving photos
 # Now the logic is a mess, since for the three options below we stop and don't do any of the rest
 if fromWhere["rename"] == "1" # Renaming only or could use if whichOne == "Rename"
@@ -1771,13 +1766,13 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
   # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
 else # whichOne=="HD", but what
   src = srcHD
-  puts "#{lineNum}.  `srcHD`: #{src}. Does it have a slash?"
+  # puts "#{lineNum}. `srcHD`: #{src}. Does it have a slash?"
   prefsPhoto = pGUI(src, destPhoto, destOrig) # is this only sending values in? 
   # to get a value use prefsPhoto("theNameInFileNamingEtcPashue.rb"), nothing to do with the name above
   # puts "Prefs as set by pGUI"
   # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
   src = prefsPhoto["srcSelect"].to_s  + "/"
-  puts "#{lineNum}. src: #{src}. Does it have a slash?"
+  # puts "#{lineNum}. src: #{src}. Does it have a slash?"
 end # whichOne=="SD"
 # else
 #   puts "#{lineNum}. SD card not mounted. (=== Some logic so can mount and try again. ===)"

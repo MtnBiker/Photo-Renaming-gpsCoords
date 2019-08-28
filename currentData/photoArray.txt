@@ -1,1 +1,398 @@
-[[0, "P1060488.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1060488.JPG", nil], [1, "P1060488.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1060488.RW2", ".JPG"], [2, "P1060489.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1060489.JPG", nil], [3, "P1060489.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1060489.RW2", ".JPG"], [4, "P1060490.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1060490.JPG", nil]]
+[[0, "P1070001.MP4", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070001.MP4", nil
+1, "P1070002.MP4", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070002.MP4", nil
+2, "P1070003.MP4", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070003.MP4", nil
+3, "P1070004.MP4", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070004.MP4", nil
+4, "P1070005.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070005.JPG", nil
+5, "P1070005.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070005.RW2", ".JPG"
+6, "P1070006.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070006.JPG", nil
+7, "P1070006.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070006.RW2", ".JPG"
+8, "P1070007.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070007.JPG", nil
+9, "P1070007.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070007.RW2", ".JPG"
+10, "P1070008.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070008.JPG", nil
+11, "P1070008.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070008.RW2", ".JPG"
+12, "P1070009.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070009.JPG", nil
+13, "P1070009.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070009.RW2", ".JPG"
+14, "P1070010.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070010.JPG", nil
+15, "P1070010.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070010.RW2", ".JPG"
+16, "P1070011.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070011.JPG", nil
+17, "P1070011.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070011.RW2", ".JPG"
+18, "P1070012.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070012.JPG", nil
+19, "P1070012.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070012.RW2", ".JPG"
+20, "P1070013.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070013.JPG", nil
+21, "P1070013.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070013.RW2", ".JPG"
+22, "P1070014.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070014.JPG", nil
+23, "P1070014.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070014.RW2", ".JPG"
+24, "P1070015.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070015.JPG", nil
+25, "P1070015.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070015.RW2", ".JPG"
+26, "P1070016.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070016.JPG", nil
+27, "P1070016.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070016.RW2", ".JPG"
+28, "P1070017.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070017.JPG", nil
+29, "P1070017.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070017.RW2", ".JPG"
+30, "P1070018.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070018.JPG", nil
+31, "P1070018.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070018.RW2", ".JPG"
+32, "P1070019.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070019.JPG", nil
+33, "P1070020.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070020.JPG", nil
+34, "P1070020.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070020.RW2", ".JPG"
+35, "P1070021.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070021.JPG", nil
+36, "P1070021.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070021.RW2", ".JPG"
+37, "P1070022.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070022.JPG", nil
+38, "P1070022.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070022.RW2", ".JPG"
+39, "P1070023.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070023.JPG", nil
+40, "P1070023.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070023.RW2", ".JPG"
+41, "P1070024.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070024.JPG", nil
+42, "P1070024.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070024.RW2", ".JPG"
+43, "P1070025.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070025.JPG", nil
+44, "P1070025.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070025.RW2", ".JPG"
+45, "P1070026.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070026.JPG", nil
+46, "P1070026.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070026.RW2", ".JPG"
+47, "P1070027.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070027.JPG", nil
+48, "P1070027.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070027.RW2", ".JPG"
+49, "P1070028.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070028.JPG", nil
+50, "P1070028.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070028.RW2", ".JPG"
+51, "P1070029.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070029.JPG", nil
+52, "P1070029.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070029.RW2", ".JPG"
+53, "P1070030.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070030.JPG", nil
+54, "P1070030.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070030.RW2", ".JPG"
+55, "P1070031.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070031.JPG", nil
+56, "P1070031.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070031.RW2", ".JPG"
+57, "P1070032.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070032.JPG", nil
+58, "P1070032.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070032.RW2", ".JPG"
+59, "P1070033.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070033.JPG", nil
+60, "P1070033.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070033.RW2", ".JPG"
+61, "P1070034.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070034.JPG", nil
+62, "P1070034.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070034.RW2", ".JPG"
+63, "P1070035.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070035.JPG", nil
+64, "P1070035.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070035.RW2", ".JPG"
+65, "P1070036.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070036.JPG", nil
+66, "P1070037.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070037.JPG", nil
+67, "P1070038.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070038.JPG", nil
+68, "P1070038.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070038.RW2", ".JPG"
+69, "P1070039.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070039.JPG", nil
+70, "P1070039.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070039.RW2", ".JPG"
+71, "P1070040.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070040.JPG", nil
+72, "P1070040.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070040.RW2", ".JPG"
+73, "P1070041.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070041.JPG", nil
+74, "P1070041.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070041.RW2", ".JPG"
+75, "P1070042.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070042.JPG", nil
+76, "P1070042.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070042.RW2", ".JPG"
+77, "P1070043.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070043.JPG", nil
+78, "P1070043.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070043.RW2", ".JPG"
+79, "P1070044.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070044.JPG", nil
+80, "P1070044.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070044.RW2", ".JPG"
+81, "P1070045.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070045.JPG", nil
+82, "P1070045.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070045.RW2", ".JPG"
+83, "P1070046.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070046.JPG", nil
+84, "P1070046.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070046.RW2", ".JPG"
+85, "P1070049.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070049.JPG", nil
+86, "P1070049.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070049.RW2", ".JPG"
+87, "P1070050.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070050.JPG", nil
+88, "P1070050.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070050.RW2", ".JPG"
+89, "P1070051.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070051.JPG", nil
+90, "P1070051.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070051.RW2", ".JPG"
+91, "P1070052.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070052.JPG", nil
+92, "P1070052.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070052.RW2", ".JPG"
+93, "P1070053.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070053.JPG", nil
+94, "P1070053.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070053.RW2", ".JPG"
+95, "P1070054.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070054.JPG", nil
+96, "P1070054.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070054.RW2", ".JPG"
+97, "P1070055.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070055.JPG", nil
+98, "P1070055.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070055.RW2", ".JPG"
+99, "P1070056.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070056.JPG", nil
+100, "P1070056.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070056.RW2", ".JPG"
+101, "P1070057.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070057.JPG", nil
+102, "P1070057.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070057.RW2", ".JPG"
+103, "P1070058.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070058.JPG", nil
+104, "P1070058.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070058.RW2", ".JPG"
+105, "P1070059.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070059.JPG", nil
+106, "P1070059.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070059.RW2", ".JPG"
+107, "P1070060.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070060.JPG", nil
+108, "P1070060.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070060.RW2", ".JPG"
+109, "P1070061.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070061.JPG", nil
+110, "P1070061.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070061.RW2", ".JPG"
+111, "P1070062.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070062.JPG", nil
+112, "P1070062.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070062.RW2", ".JPG"
+113, "P1070063.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070063.JPG", nil
+114, "P1070064.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070064.JPG", nil
+115, "P1070065.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070065.JPG", nil
+116, "P1070066.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070066.JPG", nil
+117, "P1070066.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070066.RW2", ".JPG"
+118, "P1070067.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070067.JPG", nil
+119, "P1070067.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070067.RW2", ".JPG"
+120, "P1070068.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070068.JPG", nil
+121, "P1070068.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070068.RW2", ".JPG"
+122, "P1070069.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070069.JPG", nil
+123, "P1070069.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070069.RW2", ".JPG"
+124, "P1070070.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070070.JPG", nil
+125, "P1070070.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070070.RW2", ".JPG"
+126, "P1070071.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070071.JPG", nil
+127, "P1070071.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070071.RW2", ".JPG"
+128, "P1070072.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070072.JPG", nil
+129, "P1070072.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070072.RW2", ".JPG"
+130, "P1070073.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070073.JPG", nil
+131, "P1070073.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070073.RW2", ".JPG"
+132, "P1070074.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070074.JPG", nil
+133, "P1070074.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070074.RW2", ".JPG"
+134, "P1070075.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070075.JPG", nil
+135, "P1070075.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070075.RW2", ".JPG"
+136, "P1070076.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070076.JPG", nil
+137, "P1070077.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070077.JPG", nil
+138, "P1070078.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070078.JPG", nil
+139, "P1070078.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070078.RW2", ".JPG"
+140, "P1070079.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070079.JPG", nil
+141, "P1070079.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070079.RW2", ".JPG"
+142, "P1070080.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070080.JPG", nil
+143, "P1070080.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070080.RW2", ".JPG"
+144, "P1070081.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070081.JPG", nil
+145, "P1070081.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070081.RW2", ".JPG"
+146, "P1070082.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070082.JPG", nil
+147, "P1070083.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070083.JPG", nil
+148, "P1070084.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070084.JPG", nil
+149, "P1070084.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070084.RW2", ".JPG"
+150, "P1070085.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070085.JPG", nil
+151, "P1070085.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070085.RW2", ".JPG"
+152, "P1070086.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070086.JPG", nil
+153, "P1070086.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070086.RW2", ".JPG"
+154, "P1070087.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070087.JPG", nil
+155, "P1070087.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070087.RW2", ".JPG"
+156, "P1070088.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070088.JPG", nil
+157, "P1070088.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070088.RW2", ".JPG"
+158, "P1070089.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070089.JPG", nil
+159, "P1070089.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070089.RW2", ".JPG"
+160, "P1070090.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070090.JPG", nil
+161, "P1070090.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070090.RW2", ".JPG"
+162, "P1070091.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070091.JPG", nil
+163, "P1070091.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070091.RW2", ".JPG"
+164, "P1070092.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070092.JPG", nil
+165, "P1070092.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070092.RW2", ".JPG"
+166, "P1070093.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070093.JPG", nil
+167, "P1070093.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070093.RW2", ".JPG"
+168, "P1070094.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070094.JPG", nil
+169, "P1070094.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070094.RW2", ".JPG"
+170, "P1070095.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070095.JPG", nil
+171, "P1070095.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070095.RW2", ".JPG"
+172, "P1070096.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070096.JPG", nil
+173, "P1070096.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070096.RW2", ".JPG"
+174, "P1070097.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070097.JPG", nil
+175, "P1070097.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070097.RW2", ".JPG"
+176, "P1070098.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070098.JPG", nil
+177, "P1070098.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070098.RW2", ".JPG"
+178, "P1070099.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070099.JPG", nil
+179, "P1070099.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070099.RW2", ".JPG"
+180, "P1070100.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070100.JPG", nil
+181, "P1070100.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070100.RW2", ".JPG"
+182, "P1070101.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070101.JPG", nil
+183, "P1070101.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070101.RW2", ".JPG"
+184, "P1070102.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070102.JPG", nil
+185, "P1070102.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070102.RW2", ".JPG"
+186, "P1070103.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070103.JPG", nil
+187, "P1070103.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070103.RW2", ".JPG"
+188, "P1070104.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070104.JPG", nil
+189, "P1070104.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070104.RW2", ".JPG"
+190, "P1070105.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070105.JPG", nil
+191, "P1070105.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070105.RW2", ".JPG"
+192, "P1070106.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070106.JPG", nil
+193, "P1070106.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070106.RW2", ".JPG"
+194, "P1070107.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070107.JPG", nil
+195, "P1070107.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070107.RW2", ".JPG"
+196, "P1070108.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070108.JPG", nil
+197, "P1070108.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070108.RW2", ".JPG"
+198, "P1070109.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070109.JPG", nil
+199, "P1070109.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070109.RW2", ".JPG"
+200, "P1070110.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070110.JPG", nil
+201, "P1070110.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070110.RW2", ".JPG"
+202, "P1070111.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070111.JPG", nil
+203, "P1070111.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070111.RW2", ".JPG"
+204, "P1070112.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070112.JPG", nil
+205, "P1070112.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070112.RW2", ".JPG"
+206, "P1070113.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070113.JPG", nil
+207, "P1070113.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070113.RW2", ".JPG"
+208, "P1070114.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070114.JPG", nil
+209, "P1070114.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070114.RW2", ".JPG"
+210, "P1070115.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070115.JPG", nil
+211, "P1070115.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070115.RW2", ".JPG"
+212, "P1070116.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070116.JPG", nil
+213, "P1070116.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070116.RW2", ".JPG"
+214, "P1070117.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070117.JPG", nil
+215, "P1070117.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070117.RW2", ".JPG"
+216, "P1070118.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070118.JPG", nil
+217, "P1070118.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070118.RW2", ".JPG"
+218, "P1070119.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070119.JPG", nil
+219, "P1070119.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070119.RW2", ".JPG"
+220, "P1070120.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070120.JPG", nil
+221, "P1070120.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070120.RW2", ".JPG"
+222, "P1070121.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070121.JPG", nil
+223, "P1070121.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070121.RW2", ".JPG"
+224, "P1070122.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070122.JPG", nil
+225, "P1070122.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070122.RW2", ".JPG"
+226, "P1070123.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070123.JPG", nil
+227, "P1070123.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070123.RW2", ".JPG"
+228, "P1070124.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070124.JPG", nil
+229, "P1070124.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070124.RW2", ".JPG"
+230, "P1070125.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070125.JPG", nil
+231, "P1070125.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070125.RW2", ".JPG"
+232, "P1070126.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070126.JPG", nil
+233, "P1070126.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070126.RW2", ".JPG"
+234, "P1070127.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070127.JPG", nil
+235, "P1070127.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070127.RW2", ".JPG"
+236, "P1070128.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070128.JPG", nil
+237, "P1070128.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070128.RW2", ".JPG"
+238, "P1070129.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070129.JPG", nil
+239, "P1070129.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070129.RW2", ".JPG"
+240, "P1070130.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070130.JPG", nil
+241, "P1070130.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070130.RW2", ".JPG"
+242, "P1070131.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070131.JPG", nil
+243, "P1070131.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070131.RW2", ".JPG"
+244, "P1070132.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070132.JPG", nil
+245, "P1070132.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070132.RW2", ".JPG"
+246, "P1070133.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070133.JPG", nil
+247, "P1070133.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070133.RW2", ".JPG"
+248, "P1070134.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070134.JPG", nil
+249, "P1070134.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070134.RW2", ".JPG"
+250, "P1070135.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070135.JPG", nil
+251, "P1070135.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070135.RW2", ".JPG"
+252, "P1070136.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070136.JPG", nil
+253, "P1070136.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070136.RW2", ".JPG"
+254, "P1070137.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070137.JPG", nil
+255, "P1070137.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070137.RW2", ".JPG"
+256, "P1070138.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070138.JPG", nil
+257, "P1070138.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070138.RW2", ".JPG"
+258, "P1070139.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070139.JPG", nil
+259, "P1070139.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070139.RW2", ".JPG"
+260, "P1070140.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070140.JPG", nil
+261, "P1070140.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070140.RW2", ".JPG"
+262, "P1070141.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070141.JPG", nil
+263, "P1070141.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070141.RW2", ".JPG"
+264, "P1070142.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070142.JPG", nil
+265, "P1070142.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070142.RW2", ".JPG"
+266, "P1070143.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070143.JPG", nil
+267, "P1070143.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070143.RW2", ".JPG"
+268, "P1070144.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070144.JPG", nil
+269, "P1070144.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070144.RW2", ".JPG"
+270, "P1070145.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070145.JPG", nil
+271, "P1070145.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070145.RW2", ".JPG"
+272, "P1070146.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070146.JPG", nil
+273, "P1070146.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070146.RW2", ".JPG"
+274, "P1070147.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070147.JPG", nil
+275, "P1070147.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070147.RW2", ".JPG"
+276, "P1070148.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070148.JPG", nil
+277, "P1070148.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070148.RW2", ".JPG"
+278, "P1070149.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070149.JPG", nil
+279, "P1070149.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070149.RW2", ".JPG"
+280, "P1070150.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070150.JPG", nil
+281, "P1070150.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070150.RW2", ".JPG"
+282, "P1070151.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070151.JPG", nil
+283, "P1070151.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070151.RW2", ".JPG"
+284, "P1070152.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070152.JPG", nil
+285, "P1070152.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070152.RW2", ".JPG"
+286, "P1070153.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070153.JPG", nil
+287, "P1070153.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070153.RW2", ".JPG"
+288, "P1070154.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070154.JPG", nil
+289, "P1070154.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070154.RW2", ".JPG"
+290, "P1070155.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070155.JPG", nil
+291, "P1070155.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070155.RW2", ".JPG"
+292, "P1070156.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070156.JPG", nil
+293, "P1070156.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070156.RW2", ".JPG"
+294, "P1070157.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070157.JPG", nil
+295, "P1070157.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070157.RW2", ".JPG"
+296, "P1070158.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070158.JPG", nil
+297, "P1070158.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070158.RW2", ".JPG"
+298, "P1070159.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070159.JPG", nil
+299, "P1070159.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070159.RW2", ".JPG"
+300, "P1070160.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070160.JPG", nil
+301, "P1070160.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070160.RW2", ".JPG"
+302, "P1070161.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070161.JPG", nil
+303, "P1070161.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070161.RW2", ".JPG"
+304, "P1070162.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070162.JPG", nil
+305, "P1070162.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070162.RW2", ".JPG"
+306, "P1070163.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070163.JPG", nil
+307, "P1070163.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070163.RW2", ".JPG"
+308, "P1070164.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070164.JPG", nil
+309, "P1070164.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070164.RW2", ".JPG"
+310, "P1070165.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070165.JPG", nil
+311, "P1070165.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070165.RW2", ".JPG"
+312, "P1070166.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070166.JPG", nil
+313, "P1070166.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070166.RW2", ".JPG"
+314, "P1070167.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070167.JPG", nil
+315, "P1070167.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070167.RW2", ".JPG"
+316, "P1070168.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070168.JPG", nil
+317, "P1070168.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070168.RW2", ".JPG"
+318, "P1070169.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070169.JPG", nil
+319, "P1070169.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070169.RW2", ".JPG"
+320, "P1070170.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070170.JPG", nil
+321, "P1070170.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070170.RW2", ".JPG"
+322, "P1070171.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070171.JPG", nil
+323, "P1070171.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070171.RW2", ".JPG"
+324, "P1070172.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070172.JPG", nil
+325, "P1070172.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070172.RW2", ".JPG"
+326, "P1070173.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070173.JPG", nil
+327, "P1070173.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070173.RW2", ".JPG"
+328, "P1070174.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070174.JPG", nil
+329, "P1070174.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070174.RW2", ".JPG"
+330, "P1070175.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070175.JPG", nil
+331, "P1070175.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070175.RW2", ".JPG"
+332, "P1070176.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070176.JPG", nil
+333, "P1070176.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070176.RW2", ".JPG"
+334, "P1070177.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070177.JPG", nil
+335, "P1070177.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070177.RW2", ".JPG"
+336, "P1070178.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070178.JPG", nil
+337, "P1070178.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070178.RW2", ".JPG"
+338, "P1070179.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070179.JPG", nil
+339, "P1070179.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070179.RW2", ".JPG"
+340, "P1070180.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070180.JPG", nil
+341, "P1070180.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070180.RW2", ".JPG"
+342, "P1070181.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070181.JPG", nil
+343, "P1070181.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070181.RW2", ".JPG"
+344, "P1070182.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070182.JPG", nil
+345, "P1070182.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070182.RW2", ".JPG"
+346, "P1070183.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070183.JPG", nil
+347, "P1070183.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070183.RW2", ".JPG"
+348, "P1070184.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070184.JPG", nil
+349, "P1070184.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070184.RW2", ".JPG"
+350, "P1070185.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070185.JPG", nil
+351, "P1070185.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070185.RW2", ".JPG"
+352, "P1070186.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070186.JPG", nil
+353, "P1070186.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070186.RW2", ".JPG"
+354, "P1070187.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070187.JPG", nil
+355, "P1070187.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070187.RW2", ".JPG"
+356, "P1070188.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070188.JPG", nil
+357, "P1070188.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070188.RW2", ".JPG"
+358, "P1070189.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070189.JPG", nil
+359, "P1070189.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070189.RW2", ".JPG"
+360, "P1070190.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070190.JPG", nil
+361, "P1070190.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070190.RW2", ".JPG"
+362, "P1070191.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070191.JPG", nil
+363, "P1070191.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070191.RW2", ".JPG"
+364, "P1070192.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070192.JPG", nil
+365, "P1070192.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070192.RW2", ".JPG"
+366, "P1070193.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070193.JPG", nil
+367, "P1070193.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070193.RW2", ".JPG"
+368, "P1070194.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070194.JPG", nil
+369, "P1070194.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070194.RW2", ".JPG"
+370, "P1070195.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070195.JPG", nil
+371, "P1070195.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070195.RW2", ".JPG"
+372, "P1070196.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070196.JPG", nil
+373, "P1070196.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070196.RW2", ".JPG"
+374, "P1070197.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070197.JPG", nil
+375, "P1070197.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070197.RW2", ".JPG"
+376, "P1070198.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070198.JPG", nil
+377, "P1070198.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070198.RW2", ".JPG"
+378, "P1070199.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070199.JPG", nil
+379, "P1070199.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070199.RW2", ".JPG"
+380, "P1070200.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070200.JPG", nil
+381, "P1070200.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070200.RW2", ".JPG"
+382, "P1070201.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070201.JPG", nil
+383, "P1070201.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070201.RW2", ".JPG"
+384, "P1070202.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070202.JPG", nil
+385, "P1070202.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070202.RW2", ".JPG"
+386, "P1070203.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070203.JPG", nil
+387, "P1070203.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070203.RW2", ".JPG"
+388, "P1070204.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070204.JPG", nil
+389, "P1070204.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070204.RW2", ".JPG"
+390, "P1070205.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070205.JPG", nil
+391, "P1070205.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070205.RW2", ".JPG"
+392, "P1070206.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070206.JPG", nil
+393, "P1070206.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070206.RW2", ".JPG"
+394, "P1070207.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070207.JPG", nil
+395, "P1070207.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070207.RW2", ".JPG"
+396, "P1070208.JPG", "/Volumes/Daguerre/_Download folder/Latest Downloads temp jpg/P1070208.JPG", nil
+397, "P1070208.RW2", "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio//P1070208.RW2", ".JPG"]]
