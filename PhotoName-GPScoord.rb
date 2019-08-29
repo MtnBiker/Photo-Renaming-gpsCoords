@@ -860,6 +860,7 @@ srcAddLocation  = "/Volumes/Daguerre/_Download folder/Latest Processed photos-Im
 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
 puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}."
+
 # geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wikipedia—most general and osm—maybe better for cities # not being used May 2019
 timeZonesFile = "/Users/gscar/Dropbox/scriptsEtc/Greg camera time zones.yml"
 # timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with. Only use once, so this just confused things
@@ -897,7 +898,7 @@ def timeStamp(timeNowWas, fromWhere)
   else
     report = "#{lineNum}. #{minutes.to_i} minutes"
   end   
-  puts "#{fromWhere}-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -   #{report}. #{Time.now.strftime("%I:%M:%S %p")}   -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  "
+  puts "\n#{fromWhere} -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -   #{report}. #{Time.now.strftime("%I:%M:%S %p")}   -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  "
   Time.now
 end
 
@@ -1218,7 +1219,10 @@ def rename(src, timeZonesFile, timeNowWas)
     camModel = fileEXIF.model
     # puts "\n#{lineNum}. #{fileCount}. fn: #{fn}"
     # puts "#{lineNum}.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
-    if File.file?(fn)
+    # if !File.file?(fn) # Take out when figure it out.
+    #   puts "#{lineNum}. Checking why the check below is needed. File.file?(fn): #{File.file?(fn)} for fn: #{fn}"
+    # end
+    if File.file?(fn) # why is this needed. Do a check above
       # Determine the time and time zone where the photo was taken
       # puts "#{lineNum}.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}." #  #{timeNowWas = timeStamp(timeNowWas)}
       fileExt = File.extname(fn).tr(".","").downcase  # needed later for determining if dups at same time. Will be lowercase jpg or rw2 or whatever
@@ -1241,7 +1245,7 @@ def rename(src, timeZonesFile, timeNowWas)
         puts "#{lineNum}. panasonicLocation: #{panasonicLocation}. tzoLoc: #{tzoLoc} Time zone photo was taken in from Greg camera time zones.yml"
       else
         print "."
-      end
+      end # count
       # count == 1 | 1*100 ?  :  puts "."  Just to show one value, otherwise without if prints for each file; now prints every 100 time since this call seemed to create some line breaks and added periods.
       # Also determine Time Zone TODO and write to file OffsetTimeOriginal	(time zone for DateTimeOriginal). Either GMT or use tzoLoc if recorded in local time as determined below
       # puts "#{lineNum}.. camModel: #{camModel}. #{tzoLoc} is the time zone where photo was taken. Script assumes GX8 on local time "
@@ -1319,7 +1323,9 @@ def rename(src, timeZonesFile, timeNowWas)
       count += 1
       # print " #{count}" Trying for  progress indicator
       # puts "#{lineNum}.#{count} #{timeNowWas = timeStamp(timeNowWas)}. #{fileBaseName}" # temp to see how long taking. 1 to 4 seconds on MBP accessing photos on attached portable drive
-    end # 3. if File
+    else
+      puts "#{lineNum}. CHECKING why `if File.file?(fn)` is needed. File.file?(fn): #{File.file?(fn)} for fn: #{fn}"
+    end # 3. if File.file?(fn)
     # puts "#{lineNum}. Got to here. tzoLoc: #{tzoLoc}"
     
   end # 2. Dir.foreach(src)
@@ -1431,7 +1437,8 @@ def addLocation(src, geoNamesUser)
       fn = src + item
       if File.file?(fn) 
         countTotal += 1
-        puts "\n#{lineNum}. #{countTotal}. #{item}. Adding location information using geonames based on coordinates. " # amounts to a progress bar, even if a bit verbose #{timeStamp(timeNowWas)}
+        # puts "\n#{lineNum}. #{countTotal}. #{item}. Adding location information using geonames based on coordinates. " # amounts to a progress bar, even if a bit verbose #{timeStamp(timeNowWas)}
+        print "." # Minimal progress bar
         fileEXIF = MiniExiftool.new(fn)
         # Get lat and lon from photo file. What is this fileEXIF.specialinstructions. This must be written by the perl script.
         puts "#{lineNum}. No gps information for #{item}. #{fileEXIF.title}. fileEXIF.specialinstructions: #{fileEXIF.specialinstructions}" if fileEXIF.specialinstructions == nil
@@ -1440,7 +1447,6 @@ def addLocation(src, geoNamesUser)
         gps = fileEXIF.specialinstructions.split(", ") # or some way of getting lat and lon. This is a good start. Look at input form needed
         lat = (gps[0][4,11]).to_f # Capture long numbers like -123.123456, but short ones aren't that long, but nothing is there
         lon = (gps[1][4,11].split(" ")[0]).to_f # needs to 11 long to capture when -xxx.xxxxxx, but then can capture the - when it's xx.xxxxxx. Then grab whats between the first two spaces. Still need the 4,11 because there seems to be a space at the beginning if leave out [4,11]
-
         # puts " #{lineNum}. #{lat} #{lon} for #{fn}" # put here because of fail with TS5 file with erroneous lat lon
         # puts " #{lineNum}. #{lat.to_i} #{lon.to_i} for #{fn}" # put here because of fail with TS5 file with erroneous lat lon        
         # Quick and dirty to block erroneous TS5 results, but need to fix coordinates earlier.
@@ -1460,9 +1466,9 @@ def addLocation(src, geoNamesUser)
           begin
             # doesn't work for Istanbul, works for Croatia, Canada
             countryCodeGeo = api.country_code(lat: lat, lng: lon) # doesn't work in Turkey
-            puts "#{lineNum}.. countryCodeGeo: #{countryCodeGeo}" # debug
+            # puts "\n#{lineNum}.. countryCodeGeo: #{countryCodeGeo}" # debug
             countryCode  = countryCodeGeo['countryCode']
-            puts "#{lineNum}.. countryCode #{countryCode}."
+            # puts "#{lineNum}.. countryCode #{countryCode}." # DEBUG
           rescue
             # begin
              $stderr.print
@@ -1540,13 +1546,13 @@ def addLocation(src, geoNamesUser)
           begin
             findNearbyPostalCodes = api.find_nearby_postal_codes(lat: lat, lng: lon, maxRows: 1).first
             state = findNearbyPostalCodes['adminName1']
-            puts "#{lineNum}.. state (outside US): #{state}"
+            # puts "#{lineNum}.. state (outside US): #{state}" # DEBUG
             city = findNearbyPostalCodes['placeName'] # close to city, but misses Dubrovnik and Zagreb
             # Below was normal I think, but turned off to try to get Canada to work
             city = api.find_nearby_place_name(lat: lat, lng: lon, maxRows: 1).first['toponymName'] # name or adminName1 could work too
-            puts "#{lineNum}.. city (outside US):  #{city}"
+            # puts "#{lineNum}.. city (outside US):  #{city}" # DEBUG
           rescue
-            puts "#{lineNum}. findNearbyPostalCodes failed, therefore try getting location from Wikipedia" # This can work outside the US, maybe fails when not near a city.
+            # puts "#{lineNum}. findNearbyPostalCodes failed, therefore try getting location from Wikipedia" # This can work outside the US, maybe fails when not near a city.  # DEBUG
           end
         
           # puts city =  api.find_nearby_wikipedia(lat: lat, lng: lon)["geonames"].first["title"] # the third item is a city, maybe could regex wikipedia, but doubt it's consistent enough to work
@@ -1567,11 +1573,9 @@ def addLocation(src, geoNamesUser)
           rescue
             # maybe this whole exception needs reworking
           ensure
-            puts "#{lineNum}. #{item} find api.find_nearby_wikipedia failed. Maybe a foreign country? "
+            # puts "#{lineNum}. #{item} find api.find_nearby_wikipedia failed. Maybe a foreign country? " # DEBUG
             location = "" # added this to help prevent failure on test below. May not be necessary
           end
-        
-        
         end # if countryCode
         location = "" if city == location # cases where they where the same (Myers Flat, Callahan and Etna). Could try to find a location with some other find, maybe Wikipedia, but would want a distance check
         latPrev  = lat
@@ -1669,7 +1673,7 @@ if folderPhotoCount > 0
   puts "#{lineNum}. downloadsFolders: #{downloadsFolders}. Check if Pashua warning window appears"
   # downloadsFolderEmpty(destPhoto, folderPhotoCount) # Pashua window
 else
-  puts "\n#{lineNum}. Downloads folder is empty and script will continue."
+  puts "\n#{lineNum}. 'Processed photos to be imported to Mylio/' folder is empty and script will continue."
 end
 
 # Ask whether working with photo files from SD card or HD
@@ -1783,7 +1787,7 @@ destPhoto = prefsPhoto["destPhotoP"].to_s + "/"
 destOrig  = prefsPhoto["destOrig"].to_s + "/"
 # Above are true whether SD or from another folder
 
-puts "\n#{lineNum}. Initialization complete. File renaming and copying/moving beginning. Time below is responding to options requests via Pashua if coping an SD card, otherwise times will be the same"
+puts "\n#{lineNum}. Initialization complete. File renaming and copying/moving beginning.\n        Time below is responding to options requests via Pashua if copying an SD card, otherwise the two times will be the same."
 
 timeNowWas = timeStamp(timeNowWas, lineNum)
 
@@ -1794,22 +1798,18 @@ copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisSc
 #  Note that file creation date is the time of copying. May want to fix this. Maybe a mv is a copy and move which is sort of a recreation. 
 
 timeNowWas = timeStamp(timeNowWas, lineNum)
-# puts "\n#{lineNum}. Photos will now be moved and renamed."
 
-# puts "First will copy to the final destination where the renaming will be done and the original moved to an archive (_imported-archive folder)"
-#  Copy jpg to tempJpg if there is a corresponding raw, and rename later
-puts "\n#{lineNum}. Photos will now be moved and renamed."
+puts "\n#{lineNum}. Photos will now be copied and moved in readiness for renaming, etc."
 # COPY AND MOVE and sort jpgs
 # Which drive has already been decided. (this note because it hadn't yet if Daguerre wasn't available)
 photosArray = copyAndMove(srcHD, destPhoto, tempJpg, destOrig, photosArray)
 # Now do the same for the jpg files. Going to tempJpg and moving files to same places, except no jpg's will move to tempJpg
-puts "\n#{lineNum}. JPGs will now be moved from #{tempJpg} and renamed.THIS PART NEEDS WORK, SO IS TURNED OFF, but I'm doing it a different way. Can delete this and the next few lines when get it sorted" # tempJpg twice ??
 
 # photosArray = copyAndMove(tempJpg, destPhoto, tempJpg, destOrig, photosArray)
 # puts "#{lineNum}. photosArray:" # Arrays seem to get mixed up if put in a {}
 # puts photosArray
 #  To see how it looks
-puts "\n#{lineNum}. photosArray[2]: #{photosArray[2]}. Sample of photosArray." # Shows everything
+puts "\n#{lineNum}. photosArray[2]: #{photosArray[2]}. Sample of photosArray. NEEDS to have dateTimeStamp if to be useful." # Shows everything
 # puts "photosArray[2]: " + photosArray[2] # only the index (3) shows up, not now
 puts "#{lineNum}. Next should write photosArray to #{photoArrayFile}"
 File.write(photoArrayFile, photosArray) # A list of all the files processed. Saved with script. Work with this later
@@ -1817,7 +1817,9 @@ File.write(photoArrayFile, photosArray) # A list of all the files processed. Sav
 # puts "\n#{lineNum}. fromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}"
 # whichOne =="SD" ? unmountCard(sdCard) : "" # not working so turned off TODO
 
-timeNowWas = timeStamp(timeNowWas, lineNum)
+# timeNowWas = timeStamp(timeNowWas, lineNum) # moved into line below
+
+puts "\n#{lineNum}. Photos will now be renamed. #{timeNowWas = timeStamp(timeNowWas, lineNum)}"
 
 puts "\n#{lineNum}. Rename [tzoLoc = rename(…)] the photo files with date and an ID for the camera or photographer (except for the paired jpgs in #{tempJpg}). #{timeNowWas}\n"
 # tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # Second time this variable name is used, other is in a method
@@ -1826,7 +1828,7 @@ tzoLoc = - rename(destPhoto, timeZonesFile , timeNowWas).to_i # This also calls 
 
 timeNowWas = timeStamp(timeNowWas, lineNum)
 #Rename the jpgs and then move to Latest Download
-puts "#{lineNum}. Rename the jpgs in #{tempJpg} and then move to #{destPhoto}. #{timeNowWas}"
+puts "\n#{lineNum}. Rename the jpgs in #{tempJpg} and then move to #{destPhoto}. #{timeNowWas = timeStamp(timeNowWas, lineNum)}"
 rename(tempJpg, timeZonesFile, timeNowWas)
 #  Move the jpgs to destPhoto (Latest Download)
 jpgsMovedCount = 0 # Initializing for debugging puts
