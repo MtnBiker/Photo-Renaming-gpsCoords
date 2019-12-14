@@ -1457,7 +1457,7 @@ def addLocation(src, geoNamesUser)
         countLoc += 1 # gives an error here or at the end.
         # puts "#{lineNum}..#{countTotal}. Use geonames to determine city, state, country, and location for #{item}"
         api = GeoNames.new(username: geoNamesUser)
-        # puts "#{lineNum}.. geoNamesUser: #{geoNamesUser}. api: #{api}"
+        # puts "#{lineNum}..#{countTotal}... geoNamesUser: #{geoNamesUser}. api: #{api}"
 
         # Reusing info for nearby points
         # puts "#{lineNum}. latPrev: #{latPrev}. latPrev.class: #{latPrev.class}. lat: #{lat}.  lat.class: #{lat.class}" # debug
@@ -1466,26 +1466,21 @@ def addLocation(src, geoNamesUser)
           begin
             # doesn't work for Istanbul, works for Croatia, Canada
             countryCodeGeo = api.country_code(lat: lat, lng: lon) # doesn't work in Turkey
-            # puts "\n#{lineNum}.. countryCodeGeo: #{countryCodeGeo}" # debug
+           puts "\n#{lineNum}.. countryCodeGeo: #{countryCodeGeo}" # debug
             countryCode  = countryCodeGeo['countryCode']
-            # puts "#{lineNum}.. countryCode #{countryCode}." # DEBUG
+            puts "#{lineNum}.. countryCode #{countryCode}." # DEBUG
           rescue
             # begin
              $stderr.print
-             puts "#{lineNum}. $stderr: #{$stderr} for api.country_code (lat: #{lat}, lng: #{lon}) or countryCode  = countryCodeGeo['countryCode']."
-             # strMessage = message # e.message.to_s ng. message.to_s ng
-             if message.include?("the hourly limit") 
-               puts "#{lineNum}. #{e.message}, so we will wait an hour"
-               sleep(1.hour)
-             else
+             puts "#{lineNum}. $stderr: #{$stderr} for api.country_code (lat: #{lat}, lng: #{lon}) or countryCode  = countryCodeGeo['countryCode']: #{countryCode}. for #{item}"
+             # Was trying to capture the message, but now failing even when not exceeded hourly limit, so comment out
+             # if message.include?("the hourly limit")
+             #   puts "#{lineNum}. #{e.message}, so we will wait an hour"
+             #   sleep(1.hour)
+             # else
                countryCodeGeo = api.find_nearby_place_name(lat: lat, lng: lon).first # works for Turkey
-             #          puts "#{lineNum}.. countryCodeGeo:\n#{countryCodeGeo}"
-             #          countryCode  = countryCodeGeo['countryCode']
-             #        rescue SocketError # SocketError: getaddrinfo: nodename nor servname provided, or not known. NOT SURE WHAT THE FAILURE IS HERE. WILL SEE IF IT HAPPENS AGAIN
-             #          puts " #{lineNum}. Failing for api.find_nearby_place_name(lat: lat, lng: lon).first #{lat} #{lon} \nfor #{fn}\n"
-             #          $stderr.print  $! # Thomas p. 108
-             #        end
-             end
+               #          $stderr.print  $! # Thomas p. 108
+             # end
           end # rescue
        
         # puts "#{lineNum}.. countryCode:  #{countryCode}"
