@@ -839,10 +839,13 @@ srcSDfolder = sdCard + "DCIM/"  # SD folder
 
 # Temp file below that could be used to group some of the searches to geonames
 photoArrayFile = thisScript + "currentData/photoArray.txt"
+# photoArrayFile = File.join(thisScript + "currentData/photoArray.txt") # change def of thisScript
 
 # Folders on laptop
 laptopLocation        = "/Users/gscar/Pictures/_Photo Processing Folders/"
+# laptopLocation        = File.join("Users", "gscar", "Pictures", "_Photo Processing Folders") # Should be better than above def
 laptopDownloadsFolder = laptopLocation + "Download folder/"
+# laptopDownloadsFolder = File.join(laptopLocation , "Download folder") # Hve to go through the entire script and sort out the "/"
 laptopDestination     = laptopLocation + "Processed photos to be imported to Mylio/"
 laptopDestOrig        = laptopLocation + "Originals to archive/"
 laptopTempJpg         = laptopLocation + "Latest Downloads temp jpg/"
@@ -865,7 +868,7 @@ puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}."
 timeZonesFile = "/Users/gscar/Dropbox/scriptsEtc/Greg camera time zones.yml"
 # timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with. Only use once, so this just confused things
 gpsPhotoPerl = thisScript + "lib/gpsPhoto.pl"
-folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2019 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
+folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2020 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
 puts "#{lineNum}. Must manually set folderGPX for GPX file folders. Particularly important at start of new year AND if working on photos not in current year.\n       Using: #{folderGPX}\n"
 geoNamesUser    = "MtnBiker" # This is login, user shows up as MtnBiker; but used to work with this. Good but may use it up. Ran out after about 300 photos per hour. This fixed it.
 geoNamesUser2   = "geonamestwo" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
@@ -996,7 +999,7 @@ end
     # fileNow = File.open(lastPhotoReadTextFile, "w") # must use explicit path, otherwise will use wherever we are are on the SD card
     #   fileNow.puts firstLine
     #   fileNow.close
-      puts "\n#{lineNum}. The last file processed. fileSDbasename, #{fileSDbasename}, written to  #{fileSDbasename}."
+      puts "\n#{lineNum}. The last file processed. fileSDbasename, #{fileSDbasename}, written to  # {fileNow} ??."
   rescue IOError => e
     puts "Something went wrong. Could not write last photo read (#{fileSDbasename}) to #{fileNow}"
   end # begin
@@ -1782,6 +1785,13 @@ destPhoto = prefsPhoto["destPhotoP"].to_s + "/"
 destOrig  = prefsPhoto["destOrig"].to_s + "/"
 # Above are true whether SD or from another folder
 
+# But first check that destPhoto is empty. I'm assuming destPhoto has been determined at this point
+destPhotoCount = Dir.entries(destPhoto).count
+if destPhotoCount > 3 # 
+  puts "\n#{lineNum}. #{destPhotoCount} files are in the destination folder"
+  # Put up a notice or ask if want to delete them. Or list the first few
+end
+
 puts "\n#{lineNum}. Initialization complete. File renaming and copying/moving beginning.\n        Time below is responding to options requests via Pashua if copying an SD card, otherwise the two times will be the same."
 
 timeNowWas = timeStamp(timeNowWas, lineNum)
@@ -1795,6 +1805,7 @@ copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisSc
 timeNowWas = timeStamp(timeNowWas, lineNum)
 
 puts "\n#{lineNum}. Photos will now be copied and moved in readiness for renaming, etc."
+
 # COPY AND MOVE and sort jpgs
 # Which drive has already been decided. (this note because it hadn't yet if Daguerre wasn't available)
 photosArray = copyAndMove(srcHD, destPhoto, tempJpg, destOrig, photosArray)
@@ -1852,8 +1863,11 @@ writeTimeDiff(perlOutput)
 timeNowWas = timeStamp(timeNowWas, lineNum)
 # Parce perlOutput and add maxTimeDiff info to photo files
 
-# Add location information to photo file
-addLocation(destPhoto, geoNamesUser)
+puts "\n#{lineNum}. All Finished. Note that \"Adding location information to photo files\" is commented out."
 
-timeNowWas = timeStamp(timeNowWas, lineNum)
-puts "\n#{lineNum}.-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - All done"
+# puts "\n#{lineNum}. Adding location information to photo files"
+# # Add location information to photo file
+# addLocation(destPhoto, geoNamesUser)
+#
+# timeNowWas = timeStamp(timeNowWas, lineNum)
+# puts "\n#{lineNum}.-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - All done"
