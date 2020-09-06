@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+# Using GitHub so can use on MBP (laptop)
+
 # Look at https://github.com/txus/kleisli for getting location information from geonames.
 # Look at speeding up with https://github.com/tonytonyjan/exif for rename and annotate which is rather slow. 8 min. for 326 photos
 #  2019/05/10 installed libexif and tried to use. Got error File not readable or no EXIF data in file. (Exif::NotReadable). Issue still open after two years at tonytonyjan
@@ -861,6 +863,9 @@ srcRename = "/Volumes/Seagate 8TB Backup/Mylio_87103a/Greg Scarich’s iPhone Li
 srcGpsAdd = "/Users/gscar/Documents/◊ Pre-trash/Cheeseboro/" # srcRename # Could to another location for convenience
 srcAddLocation  = "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio/" # = srcRename # Change to another location for convenience. This location picked so don't screw up a bunch of files
 
+# Mylio folder
+iMacMylio = "/Users/gscar/Mylio/2020/GX8 2020/"
+
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
 puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}."
 
@@ -1636,6 +1641,16 @@ def file_prepend(file, str)
   end
 end
 
+def moveToMylio(destPhoto, mylioFolder)
+  Dir.foreach(destPhoto) do |item|
+    fn  = destPhoto + item # destPhoto is now temporary destination, so nomenclature is weird
+    fnp = mylioFolder + item
+    # puts "#{lineNum}.#{jpgsMovedCount += 1}. #{fn} moved to #{fnp}" # dubugging
+    next if ignoreNonFiles(item) == true # skipping file when true
+    FileUtils.move(fn, fnp)
+  end
+end
+
 ## The "PROGRAM" ############ ##################### ###################### ##################### ##########################
 timeNowWas = timeStamp(Time.now, lineNum) # Initializing. Later calls are different
 # timeNowWas = timeStamp(timeNowWas)
@@ -1750,7 +1765,7 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
     file.close
   # rescue Exception => err # Not good to rescue Exception
   rescue => err
-    puts "Exception: #{err}. Not critical as value can be entered manually by user."
+    puts "Exception: #{err}. Not critical as value can be entered manually by user.\n"
   end
 
   begin
@@ -1868,6 +1883,11 @@ puts "\n#{lineNum}. All Finished. Note that \"Adding location information to pho
 # puts "\n#{lineNum}. Adding location information to photo files"
 # # Add location information to photo file
 # addLocation(destPhoto, geoNamesUser)
-#
+
+# Move to Mylio folder (can't process in this folder or Mylio might import before changes are made)
+puts "\n#{lineNum}. Moving processed photo to Mylio folder"
+mylioFolder = iMacMylio # need to generalize this
+moveToMylio(destPhoto, mylioFolder)
+
 # timeNowWas = timeStamp(timeNowWas, lineNum)
 # puts "\n#{lineNum}.-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - All done"
