@@ -863,8 +863,8 @@ srcRename = "/Volumes/Seagate 8TB Backup/Mylio_87103a/Greg Scarich’s iPhone Li
 srcGpsAdd = "/Users/gscar/Documents/◊ Pre-trash/Cheeseboro/" # srcRename # Could to another location for convenience
 srcAddLocation  = "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio/" # = srcRename # Change to another location for convenience. This location picked so don't screw up a bunch of files
 
-# Mylio folder
-iMacMylio = "/Users/gscar/Mylio/2020/GX8 2020/"
+# Mylio folders
+iMacMylio = "/Users/gscar/Mylio/2021/GX8 2021/"
 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
 puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}."
@@ -873,7 +873,7 @@ puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}."
 timeZonesFile = "/Users/gscar/Dropbox/scriptsEtc/Greg camera time zones.yml"
 # timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with. Only use once, so this just confused things
 gpsPhotoPerl = thisScript + "lib/gpsPhoto.pl"
-folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2020 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
+folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2021 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
 puts "#{lineNum}. Must manually set folderGPX for GPX file folders. Particularly important at start of new year AND if working on photos not in current year.\n       Using: #{folderGPX}\n"
 geoNamesUser    = "MtnBiker" # This is login, user shows up as MtnBiker; but used to work with this. Good but may use it up. Ran out after about 300 photos per hour. This fixed it.
 geoNamesUser2   = "geonamestwo" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
@@ -1642,6 +1642,7 @@ def file_prepend(file, str)
 end
 
 def moveToMylio(destPhoto, mylioFolder)
+  puts "\n#{lineNum}. Moving processed photos from #{destPhoto} to Mylio folder #{mylioFolder}"
   Dir.foreach(destPhoto) do |item|
     fn  = destPhoto + item # destPhoto is now temporary destination, so nomenclature is weird
     fnp = mylioFolder + item
@@ -1649,6 +1650,7 @@ def moveToMylio(destPhoto, mylioFolder)
     next if ignoreNonFiles(item) == true # skipping file when true
     FileUtils.move(fn, fnp)
   end
+  puts "Photos moved to Mylio folder, #{mylioFolder}, where they will automagically be imported into Mylio"
 end
 
 ## The "PROGRAM" ############ ##################### ###################### ##################### ##########################
@@ -1885,7 +1887,6 @@ puts "\n#{lineNum}. All Finished. Note that \"Adding location information to pho
 # addLocation(destPhoto, geoNamesUser)
 
 # Move to Mylio folder (can't process in this folder or Mylio might import before changes are made)
-puts "\n#{lineNum}. Moving processed photo to Mylio folder"
 mylioFolder = iMacMylio # need to generalize this
 moveToMylio(destPhoto, mylioFolder)
 
