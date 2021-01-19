@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-
+# Note from MBP: Had to run on command line since mini_exiftool can't be found by TM
 # Using GitHub so can use on MBP (laptop)
 
 # Look at https://github.com/txus/kleisli for getting location information from geonames.
@@ -1059,7 +1059,7 @@ def copyAndMove(srcHD, destPhoto, tempJpg, destOrig, photosArray)
     FileUtils.copy(fn, fnp) if fn!=fnp # making a copy in the Latest Downloads folder for further action
     # puts "#{lineNum}.#{photoFinalCount}. #{fn} copied to #{fnp}" # dubugging
     # puts "#{lineNum}.#{photoFinalCount}. item: #{item}. #{fn} copied to #{fnp}" # dubugging
-    
+
     if File.exists?(fnf)  # moving the original to _imported-archive, but not writing over existing files
       fnf = uniqueFileName(fnf)
       FileUtils.move(fn, fnf)
@@ -1181,8 +1181,8 @@ def timeZone(fileDateTimeOriginal, timeZonesFile )
       i= (i.to_i-1).to_s
     end
   end # loop
-  # puts "D. #{i}. fileDateTimeOriginal: #{fileDateTimeOriginal} fileDateTimeOriginal.class: #{fileDateTimeOriginal.class}. theTimeZone: #{theTimeZone}. "
-  return theTimeZone
+  # theTimeZone = -2 # Was changed on MBP, don't know if needed there or it was a one off
+  # puts "#{lineNum}. #{i}. fileDateTimeOriginal: #{fileDateTimeOriginal} fileDateTimeOriginal.class: #{fileDateTimeOriginal.class}. theTimeZone: #{theTimeZone}. "  return theTimeZone
 end # timeZone
 
 def rename(src, timeZonesFile, timeNowWas)
@@ -1236,6 +1236,7 @@ def rename(src, timeZonesFile, timeNowWas)
       panasonicLocation = fileEXIF.location # Defined by Panasonic if on trip (and also may exist for photos exported from other apps such as Photos). If defined then time stamp is that local time
       # puts "#{lineNum}. panasonicLocation: #{panasonicLocation}"
       tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile ) # the time zone the picture was taken in, doesn't say anything about what times are recorded in the photo's EXIF. I'm doing this slightly wrong, because it's using the photo's recorded date which could be either GMT or local time. But only wrong if the photo was taken too close to the time when camera changed time zones
+      puts "#{lineNum}. tzoLoc: #{tzoLoc}. count: #{count}" # added in MBP
       if count == 1 | 1*100
         puts "#{lineNum}. panasonicLocation: #{panasonicLocation}. tzoLoc: #{tzoLoc} Time zone photo was taken in from Greg camera time zones.yml"
       else
@@ -1359,7 +1360,7 @@ def addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, tzoLoc)
         puts "#{lineNum}. timeOffset: #{timeOffset} for DMC-TS5 photos stamped in local time."
       elsif camModel == "DMC-GX8"# Assumes GX8 always on local time. Made if's a bit more complex, but keeping logic simpler
         timeOffset = tzoLoc * 3600
-        puts "#{lineNum}. timeOffset: #{timeOffset} with GX-8 photos stamped in local time."
+        puts "#{lineNum}. timeOffset: #{timeOffset} seconds with GX-8 photos stamped in local time. tzoLoc: #{tzoLoc}"
       elsif camModel.include?("DMC") and panasonicLocation.length > 0 # Panasonic in Travel Mode, but also some photos exported from Photos. 
         timeOffset = tzoLoc * 3600
         puts "#{lineNum}. timeOffset: #{timeOffset} sec (#{tzoLoc} hours) with photos stamped in local time."
@@ -1850,7 +1851,7 @@ Dir.foreach(tempJpg) do |item|
   FileUtils.move(fn, fnp)
 end
 
-puts "#{lineNum} tzoLoc: #{tzoLoc}. Because GX8 and some other cameras use local time and not GMT as this script was originally written for. All photos must be in same time zone."
+puts "\n#{lineNum} tzoLoc: #{tzoLoc}. Because GX8 and some other cameras use local time and not GMT as this script was originally written for. All photos must be in same time zone."
 timeNowWas = timeStamp(timeNowWas, lineNum)
 
 puts "\n#{lineNum}. Using perl script to add gps coordinates. Will take a while as all the gps files for the year will be processed and then all the photos. -tzoLoc, `i.e.: GMT #{-tzoLoc}"

@@ -21,3 +21,6 @@ geonames.rb. Not sure whose version, but I have a local copy. Can't remember if 
 I'm very much an neophyte Ruby script writer, so at best use this as a guideline. Use at your own risk. I pretty much learned Ruby to write this script. I started this six years ago and am still a rank amateur. 
 
 Many of the files aren't being used, but haven't been cleaned out.
+
+2021.01.19 Upgrading to 2021 and seems to run OK. TM_RUBY on iMac is 2.7.1, but now at 3.0.0 on MBP. Pushed to github. Should pull to MBP. Did and then added stashed from MBP to this version.
+Was behind on merging. branch 4-2021-working can be abandoned. moveToMylio had gotten left behind
