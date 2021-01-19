@@ -1,10 +1,11 @@
-.ruby_version
+.ruby_version # not used by TextMate anyway
 "Ruby- to backup alias"
 "Ruby-old stuff to backup alias"
 "Icon\r"
 "Ruby- to back up alias"
 TODO
 TODO.md
+/currentData/photoArray.txt
 
 #  Following are recommended for Ruby, although I don't think I have any of these. Probably more for Ruby development itself, not using Ruby
 *.gem

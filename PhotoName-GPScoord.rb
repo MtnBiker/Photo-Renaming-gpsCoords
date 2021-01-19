@@ -863,8 +863,8 @@ srcRename = "/Volumes/Seagate 8TB Backup/Mylio_87103a/Greg Scarich’s iPhone Li
 srcGpsAdd = "/Users/gscar/Documents/◊ Pre-trash/Cheeseboro/" # srcRename # Could to another location for convenience
 srcAddLocation  = "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio/" # = srcRename # Change to another location for convenience. This location picked so don't screw up a bunch of files
 
-# Mylio folders
-iMacMylio = "/Users/gscar/Mylio/2021/GX8 2021/"
+# Mylio folder. Moved to this folder after all processing. Can't process in this folder or Mylio might add before this script's processing is finished. Processing is mainly done in destPhoto (should rename to ?, not process photo since that is another folder)
+iMacMylio = "/Users/gscar/Mylio/2021/GX8-2021/"
 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
 puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}."
@@ -909,19 +909,6 @@ def timeStamp(timeNowWas, fromWhere)
   puts "\n#{fromWhere} -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -   #{report}. #{Time.now.strftime("%I:%M:%S %p")}   -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  "
   Time.now
 end
-
-# No longer used 2019.07.20
-# def sdFolder(sdFolderFile)
-#   begin
-#     file = File.new(sdFolderFile, "r")
-#     sdFolder = file.gets
-#     file.close
-#   # rescue Exception => err # Shouldn't rescue and Exception
-#   rescue StandardError => err # or can write "rescue => err" since Ruby assumes it's standard error
-#     puts "Exception: #{err}. Could not read which folder is current on the SD card from #{sdFolderFile}"
-#   end
-#   sdFolder
-# end
 
 def whichOne(whichOne)  # suspect could do without this with minor changes
   if whichOne =="S" # First letter of this option
