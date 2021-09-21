@@ -1,10 +1,11 @@
 #!/usr/bin/env ruby
-# Note from MBP: Had to run on command line since mini_exiftool can't be found by TM
+# mini_exiftool couldn't be found. Was a problem with  TM_RUBY, GEM_PATH, AND GEM_HOME not matching the what TextMate is using. TM does not use .ruby_version
+
 # Using GitHub so can use on MBP (laptop)
 
 # Look at https://github.com/txus/kleisli for getting location information from geonames.
 # Look at speeding up with https://github.com/tonytonyjan/exif for rename and annotate which is rather slow. 8 min. for 326 photos
-#  2019/05/10 installed libexif and tried to use. Got error File not readable or no EXIF data in file. (Exif::NotReadable). Issue still open after two years at tonytonyjan
+# 2019/05/10 installed libexif and tried to use. Got error File not readable or no EXIF data in file. (Exif::NotReadable). Issue still open after two years at tonytonyjan
 # puts "Ruby v#{RUBY_VERSION}p#{RUBY_PATCHLEVEL} as reported by Ruby\nAnd as reported by \`system ('gem env')\`:" # A Ruby constant
 # system ('gem env') # for debugging problem with gem not loading https://stackoverflow.com/questions/53202164/textmate-chruby-and-ruby-gems
 
@@ -867,7 +868,7 @@ srcAddLocation  = "/Volumes/Daguerre/_Download folder/Latest Processed photos-Im
 iMacMylio = "/Users/gscar/Mylio/2021/GX8-2021/"
 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
-puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}."
+puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. ?? But it's being stored on LUMIX card"
 
 # geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wikipedia—most general and osm—maybe better for cities # not being used May 2019
 timeZonesFile = "/Users/gscar/Dropbox/scriptsEtc/Greg camera time zones.yml"
@@ -1251,7 +1252,8 @@ def rename(src, timeZonesFile, timeNowWas)
       if camModel ==  "MISC" # MISC is for photos without fileDateTimeOriginal, e.g., movies
         # timeChange = 0
         fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
-      elsif camModel.include?("DMC-GX7") and panasonicLocation.length > 0 or camModel == "DMC-TS5" or camModel == "DMC-GX8" or  # DateTimeOriginal is in local time. Look at https://sno.phy.queensu.ca/~phil/exiftool/TagNames/Panasonic.html for other Tags that could be used
+      elsif camModel == "DMC-TS5" or camModel == "DMC-GX8"
+      # elsif camModel.include?("DMC-GX7") and panasonicLocation.length > 0 or camModel == "DMC-TS5" or camModel == "DMC-GX8" # Not sure what the first check was, but GX& isn't being used anymore so took it out. Was giving an error for a jpg created by QuickTime Player 2021.07.15. DateTimeOriginal is in local time. Look at https://sno.phy.queensu.ca/~phil/exiftool/TagNames/Panasonic.html for other Tags that could be used
         # Above first checking that is a Panasonic Lumix GX7 using travel, otherwise will error on second test which checks if using travel, 
         ### first criteria won't work for files exported from another app using GX7
         # timeChange = 0
@@ -1263,7 +1265,7 @@ def rename(src, timeZonesFile, timeNowWas)
         timeChange = (3600*tzoLoc) # previously had error capture on this. Maybe for general cases which I'm not longer covering
         fileEXIF.OffsetTimeOriginal = "GMT"
       end # if camModel
-      # puts "#{lineNum}.. timeChange: #{timeChange}"
+      puts "#{lineNum}.. fileDateTimeOriginal #{fileDateTimeOriginal}. timeChange: #{timeChange}"
 
       fileDate = fileDateTimeOriginal + timeChange.to_i # date in local time photo was taken. No idea why have to change this to i, but was nil class even though zero  
       fileDateTimeOriginalstr = fileDateTimeOriginal.to_s[0..-6]
@@ -1820,7 +1822,7 @@ photosArray = copyAndMove(srcHD, destPhoto, tempJpg, destOrig, photosArray)
 # puts "#{lineNum}. photosArray:" # Arrays seem to get mixed up if put in a {}
 # puts photosArray
 #  To see how it looks
-puts "\n#{lineNum}. photosArray[2]: #{photosArray[2]}. Sample of photosArray. NEEDS to have dateTimeStamp if to be useful." # Shows everything
+puts "\n#{lineNum}. photosArray[2]: #{photosArray[2]}. Sample of photosArray. NEEDS to have dateTimeStamp if to be useful, which it doesn't now." # Shows everything
 # puts "photosArray[2]: " + photosArray[2] # only the index (3) shows up, not now
 puts "#{lineNum}. Next should write photosArray to #{photoArrayFile}"
 File.write(photoArrayFile, photosArray) # A list of all the files processed. Saved with script. Work with this later

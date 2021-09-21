@@ -24,3 +24,4 @@ Many of the files aren't being used, but haven't been cleaned out.
 
 2021.01.19 Upgrading to 2021 and seems to run OK. TM_RUBY on iMac is 2.7.1, but now at 3.0.0 on MBP. Pushed to github. Should pull to MBP. Did and then added stashed from MBP to this version.
 Was behind on merging. branch 4-2021-working can be abandoned. moveToMylio had gotten left behind
+Pushed to master and GitHub so MBP can pull
