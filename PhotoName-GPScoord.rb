@@ -874,7 +874,9 @@ puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. ?? But it's b
 timeZonesFile = "/Users/gscar/Dropbox/scriptsEtc/Greg camera time zones.yml"
 # timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with. Only use once, so this just confused things
 gpsPhotoPerl = thisScript + "lib/gpsPhoto.pl"
-folderGPX = "/Users/gscar/Dropbox/ GPX daily logs/2021 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
+
+# GPS log files. Will this work from laptop
+folderGPX = "/Users/gscar/Documents/Documents - Greg’s iMac/GPS-Maps-docs/ GPX daily logs/2021 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
 puts "#{lineNum}. Must manually set folderGPX for GPX file folders. Particularly important at start of new year AND if working on photos not in current year.\n       Using: #{folderGPX}\n"
 geoNamesUser    = "MtnBiker" # This is login, user shows up as MtnBiker; but used to work with this. Good but may use it up. Ran out after about 300 photos per hour. This fixed it.
 geoNamesUser2   = "geonamestwo" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
@@ -932,7 +934,7 @@ def whichSource(whichOne,prefsPhoto)
   src
 end
 
- def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) 
+def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) 
   # some of the above counter variables could be set at the beginning of this script and used locally
   puts "\n#{lineNum}. Copying photos from an SD card starting with #{lastPhotoFilename} or from another value manually entered"
   cardCount = 0
@@ -1637,7 +1639,7 @@ def moveToMylio(destPhoto, mylioFolder)
     fn  = destPhoto + item # destPhoto is now temporary destination, so nomenclature is weird
     fnp = mylioFolder + item
     # puts "#{lineNum}.#{jpgsMovedCount += 1}. #{fn} moved to #{fnp}" # dubugging
-    next if ignoreNonFiles(item) == true # skipping file when true
+    next if ignoreNonFiles(item) == true # skipping file when . or ..
     FileUtils.move(fn, fnp)
   end
   puts "Photos moved to Mylio folder, #{mylioFolder}, where they will automagically be imported into Mylio"
