@@ -349,34 +349,26 @@ def userCamCode(fn)
   return userCamCode
 end # userCamCode
 
-def fileAnnotate(fn, fileEXIF, fileDateTimeOriginalstr, tzoLoc)  # writing original filename and dateTimeOrig to the photo file.
+def fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc) # wasn't working when passed in fileEXIF, so try reopening in this module and that made it work, although I don't know why.
   # Called from rename
   # writing original filename and dateTimeOrig to the photo file.
-  # SEEMS SLOPPY THAT I'M OPENING THE FILE ELSEWHERE AND SAVING IT HERE
-  if fileEXIF.source.to_s.length < 2 # if exists then don't write. If avoid rewriting, then can eliminate this test. Was a test on comment, but not sure what that was and it wasn't working.
-    # puts "#{lineNum}. tzoLoc #{tzoLoc}"
-    if tzoLoc.to_i < 0
-      tzoLocPrint = tzoLoc
-    else
-      tzoLocPrint = "+" + tzoLoc.to_s
-    end
-    fileEXIF.instructions = "#{fileDateTimeOriginalstr} #{tzoLocPrint}" if !fileEXIF.DateTimeStamp # Time zone of photo is GMT #{tzoLoc} unless TS5?" or travel. TODO find out what this field is really for
-    # fileEXIF.comment = "Capture date: #{fileDateTimeOriginalstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Doesn't show up in Aperture
-    # fileEXIF.source = fileEXIF.title = "#{File.basename(fn)} original filename" # Source OK, but Title seemed a bit better
-    fileEXIF.source = "#{File.basename(fn)}"
-    fileEXIF.TimeZoneOffset = tzoLoc # Time Zone Offset, (1 or 2 values: 1. The time zone offset of DateTimeOriginal from GMT in hours, 2. If present, the time zone offset of ModifyDate)
-    # Am I misusing this? I may using it as the TimeZone for photos taken GMT 0 TODO
-    # OffsetTimeOriginal	(time zone for DateTimeOriginal) which may or may not be the time zone the photo was taken in TODO 
-    # TODO write GMT time to
-    # Wiping out bad GPS data on TS5. Maybe should test for TS5 to save checking all other files
-    if !fileEXIF.GPSDateTime  # i.e. == "false" # condition if bad data for TS5. Note is nil for GX7. Not changing because can use as flag
-      # puts "#{lineNum}. #{File.basename(fn)} has bad GPS data  (GPSDateTime is false), and will be blanked out\n"
-      fileEXIF.gps_latitude = fileEXIF.gps_longitude = fileEXIF.gps_altitude = ""
-    end    
-    fileEXIF.save # this doesn't seem to be Happening TODO
+  fileEXIF = MiniExiftool.new(fn)
+  # puts "#{lineNum}. tzoLoc #{tzoLoc}"
+  if tzoLoc.to_i < 0
+    tzoLocPrint = tzoLoc
   else
-    puts "#{lineNum}. EXIF source existed, so some info not written. source: #{fileEXIF.source}"
+    tzoLocPrint = "+" + tzoLoc.to_s
   end
+  fileEXIF.instructions = "#{fileDateTimeOriginalstr} #{tzoLocPrint} from fileAnnotate debug" if !fileEXIF.DateTimeStamp # Time zone of photo is GMT #{tzoLoc} unless TS5?" or travel. TODO find out what this field is really for
+  # fileEXIF.comment = "Capture date: #{fileDateTimeOriginalstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Doesn't show up in Aperture
+  # puts "#{lineNum}. fileEXIF.source: #{fileEXIF.source}.original file basename not getting written"
+  puts "#{File.basename(fn)} original filename to be written to EXIF.title"
+  # fileEXIF.title = "#{File.basename(fn)} original filename" # Source OK, but Title seemed a bit better. Seems to be a Panasonic field. Mylio metadata shows it.
+  fileEXIF.TimeZoneOffset = tzoLoc # Time Zone Offset, (1 or 2 values: 1. The time zone offset of DateTimeOriginal from GMT in hours, 2. If present, the time zone offset of ModifyDate)
+  # Am I misusing this? I may using it as the TimeZone for photos taken GMT 0 TODO
+  # OffsetTimeOriginal	(time zone for DateTimeOriginal) which may or may not be the time zone the photo was taken in TODO
+  # TODO write GMT time to
+  fileEXIF.save
 end # fileAnnotate. writing original filename and dateTimeOrig to the photo file and cleaning up TS5 photos with bad (no) GPS data.
 
 # With the fileDateTimeOriginal for the photo, find the time zone based on the log.
@@ -443,7 +435,8 @@ def rename(src, timeZonesFile, timeNowWas)
       fileExt = File.extname(fn).tr(".","").downcase  # needed later for determining if dups at same time. Will be lowercase jpg or rw2 or whatever
       fileExtPrev = ""
       fileDateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
-      puts "#{lineNum}. fileDateTimeOriginal = fileEXIF.dateTimeOriginal: #{fileDateTimeOriginal} of class: #{fileDateTimeOriginal.class} "
+      # puts "#{lineNum}. fileDateTimeOriginal = fileEXIF.dateTimeOriginal: #{fileDateTimeOriginal} of class: #{fileDateTimeOriginal.class}"
+      # 446. fileDateTimeOriginal = fileEXIF.dateTimeOriginal: 2021-11-25 12:09:11 -0800 of class: Time. This was really -7, but computer is -8, and that is what is reported. The dateTimeOriginal in the camera doesn't know what zone it's in.
       fileSubSecTimeOriginal = fileEXIF.SubSecTimeOriginal # no error if doesn't exist
       subSec = "." + fileSubSecTimeOriginal.to_s[0..1] #Truncating to 2 figs (could round but would need to make a float, divide by 10 and round or something. This should be close enough)
       subSecExists = fileEXIF.SubSecTimeOriginal.to_s.length > 2 # 
@@ -457,7 +450,7 @@ def rename(src, timeZonesFile, timeNowWas)
       panasonicLocation = fileEXIF.location # Defined by Panasonic if on trip (and also may exist for photos exported from other apps such as Photos). If defined then time stamp is that local time
       # puts "#{lineNum}. panasonicLocation: #{panasonicLocation}"
       tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile ) # the time zone the picture was taken in, doesn't say anything about what times are recorded in the photo's EXIF. I'm doing this slightly wrong, because it's using the photo's recorded date which could be either GMT or local time. But only wrong if the photo was taken too close to the time when camera changed time zones
-      puts "#{lineNum}. #{count}. tzoLoc: #{tzoLoc} from timeZonesFile"
+      # puts "#{lineNum}. #{count}. tzoLoc: #{tzoLoc} from timeZonesFile"
       if count == 1 | 1*100 # only gets written every 100 files.
         puts "#{lineNum}. panasonicLocation: #{panasonicLocation}. tzoLoc: #{tzoLoc} Time zone photo was taken in from Greg camera time zones.yml\n"
       # else
@@ -488,6 +481,7 @@ def rename(src, timeZonesFile, timeNowWas)
         fileEXIF.OffsetTimeOriginal = "GMT"
         puts "#{lineNum}.. fileDateTimeOriginal #{fileDateTimeOriginal}. timeChange: #{timeChange} for #{camModel}"
       end # if camModel
+      fileEXIF.save # only set OffsetTimeOriginal, but did do some reading.
      
 
       fileDate = fileDateTimeOriginal + timeChange.to_i # date in local time photo was taken. No idea why have to change this to i, but was nil class even though zero  
@@ -532,10 +526,16 @@ def rename(src, timeZonesFile, timeNowWas)
       fileDatePrev = fileDate
       fileExtPrev = fileExt
       # fileBaseNamePrev = fileBaseName
-   
+
       # File renaming and/or moving happens here
-      # puts "#{lineNum}. #{count+1}. dateTimeOriginal: #{fileDateTimeOriginal}. item: #{item}. camModel: #{camModel}" # . #{timeNowWas = timeStamp(timeNowWas)} # took 1 sec per file
-      fileAnnotate(fn, fileEXIF, fileDateTimeOriginalstr, tzoLoc) # adds original file name, capture date and time zone to EXIF. Comments which I think show up as instructions in Aperture. Also wiping out bad GPS data on TS5
+      # puts "#{lineNum}. #{count+1}. dateTimeOriginal: #{fileDateTimeOriginal}. item: #{item}. camModel: #{camModel}" # . #{timeNowWas = timeStamp(timeNowWas)}
+      # fileAnnotate(fn, fileEXIF, fileDateTimeOriginalstr, tzoLoc) # adds original file name, capture date and time zone to EXIF. Comments which I think show up as instructions in Aperture. Also wiping out bad GPS data on TS5
+      fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc) # was passing fileEXIF, but saving wasn't happening, so reopen in the module?
+      # #### Doing here for one round Didn't work
+      # fileEXIF.title = "#{File.basename(fn)} original filename" # Source OK, but Title seemed a bit better
+     #  puts "#{lineNum}. File.basename(fn): #{File.basename(fn)}. Supposed to be written to photo"
+     #  fileEXIF.save
+
       fnp = fnpPrev = src + fileBaseName + File.extname(fn).downcase # unless #Why was the unless here?
       # puts "Place holder to make the script work. where did the unless come from"
 #       puts "#{lineNum}. fn: #{fn}. fnp (fnpPrev): #{fnp}. subSec: #{subSec}"
@@ -581,16 +581,18 @@ def addCoordinates(photoFolder, folderGPX, gpsPhotoPerl, tzoLoc)
     fn = photoFolder + item
     fileEXIF = MiniExiftool.new(fn) # used several times
     camModel = fileEXIF.model
-    puts "#{lineNum}. model: #{camModel} fn: #{fn}" # debug
+    # puts "#{lineNum}. model: #{camModel} fn: #{fn}" # debug
     panasonicLocation = fileEXIF.location
     # timeOffset = 0 # could leave this in and remove the else     
     if File.file?(fn)
-      if camModel == "DMC-GX8"# Assumes GX8 always on local time. Make's a bit more complex, but keeping logic simpler
-        timeOffset = tzoLoc * 3600
-        puts "#{lineNum}. timeOffset: #{timeOffset} seconds with GX-8 photos stamped in local time. tzoLoc: #{tzoLoc}"
-        puts "#{lineNum}. Hardwired to +7 hours for this run"
-        timeOffset = (7 * 3600)
-      elsif camModel.include?("DMC") and panasonicLocation.length > 0 # Panasonic in Travel Mode, but also some photos exported from Photos. 
+      if camModel == "DMC-GX8" # Assumes GX8 always on local time. And TimeZone is set
+        # timeOffset = tzoLoc * 3600 # old way which may be fine, but the following seems more direct. May not account for camera not being in the zone it's set for, but I don't think that matters. It matters for time labeling, but this is only GPS coords
+        timeOffset =  (fileEXIF.TimeStamp -  fileEXIF.CreateDate) # seconds, so how much GMT is ahead of local. So opposite time zone
+        puts "#{lineNum}. timeOffset: #{timeOffset} seconds (#{timeOffset/3600} hours) with GX-8 photos stamped in local time. FYI: tzoLoc: #{tzoLoc} per zones file which isn't being used for coordinates but seems like it could with hrs to secs change."
+        # timeOffset = 3600 * 7
+        # puts "#{lineNum}. Hardwired to #{timeOffset} seconds for this run"
+
+      elsif camModel.include?("DMC") and panasonicLocation.length > 0 # Panasonic in Travel Mode, but also some photos exported from Photos.
         timeOffset = tzoLoc * 3600
         puts "#{lineNum}. timeOffset: #{timeOffset} sec (#{tzoLoc} hours) with photos stamped in local time."
       elsif camModel  == "DMC-TS5"
@@ -602,7 +604,7 @@ def addCoordinates(photoFolder, folderGPX, gpsPhotoPerl, tzoLoc)
         timeOffset = 0 # camelCase, but perl variable is lowercase
         puts "#{lineNum}. timeOffset: #{timeOffset} sec (#{tzoLoc} hours) with photos stamped in GMT"
       end # if camModel
-      
+      # puts "#{lineNum} timeOffset: #{timeOffset} triple checking"
       fileEXIF.save 
       count += 1
     end # if File.file
@@ -654,172 +656,6 @@ def distanceMeters(lat1, lon1, lat2, lon2)
 
   RM * c # Delta in meters  
 end
-
-def addLocation(src, geoNamesUser)
-  # read coords and add a hierarchy of choices for location information. Look at GPS Log Renaming for what works.
-    countTotal = 0 
-    countLoc = 0
-    latPrev = 0.0
-    lonPrev = 0.0
-    countryCode = country = state = city = location = ""
-    Dir.foreach(src) do |item| 
-      next if ignoreNonFiles(item) == true # skipping file when true
-      fn = src + item
-      if File.file?(fn) 
-        countTotal += 1
-        # puts "\n#{lineNum}. #{countTotal}. #{item}. Adding location information using geonames based on coordinates. " # amounts to a progress bar, even if a bit verbose #{timeStamp(timeNowWas)}
-        print "." # Minimal progress bar
-        fileEXIF = MiniExiftool.new(fn)
-        # Get lat and lon from photo file. What is this fileEXIF.specialinstructions. This must be written by the perl script.
-        puts "#{lineNum}. No gps information for #{item}. #{fileEXIF.title}. fileEXIF.specialinstructions: #{fileEXIF.specialinstructions}" if fileEXIF.specialinstructions == nil
-        next if fileEXIF.specialinstructions == nil # can I combine this step and the one above into one step or if statement? I think I'm writing GPS coords to this field because easier to parse? I think the perl script does it. I can't find where I did it.
-        # puts "#{lineNum}. fileEXIF.specialinstructions: #{fileEXIF.specialinstructions}"
-        gps = fileEXIF.specialinstructions.split(", ") # or some way of getting lat and lon. This is a good start. Look at input form needed
-        lat = (gps[0][4,11]).to_f # Capture long numbers like -123.123456, but short ones aren't that long, but nothing is there
-        lon = (gps[1][4,11].split(" ")[0]).to_f # needs to 11 long to capture when -xxx.xxxxxx, but then can capture the - when it's xx.xxxxxx. Then grab whats between the first two spaces. Still need the 4,11 because there seems to be a space at the beginning if leave out [4,11]
-        # puts " #{lineNum}. #{lat} #{lon} for #{fn}" # put here because of fail with TS5 file with erroneous lat lon
-        # puts " #{lineNum}. #{lat.to_i} #{lon.to_i} for #{fn}" # put here because of fail with TS5 file with erroneous lat lon        
-        # Quick and dirty to block erroneous TS5 results, but need to fix coordinates earlier.
-        if lat.to_i > 180 
-          puts "#{lineNum}. #{fn} is a TS5 photo with erroneous GPS data, but the script needs to be fixed to add data"
-        end
-        next if lat.to_i > 180 # takes care of erroneous GPS coords in TS5 photos, but need to fix
-        countLoc += 1 # gives an error here or at the end.
-        # puts "#{lineNum}..#{countTotal}. Use geonames to determine city, state, country, and location for #{item}"
-        api = GeoNames.new(username: geoNamesUser)
-        # puts "#{lineNum}..#{countTotal}... geoNamesUser: #{geoNamesUser}. api: #{api}"
-
-        # Reusing info for nearby points
-        # puts "#{lineNum}. latPrev: #{latPrev}. latPrev.class: #{latPrev.class}. lat: #{lat}.  lat.class: #{lat.class}" # debug
-       distanceMeters = distanceMeters(lat, lon, latPrev, lonPrev)
-       if distanceMeters > 100.0 # distance between reference lat lon is greater than 100m recalculate location, otherwise use         # Determine country 
-          begin
-            # doesn't work for Istanbul, works for Croatia, Canada
-            countryCodeGeo = api.country_code(lat: lat, lng: lon) # doesn't work in Turkey
-           puts "\n#{lineNum}.. countryCodeGeo: #{countryCodeGeo}" # debug
-            countryCode  = countryCodeGeo['countryCode']
-            puts "#{lineNum}.. countryCode #{countryCode}." # DEBUG
-          rescue
-            # begin
-             $stderr.print
-             puts "#{lineNum}. $stderr: #{$stderr} for api.country_code (lat: #{lat}, lng: #{lon}) or countryCode  = countryCodeGeo['countryCode']: #{countryCode}. for #{item}"
-             # Was trying to capture the message, but now failing even when not exceeded hourly limit, so comment out
-             # if message.include?("the hourly limit")
-             #   puts "#{lineNum}. #{e.message}, so we will wait an hour"
-             #   sleep(1.hour)
-             # else
-               countryCodeGeo = api.find_nearby_place_name(lat: lat, lng: lon).first # works for Turkey
-               #          $stderr.print  $! # Thomas p. 108
-             # end
-          end # rescue
-       
-        # puts "#{lineNum}.. countryCode:  #{countryCode}"
-        # puts "#{lineNum}. NEED TO UNCOMMENT THIS AFTER INDONESIA ##############################################"
-        country = countryCodeGeo['countryName'] # works with both country_code  and find_nearby_place_name above
-        # puts "#{lineNum}.. country:      #{country}"
-
-        # Determine city, state, location
-        if countryCode == "US" # geocodio works in US and Canada, could use as an option to geocode.org
-          begin # state
-            postalCodes = api.find_nearby_postal_codes(lat: lat, lng: lon, maxRows: 1) # this comes up blank for some locations in the US eg P1230119, so did find_nearest_address 
-            state = postalCodes.first['adminName1']
-            # puts "#{lineNum}.. api.find_nearby_postal_codes worked"
-          rescue 
-            state = api.country_subdivision(lat: lat, lng: lon, maxRows: 1)['adminName1']
-            # puts "#{lineNum}. api.find_nearby_postal_codes failed, so used  api.country_subdivision"
-          end # if country code
-          # puts "#{lineNum}.. state:        #{state}"
-        
-          begin  # city, location
-            neigh = api.neighbourhood(lat: lat, lng: lon) # errors outside the US and at other time
-            city =  neigh['city']
-            # puts "#{lineNum}.. city:         #{city}"
-            location = neigh['name']
-            # puts "386.. location:     #{location}"
-          rescue # could use api.find_nearby_postal_codes for some of this
-            # puts "344.  api.neighbourhood failed for #{lat} #{lon}"
-          
-            begin # within a rescue
-              city = postalCodes.first['placeName'] # breaking for some points, but is it better than replacement? If so add another rescue
-              # puts "#{lineNum}.. city (rescue): #{city}"
-              findNearbyPlaceName = api.find_nearby_place_name(lat: lat, lng: lon)
-              location = findNearbyPlaceName.first['toponymName']
-              # puts "#{lineNum}.. location (rescue): #{location}"      
-            rescue # probably end up here for a remote place, so wikipedia may be the best
-              # puts "#{lineNum}.. find_nearby_postal_codes failed for city, so use Wikipedia to find a location"
-              city = ""
-              distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance']
-              location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']
-              puts "#{lineNum}.. location:     #{location}. distance: #{distance}" # may need to screen as for outside US
-            end # of within a rescue
-          end # begin rescue outer
-        
-        else # outside US. Doesn't work in Indonesia
-        
-          # Uncomment below for Indonesia. Could probably generalize this for other countries. But it requires downloading the file to pgAdmin and building a database.
-          # locationIN  = indoLocation(lat,lon)
-   #        countryCode  = locationIN[0]
-   #        city         = locationIN[1]
-   #        location     = locationIN[2]
-   #        if countryCode == "ID"
-   #          country = "Indonesia"
-   #        else
-   #          country = ""
-   #        end
-                 
-          # off for Indonesia and Ethiopia, just skip if         
-          begin
-            findNearbyPostalCodes = api.find_nearby_postal_codes(lat: lat, lng: lon, maxRows: 1).first
-            state = findNearbyPostalCodes['adminName1']
-            # puts "#{lineNum}.. state (outside US): #{state}" # DEBUG
-            city = findNearbyPostalCodes['placeName'] # close to city, but misses Dubrovnik and Zagreb
-            # Below was normal I think, but turned off to try to get Canada to work
-            city = api.find_nearby_place_name(lat: lat, lng: lon, maxRows: 1).first['toponymName'] # name or adminName1 could work too
-            # puts "#{lineNum}.. city (outside US):  #{city}" # DEBUG
-          rescue
-            # puts "#{lineNum}. findNearbyPostalCodes failed, therefore try getting location from Wikipedia" # This can work outside the US, maybe fails when not near a city.  # DEBUG
-          end
-        
-          # puts city =  api.find_nearby_wikipedia(lat: lat, lng: lon)["geonames"].first["title"] # the third item is a city, maybe could regex wikipedia, but doubt it's consistent enough to work
-          # puts "#{lineNum}.. Four lines below must be commented out for Canada"
-        
-          begin # put this in with failure anotating Ethiopia photos
-            location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']
-            distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance'].to_f
-            locationDistance = "#{location} is #{distance}km away."
-            puts "#{lineNum}. location:     #{location}. distance: #{distance}. If distance > 0.3km location not used"
-            if  distance < 0.3
-              location = ""
-            elsif fileEXIF.caption == nil
-              fileEXIF.caption = locationDistance
-            else
-              fileEXIF.usercomment = locationDistance
-            end # if distance
-          rescue
-            # maybe this whole exception needs reworking
-          ensure
-            # puts "#{lineNum}. #{item} find api.find_nearby_wikipedia failed. Maybe a foreign country? " # DEBUG
-            location = "" # added this to help prevent failure on test below. May not be necessary
-          end
-        end # if countryCode
-        location = "" if city == location # cases where they where the same (Myers Flat, Callahan and Etna). Could try to find a location with some other find, maybe Wikipedia, but would want a distance check
-        latPrev  = lat
-        lonPrev = lon
-      # else # commented out since not usng, but can for debug
-        # puts "#{lineNum}. #{distanceMeters.ceil}m between the current and previous photo and since less than 100m will use the location information from the previous photo." # Debug
-      end # if > 100m (so if greater recalculated above, other wise just reuse below)  
-      
-      # puts "#{lineNum}.. Use MiniExiftool to write location info to photo files\n" # Have already set fileEXIF
-      fileEXIF.CountryCode = countryCode
-      fileEXIF.country     = country
-      fileEXIF.state       = state
-      fileEXIF.city        = city
-      fileEXIF.location    = location
-      fileEXIF.save
-    end    
-  end 
-  puts "\n#{lineNum}. Location information found for #{countLoc} of #{countTotal} photos processed" 
-end # addLocation
 
 def indoLocation(lat,lon) # Could modify for other countries. Uses file loaded into PGadmin
   conn = PG.connect( dbname: 'Indonesia' )
@@ -1102,7 +938,7 @@ writeTimeDiff(perlOutput)
 timeNowWas = timeStamp(timeNowWas, lineNum)
 # Parce perlOutput and add maxTimeDiff info to photo files
 
-puts "\n#{lineNum}. All Finished. Note that \"Adding location information to photo files\" is commented out."
+puts "\n#{lineNum}. All Finished. Note that \"Adding location information to photo files\" is commented out, i.e., geographic descriptions not being added."
 
 # puts "\n#{lineNum}. Adding location information to photo files"
 # # Add location information to photo file
@@ -1114,3 +950,171 @@ moveToMylio(destPhoto, mylioFolder)
 
 # timeNowWas = timeStamp(timeNowWas, lineNum)
 # puts "\n#{lineNum}.-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - All done"
+
+
+
+# def addLocation(src, geoNamesUser)
+#   # read coords and add a hierarchy of choices for location information. Look at GPS Log Renaming for what works.
+#     countTotal = 0
+#     countLoc = 0
+#     latPrev = 0.0
+#     lonPrev = 0.0
+#     countryCode = country = state = city = location = ""
+#     Dir.foreach(src) do |item|
+#       next if ignoreNonFiles(item) == true # skipping file when true
+#       fn = src + item
+#       if File.file?(fn)
+#         countTotal += 1
+#         # puts "\n#{lineNum}. #{countTotal}. #{item}. Adding location information using geonames based on coordinates. " # amounts to a progress bar, even if a bit verbose #{timeStamp(timeNowWas)}
+#         print "." # Minimal progress bar
+#         fileEXIF = MiniExiftool.new(fn)
+#         # Get lat and lon from photo file. What is this fileEXIF.specialinstructions. This must be written by the perl script.
+#         puts "#{lineNum}. No gps information for #{item}. #{fileEXIF.title}. fileEXIF.specialinstructions: #{fileEXIF.specialinstructions}" if fileEXIF.specialinstructions == nil
+#         next if fileEXIF.specialinstructions == nil # can I combine this step and the one above into one step or if statement? I think I'm writing GPS coords to this field because easier to parse? I think the perl script does it. I can't find where I did it.
+#         # puts "#{lineNum}. fileEXIF.specialinstructions: #{fileEXIF.specialinstructions}"
+#         gps = fileEXIF.specialinstructions.split(", ") # or some way of getting lat and lon. This is a good start. Look at input form needed
+#         lat = (gps[0][4,11]).to_f # Capture long numbers like -123.123456, but short ones aren't that long, but nothing is there
+#         lon = (gps[1][4,11].split(" ")[0]).to_f # needs to 11 long to capture when -xxx.xxxxxx, but then can capture the - when it's xx.xxxxxx. Then grab whats between the first two spaces. Still need the 4,11 because there seems to be a space at the beginning if leave out [4,11]
+#         # puts " #{lineNum}. #{lat} #{lon} for #{fn}" # put here because of fail with TS5 file with erroneous lat lon
+#         # puts " #{lineNum}. #{lat.to_i} #{lon.to_i} for #{fn}" # put here because of fail with TS5 file with erroneous lat lon
+#         # Quick and dirty to block erroneous TS5 results, but need to fix coordinates earlier.
+#         if lat.to_i > 180
+#           puts "#{lineNum}. #{fn} is a TS5 photo with erroneous GPS data, but the script needs to be fixed to add data"
+#         end
+#         next if lat.to_i > 180 # takes care of erroneous GPS coords in TS5 photos, but need to fix
+#         countLoc += 1 # gives an error here or at the end.
+#         # puts "#{lineNum}..#{countTotal}. Use geonames to determine city, state, country, and location for #{item}"
+#         api = GeoNames.new(username: geoNamesUser)
+#         # puts "#{lineNum}..#{countTotal}... geoNamesUser: #{geoNamesUser}. api: #{api}"
+#
+#         # Reusing info for nearby points
+#         # puts "#{lineNum}. latPrev: #{latPrev}. latPrev.class: #{latPrev.class}. lat: #{lat}.  lat.class: #{lat.class}" # debug
+#        distanceMeters = distanceMeters(lat, lon, latPrev, lonPrev)
+#        if distanceMeters > 100.0 # distance between reference lat lon is greater than 100m recalculate location, otherwise use         # Determine country
+#           begin
+#             # doesn't work for Istanbul, works for Croatia, Canada
+#             countryCodeGeo = api.country_code(lat: lat, lng: lon) # doesn't work in Turkey
+#            puts "\n#{lineNum}.. countryCodeGeo: #{countryCodeGeo}" # debug
+#             countryCode  = countryCodeGeo['countryCode']
+#             puts "#{lineNum}.. countryCode #{countryCode}." # DEBUG
+#           rescue
+#             # begin
+#              $stderr.print
+#              puts "#{lineNum}. $stderr: #{$stderr} for api.country_code (lat: #{lat}, lng: #{lon}) or countryCode  = countryCodeGeo['countryCode']: #{countryCode}. for #{item}"
+#              # Was trying to capture the message, but now failing even when not exceeded hourly limit, so comment out
+#              # if message.include?("the hourly limit")
+#              #   puts "#{lineNum}. #{e.message}, so we will wait an hour"
+#              #   sleep(1.hour)
+#              # else
+#                countryCodeGeo = api.find_nearby_place_name(lat: lat, lng: lon).first # works for Turkey
+#                #          $stderr.print  $! # Thomas p. 108
+#              # end
+#           end # rescue
+#
+#         # puts "#{lineNum}.. countryCode:  #{countryCode}"
+#         # puts "#{lineNum}. NEED TO UNCOMMENT THIS AFTER INDONESIA ##############################################"
+#         country = countryCodeGeo['countryName'] # works with both country_code  and find_nearby_place_name above
+#         # puts "#{lineNum}.. country:      #{country}"
+#
+#         # Determine city, state, location
+#         if countryCode == "US" # geocodio works in US and Canada, could use as an option to geocode.org
+#           begin # state
+#             postalCodes = api.find_nearby_postal_codes(lat: lat, lng: lon, maxRows: 1) # this comes up blank for some locations in the US eg P1230119, so did find_nearest_address
+#             state = postalCodes.first['adminName1']
+#             # puts "#{lineNum}.. api.find_nearby_postal_codes worked"
+#           rescue
+#             state = api.country_subdivision(lat: lat, lng: lon, maxRows: 1)['adminName1']
+#             # puts "#{lineNum}. api.find_nearby_postal_codes failed, so used  api.country_subdivision"
+#           end # if country code
+#           # puts "#{lineNum}.. state:        #{state}"
+#
+#           begin  # city, location
+#             neigh = api.neighbourhood(lat: lat, lng: lon) # errors outside the US and at other time
+#             city =  neigh['city']
+#             # puts "#{lineNum}.. city:         #{city}"
+#             location = neigh['name']
+#             # puts "386.. location:     #{location}"
+#           rescue # could use api.find_nearby_postal_codes for some of this
+#             # puts "344.  api.neighbourhood failed for #{lat} #{lon}"
+#
+#             begin # within a rescue
+#               city = postalCodes.first['placeName'] # breaking for some points, but is it better than replacement? If so add another rescue
+#               # puts "#{lineNum}.. city (rescue): #{city}"
+#               findNearbyPlaceName = api.find_nearby_place_name(lat: lat, lng: lon)
+#               location = findNearbyPlaceName.first['toponymName']
+#               # puts "#{lineNum}.. location (rescue): #{location}"
+#             rescue # probably end up here for a remote place, so wikipedia may be the best
+#               # puts "#{lineNum}.. find_nearby_postal_codes failed for city, so use Wikipedia to find a location"
+#               city = ""
+#               distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance']
+#               location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']
+#               puts "#{lineNum}.. location:     #{location}. distance: #{distance}" # may need to screen as for outside US
+#             end # of within a rescue
+#           end # begin rescue outer
+#
+#         else # outside US. Doesn't work in Indonesia
+#
+#           # Uncomment below for Indonesia. Could probably generalize this for other countries. But it requires downloading the file to pgAdmin and building a database.
+#           # locationIN  = indoLocation(lat,lon)
+#    #        countryCode  = locationIN[0]
+#    #        city         = locationIN[1]
+#    #        location     = locationIN[2]
+#    #        if countryCode == "ID"
+#    #          country = "Indonesia"
+#    #        else
+#    #          country = ""
+#    #        end
+#
+#           # off for Indonesia and Ethiopia, just skip if
+#           begin
+#             findNearbyPostalCodes = api.find_nearby_postal_codes(lat: lat, lng: lon, maxRows: 1).first
+#             state = findNearbyPostalCodes['adminName1']
+#             # puts "#{lineNum}.. state (outside US): #{state}" # DEBUG
+#             city = findNearbyPostalCodes['placeName'] # close to city, but misses Dubrovnik and Zagreb
+#             # Below was normal I think, but turned off to try to get Canada to work
+#             city = api.find_nearby_place_name(lat: lat, lng: lon, maxRows: 1).first['toponymName'] # name or adminName1 could work too
+#             # puts "#{lineNum}.. city (outside US):  #{city}" # DEBUG
+#           rescue
+#             # puts "#{lineNum}. findNearbyPostalCodes failed, therefore try getting location from Wikipedia" # This can work outside the US, maybe fails when not near a city.  # DEBUG
+#           end
+#
+#           # puts city =  api.find_nearby_wikipedia(lat: lat, lng: lon)["geonames"].first["title"] # the third item is a city, maybe could regex wikipedia, but doubt it's consistent enough to work
+#           # puts "#{lineNum}.. Four lines below must be commented out for Canada"
+#
+#           begin # put this in with failure anotating Ethiopia photos
+#             location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']
+#             distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance'].to_f
+#             locationDistance = "#{location} is #{distance}km away."
+#             puts "#{lineNum}. location:     #{location}. distance: #{distance}. If distance > 0.3km location not used"
+#             if  distance < 0.3
+#               location = ""
+#             elsif fileEXIF.caption == nil
+#               fileEXIF.caption = locationDistance
+#             else
+#               fileEXIF.usercomment = locationDistance
+#             end # if distance
+#           rescue
+#             # maybe this whole exception needs reworking
+#           ensure
+#             # puts "#{lineNum}. #{item} find api.find_nearby_wikipedia failed. Maybe a foreign country? " # DEBUG
+#             location = "" # added this to help prevent failure on test below. May not be necessary
+#           end
+#         end # if countryCode
+#         location = "" if city == location # cases where they where the same (Myers Flat, Callahan and Etna). Could try to find a location with some other find, maybe Wikipedia, but would want a distance check
+#         latPrev  = lat
+#         lonPrev = lon
+#       # else # commented out since not usng, but can for debug
+#         # puts "#{lineNum}. #{distanceMeters.ceil}m between the current and previous photo and since less than 100m will use the location information from the previous photo." # Debug
+#       end # if > 100m (so if greater recalculated above, other wise just reuse below)
+#
+#       # puts "#{lineNum}.. Use MiniExiftool to write location info to photo files\n" # Have already set fileEXIF
+#       fileEXIF.CountryCode = countryCode
+#       fileEXIF.country     = country
+#       fileEXIF.state       = state
+#       fileEXIF.city        = city
+#       fileEXIF.location    = location
+#       fileEXIF.save
+#     end
+#   end
+#   puts "\n#{lineNum}. Location information found for #{countLoc} of #{countTotal} photos processed"
+# end # addLocation

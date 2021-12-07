@@ -1,5 +1,5 @@
 #!/usr/bin/perl -w
-# Can't find this anymore. Don't loose this copy. Links at bottom of this page, but they don't seem to lead anywhere good.
+# Can't find this anymore. Don't lose this copy. Links at bottom of this page, but they don't seem to lead anywhere good.
 
 # BEGIN { unshift @INC, "/usr/bin/lib/" }
 BEGIN { unshift @INC, "/usr/local/bin/lib/" }
