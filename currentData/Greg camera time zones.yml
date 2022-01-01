@@ -1,0 +1,562 @@
+"598":
+    Description: "PDT. California Daylight Time"
+    timeGMT: 2022-11-16T14-00-00Z
+    zone: -8
+    comments: "end of DST"
+"597":
+    Description: "PDT. California Daylight Time"
+    timeGMT: 2022-03-13T14-00-00Z
+    zone: -7
+    comments: "Beginning of DST"
+"596":
+    Description: "PST. California Standard Time"
+    timeGMT: 2021-11-29T18-59-00Z
+    zone: -8
+    comments: "Back from Santa Fe"
+"595":
+    Description: "MST. Mountain Time"
+    timeGMT: 2021-11-22T17-00-00Z
+    zone: -7
+    comments: "Off to Santa Fe"
+"594":
+    Description: "PST. California Standard Time"
+    timeGMT: 2021-11-07T14-00-00Z
+    zone: -8
+    comments: "end of DST"
+"593":
+    Description: "PST. California Daylight Time"
+    timeGMT: 2021-09-20T18-00-00Z
+    zone: -7
+    comments: "Return from Ohio"
+"592":
+    Description: "EST. Eastern Daylight"
+    timeGMT: 2021-09-01T18-00-00Z
+    zone: -4
+    comments: "To Cleveland from Calif."
+"591":
+    Description: "PST. California Daylight Time"
+    timeGMT: 2021-06-27T18-00-00Z
+    zone: -7
+    comments: "Return from Utah. Camera was 1 min 44 sec ahead. And I reset it."
+"590":
+    Description: "MST. Mountain Daylight Time"
+    timeGMT: 2021-06-20T20-00-00Z
+    zone: -6
+    comments: "To Utah. Guessing around 1 pm. PDT"
+"589":
+    Description: "PST. California Daylight Time"
+    timeGMT: 2021-03-14T14-00-00Z
+    zone: -7
+    comments: "start of DST. PDT, Was about 2 minutes fast 2021.03.31"
+"588":
+    Description: "PST. California Standard Time"
+    timeGMT: 2020-11-01T14-00-00Z
+    zone: -8
+    comments: "end of DST"
+"587":
+    Description: "PDT and MST in Arizona summer"
+    timeGMT: 2020-03-08T10-00-00Z
+    zone: -7
+    comments: "to PDT: Daylight Saving"
+"586":
+    Description: "California Standard Time"
+    timeGMT: 2020-02-23T14-00-00Z
+    zone: -8
+    comments: "SLC to LAX"
+"585":
+    Description: "Mountain Standard Time"
+    timeGMT: 2020-02-18T19-00-00Z
+    zone: -7
+    comments: "LAX to SLC"
+"584":
+    Description: "California Standard Time"
+    timeGMT: 2019-12-27T23-00-00Z
+    zone: -8
+    comments: "Return from Cleveland"
+"583":
+    Description: "Eastern Standard Time"
+    timeGMT: 2019-12-21T17-00-00Z
+    zone: -5
+    comments: "LAX to CLE"
+"582":
+    Description: "California Standard Time"
+    timeGMT: 2019-11-03T10-00-00Z
+    zone: -8
+    comments: "California Daylight to Standard"
+"581":
+    Description: "California Daylight Time"
+    timeGMT: 2019-08-22T19-00-00Z
+    zone: -7
+    comments: "Louisville to LAX"
+"580":
+    Description: "Eastern Daylight Time"
+    timeGMT: 2019-07-25T23-00-00Z
+    zone: -4
+    comments: "LAX to CLE. Stayed in EST for the entire trip. Before the trip, this was incorrectly -3"
+"579":
+    Description: "California Daylight Time"
+    timeGMT: 2019-03-25T17-00-00Z
+    zone: -7
+    comments: " Guerrero Negro and the rest of Baja Sud stays on MST until April 7 while Baja Nor and Calif change on March 10, so when we cross back into the north there will be no time change"
+"578":
+    Description: "Mountain Standard Time in Baja Sud"
+    timeGMT: 2019-03-09T23-00-00Z
+    zone: -7
+    comments: "California Standard to Mexico Baja Sud Standard (MST). Approx. 4pm on Mar 8."
+"577":
+    Description: "California Standard Time from Ethiopia"
+    timeGMT: 2018-12-14T10-00-00Z
+    zone: -8
+    comments: "back to California"
+"576":
+    Description: "Ethiopia"
+    timeGMT: 2018-11-09T10-00-00Z
+    zone: +3
+    comments: "To Ethiopia"
+"575":
+    Description: "California Standard Time"
+    timeGMT: 2018-11-04T10-00-00Z
+    zone: -8
+    comments: "To Calif. Standard Time from Daylight Time"
+"574":
+    Description: "California Daylight Time"
+    timeGMT: 2018-09-14T17-10-00Z
+    zone: -7
+    comments: "To Calif. Daylight Time from France"
+"573":
+    Description: "France Daylight"
+    timeGMT: 2018-08-30T18-00-00Z
+    zone: +2
+    comments: "To France from UK, both Daylight time"
+"572":
+    Description: "UK Daylight"
+    timeGMT: 2018-07-16T02-00-00Z
+    zone: +1
+    comments: "To Calif. Daylight Time from ST"
+"571":
+    Description: "California Daylight Time"
+    timeGMT: 2018-04-04T17-10-00Z
+    zone: -7
+    comments: "To Calif. Daylight Time from ST"
+"570":
+    Description: "Eastern Daylight Time"
+    timeGMT: 2018-04-01T18-00-00Z
+    zone: -4
+    comments: "To Louisville"
+"569":
+    Description: "California Daylight Time"
+    timeGMT: 2018-03-11T10-10-00Z
+    zone: -7
+    comments: "To Calif. Daylight Time from ST"
+"568":
+    Description: "California Standard Time"
+    timeGMT: 2017-11-27T00-18-00Z
+    zone: -8
+    comments: "To Calif. Standard Time from Arizona"
+"567":
+    Description: "Mountain Standard Time"
+    timeGMT: 2017-11-22T00-17-00Z
+    zone: -7
+    comments: "To Arizona.  From Pacific Standard Time to Mountain"
+"566":
+    Description: "California Standard Time"
+    timeGMT: 2017-11-05T00-10-00Z
+    zone: -8
+    comments: "To Calif. Standard Time from DST"
+"565":
+    Description: "California Daylight Time-"
+    timeGMT: 2017-07-24T00-00-00Z
+    zone: -7
+    comments: "Back to Pacific Time from MST. Guess at date"
+"564":
+    Description: "MST"
+    timeGMT: 2017-06-29T00-10-00Z
+    zone: -6
+    comments: "To Colorado. Guess at date."
+"563":
+    Description: "California Daylight Time-"
+    timeGMT: 2017-03-12T10-00-00Z
+    zone: -7
+    comments: "To Calif. Daylight Time from DST"
+"562":
+    Description: "California Standard Time-"
+    timeGMT: 2016-11-06T00-10-00Z
+    zone: -8
+    comments: "To Calif. Standard Time from DST"
+"561":
+    Description: "California Daylight Time-"
+    timeGMT: 2016-08-23T00-01-00Z
+    zone: -7
+    comments: "To Calif. DST from NT (Northwest Territories). 6:30pm flight"
+"560":
+    Description: "Canada. Northwest Territories"
+    timeGMT: 2016-07-26T19-00-00Z
+    zone: -6
+    comments: "To Canada-NWT is by the map -8 GMT, but is on Mountain Time"
+"559":
+    Description: "California Standard Time"
+    timeGMT: 2016-06-15T18-00-00Z
+    zone: -7
+    comments: "To Calif. DST from Indonesia"
+"558":
+    Description: "Taipei and Indonesia (Bali)  Time"
+    timeGMT: 2016-06-15T18-20-00Z
+    zone: 8
+    comments: "To Bali, then Taipai"
+"557":
+    Description: "Western Indonesia Time"
+    timeGMT: 2016-06-08T11-24-00Z
+    zone: 7
+    comments: "To Java (Yogykarta) from Menado"
+"556":
+    Description: "Taipei and Indonesia (Bali & Sulawesi) Time"
+    timeGMT: 2016-05-12T00-30-00Z
+    zone: 8
+    comments: "To Taipei, then Bali, Indonesia (both same time zone)"
+"555":
+    Description: "California Daylight Time"
+    timeGMT: 2016-03-13T10-00-00Z
+    zone: -7
+    comments: "Change to PDT"
+"554":
+    Description: "California Standard Time"
+    timeGMT: 2015-12-14T08-00-00Z
+    zone: -8
+    comments: "To Calif. from CLE"
+"553":
+    Description: "EST"
+    timeGMT: 2015-12-09T20-00-00Z
+    zone: -5
+    comments: "To KY from Calif"
+"552":
+    Description: "California Standard Time"
+    timeGMT: 2015-11-01T10-00-00Z
+    zone: -8
+    comments: to Standard Time
+"551":
+    Description: "California Daylight Time"
+    timeGMT: 2015-06-30T22-00-00Z
+    zone: -7
+    comments: "To Calif. from NY"
+"550":
+    Description: "EDT"
+    timeGMT: 2015-06-13T05-00-00Z
+    zone: -4
+    comments: "Home to NY"
+"549":
+    Description: "California Daylight Time"
+    timeGMT: 2015-05-14T22-00-00Z
+    zone: -7
+    comments: "To Calif. from Moscow"
+"548":
+    Description: "Moscow-No DST"
+    timeGMT: 2015-05-14T08-00-00Z
+    zone: 3
+    comments: "Home via Moscow"
+"547":
+    Description: "French Daylight"
+    timeGMT: 2015-04-22T19-00-00Z
+    zone: 2
+    comments: "Moscow to France"
+"546":
+    Description: "Moscow-No DST"
+    timeGMT: 2015-04-22T04-00-00Z
+    zone: 3
+    comments: "to France via Moscow"
+"545":
+    Description: "California Daylight Time"
+    timeGMT: 2015-03-08T10-00-00Z
+    zone: -8
+    comments: "To Standard Time [in British Columbia at the time]"
+"544":
+    Description: "California Standard Time"
+    timeGMT: 2015-02-28T18-00-00Z
+    zone: -7
+    comments: "to Vancouver from Colorado"
+"543":
+    Description: "Mountain time"
+    timeGMT: 2015-02-23T17-00-00Z
+    zone: -6
+    comments: "to Colorado"
+"542":
+    Description: "California Standard Time"
+    timeGMT: 2014-11-02T09-00-00Z
+    zone: -8
+    comments: "To Standard Time"
+"541":
+    Description: "California Daylight Time"
+    timeGMT: 2014-10-07T19-00-00Z
+    zone: -7
+    comments: "Return from Maine"
+"540":
+    Description: "Central Daylight Time"
+    timeGMT: 2014-09-18T15-00-00Z
+    zone: -4
+    comments: "to Kentucky"
+"539":
+    Description: "California Daylight Time"
+    timeGMT: 2014-08-27T17-00-00Z
+    zone: -7
+    comments: "Return from Colorado. GX7 was about 2 min. slow. 104-0492 confirms. Reset 2014.08.30"
+"538":
+    Description: "Mountain Daylight Time"
+    timeGMT: 2014-08-15T00-00-00Z
+    zone: -6
+    comments: "to Crested Butte and Steamboat Springs"
+"537":
+    Description: "California Daylight Time"
+    timeGMT: 2014-07-04T07-00-00Z
+    zone: -7
+    comments: "Return from Alaska"
+"536":
+    Description: "Alaska Daylight Time"
+    timeGMT: 2014-06-09T23-00-00Z
+    zone: -8
+    comments: "Alaska Kayaking"
+"535":
+    Description: "California Daylight Time"
+    timeGMT: 2014-06-01T15-00-00Z
+    zone: -7
+    comments: "From Cleveland to Los Angeles"
+"534":
+    Description: "Eastern Daylight Time"
+    timeGMT: 2014-05-23T15-00-00Z
+    zone: -4
+    comments: "California to Cleveland"
+"533":
+    Description: "California Standard Time"
+    timeGMT: 2014-04-23T23-30-00Z
+    zone: -7
+    comments: "Return Home from Louisville"
+"532":
+    Description: "Eastern Daylight Time"
+    timeGMT: 2014-04-16T23-30-00Z
+    zone: -4
+    comments: "Flying to Louisville"
+"531":
+    Description: "California Daylight Time"
+    timeGMT: 2014-03-09T10-00-00Z
+    zone: -7
+    comments: "Switch to Daylight Saving Time"
+"530":
+    Description: "California Daylight Time"
+    timeGMT: 2014-02-13T10-00-00Z
+    zone: -8
+    comments: "Return from Cleveland"
+"529":
+    Description: "Eastern Daylight Time"
+    timeGMT: 2014-01-29T10-00-00Z
+    zone: -5
+    comments: "Flying to Cleveland"
+"528":
+    Description: "California Standard Time"
+    timeGMT: 2013-12-26T23-30-00Z
+    zone: -8
+    comments: "Back to PDT. Left Cleveland at 6:30 pm"
+"527":
+    Description: "Eastern Standard Time"
+    timeGMT: 2013-12-20T1-15-00Z
+    zone: -5
+    comments: "To Cleveland for Christmas. Left Calif. at 4:12 p.m. on Dec. 19 and give an hour to leave time zone"
+"526":
+    Description: "California Standard Time"
+    timeGMT: 2013-11-03T10-00-00Z
+    zone: -8
+    comments: "Back to PDT"
+"525":
+    Description: "Arizona"
+    timeGMT: 2013-10-21T23-00-00Z
+    zone: -7
+    comments: "Drive from Colorado to Arizona ST"
+"524":
+    Description: "Denver"
+    timeGMT: 2013-10-20T13-15-00Z
+    zone: -6
+    comments: "Fly to Denver from Cleveland"
+"523":
+    Description: "Cleveland"
+    timeGMT: 2013-10-14T16-15-00Z
+    zone: -4
+    comments: "Fly to CLE from Denver"
+"522":
+    Description: "Utah-Colorado"
+    timeGMT: 2013-10-01T02-15-00Z
+    zone: -6
+    comments: "Driving to Moab. Arrived in St. George around 6pm on 30 Oct."
+"521":
+    Description: "California Daylight Savings Time"
+    timeGMT: 2013-09-24T01-00-00Z
+    zone: -7
+    comments: "Back to Calif at 6 pm on the 23rd, but no photos close to arrival"
+"520":
+    Description: "Istanbul"
+    timeGMT: 2013-09-20T09-15-00Z
+    zone: 3
+    comments: "Left 11 am"
+"519":
+    Description: "To Croatia. CEST - Central European Summer Time"
+    timeGMT: 2013-08-31T01-00-00Z
+    zone: 2
+    comments: "Left Friday 30 Aug at 6 pm"
+"518":
+    Description: "California Daylight Savings Time"
+    timeGMT: 2013-04-29T12-00-00Z
+    zone: -7
+    comments: "Back to PDT in Mexico"
+"517":
+    Description: "Baja to Daylight Mountain Time"
+    timeGMT: 2013-04-07T08-00-00Z
+    zone: -6
+    comments: "Southern Baja starts DST on a different date, so when we entered Southern Baja on April 3, the time was the same as PDT"
+"516":
+    Description: "California switch to Daylight Savings Time"
+    timeGMT: 2013-03-10T10-00-00Z
+    zone: -7
+    comments: "Change to daylight savings time"
+"515":
+    Description: "California switch to Standard Time"
+    timeGMT: 2012-11-04T09-00-00Z
+    zone: -8
+    comments: "Change to standard time"
+"514":
+    Description: "NYC to Calif"
+    timeGMT: 2012-11-01T03-00-00Z
+    zone: -7
+    comments: "Still Daylight Savings Time. Arrival Time used. 8pm Nov 30"
+"513":
+    Description: "Calif to Louisville"
+    timeGMT: 2012-10-10T15-10-00Z
+    zone: -4
+    comments: "Stopover in Chicago is Central Daylight Time, not taken care of here. Trip all on EDT"
+"512":
+    Description: "Colorado (MDT) to Arizona (PDT)"
+    timeGMT: 2012-06-01T21-00-00Z
+    zone: -7
+    comments: "Time is approx., but I wasn't taking photos"
+"511":
+    Description: "California to Utah"
+    timeGMT: 2012-05-15T122-00-00Z
+    zone: -6
+    comments: "Leaving Arizona photos on Mountain Time, i.e., Coyote Buttes"
+"510":
+    Description: "Daylight Savings Time Starts"
+    timeGMT: 2012-03-11T10-00-00Z
+    zone: -7
+    comments: "Set this two weeks late, so photos until Mar. 29 are wrong"
+"509":
+    Description: "Return to Calif. from Cleveland"
+    timeGMT: 2011-11-26T16-00-00Z
+    zone: -8
+    comments: "Stopped in Phoenix, but don't think I took any photos"
+"508":
+    Description: "Thanksgiving trip to Cleveland"
+    timeGMT: 2011-11-21T16-00-00Z
+    zone: -5
+    comments: "7:15 am flight"
+"507":
+    Description: "Daylight savings ends"
+    timeGMT: 2011-11-06T10-00-00Z
+    zone: -8
+    comments: "Back to standard time"
+"506":
+    Description: "Return from Green River trip"
+    timeGMT: 2011-10-27T19-00-00Z
+    zone: -7
+    comments: "Back into Calif. Estimating 3 pm Thursday"
+"505":
+    Description: "To Green River"
+    timeGMT: 2011-10-15T7-00-00Z
+    zone: -6
+    comments: "Entering Utah from Nevada. at about 10 am. Ignoring Arizona piece  "
+"504":
+    Description: "Return from Montana"
+    timeGMT: 2011-08-25T21-00-00Z
+    zone: -7
+    comments: "Arrive LAX at 3 pm"
+"503":
+    Description: "To Montana from LAX"
+    timeGMT: 2011-08-17T14-00-00Z
+    zone: -6
+    comments: "Left LAX at 6:15 am.  "
+"502":
+    Description: "Return from Cleveland"
+    timeGMT: 2011-06-29T01-00-00Z
+    zone: -7
+    comments: "Vegas about 6 pm June 28"
+"501":
+    Description: "To Cleveland from LAX"
+    timeGMT: 2011-06-21T19-50-00Z
+    zone: -4
+    comments: "Los Angeles International (LAX)  Tuesday, June 21, 2011 01:50 PM PDT. Stopped in Dallas if I took pictures there. need to add. 1 pm + 12 + 7, maybe split the difference with Cleveland "
+"500":
+    Description: "Returning to Calif. time zone (no daylight savings in Arizona)"
+    timeGMT: 2011-06-11T15-00-00Z
+    zone: -7
+    trip: "Colorado-Utah spring 2011"
+    comments: "Sometime between 8:30am and 9:30 Denver time based on photos"
+"499":
+    Description: "Arizona to Flagstaff"
+    timeGMT: 2011-05-26T19-00-00Z
+    zone: -6
+    trip: "Colorado-Utah spring 2011"
+    comments: "Rough estimate based on leaving Flagstaff area and eating breakfast"
+"498":
+    Description: "Hyderbad to LAX"
+    timeGMT: 2011-03-10T21-00-00Z
+    zone: -7
+    trip: "Sri Lanka-India 2011"
+    comments: "10 Mar 11	21:30	Rajiv Gandhi Airport (HYD). GMT+6.5. Picked an inbetween time. Pictures in flight won't be local time"
+"497":
+    Description: "Dubai to Colombo"
+    timeGMT: 2011-01-11T21-15-00Z
+    zone: +5.5
+    trip: "Sri Lanka-India 2011"
+    comments: "India and Sri-Lanka are both GMT+5.5 and no daylight savings time.Wed    12 Jan 11	02:45	Dubai International Airport"
+"496":
+    Description: "LAX to Dubai"
+    timeGMT: 2011-01-10T19-00-00Z
+    zone: +4
+    trip: "Sri Lanka-India 2011"
+    comments: "Leaving GMT-8"
+"495":
+    Description: "Makalu Trek return"
+    timeGMT: 2010-11-08T10-00-00Z
+    zone: -8
+    trip: "Makalu Trek"
+    comments: "MON 08NOV 3:45 PM. GMT +5:45 Daylight saving ended. Ignoring intermediate stops"
+"494":
+    Description: "Hong Kong to Kathmandu"
+    timeGMT: 2010-10-07T10-00-00Z
+    zone: +5.75
+    trip: "Makalu Trek"
+    comments: ""
+"493":
+    Description: "LAX to Hong Kong"
+    timeGMT: 2010-10-06T12-05-00Z
+    zone: +8
+    trip: "Makalu Trek"
+    comments: "GMT +8. Left whie still PT daylight savings"
+"492":
+    Description: "Alberta to BC"
+    timeGMT: 2010-08-20T15-00-00Z
+    zone: -7
+    trip: "Canadian Rockies 2010"
+    comments: "Back in Pacific Time zone. Daylight Savings Was GMT -6. Estimated from GPS track. Could fine tune better"
+"491":
+    Description: "Into Canada"
+    timeGMT: 2010-07-30T17-00-00Z
+    zone: -6
+    trip: "Canadian Rockies 2010"
+    comments: "Around 10 am. Looks like we drove along the time line in BC."
+"490":
+    Description: "Daylight Savings"
+    timeGMT: 2010-03-14T10-00-00Z
+    zone: -7
+    trip: "DST"
+    comments: "Guessing didn't leave state before DST. Louisa may have gone to Denver?"
+"489":
+    Description: "Daylight Savings"
+    timeGMT: 2000-03-14T10-00-00Z
+    zone: -7
+    trip: "DST"
+    comments: "Just filling the gap from 2010"

@@ -41,6 +41,8 @@ require_relative 'lib/gpsAddLocationPashua' # Dialog for adding location informa
 # For distanceMeters method
 RAD_PER_DEG = Math::PI / 180
 RM = 6371000 # Earth radius in meters
+HOME = "/Users/gscar/"
+thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
 
 def lineNum() # Had to move this to above the first call or it didn't work. Didn't think that was necessary
   caller_infos = caller.first.split(":")
@@ -49,7 +51,6 @@ def lineNum() # Had to move this to above the first call or it didn't work. Didn
 end # line numbers of this file, useful for debugging and logging info to progress screen
 
 photosArray = [] # can create initially, but I don't know how to add other "fields" to a file already on the list. I'll be better off with an indexed data base. I suppose could delete the existing item for that index and then put in revised. Not using this, but maybe some day
-thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
 lastPhotoReadTextFile = "/Volumes/LUMIX/DCIM/" # SD folder alternate since both this and one below occur
 sdCardAlt   = "/Volumes/NO NAME/"
 sdCard      = "/Volumes/LUMIX/"
@@ -58,15 +59,14 @@ srcSDfolder = sdCard + "DCIM/"  # SD folder
 
 # Temp file below that could be used to group some of the searches to geonames
 photoArrayFile = thisScript + "currentData/photoArray.txt"
-# photoArrayFile = File.join(thisScript + "currentData/photoArray.txt") # change def of thisScript
 
 # Folders on laptop
-laptopLocation        = "/Users/gscar/Pictures/_Photo Processing Folders/"
+laptopLocation        = HOME + "Pictures/_Photo Processing Folders/"
 # laptopLocation        = File.join("Users", "gscar", "Pictures", "_Photo Processing Folders") # Should be better than above def
 laptopDownloadsFolder = laptopLocation + "Download folder/"
-# laptopDownloadsFolder = File.join(laptopLocation , "Download folder") # Hve to go through the entire script and sort out the "/"
-laptopDestination     = laptopLocation + "Processed photos to be imported to Mylio/"
-laptopDestOrig        = laptopLocation + "Originals to archive/"
+# laptopDownloadsFolder = File.join(laptopLocation , "Download folder") # Have to go through the entire script and sort out the "/"
+laptopDestination     = laptopLocation + "Processed photos to be imported to Mylio/" # a temp folder.
+laptopDestOrig        = laptopLocation + "Originals to archive/" # FIXME Should be a flag to move to Daguerre when Daguerre available
 laptopTempJpg         = laptopLocation + "Latest Downloads temp jpg/"
 
 # Folders on portable drive: Daguerre. This is the normal location with Daguerre plugged into iMac
@@ -77,22 +77,23 @@ tempJpg   = downloadsFolders + "Latest Downloads temp jpg/"
 destOrig  = downloadsFolders + "_imported-archive" # folder to move originals to if not done in. No slash because getting double slash with one
 srcRename = "/Volumes/Seagate 8TB Backup/Mylio_87103a/Greg Scarich’s iPhone Library/" # Frequent location to perfom this. iPhone photos brought into Mylio
 #  Below is temporary file location for testing
-srcGpsAdd = "/Users/gscar/Documents/◊ Pre-trash/Cheeseboro/" # srcRename # Could to another location for convenience
+srcGpsAdd = HOME + "Documents/◊ Pre-trash/Cheeseboro/" # srcRename # Could to another location for convenience
 srcAddLocation  = "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio/" # = srcRename # Change to another location for convenience. This location picked so don't screw up a bunch of files
 
 # Mylio folder. Moved to this folder after all processing. Can't process in this folder or Mylio might add before this script's processing is finished. Processing is mainly done in destPhoto (should rename to ?, not process photo since that is another folder)
-iMacMylio = "/Users/gscar/Mylio/2021/GX8-2021/"
+iMacMylio = HOME + "Mylio/2021/GX8-2021/" # Good on both iMac and MBP M1 although it's not under iCloud, so requires Mylio for syncing
 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
 puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. ?? But it's being stored on LUMIX card"
 
 # geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wikipedia—most general and osm—maybe better for cities # not being used May 2019
-timeZonesFile = "/Users/gscar/Dropbox/scriptsEtc/Greg camera time zones.yml"
+# timeZonesFile = HOME + "Dropbox/scriptsEtc/Greg camera time zones.yml"
+timeZonesFile = thisScript + "currentData/Greg camera time zones.yml"
 # timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with. Only use once, so this just confused things
 gpsPhotoPerl = thisScript + "lib/gpsPhoto.pl"
 
 # GPS log files. Will this work from laptop
-folderGPX = "/Users/gscar/Documents/Documents - Greg’s iMac/GPS-Maps-docs/ GPX daily logs/2021 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
+folderGPX = HOME + "Documents/GPS-Maps-docs/ GPX daily logs/2021 Massaged/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
 puts "#{lineNum}. Must manually set folderGPX for GPX file folders. Particularly important at start of new year AND if working on photos not in current year.\n       Using: #{folderGPX}\n"
 geoNamesUser    = "MtnBiker" # This is login, user shows up as MtnBiker; but used to work with this. Good but may use it up. Ran out after about 300 photos per hour. This fixed it.
 geoNamesUser2   = "geonamestwo" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
@@ -229,7 +230,7 @@ def uniqueFileName(filename)
 end
 
 def copyAndMove(srcHD, destPhoto, tempJpg, destOrig, photosArray)
-  puts "\n#{lineNum}. Copy photos\nfrom #{srcHD}\n  to #{destPhoto} where the renaming will be done, \n\n and the originals moved to an archive folder (#{destOrig})\n Running dots are progress bar except the dots only show up when done! Fail." 
+  puts "\n#{lineNum}. Copy photos\nfrom #{srcHD}\n  to #{destPhoto} where the renaming will be done, \n\n and the originals moved to an archive folder (#{destOrig})" 
   # Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
   # Guess this method is slow because files are being copied
   # THIS METHOD WILL NOT WORK IF THE RAW FILE FORMAT ALPHABETICALLY COMES BEFORE JPG. SHOULD MAKE THIS MORE ROBUST
@@ -359,11 +360,11 @@ def fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc) # wasn't working when pass
   else
     tzoLocPrint = "+" + tzoLoc.to_s
   end
-  fileEXIF.instructions = "#{fileDateTimeOriginalstr} #{tzoLocPrint} from fileAnnotate debug" if !fileEXIF.DateTimeStamp # Time zone of photo is GMT #{tzoLoc} unless TS5?" or travel. TODO find out what this field is really for
+  fileEXIF.instructions = "#{fileDateTimeOriginalstr} #{tzoLocPrint})" if !fileEXIF.DateTimeStamp # Time zone of photo is GMT #{tzoLoc} unless TS5?" or travel. TODO find out what this field is really for
   # fileEXIF.comment = "Capture date: #{fileDateTimeOriginalstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Doesn't show up in Aperture
   # puts "#{lineNum}. fileEXIF.source: #{fileEXIF.source}.original file basename not getting written"
-  puts "#{File.basename(fn)} original filename to be written to EXIF.title"
-  # fileEXIF.title = "#{File.basename(fn)} original filename" # Source OK, but Title seemed a bit better. Seems to be a Panasonic field. Mylio metadata shows it.
+  # puts "#{File.basename(fn)} original filename to be written to EXIF.title"
+  fileEXIF.PreservedFileName = "#{File.basename(fn)}" # title ends up as Title above the caption. Source shows up in exiftool as IPTC::Source
   fileEXIF.TimeZoneOffset = tzoLoc # Time Zone Offset, (1 or 2 values: 1. The time zone offset of DateTimeOriginal from GMT in hours, 2. If present, the time zone offset of ModifyDate)
   # Am I misusing this? I may using it as the TimeZone for photos taken GMT 0 TODO
   # OffsetTimeOriginal	(time zone for DateTimeOriginal) which may or may not be the time zone the photo was taken in TODO
@@ -479,7 +480,7 @@ def rename(src, timeZonesFile, timeNowWas)
         fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
         timeChange = (3600*tzoLoc) # previously had error capture on this. Maybe for general cases which I'm not longer covering
         fileEXIF.OffsetTimeOriginal = "GMT"
-        puts "#{lineNum}.. fileDateTimeOriginal #{fileDateTimeOriginal}. timeChange: #{timeChange} for #{camModel}"
+        puts "#{lineNum}.. fileDateTimeOriginal #{fileDateTimeOriginal}. timeChange: #{timeChange} for #{camModel}" if count == 1 # just once is enough
       end # if camModel
       fileEXIF.save # only set OffsetTimeOriginal, but did do some reading.
      
