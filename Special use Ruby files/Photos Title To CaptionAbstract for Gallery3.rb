@@ -24,6 +24,6 @@ Dir.foreach(src) do |item|
   end
 end
        
-    puts "#{i_commented} of #{i} files had Title copied to EXIF ImageDescription (Gallery3 Caption)"   
-       # NOT TESTED WITH FileUtils.move(src,
-       # Nice to move annotated files too, but need to refactor to handle rescue
+puts "#{i_commented} of #{i} files had Title copied to EXIF ImageDescription (Gallery3 Caption)"   
+   # NOT TESTED WITH FileUtils.move(src,
+   # Nice to move annotated files too, but need to refactor to handle rescue
