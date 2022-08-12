@@ -9,11 +9,11 @@
 # Must set these variables manually. Next five lines
 # src = "/Users/gscar/Pictures/Epson V600 scans/" # Keeping as a frequently used folder
 src = "/Users/gscar/Mylio/New Folder With Items/"
-src = "/Users/gscar/Mylio/Apple Photos/Louisa's Santa Cruz Retina MacBook Pro Library/IMG_2346.HEIC"
+src = "/Users/gscar/Mylio/2022/bikecology_1980_mercian_catalogue_p 7.jpg"
 
 # Making it easier (less error prone) to change the date
-year = "1960" # 1898
-month =  "04" # 01
+year = "1980" # 1898
+month =  "01" # 01
 day =    "01" # 01
 # hour =   "12" # "00"
 # minute = "00" # "00"
@@ -62,7 +62,7 @@ else # a whole directory
   # https://stackoverflow.com/questions/5480703/how-to-sort-an-alphanumeric-array-in-ruby
   puts "Files in #{src} will be processed. PDFs and XMPs will (can)not be processed.\n\n"
   Dir.chdir(src)
-  files = Dir.glob("*.{jpg,png}")  # Restricts to only this type of file.
+  files = Dir.glob("*.{jpg,png,jpeg}")  # Restricts to only this type of file.
   # puts "#{lineNum}. files: #{files}"
   # Files for crores are named in page order, and this sorts them in this order, and the new dates are increased by 1 sec per file so they show up in page order in Mylio
   filesSorted = Naturally.sort(files)

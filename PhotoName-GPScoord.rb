@@ -51,11 +51,16 @@ def lineNum() # Had to move this to above the first call or it didn't work. Didn
 end # line numbers of this file, useful for debugging and logging info to progress screen
 
 photosArray = [] # can create initially, but I don't know how to add other "fields" to a file already on the list. I'll be better off with an indexed data base. I suppose could delete the existing item for that index and then put in revised. Not using this, but maybe some day
-lastPhotoReadTextFile = "/Volumes/LUMIX/DCIM/" # SD folder alternate since both this and one below occur
+sdCard      = "/Volumes/LUMIX0/"
+puts "#{lineNum}. Could be a problem with differently named SD cards: #{sdCard}. If the name is different, change #{lineNum.to_i - 1}" # In 2022, I got creative and named the LUMIX cards with a suffix in numerical order.
+lastPhotoReadTextFile = sdCard + "/DCIM/" # SD folder alternate since both this and one below occur
 sdCardAlt   = "/Volumes/NO NAME/"
-sdCard      = "/Volumes/LUMIX/"
 srcSDfolderAlt = sdCardAlt + "DCIM/" # SD folder alternate since both this and one below occur. Used at line 740
 srcSDfolder = sdCard + "DCIM/"  # SD folder 
+
+puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. If script failing may need to change the last file read to 0000 if folder change"
+puts "#{lineNum}. srcSDfolder: #{srcSDfolder}"
+
 
 # Temp file below that could be used to group some of the searches to geonames
 photoArrayFile = thisScript + "currentData/photoArray.txt"
@@ -71,6 +76,16 @@ laptopTempJpg         = laptopLocation + "Latest Downloads temp jpg/"
 
 # Folders on portable drive: Daguerre. This is the normal location with Daguerre plugged into iMac
 downloadsFolders = "/Volumes/Daguerre/_Download folder/"
+# For MtnBikerSSD. Need to rework this so flows more easily.
+# Maybe should start with what computer I'm on then make decisions about what's plugged in. Also consider the 10GB as a primary?
+# Process in MtnBikerSSD or Daguerre if plugged in, otherwise the computer in use?
+# See at approx line 985 where decide where to move files
+# Always _Download folder/ ?
+# 1. Daguerre
+# 2. MtnBikerSSD for travel with MBA
+# 2. MBP
+# 3. MBA-Does not have room to store photos for long
+downloadsFolders = "/Volumes/MtnBikerSSD/_Download folder/"
 srcHD     = downloadsFolders + " Drag Photos HERE/"  # Photos copied from camera, sent by others, etc.
 destPhoto = downloadsFolders + "Latest Processed photos-Import to Mylio/" # Was Latest Download. These are relabeled and GPSed files.
 tempJpg   = downloadsFolders + "Latest Downloads temp jpg/"
@@ -80,7 +95,7 @@ srcRename = "/Volumes/Seagate 8TB Backup/Mylio_87103a/Greg Scarich’s iPhone Li
 srcGpsAdd = HOME + "Documents/◊ Pre-trash/Cheeseboro/" # srcRename # Could to another location for convenience
 srcAddLocation  = "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio/" # = srcRename # Change to another location for convenience. This location picked so don't screw up a bunch of files
 
-# Mylio folder. Moved to this folder after all processing. Can't process in this folder or Mylio might add before this script's processing is finished. Processing is mainly done in destPhoto (should rename to ?, not process photo since that is another folder)
+# Mylio folder. Moved to this folder after all processing. Can't process in this folder or Mylio might add before this script's processing is finished. Processing is mainly done in destPhoto (should rename to ?, not process photo since that is another folder). The following needs to change based on comments at line 79
 iMacMylio = HOME + "Mylio/2022/GX8-2022/" # ANNUALLY: ADD IN MYLIO, NOT IN FINDER. Good on both iMac and MBP M1 although it's not under iCloud, so requires Mylio for syncing
 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
@@ -215,7 +230,7 @@ def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, th
   rescue IOError => e
     puts "Something went wrong. Could not write last photo read (#{fileSDbasename}) to #{fileNow}"
   end # begin
-    puts "\n#{lineNum}. Of the #{cardCount} photos on the SD card, #{cardCountCopied} were copied to #{src}" #last item was src, doesn't make sense
+    puts "\n#{lineNum}. Of the #{cardCount} photos on the SD card, #{cardCountCopied} were copied to #{src}" # last item was src, doesn't make sense
 end # copySD
 
 def uniqueFileName(filename)
@@ -453,7 +468,7 @@ def rename(src, timeZonesFile, timeNowWas)
       tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile ) # the time zone the picture was taken in, doesn't say anything about what times are recorded in the photo's EXIF. I'm doing this slightly wrong, because it's using the photo's recorded date which could be either GMT or local time. But only wrong if the photo was taken too close to the time when camera changed time zones
       # puts "#{lineNum}. #{count}. tzoLoc: #{tzoLoc} from timeZonesFile"
       if count == 1 | 1*100 # only gets written every 100 files.
-        puts "#{lineNum}. panasonicLocation: #{panasonicLocation}. tzoLoc: #{tzoLoc} Time zone photo was taken in from Greg camera time zones.yml\n"
+        puts "#{lineNum}. panasonicLocation: #{panasonicLocation}. tzoLoc: #{tzoLoc}. Time zone photo was taken in from Greg camera time zones.yml\n"
       # else
       #   print "."
       end # count
@@ -461,7 +476,7 @@ def rename(src, timeZonesFile, timeNowWas)
       # Also determine Time Zone TODO and write to file OffsetTimeOriginal	(time zone for DateTimeOriginal). Either GMT or use tzoLoc if recorded in local time as determined below
       # puts "#{lineNum}.. camModel: #{camModel}. #{tzoLoc} is the time zone where photo was taken. Script assumes GX8 on local time "
       # Could set timeChange = 0 here and remove from below except of course where it is set to something else
-      timeChange = 0 # setting it outside the loops below and get reset each time through. But can get changed
+      timeChange =  0 # 3600 *  # setting it outside the loops below and get reset each time through. But can get changed
       # puts "#{lineNum}. camModel: #{camModel}. fileEXIF.OffsetTimeOriginal: #{fileEXIF.OffsetTimeOriginal}"
       if camModel ==  "MISC" # MISC is for photos without fileDateTimeOriginal, e.g., movies
         # timeChange = 0
@@ -948,6 +963,7 @@ puts "\n#{lineNum}. All Finished. Note that \"Adding location information to pho
 
 # Move to Mylio folder (can't process in this folder or Mylio might import before changes are made)
 mylioFolder = iMacMylio # need to generalize this
+mylioFolder = "/Volumes/MtnBikerSSD/Mylio_87103a/2022/GX8-2022/"
 moveToMylio(destPhoto, mylioFolder, timeNowWas)
 
 # timeNowWas = timeStamp(timeNowWas, lineNum)
