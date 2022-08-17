@@ -1,29 +1,13 @@
 #!/usr/bin/env ruby
 # mini_exiftool couldn't be found. Was a problem with  TM_RUBY, GEM_PATH, AND GEM_HOME not matching the what TextMate is using. TM does not use .ruby_version
 
-# Using GitHub so can use on MBP (laptop)
-
-# Look at https://github.com/txus/kleisli for getting location information from geonames.
-# Look at speeding up with https://github.com/tonytonyjan/exif for rename and annotate which is rather slow. 8 min. for 326 photos
-# 2019/05/10 installed libexif and tried to use. Got error File not readable or no EXIF data in file. (Exif::NotReadable). Issue still open after two years at tonytonyjan
-# puts "Ruby v#{RUBY_VERSION}p#{RUBY_PATCHLEVEL} as reported by Ruby\nAnd as reported by \`system ('gem env')\`:" # A Ruby constant
-# system ('gem env') # for debugging problem with gem not loading https://stackoverflow.com/questions/53202164/textmate-chruby-and-ruby-gems
-
-# puts "\n10. Gem.path: #{Gem.path}"
-# puts "\ngem list:" # Can't figure out how to do this in one line.
-# system ('gem list') # for debugging problem with mini_exiftool not loading
-
 require 'fileutils'
 include FileUtils
 require 'find'
 require 'yaml'
 require "time"
-# require 'shellwords'
 require 'irb' # binding.irb where error checking is desired
 require 'mini_exiftool'
-# require 'exif' # added later. A partial implementation of ExifTool, but faster than mini_exiftool. Commented out since doesn't work with Panasonic Raw
-
-# require 'geonames' # Brought into the script because was getting loading errors
 # The these first three requires are for geonames and then the class
 require 'json'
 require 'open-uri'
@@ -57,7 +41,6 @@ srcSDfolder = sdCard + "DCIM/"  # SD folder
 
 puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. If script failing may need to change the last file read to 0000 if folder change"
 puts "#{lineNum}. srcSDfolder: #{srcSDfolder} which may or may not be the folder being read from"
-
 
 # Temp file below that could be used to group some of the searches to geonames
 photoArrayFile = thisScript + "currentData/photoArray.txt"
@@ -230,26 +213,6 @@ def uniqueFileName(filename)
   unique_name
 end
 
-# Checking if a filterEffect or whatever it's called was used, because will use the jpg in Mylio. Also HDR
-# def filterEffect(fnp)
-#   fileEXIF = MiniExiftool.new(fnp)
-#   filterEffect = fileEXIF.FilterEffect
-#   puts "\n#{lineNum}. fnp: #{fnp}. FilterEffect: #{filterEffect}"
-#   # HDR is "Expressive"
-#   if filterEffect == "Expressive" && fileEXIF.HDRShot != "On"
-#     jpgMove = true # saying to move, but is this what I want to do NOW. initialized outside this def
-#     puts "#{lineNum} FilterEffect: #{filterEffect} == 'Expressive'"
-#     FileUtils.rm(fnp) # Removing the jpg file from LatestDownload which is "duplicate" of a RAW that we're now considering. Can comment this out to keep both
-#     puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} will not be added to Mylio because it's a jpg duplicate of a RAW version. But any jpgs from Presets will be missing" # Is this slow? Turned off to try. Not sure.
-#     # puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} was moved to #{tempJpg} it's a jpg duplicate of a RAW version and needs to be processed separately." # Is this slow? Turned off to try. Not sure.
-#     delCount += 1
-#   else
-#     puts "#{lineNum}. #{item} jpg saved to Mylio because the #{filterEffect} effect was used"
-#     puts "#{lineNum} FilterEffect: #{filterEffect} == '!Expressive'"
-#   end
-#   fileEXIF.save
-# end
-
 def mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArray)
   # Already copied from SD card, but copying to processing folder (mylioStaging) and then moving the original to archive folder (archiveFolder)
   puts "\n#{lineNum}. Copy photos\nfrom #{srcHD}\n
@@ -281,16 +244,15 @@ def mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArra
       puts "#{lineNum}. #{fn} since #{itemExt} is not jpg to be staged"
     end
 
-   # If a jpg and has an effect, copy to mylioStaging via 
+   # If a jpg and has an effect, copy to mylioStaging via
     fileEXIF = MiniExiftool.new(fn)
     filterEffect = fileEXIF.FilterEffect
     if itemExt.downcase == ".jpg" && filterEffect != "Expressive" # Expressive is default, so not much of an effect, but may need to change this
-      # filterEffect(fnp) # if decide to do more with this
       fnt = tempJpg + item
       FileUtils.copy(fn, fnt)
       puts "#{lineNum}. #{fn} to be staged since filterEffect is #{filterEffect}"
     end
-    
+
     # if two jpgs in a row, then no associated raw, therefore stage
     if itemPrevExtName == itemExt
       fnt = tempJpg + item
@@ -307,7 +269,7 @@ def mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArra
     else # no copies, so move
       FileUtils.move(fn, fna)
     end # File.exists?
-      # "#{lineNum}.. #{photoFinalCount + delCount} #{fn}" # More for debugging, but maybe OK as progress in this slow process
+    # "#{lineNum}.. #{photoFinalCount + delCount} #{fn}" # More for debugging, but maybe OK as progress in this slow process
     photoFinalCount += 1
     arrayIndex = photoFinalCount - 1 # Need spaces around the minus
     photosArray << [arrayIndex, item, fnm, itemPrevExtName] # count minus one, so indexed like an array starting at zero
@@ -322,105 +284,6 @@ def mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArra
   puts "\n#{lineNum}. #{photoFinalCount} photos have been moved and are ready for renaming and adding GPS coordinates \n#{comment}"
   return photosArray
 end # mylioStageAndArchive: copy to the final destination where the renaming will be done and coordinates added; and the original moved to an archive (_imported-archive folder)
-
-# Before reverse but was not working
-# def mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArray)
-#   # Already copied from SD card, but copying to processing folder (mylioStaging) and then moving the original to archive folder (archiveFolder)
-#   puts "\n#{lineNum}. Copy photos\nfrom #{srcHD}\n
-#   to #{mylioStaging} where the renaming will be done, \n
-#   and the originals moved to an archive folder (#{archiveFolder})"
-#   # Only copy jpg to mylioStaging if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
-#   # Guess this method is slow because files are being copied
-#   # THIS METHOD WILL NOT WORK IF THE RAW FILE FORMAT ALPHABETICALLY COMES BEFORE JPG. SHOULD MAKE THIS MORE ROBUST
-#   photoFinalCount = 0
-#   delCount = 1
-#   itemPrev = "" # need something for first time through
-#   fnp = ""
-#   jpgMove = false # Define outside of the 'each do' loop
-#   # puts "#{lineNum}. Files in #{srcHD}: #{Dir.entries(srcHD).sort}" # list of files to be processed
-#   Dir.entries(srcHD).sort.each do |item| # This construct goes through each in order. Sometimes the files are not in order with Dir.foreach or Dir.entries without sort
-#     # Item is the file name
-#     # puts "\n#{lineNum}.. photoFinalCount: #{photoFinalCount + 1}. item: #{item}." # kind of a progress bar
-#     next if item == '.' or item == '..' or item == '.DS_Store'
-#     # next if ignoreNonFiles(item) == true
-#
-#     fn  = srcHD + item
-#     fnm = mylioStaging + item
-#     fnf = archiveFolder + item # to already imported for archiving
-#
-#    # If a jpg and has an effect, copy to mylioStaging
-#     itemExt = File.extname(item)
-#     fileEXIF = MiniExiftool.new(item)
-#     filterEffect = fileEXIF.FilterEffect
-#     if itemExt.downcase == ".jpg" && filterEffect != "Expressive" # Expressive is default, so not much of an effect, but may need to change this
-#       FileUtils.copy(fn, fnm)
-#       # filterEffect(fnp) # if decide to do more with this
-#     end
-#
-#     # If first pair are jpgs or Raws, the previous one needs to be saved as it is jpg only or an HDR
-#     if photoFinalCount == 1 && itemPrevExtName == itemExt # checks if a Raw and jpg exist, but skips first time through
-#       #  The following shouldn't be necessary, but is a check in case another kind of raw or who know what else. Only the FileUtils.rm(itemPrev) should be needed
-#         FileUtils.copy(fnp, fnmp)
-#     else # not the same
-#
-#     # Already screened for ones with effect above, now just delete any jpgs without a Raw
-#     # If jpg's into Mylio if a Raw exists, First check if basenames are the same
-#     # Then if Raw, copy. Skip if jpg
-#     if File.basename(itemPrev, ".*") == File.basename(item,".*") && photoFinalCount != 0 # checks if a Raw and jpg exist, but skips first time through
-#       #  The following shouldn't be necessary, but is a check in case another kind of raw or who know what else. Only the FileUtils.rm(itemPrev) should be needed
-#       if itemExt.downcase != ".jpg" # that is raw
-#         FileUtils.copy(fn, fnm)
-#       end
-#     else # not the same
-#
-#     # What about solo jpg, either an HDR or only shot jpg for some reason
-#
-#       itemPrevExtName = File.extname(itemPrev) # since reusing below. jpg, orf (Olympus) or RW2 (Panasonic). So will work as long as Raw comes after jpg alphabetically
-#       fnp = fn
-#       fnpm = fnm
-#       # TODO Add an option to keep or not keep jpgs. May want to see how camera is converting them. May end up having problem with labeling as then would have two photos taken at the same time and the Raw will always be a .b
-#         # FileUtils.rm(mylioStaging + itemPrev) if itemPrevExtName == ".HEIC" # could uncomment this if a problem for Mylio.
-#       #  Not sure about what how to handle HEIC
-#       # if itemPrevExtName.downcase ==  ".jpg"
-#         # photoFinalCount -= 1 # commented out since now included
-#       # else # not a jpg and check for HEIC--what am I doing with this
-#     #     if itemPrevExtName == ".HEIC"
-#     #       FileUtils.rm(mylioStaging + itemPrev)
-#     #     end # itemPrevExtName-just one line
-#     #     puts "#{lineNum}. Something very wrong here with trying to remove JPGs when there is a corresponding .RW2 or .HEIC. itemPrev: #{itemPrev}. item: #{item}."
-#     #   end # itemPrevExtName.downcase a bunch of lines
-#       # end # File.extname
-#     end   # File.basename
-#     # fn  = srcHD       + item # sourced from Drag Photos Here
-#    #  fnm = mylioStaging + item # new file in Latest Download
-#     # fnm = tempJpg     + item if !jpgMove # seems like ! is backwards but this works
-#     # FileUtils.copy(fn, fnm) if fn!=fnp # making a copy in the mylioStaging folder for further action
-#
-#     if File.exists?(fnf)  # moving the original to _imported-archive, but not writing over existing files
-#       fnf = uniqueFileName(fnf)
-#       FileUtils.move(fn, fnf)
-#       puts "#{lineNum}. A file already existed with this name so it was changed to fnf: #{fnf}"
-#     else # no copies, so move
-#       FileUtils.move(fn, fnf)
-#     end # File.exists?
-#       # "#{lineNum}.. #{photoFinalCount + delCount} #{fn}" # More for debugging, but maybe OK as progress in this slow process
-#       itemPrev = item
-#       jpgMove = false
-#       photoFinalCount += 1
-#       arrayIndex = photoFinalCount - 1 # Need spaces around the minus
-#       photosArray << [arrayIndex, item, fnm, itemPrevExtName] # count minus one, so indexed like an array starting at zero
-#       print "." # Trying to get a progress bar
-#
-#   end # Dir.entries
-#   # puts "\#{lineNum}. #{photoFinalCount} photos have been moved and are ready for renaming and gpsing. #{delCount-1} duplicate jpg were not
-#   if delCount > 1
-#     comment = "#{lineNum}. #{delCount-1} jpegs were moved to #{tempJpg} for processing separately."
-#   else
-#     comment = ""
-#   end # if delCount
-#   puts "\n#{lineNum}. #{photoFinalCount} photos have been moved and are ready for renaming and adding GPS coordinates \n#{comment}"
-#   return photosArray
-# end # mylioStageAndArchive: copy to the final destination where the renaming will be done and coordinates added; and the original moved to an archive (_imported-archive folder)
 
 # def unmountCard(card)
 #   puts "#{lineNum}. card: #{card}"
@@ -550,9 +413,6 @@ def rename(src, timeZonesFile, timeNowWas)
 
     # puts "\n#{lineNum}. #{fileCount}. fn: #{fn}"
     # puts "#{lineNum}.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
-    # if !File.file?(fn) # Take out when figure it out.
-    #   puts "#{lineNum}. Checking why the check below is needed. File.file?(fn): #{File.file?(fn)} for fn: #{fn}"
-    # end
     if File.file?(fn) # why is this needed. Do a check above
       # Determine the time and time zone where the photo was taken
       # puts "#{lineNum}.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}." #  #{timeNowWas = timeStamp(timeNowWas)}
@@ -560,7 +420,6 @@ def rename(src, timeZonesFile, timeNowWas)
       fileExtPrev = ""
       fileDateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
       # puts "#{lineNum}. fileDateTimeOriginal = fileEXIF.dateTimeOriginal: #{fileDateTimeOriginal} of class: #{fileDateTimeOriginal.class}"
-      # 446. fileDateTimeOriginal = fileEXIF.dateTimeOriginal: 2021-11-25 12:09:11 -0800 of class: Time. This was really -7, but computer is -8, and that is what is reported. The dateTimeOriginal in the camera doesn't know what zone it's in.
       fileSubSecTimeOriginal = fileEXIF.SubSecTimeOriginal # no error if doesn't exist
       subSec = "." + fileSubSecTimeOriginal.to_s[0..1] #Truncating to 2 figs (could round but would need to make a float, divide by 10 and round or something. This should be close enough)
       subSecExists = fileEXIF.SubSecTimeOriginal.to_s.length > 2 # 
@@ -605,24 +464,12 @@ def rename(src, timeZonesFile, timeNowWas)
         fileEXIF.OffsetTimeOriginal = "GMT"
         puts "#{lineNum}.. fileDateTimeOriginal #{fileDateTimeOriginal}. timeChange: #{timeChange} for #{camModel}" if count == 1 # just once is enough
       end # if camModel
-      fileEXIF.save # only set OffsetTimeOriginal, but did do some reading.     
+      fileEXIF.save # only set OffsetTimeOriginal, but did do some reading.
 
       fileDate = fileDateTimeOriginal + timeChange.to_i # date in local time photo was taken. No idea why have to change this to i, but was nil class even though zero  
       fileDateTimeOriginalstr = fileDateTimeOriginal.to_s[0..-6]
-      
-      # filePrev = fn
-      # Working out if files at the same time
-      # puts "\nxx.. #{fileCount}. oneBack: #{oneBack}."
-      # Determine dupCount, i.e., 0 if not in same second, otherwise the number of the sequence for the same time
-      # puts "#{lineNum}.. #{timeStamp(timeNowWas)}"
-      # Now the fileBaseName. Simple if not in the same second, otherwise an added sequence number
-      # oneBack = fileDate == fileDatePrev # true if previous file at the same time calculated in local time
+
       oneBack = fileDate == fileDatePrev && fileExt != fileExtPrev # at the moment this is meaningless because all of tne type
-      # puts "\n#{lineNum}.#{count}. oneBack: #{oneBack}. #{item}. dupCount: #{dupCount}"
-      # if subSecExists # mainly GX8. Too heavy handed, every GX8 files get subSec which is too much
-#           fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "." + fileSubSecTimeOriginal.to_s + userCamCode(fn)
-#           puts "#{lineNum}. fn: #{fn} in 'if subSecExists'.     fileBaseName: #{fileBaseName}."
-      # else # not GX8
       if oneBack # at the moment only handles two in the same second
         dupCount += 1
         if subSecExists # mainly GX8. and maybe iPhone bursts
@@ -638,8 +485,6 @@ def rename(src, timeZonesFile, timeNowWas)
           fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  seqLetter[dupCount] + userCamCode(fn) + filtered
           puts "#{lineNum}. fn: #{fn} in 'if oneBack'.     fileBaseName: #{fileBaseName}."
         end # subSecExists
-        # fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  seqLetter[dupCount] + userCamCode(fn)
-#           puts "#{lineNum}. fn: #{fn} in 'if oneBack'.     fileBaseName: #{fileBaseName}."
       else # normal condition that this photo is at a different time than previous photo
         dupCount = 0 # resets dupCount after having a group of photos in the same second
         fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S")  + userCamCode(fn) + filtered
@@ -650,14 +495,7 @@ def rename(src, timeZonesFile, timeNowWas)
       fileExtPrev = fileExt
       # fileBaseNamePrev = fileBaseName
 
-      # File renaming and/or moving happens here
-      # puts "#{lineNum}. #{count+1}. dateTimeOriginal: #{fileDateTimeOriginal}. item: #{item}. camModel: #{camModel}" # . #{timeNowWas = timeStamp(timeNowWas)}
-      # fileAnnotate(fn, fileEXIF, fileDateTimeOriginalstr, tzoLoc) # adds original file name, capture date and time zone to EXIF. Comments which I think show up as instructions in Aperture. Also wiping out bad GPS data on TS5
       fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc) # was passing fileEXIF, but saving wasn't happening, so reopen in the module?
-      # #### Doing here for one round Didn't work
-      # fileEXIF.title = "#{File.basename(fn)} original filename" # Source OK, but Title seemed a bit better
-     #  puts "#{lineNum}. File.basename(fn): #{File.basename(fn)}. Supposed to be written to photo"
-     #  fileEXIF.save
 
       fnp = fnpPrev = src + fileBaseName + File.extname(fn).downcase # unless #Why was the unless here?
       # puts "Place holder to make the script work. where did the unless come from"
@@ -665,16 +503,12 @@ def rename(src, timeZonesFile, timeNowWas)
       subSecPrev = subSec.to_s
       File.rename(fn,fnp)
       count += 1
-      # print " #{count}" Trying for  progress indicator
-      # puts "#{lineNum}.#{count} #{timeNowWas = timeStamp(timeNowWas)}. #{fileBaseName}" # temp to see how long taking. 1 to 4 seconds on MBP accessing photos on attached portable drive
-    else
+     else
       puts "#{lineNum}. CHECKING why `if File.file?(fn)` is needed. File.file?(fn): #{File.file?(fn)} for fn: #{fn}"
     end # 3. if File.file?(fn)
     # puts "#{lineNum}. Got to here. tzoLoc: #{tzoLoc}"
     
   end # 2. Dir.foreach(src)
-  # return tzoLoc # used by ?
-  # puts "#{lineNum}. Got to here. tzoLoc: #{tzoLoc}" # tzoLoc doesn't exist here
   return tzoLoc # the time zone the picture was taken in,
 end # rename ing photo files in the downloads folder and writing in original time.
 
@@ -954,7 +788,7 @@ end # whichOne=="SD"
 #   abort
 # end #SD card mounted
 
-mylioStaging = prefsPhoto["destPhotoP"].to_s + "/" 
+mylioStaging = prefsPhoto["destPhotoP"].to_s + "/"
 # puts "#{lineNum}. mylioStaging: #{mylioStaging} from Pashua" # debugging
 
 archiveFolder = prefsPhoto["destOrig"].to_s + "/"
@@ -962,7 +796,7 @@ archiveFolder = prefsPhoto["destOrig"].to_s + "/"
 
 # But first check that mylioStaging is empty. I'm assuming mylioStaging has been determined at this point
 mylioStagingCount = Dir.entries(mylioStaging).count
-if mylioStagingCount > 3 # 
+if mylioStagingCount > 3
   puts "\n#{lineNum}. #{mylioStagingCount} files are in the destination folder"
   # Put up a notice or ask if want to delete them. Or list the first few
 end

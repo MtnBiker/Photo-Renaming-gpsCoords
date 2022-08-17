@@ -1,8 +1,8 @@
 .ruby_version # not used by TextMate anyway
-"Ruby- to backup alias"
-"Ruby-old stuff to backup alias"
-"Icon\r"
-"Ruby- to back up alias"
+# "Ruby- to backup alias"
+# "Ruby-old stuff to backup alias"
+Icon\r
+# "Ruby- to back up alias"
 TODO
 TODO.md
 /currentData/photoArray.txt # git rm --cached FILENAME git rm --cached -f "currentData/photoArray.txt"
