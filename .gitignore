@@ -5,7 +5,8 @@
 "Ruby- to back up alias"
 TODO
 TODO.md
-/currentData/photoArray.txt
+/currentData/photoArray.txt # git rm --cached FILENAME git rm --cached -f "currentData/photoArray.txt"
+
 
 #  Following are recommended for Ruby, although I don't think I have any of these. Probably more for Ruby development itself, not using Ruby
 *.gem

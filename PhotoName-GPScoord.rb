@@ -38,9 +38,6 @@ require_relative 'lib/renamePashua' # Dialog for renaming without moving
 require_relative 'lib/gpsCoordsPashua' # Dialog for adding GPS coordinates without moving
 require_relative 'lib/gpsAddLocationPashua' # Dialog for adding location information based GPS coordinates in file EXIF without moving
 
-# For distanceMeters method
-RAD_PER_DEG = Math::PI / 180
-RM = 6371000 # Earth radius in meters
 HOME = "/Users/gscar/"
 thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
 
@@ -51,7 +48,7 @@ def lineNum() # Had to move this to above the first call or it didn't work. Didn
 end # line numbers of this file, useful for debugging and logging info to progress screen
 
 photosArray = [] # can create initially, but I don't know how to add other "fields" to a file already on the list. I'll be better off with an indexed data base. I suppose could delete the existing item for that index and then put in revised. Not using this, but maybe some day
-sdCard      = "/Volumes/LUMIX0/"
+sdCard      = "/Volumes/LUMIX/"
 puts "#{lineNum}. Could be a problem with differently named SD cards: #{sdCard}. If the name is different, change #{lineNum.to_i - 1}" # In 2022, I got creative and named the LUMIX cards with a suffix in numerical order.
 lastPhotoReadTextFile = sdCard + "/DCIM/" # SD folder alternate since both this and one below occur
 sdCardAlt   = "/Volumes/NO NAME/"
@@ -59,7 +56,7 @@ srcSDfolderAlt = sdCardAlt + "DCIM/" # SD folder alternate since both this and o
 srcSDfolder = sdCard + "DCIM/"  # SD folder 
 
 puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. If script failing may need to change the last file read to 0000 if folder change"
-puts "#{lineNum}. srcSDfolder: #{srcSDfolder}"
+puts "#{lineNum}. srcSDfolder: #{srcSDfolder} which may or may not be the folder being read from"
 
 
 # Temp file below that could be used to group some of the searches to geonames
@@ -76,32 +73,31 @@ laptopTempJpg         = laptopLocation + "Latest Downloads temp jpg/"
 
 # Folders on portable drive: Daguerre. This is the normal location with Daguerre plugged into iMac
 downloadsFolders = "/Volumes/Daguerre/_Download folder/"
-# For MtnBikerSSD. Need to rework this so flows more easily.
 # Maybe should start with what computer I'm on then make decisions about what's plugged in. Also consider the 10GB as a primary?
-# Process in MtnBikerSSD or Daguerre if plugged in, otherwise the computer in use?
+# Process in MtnBikerSSD or Daguerre if plugged in, otherwise the computer in use which is decided later?
+if File.exists?(downloadsFolders)
+  puts "#{lineNum}. Daguerre is mounted"
+else
+  downloadsFolders = "/Volumes/MtnBikerSSD/_Download folder/"
+  puts "#{lineNum}. Daguerre is NOT mounted, so using #{downloadsFolders}"
+end
 # See at approx line 985 where decide where to move files
-# Always _Download folder/ ?
-# 1. Daguerre
-# 2. MtnBikerSSD for travel with MBA
-# 2. MBP
-# 3. MBA-Does not have room to store photos for long
-downloadsFolders = "/Volumes/MtnBikerSSD/_Download folder/"
-srcHD     = downloadsFolders + " Drag Photos HERE/"  # Photos copied from camera, sent by others, etc.
-destPhoto = downloadsFolders + "Latest Processed photos-Import to Mylio/" # Was Latest Download. These are relabeled and GPSed files.
+srcHD       = downloadsFolders + " Drag Photos HERE/"  # Photos copied from camera, sent by others, etc.
+mylioStaging = downloadsFolders + "Latest Processed photos-Import to Mylio/" #  These are relabeled and GPSed files. Will be moved to Mylio after processing.
+# puts "#{lineNum}. mylioStaging: #{mylioStaging}. Where the photos are processed before being moved into Mylio folder" # debugging
 tempJpg   = downloadsFolders + "Latest Downloads temp jpg/"
-destOrig  = downloadsFolders + "_imported-archive" # folder to move originals to if not done in. No slash because getting double slash with one
+archiveFolder  = downloadsFolders + "_imported-archive" # folder to move originals to if not done in. No slash because getting double slash with one
 srcRename = "/Volumes/Seagate 8TB Backup/Mylio_87103a/Greg Scarich’s iPhone Library/" # Frequent location to perfom this. iPhone photos brought into Mylio
 #  Below is temporary file location for testing
-srcGpsAdd = HOME + "Documents/◊ Pre-trash/Cheeseboro/" # srcRename # Could to another location for convenience
+# srcGpsAdd = HOME + "Documents/◊ Pre-trash/Cheeseboro/" # srcRename # Could to another location for convenience. Debug ??
 srcAddLocation  = "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio/" # = srcRename # Change to another location for convenience. This location picked so don't screw up a bunch of files
 
-# Mylio folder. Moved to this folder after all processing. Can't process in this folder or Mylio might add before this script's processing is finished. Processing is mainly done in destPhoto (should rename to ?, not process photo since that is another folder). The following needs to change based on comments at line 79
+# Mylio folder. Moved to this folder after all processing. Can't process in this folder or Mylio might add before this script's processing is finished. Processing is mainly done in mylioStaging. The following needs to change based on comments at line 79
 iMacMylio = HOME + "Mylio/2022/GX8-2022/" # ANNUALLY: ADD IN MYLIO, NOT IN FINDER. Good on both iMac and MBP M1 although it's not under iCloud, so requires Mylio for syncing
 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
 puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. ?? But it's being stored on LUMIX card"
 
-# geoInfoMethod = "wikipedia" # for gpsPhoto to select georeferencing source. wikipedia—most general and osm—maybe better for cities # not being used May 2019
 # timeZonesFile = HOME + "Dropbox/scriptsEtc/Greg camera time zones.yml"
 timeZonesFile = thisScript + "currentData/Greg camera time zones.yml"
 # timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with. Only use once, so this just confused things
@@ -110,20 +106,10 @@ gpsPhotoPerl = thisScript + "lib/gpsPhoto.pl"
 # GPS log files. Will this work from laptop
 folderGPX = HOME + "Documents/GPS-Maps-docs/  GPX daily logs/2022 GPX logs/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
 puts "#{lineNum}. Must manually set folderGPX for GPX file folders. Particularly important at start of new year AND if working on photos not in current year.\n       Using: #{folderGPX}\n"
-geoNamesUser    = "MtnBiker" # This is login, user shows up as MtnBiker; but used to work with this. Good but may use it up. Ran out after about 300 photos per hour. This fixed it.
-geoNamesUser2   = "geonamestwo" # second account when use up first. Or use for location information, i.e., splitting use in half. NOT IMPLEMENTED
-
-# Allowing options do only do partial changes. Used to have this but took out.
-gpsDo = false # Haven't implemented
-locationDo = false
 
 # MODULES
 def ignoreNonFiles(item) # invisible files that shouldn't be processed
-  # puts "#{lineNum}. item: #{item}. item.slice(0,6): #{item.slice(0,7)}"
   item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon ' or item.slice(0,7) == ".MYLock"
-  # .MYLock... is a Mylio file of some kind
-  # This is true when it should not be processed i.e. next if ignoreNonFiles(item) == true
-  # next if ignoreNonFiles(item) == true # how to use this
 end
 
 def gpsFilesUpToDate(folderGPX)
@@ -176,7 +162,7 @@ def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, th
   fileSDbasename = "" # got an error at puts fileSDbasename
   while doAgain==true # and timesThrough<=2 
     Dir.chdir(src) # needed for glob
-    Dir.glob("P*") do |item| 
+    Dir.glob("P*") do |item| # Presumably filename has to start with 'P'
       cardCount += 1
       print(".") # crude activity bar. This doesn't happen
       # put cardCount # another try at activity bar
@@ -244,83 +230,197 @@ def uniqueFileName(filename)
   unique_name
 end
 
-def copyAndMove(srcHD, destPhoto, tempJpg, destOrig, photosArray)
-  puts "\n#{lineNum}. Copy photos\nfrom #{srcHD}\n  to #{destPhoto} where the renaming will be done, \n\n and the originals moved to an archive folder (#{destOrig})" 
-  # Only copy jpg to destPhoto if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
+# Checking if a filterEffect or whatever it's called was used, because will use the jpg in Mylio. Also HDR
+# def filterEffect(fnp)
+#   fileEXIF = MiniExiftool.new(fnp)
+#   filterEffect = fileEXIF.FilterEffect
+#   puts "\n#{lineNum}. fnp: #{fnp}. FilterEffect: #{filterEffect}"
+#   # HDR is "Expressive"
+#   if filterEffect == "Expressive" && fileEXIF.HDRShot != "On"
+#     jpgMove = true # saying to move, but is this what I want to do NOW. initialized outside this def
+#     puts "#{lineNum} FilterEffect: #{filterEffect} == 'Expressive'"
+#     FileUtils.rm(fnp) # Removing the jpg file from LatestDownload which is "duplicate" of a RAW that we're now considering. Can comment this out to keep both
+#     puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} will not be added to Mylio because it's a jpg duplicate of a RAW version. But any jpgs from Presets will be missing" # Is this slow? Turned off to try. Not sure.
+#     # puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} was moved to #{tempJpg} it's a jpg duplicate of a RAW version and needs to be processed separately." # Is this slow? Turned off to try. Not sure.
+#     delCount += 1
+#   else
+#     puts "#{lineNum}. #{item} jpg saved to Mylio because the #{filterEffect} effect was used"
+#     puts "#{lineNum} FilterEffect: #{filterEffect} == '!Expressive'"
+#   end
+#   fileEXIF.save
+# end
+
+def mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArray)
+  # Already copied from SD card, but copying to processing folder (mylioStaging) and then moving the original to archive folder (archiveFolder)
+  puts "\n#{lineNum}. Copy photos\nfrom #{srcHD}\n
+  to #{mylioStaging} where the renaming will be done, \n
+  and the originals moved to an archive folder (#{archiveFolder})" 
+  # Only copy jpg to mylioStaging if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
   # Guess this method is slow because files are being copied
   # THIS METHOD WILL NOT WORK IF THE RAW FILE FORMAT ALPHABETICALLY COMES BEFORE JPG. SHOULD MAKE THIS MORE ROBUST
   photoFinalCount = 0
   delCount = 1
   itemPrev = "" # need something for first time through
-  fnp = "" # when looped back got error "undefined local variable or method ‘fnp’ for main:Object", so needs to be set here to remember it. Yes, this works, without this statement get an error
-  jpgMove = false # Define outside of the 'each do' loop
-  # puts "#{lineNum}. Files in #{srcHD}: #{Dir.entries(srcHD).sort}" # list of files to be processed
-  Dir.entries(srcHD).sort.each do |item| # This construct goes through each in order. Sometimes the files are not in order with Dir.foreach or Dir.entries without sort
+  itemPrevExtName = ""
+  fnp = ""
+  puts "#{lineNum}. Files in #{srcHD}: #{Dir.entries(srcHD).sort.reverse}" # list of files to be processed
+  Dir.entries(srcHD).sort.reverse.each do |item| # This construct goes through each in order. Sometimes the files are not in order with Dir.foreach or Dir.entries without sort. Reverse sorting so can do Raws first
     # Item is the file name
     # puts "\n#{lineNum}.. photoFinalCount: #{photoFinalCount + 1}. item: #{item}." # kind of a progress bar
     next if item == '.' or item == '..' or item == '.DS_Store'
     # next if ignoreNonFiles(item) == true
-    # fileExt = File.extname(item)
-    # I think the following if is about not bringing jpg's into whatever program I'm using which is now Mylio. Now being used at the moment, so all commented out
-    if File.basename(itemPrev, ".*") == File.basename(item,".*") && photoFinalCount != 0
-     #  The following shouldn't be necessary, but is a check in case another kind of raw or who know what else. Only the FileUtils.rm(itemPrev) should be needed
-     itemPrevExtName = File.extname(itemPrev) # since reusing below
-     # TODO Add an option to keep or not keep jpgs. May want to see how camera is converting them. May end up having problem with labeling as then would have two photos taken at the same time and the Raw will always be a .b
-     # Now just keeping them
-       # FileUtils.rm(destPhoto + itemPrev) if itemPrevExtName == ".HEIC" # could uncomment this if a problem for Mylio.
-        # All the commented out lines below since keeping jpgs. Not sure about what how to handle HEIC
-      if itemPrevExtName.downcase ==  ".jpg" # Downcased and removed this (".JPG" or itemPrevExtName ==) added lower case for iPhone to sort HEIC
-        # Mark for moving to tempJpg
-        jpgMove = true
-        # FileUtils.rm(fnp) # Removing the jpg file from LatestDownload which is "duplicate" of a RAW that we're now considering. Can comment this out to keep both
-        # puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} will not be transferred because it's a jpg duplicate of a RAWversion." # Is this slow? Turned off to try. Not sure.
-        # puts "#{lineNum}.. #{delCount}. fnp: #{itemPrev} was moved to #{tempJpg} it's a jpg duplicate of a RAW version and needs to be processed separately." # Is this slow? Turned off to try. Not sure.
-        delCount += 1
-        # photoFinalCount -= 1 # commented out since now included
-      elsif # not a jpg and check for HEIC--what am I doing with this
-        if itemPrevExtName == ".HEIC"
-          FileUtils.rm(destPhoto + itemPrev)
-        end # itemPrevExtName-just one line
-        puts "#{lineNum}. Something very wrong here with trying to remove JPGs when there is a corresponding .RW2 or .HEIC. itemPrev: #{itemPrev}. item: #{item}."
-      end # itemPrevExtName.downcase a bunch of lines
-      # end # File.extname  
-    end   # File.basename
-    fn  = srcHD     + item # sourced from Drag Photos Here
-    fnp = destPhoto + item # new file in Latest Download
-    fnp = tempJpg   + item if !jpgMove # seems like ! is backwards but this works
-    # puts "#{lineNum}. Copy from fn: #{fn}"  # debugging
-    fnf = destOrig  + item # to already imported for archiving
-    # puts "#{lineNum}. from fn: #{fn} to fnp: #{fnp}" # debugging
-    FileUtils.copy(fn, fnp) if fn!=fnp # making a copy in the Latest Downloads folder for further action
-    # puts "#{lineNum}.#{photoFinalCount}. #{fn} copied to #{fnp}" # dubugging
-    # puts "#{lineNum}.#{photoFinalCount}. item: #{item}. #{fn} copied to #{fnp}" # dubugging
 
-    if File.exists?(fnf)  # moving the original to _imported-archive, but not writing over existing files
-      fnf = uniqueFileName(fnf)
-      FileUtils.move(fn, fnf)
-      puts "#{lineNum}. A file already existed with this name so it was changed to fnf: #{fnf}"
+    fn  = srcHD + item
+    fnm = mylioStaging + item
+    fna = archiveFolder + item # to already imported for archiving
+    itemExt = File.extname(item).downcase
+
+    # if Raw or mp4, copy to staging
+    if itemExt != ".jpg"
+      FileUtils.copy(fn, fnm)
+      puts "#{lineNum}. #{fn} since #{itemExt} is not jpg to be staged"
+    end
+
+   # If a jpg and has an effect, copy to mylioStaging via 
+    fileEXIF = MiniExiftool.new(fn)
+    filterEffect = fileEXIF.FilterEffect
+    if itemExt.downcase == ".jpg" && filterEffect != "Expressive" # Expressive is default, so not much of an effect, but may need to change this
+      # filterEffect(fnp) # if decide to do more with this
+      fnt = tempJpg + item
+      FileUtils.copy(fn, fnt)
+      puts "#{lineNum}. #{fn} to be staged since filterEffect is #{filterEffect}"
+    end
+    
+    # if two jpgs in a row, then no associated raw, therefore stage
+    if itemPrevExtName == itemExt
+      fnt = tempJpg + item
+      FileUtils.copy(fn, fnt)
+      puts "#{lineNum}. #{fn} to be staged since #{itemPrevExtName} == #{itemExt} was #{itemPrevExtName == itemExt}"
+    end
+
+    itemPrevExtName = itemExt # since reusing below. jpg, orf (Olympus) or RW2 (Panasonic). So will work as long as Raw comes after jpg alphabetically
+
+    if File.exists?(fna)  # moving the original to _imported-archive, but not writing over existing files
+      fna = uniqueFileName(fna)
+      FileUtils.move(fn, fna)
+      puts "#{lineNum}. A file already existed with this name so it was changed to fna: #{fna}"
     else # no copies, so move
-      # puts "#{lineNum}.#{photoFinalCount}. #{fn} moved to #{fnf}" # dubugging
-      FileUtils.move(fn, fnf)
+      FileUtils.move(fn, fna)
     end # File.exists?
-    # "#{lineNum}.. #{photoFinalCount + delCount} #{fn}" # More for debugging, but maybe OK as progress in this slow process
-    itemPrev = item
-    jpgMove = false
+      # "#{lineNum}.. #{photoFinalCount + delCount} #{fn}" # More for debugging, but maybe OK as progress in this slow process
     photoFinalCount += 1
     arrayIndex = photoFinalCount - 1 # Need spaces around the minus
-    photosArray << [arrayIndex, item, fnp, itemPrevExtName] # count minus one, so indexed like an array starting at zero
+    photosArray << [arrayIndex, item, fnm, itemPrevExtName] # count minus one, so indexed like an array starting at zero
     print "." # Trying to get a progress bar
   end # Dir.entries
   # puts "\#{lineNum}. #{photoFinalCount} photos have been moved and are ready for renaming and gpsing. #{delCount-1} duplicate jpg were not
   if delCount > 1
-#   comment = "#{lineNum}. #{delCount-1} duplicate jpg were not moved."
     comment = "#{lineNum}. #{delCount-1} jpegs were moved to #{tempJpg} for processing separately."
   else
     comment = ""
   end # if delCount
-  puts "\n#{lineNum}. #{photoFinalCount} photos have been moved and are ready for renaming and adding GPS coordinates and locations \n#{comment}"
+  puts "\n#{lineNum}. #{photoFinalCount} photos have been moved and are ready for renaming and adding GPS coordinates \n#{comment}"
   return photosArray
-end # copyAndMove: copy to the final destination where the renaming will be done and the original moved to an archive (_imported-archive folder)
+end # mylioStageAndArchive: copy to the final destination where the renaming will be done and coordinates added; and the original moved to an archive (_imported-archive folder)
+
+# Before reverse but was not working
+# def mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArray)
+#   # Already copied from SD card, but copying to processing folder (mylioStaging) and then moving the original to archive folder (archiveFolder)
+#   puts "\n#{lineNum}. Copy photos\nfrom #{srcHD}\n
+#   to #{mylioStaging} where the renaming will be done, \n
+#   and the originals moved to an archive folder (#{archiveFolder})"
+#   # Only copy jpg to mylioStaging if there is not a corresponding raw, but keep all taken files. With Panasonic JPG comes before RW2
+#   # Guess this method is slow because files are being copied
+#   # THIS METHOD WILL NOT WORK IF THE RAW FILE FORMAT ALPHABETICALLY COMES BEFORE JPG. SHOULD MAKE THIS MORE ROBUST
+#   photoFinalCount = 0
+#   delCount = 1
+#   itemPrev = "" # need something for first time through
+#   fnp = ""
+#   jpgMove = false # Define outside of the 'each do' loop
+#   # puts "#{lineNum}. Files in #{srcHD}: #{Dir.entries(srcHD).sort}" # list of files to be processed
+#   Dir.entries(srcHD).sort.each do |item| # This construct goes through each in order. Sometimes the files are not in order with Dir.foreach or Dir.entries without sort
+#     # Item is the file name
+#     # puts "\n#{lineNum}.. photoFinalCount: #{photoFinalCount + 1}. item: #{item}." # kind of a progress bar
+#     next if item == '.' or item == '..' or item == '.DS_Store'
+#     # next if ignoreNonFiles(item) == true
+#
+#     fn  = srcHD + item
+#     fnm = mylioStaging + item
+#     fnf = archiveFolder + item # to already imported for archiving
+#
+#    # If a jpg and has an effect, copy to mylioStaging
+#     itemExt = File.extname(item)
+#     fileEXIF = MiniExiftool.new(item)
+#     filterEffect = fileEXIF.FilterEffect
+#     if itemExt.downcase == ".jpg" && filterEffect != "Expressive" # Expressive is default, so not much of an effect, but may need to change this
+#       FileUtils.copy(fn, fnm)
+#       # filterEffect(fnp) # if decide to do more with this
+#     end
+#
+#     # If first pair are jpgs or Raws, the previous one needs to be saved as it is jpg only or an HDR
+#     if photoFinalCount == 1 && itemPrevExtName == itemExt # checks if a Raw and jpg exist, but skips first time through
+#       #  The following shouldn't be necessary, but is a check in case another kind of raw or who know what else. Only the FileUtils.rm(itemPrev) should be needed
+#         FileUtils.copy(fnp, fnmp)
+#     else # not the same
+#
+#     # Already screened for ones with effect above, now just delete any jpgs without a Raw
+#     # If jpg's into Mylio if a Raw exists, First check if basenames are the same
+#     # Then if Raw, copy. Skip if jpg
+#     if File.basename(itemPrev, ".*") == File.basename(item,".*") && photoFinalCount != 0 # checks if a Raw and jpg exist, but skips first time through
+#       #  The following shouldn't be necessary, but is a check in case another kind of raw or who know what else. Only the FileUtils.rm(itemPrev) should be needed
+#       if itemExt.downcase != ".jpg" # that is raw
+#         FileUtils.copy(fn, fnm)
+#       end
+#     else # not the same
+#
+#     # What about solo jpg, either an HDR or only shot jpg for some reason
+#
+#       itemPrevExtName = File.extname(itemPrev) # since reusing below. jpg, orf (Olympus) or RW2 (Panasonic). So will work as long as Raw comes after jpg alphabetically
+#       fnp = fn
+#       fnpm = fnm
+#       # TODO Add an option to keep or not keep jpgs. May want to see how camera is converting them. May end up having problem with labeling as then would have two photos taken at the same time and the Raw will always be a .b
+#         # FileUtils.rm(mylioStaging + itemPrev) if itemPrevExtName == ".HEIC" # could uncomment this if a problem for Mylio.
+#       #  Not sure about what how to handle HEIC
+#       # if itemPrevExtName.downcase ==  ".jpg"
+#         # photoFinalCount -= 1 # commented out since now included
+#       # else # not a jpg and check for HEIC--what am I doing with this
+#     #     if itemPrevExtName == ".HEIC"
+#     #       FileUtils.rm(mylioStaging + itemPrev)
+#     #     end # itemPrevExtName-just one line
+#     #     puts "#{lineNum}. Something very wrong here with trying to remove JPGs when there is a corresponding .RW2 or .HEIC. itemPrev: #{itemPrev}. item: #{item}."
+#     #   end # itemPrevExtName.downcase a bunch of lines
+#       # end # File.extname
+#     end   # File.basename
+#     # fn  = srcHD       + item # sourced from Drag Photos Here
+#    #  fnm = mylioStaging + item # new file in Latest Download
+#     # fnm = tempJpg     + item if !jpgMove # seems like ! is backwards but this works
+#     # FileUtils.copy(fn, fnm) if fn!=fnp # making a copy in the mylioStaging folder for further action
+#
+#     if File.exists?(fnf)  # moving the original to _imported-archive, but not writing over existing files
+#       fnf = uniqueFileName(fnf)
+#       FileUtils.move(fn, fnf)
+#       puts "#{lineNum}. A file already existed with this name so it was changed to fnf: #{fnf}"
+#     else # no copies, so move
+#       FileUtils.move(fn, fnf)
+#     end # File.exists?
+#       # "#{lineNum}.. #{photoFinalCount + delCount} #{fn}" # More for debugging, but maybe OK as progress in this slow process
+#       itemPrev = item
+#       jpgMove = false
+#       photoFinalCount += 1
+#       arrayIndex = photoFinalCount - 1 # Need spaces around the minus
+#       photosArray << [arrayIndex, item, fnm, itemPrevExtName] # count minus one, so indexed like an array starting at zero
+#       print "." # Trying to get a progress bar
+#
+#   end # Dir.entries
+#   # puts "\#{lineNum}. #{photoFinalCount} photos have been moved and are ready for renaming and gpsing. #{delCount-1} duplicate jpg were not
+#   if delCount > 1
+#     comment = "#{lineNum}. #{delCount-1} jpegs were moved to #{tempJpg} for processing separately."
+#   else
+#     comment = ""
+#   end # if delCount
+#   puts "\n#{lineNum}. #{photoFinalCount} photos have been moved and are ready for renaming and adding GPS coordinates \n#{comment}"
+#   return photosArray
+# end # mylioStageAndArchive: copy to the final destination where the renaming will be done and coordinates added; and the original moved to an archive (_imported-archive folder)
 
 # def unmountCard(card)
 #   puts "#{lineNum}. card: #{card}"
@@ -345,14 +445,14 @@ def userCamCode(fn)
   case fileEXIF.model
     when "DMC-GX8"
       userCamCode = ".gs.P" # gs for photographer. P for *P*anasonic Lumix
+    when "iPhone 13"
+      userCamCode = "gs.i" # gs for photographer. i for iPhone
     when "iPhone X"
-      userCamCode = ".i" # gs for photographer. i for iPhone
+      userCamCode = "lb.i" # gs for photographer. i for iPhone
     when "Canon PowerShot S100"
       userCamCode = ".lb" # initials of the photographer who usually shoots with the S100
     when "DMC-GX7" # no longer using, but may reprocess some photos
       userCamCode = ".gs.P" # gs for photographer. P for *P*anasonic Lumix
-    when "DMC-TS5"
-      userCamCode = ".gs.W" # gs for photographer. W for *w*aterproof Panasonic Lumix DMC-TS5/
     else
       userCamCode = ".xx"
   end # case
@@ -365,11 +465,10 @@ def userCamCode(fn)
   return userCamCode
 end # userCamCode
 
-def fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc) # wasn't working when passed in fileEXIF, so try reopening in this module and that made it work, although I don't know why.
+def fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc)
   # Called from rename
   # writing original filename and dateTimeOrig to the photo file.
   fileEXIF = MiniExiftool.new(fn)
-  # puts "#{lineNum}. tzoLoc #{tzoLoc}"
   if tzoLoc.to_i < 0
     tzoLocPrint = tzoLoc
   else
@@ -415,7 +514,7 @@ def timeZone(fileDateTimeOriginal, timeZonesFile )
 end # timeZone
 
 def rename(src, timeZonesFile, timeNowWas)
-  # src is destPhoto folder
+  # src is mylioStaging folder
   # timeZonesFile is my log of which time zones I was in when
   # timeNowWas used for timing various parts of the script. 
   # Until 2017, this assumed camera on UTC, but doesn't work well for cameras with a GPS or set to local time
@@ -429,17 +528,26 @@ def rename(src, timeZonesFile, timeNowWas)
   tzoLoc = ""
   seqLetter = %w(a b c d e f ) # used when subsec doesn't exist
   # puts "#{lineNum}. Entered rename and ready to enter foreach. src: #{src}"
- #  puts "#{lineNum}. Dir.entries(src). #{Dir.entries(src)}" # Debugging. Turned out I was trying to work on an empty folder.
   Dir.foreach(src) do |item| # for each photo file
     next if ignoreNonFiles(item) == true # skipping file when true, i.e., not a file
     # puts "#{lineNum}. File skipped because already renamed, i.e., the filename starts with 20xx #{item.start_with?("20")}"
     next if item.start_with?("20") # Skipping files that have already been renamed.
     next if item.end_with?("xmp") # Skipping .xmp files in Mylio and elsewhere. The files may become orphans
-    # puts "#{lineNum}. #{item} will be renamed. " # #{timeNowWas = timeStamp(timeNowWas)}
+    # puts "#{lineNum}. #{src} " # #{timeNowWas = timeStamp(timeNowWas)}
+    puts "#{lineNum}. #{item} will be renamed. " # #{timeNowWas = timeStamp(timeNowWas)}
     fn = src + item # long file name
     fileEXIF = MiniExiftool.new(fn) # used several times
     # fileEXIF = Exif::Data.new(fn) # see if can just make this change, probably break something. 2017.01.13 doesn't work with Raw, but developer is working it.
     camModel = fileEXIF.model
+
+    # To add display for Mylio
+    filterEffect = fileEXIF.FilterEffect
+    if File.extname(item).downcase == ".jpg" && filterEffect != "Expressive" # Expressive is default, so not much of an effect, but may need to change this
+      filtered = "_display"
+    else
+      filtered = ""
+    end
+
     # puts "\n#{lineNum}. #{fileCount}. fn: #{fn}"
     # puts "#{lineNum}.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
     # if !File.file?(fn) # Take out when figure it out.
@@ -497,12 +605,11 @@ def rename(src, timeZonesFile, timeNowWas)
         fileEXIF.OffsetTimeOriginal = "GMT"
         puts "#{lineNum}.. fileDateTimeOriginal #{fileDateTimeOriginal}. timeChange: #{timeChange} for #{camModel}" if count == 1 # just once is enough
       end # if camModel
-      fileEXIF.save # only set OffsetTimeOriginal, but did do some reading.
-     
+      fileEXIF.save # only set OffsetTimeOriginal, but did do some reading.     
 
       fileDate = fileDateTimeOriginal + timeChange.to_i # date in local time photo was taken. No idea why have to change this to i, but was nil class even though zero  
       fileDateTimeOriginalstr = fileDateTimeOriginal.to_s[0..-6]
-
+      
       # filePrev = fn
       # Working out if files at the same time
       # puts "\nxx.. #{fileCount}. oneBack: #{oneBack}."
@@ -510,7 +617,7 @@ def rename(src, timeZonesFile, timeNowWas)
       # puts "#{lineNum}.. #{timeStamp(timeNowWas)}"
       # Now the fileBaseName. Simple if not in the same second, otherwise an added sequence number
       # oneBack = fileDate == fileDatePrev # true if previous file at the same time calculated in local time
-      oneBack = fileDate == fileDatePrev && fileExt != fileExtPrev # at the moment this is meaningless because all ofne type
+      oneBack = fileDate == fileDatePrev && fileExt != fileExtPrev # at the moment this is meaningless because all of tne type
       # puts "\n#{lineNum}.#{count}. oneBack: #{oneBack}. #{item}. dupCount: #{dupCount}"
       # if subSecExists # mainly GX8. Too heavy handed, every GX8 files get subSec which is too much
 #           fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "." + fileSubSecTimeOriginal.to_s + userCamCode(fn)
@@ -528,14 +635,14 @@ def rename(src, timeZonesFile, timeNowWas)
             File.rename(fnpPrev,fnp)
           end # if dup count
         else # photos without subsecs, pre GX8
-          fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  seqLetter[dupCount] + userCamCode(fn)
+          fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  seqLetter[dupCount] + userCamCode(fn) + filtered
           puts "#{lineNum}. fn: #{fn} in 'if oneBack'.     fileBaseName: #{fileBaseName}."
         end # subSecExists
         # fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  seqLetter[dupCount] + userCamCode(fn)
 #           puts "#{lineNum}. fn: #{fn} in 'if oneBack'.     fileBaseName: #{fileBaseName}."
       else # normal condition that this photo is at a different time than previous photo
         dupCount = 0 # resets dupCount after having a group of photos in the same second
-        fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S")  + userCamCode(fn)
+        fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S")  + userCamCode(fn) + filtered
         # puts "#{lineNum}. item: #{item} is at different time as previous.    fileBaseName: #{fileBaseName}"
       end # if oneBack
       # end # if subSecExists
@@ -578,7 +685,7 @@ def addCoordinates(photoFolder, folderGPX, gpsPhotoPerl, tzoLoc)
   # This works, put in because having problems with file locations
   # perlOutput = `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{photoFolder.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`
   
-  # photoFolder is where the photos are that are going to have gps coordinates added. A temporary location. Usually called destPhoto is the overall script
+  # photoFolder is where the photos are that are going to have gps coordinates added. A temporary location. Usually called mylioStaging is the overall script
   # folderGPX is where the gpx tracks are
   # gpsPhotoPerl is where gpsPhoto.pl is
   # tzoLoc is the time zone from Greg camera time zones.yml file. Since GPS records UTM. Camera time zone setting varies. Camera only recordeds the time it is set for, but doesn't accurately report the zone. Currently exiftool is saying the zone is the zone of the computer running the script. tzoLoc value can be changed in this module. tzoLoc is hours and gets changed to seconds as timeOffset for use by gpsPhoto.pl
@@ -599,7 +706,7 @@ def addCoordinates(photoFolder, folderGPX, gpsPhotoPerl, tzoLoc)
     camModel = fileEXIF.model
     # puts "#{lineNum}. model: #{camModel} fn: #{fn}" # debug
     panasonicLocation = fileEXIF.location
-    # timeOffset = 0 # could leave this in and remove the else     
+    # timeOffset = 0 # could leave this in and remove the else 
     if File.file?(fn)
       if camModel == "DMC-GX8" # Assumes GX8 always on local time. And TimeZone is set
         # timeOffset = tzoLoc * 3600 # old way which may be fine, but the following seems more direct. May not account for camera not being in the zone it's set for, but I don't think that matters. It matters for time labeling, but this is only GPS coords
@@ -661,32 +768,6 @@ def addCoordinates(photoFolder, folderGPX, gpsPhotoPerl, tzoLoc)
   return perlOutput
 end # addCoordinates
 
-# Distance between two gps points. Used to reuse location information for nearby photos.
-def distanceMeters(lat1, lon1, lat2, lon2)
-  # https://stackoverflow.com/questions/12966638/how-to-calculate-the-distance-between-two-gps-coordinates-without-using-google-m
-  lat1_rad, lat2_rad = lat1 * RAD_PER_DEG, lat2 * RAD_PER_DEG
-  lon1_rad, lon2_rad = lon1 * RAD_PER_DEG, lon2 * RAD_PER_DEG
-
-  a = Math.sin((lat2_rad - lat1_rad) / 2) ** 2 + Math.cos(lat1_rad) * Math.cos(lat2_rad) * Math.sin((lon2_rad - lon1_rad) / 2) ** 2
-  c = 2 * Math::atan2(Math::sqrt(a), Math::sqrt(1 - a))
-
-  RM * c # Delta in meters  
-end
-
-def indoLocation(lat,lon) # Could modify for other countries. Uses file loaded into PGadmin
-  conn = PG.connect( dbname: 'Indonesia' )
-  #  lon/lat is the order for ST_GeomFromText
-  indo  = conn.exec("SELECT * FROM indonesia ORDER BY ST_Distance(ST_GeomFromText('POINT(#{lon} #{lat})', 4326), geom) ASC LIMIT 1")
-  country = indo.getvalue(0,8)
-  name    = indo.getvalue(0,1)
-  altNames= indo.getvalue(0,3)
-  # puts "\#{lineNum}. Indonesia country: #{country}"
-  # puts "#{lineNum}. Indonesia name: #{name}"
-  # puts "#{lineNum}. Indonesia alt names: #{altNames}"
-  result = [country, name, altNames]
-  # puts "\#{lineNum} result #{result}"
-end
-
 def writeTimeDiff(perlOutput)
   perlOutput.each_line do |line|
     if line =~ /timediff=/
@@ -714,11 +795,11 @@ def file_prepend(file, str)
     fd.write(new_contents)
   end
 end
-
-def moveToMylio(destPhoto, mylioFolder, timeNowWas)
-  puts "\n#{lineNum}. Moving processed photos from #{destPhoto} to Mylio folder #{mylioFolder}"
-  Dir.foreach(destPhoto) do |item|
-    fn  = destPhoto + item # destPhoto is now temporary destination, so nomenclature is weird
+# puts "#{lineNum}. mylioStaging: #{mylioStaging}" # debugging
+def moveToMylio(mylioStaging, mylioFolder, timeNowWas)
+  puts "\n#{lineNum}. Moving processed photos from #{mylioStaging} to Mylio folder #{mylioFolder}"
+  Dir.foreach(mylioStaging) do |item|
+    fn  = mylioStaging + item # mylioStaging is now temporary destination, so nomenclature is weird
     fnp = mylioFolder + item
     # puts "#{lineNum}.#{jpgsMovedCount += 1}. #{fn} moved to #{fnp}" # dubugging
     next if ignoreNonFiles(item) == true # skipping file when . or ..
@@ -745,23 +826,23 @@ end
 
 # if Daguerre isn't mounted use folders on laptop. 
 if File.exists?(downloadsFolders)
-  puts "#{lineNum}. Using Daguerre. File.exists?(downloadsFolders (#{downloadsFolders})): #{File.exists?(downloadsFolders)}"
+  puts "#{lineNum}. Using Daguerre or MtnBikerSSD. File.exists?(downloadsFolders (#{downloadsFolders})): #{File.exists?(downloadsFolders)}"
 else
    puts "\n#{lineNum}. #{downloadsFolders} isn't mounted, so will use local laptop folders to process"
   # Daguerre folders location loaded by default, changed as needed
   downloadsFolders = laptopDownloadsFolder # line ~844
-  destPhoto        = laptopDestination
-  destOrig         = laptopDestOrig
+  mylioStaging        = laptopDestination
+  archiveFolder         = laptopDestOrig
   tempJpg          = laptopTempJpg
   srcHD            = downloadsFolders # is this being used?
   # loadingToLaptop = true # No longer used
 end
 
 # Check if photos are already in Latest Download folder. A problem because they get reprocessed by gps coordinate adding.
-folderPhotoCount = Dir.entries(destPhoto).count - 3 # -3 is a crude way to take care of ., .., .. Crude is probably OK since this isn't critical. If one real photo is there, not a big problem
+folderPhotoCount = Dir.entries(mylioStaging).count - 3 # -3 is a crude way to take care of ., .., .. Crude is probably OK since this isn't critical. If one real photo is there, not a big problem
 if folderPhotoCount > 0
-  puts "#{lineNum}. downloadsFolders: #{downloadsFolders}. Check if Pashua warning window appears"
-  # downloadsFolderEmpty(destPhoto, folderPhotoCount) # Pashua window
+  # puts "#{lineNum}. downloadsFolders: #{downloadsFolders}. Check if Pashua warning window appears"
+  # downloadsFolderEmpty(mylioStaging, folderPhotoCount) # Pashua window
 else
   puts "\n#{lineNum}. 'Processed photos to be imported to Mylio/' folder is empty and script will continue."
 end
@@ -798,19 +879,19 @@ if fromWhere["rename"] == "1" # Renaming only or could use if whichOne == "Renam
 end
 
 # Option for adding GPS coordinates while not moving photos
-if fromWhere["gpsCoords"] == "1" # Renaming only or could use if whichOne == "Rename"
-  srcGpsAdd = gpsCoordsGUI(srcGpsAdd) # Puts up dialog box, sends default file location and retrieves selected file location
-  srcGpsAdd = srcGpsAdd["srcSelect"].to_s  + "/" # Name in dialog box which may be different than default
-  puts "\n#{lineNum}. NOT WORKING YET. Photos in #{srcGpsAdd} will have GPS coordinates added in place."
-  puts "PAY ATTENTION TO YEAR AS NOT SURE MORE THAN ONE YEAR IS INCLUDED IN MY MODULE"
-  puts "#{lineNum} Debugging.\n srcGpsAdd: #{srcGpsAdd} \n folderGPX: #{folderGPX}  \n gpsPhotoPerl: #{gpsPhotoPerl}  \n tzoLoc: #{tzoLoc} added manually. TODO ask for"
-  perlOutput = addCoordinates(srcGpsAdd, folderGPX, gpsPhotoPerl, tzoLoc) # Don't need perlOutput since abort
-  puts "#{lineNum}. Added coordinates to photos in #{srcGpsAdd}\nMultiline perlOutput follows:\n#{perlOutput}"
-  abort # break gives compile error
-  # abort if (whichDrive == "R") # break doesn't work, but abort seems to
-end
+# if fromWhere["gpsCoords"] == "1" # Renaming only or could use if whichOne == "Rename"
+#   srcGpsAdd = gpsCoordsGUI(srcGpsAdd) # Puts up dialog box, sends default file location and retrieves selected file location
+#   srcGpsAdd = srcGpsAdd["srcSelect"].to_s  + "/" # Name in dialog box which may be different than default
+#   puts "\n#{lineNum}. NOT WORKING YET. Photos in #{srcGpsAdd} will have GPS coordinates added in place."
+#   puts "PAY ATTENTION TO YEAR AS NOT SURE MORE THAN ONE YEAR IS INCLUDED IN MY MODULE"
+#   puts "#{lineNum} Debugging.\n srcGpsAdd: #{srcGpsAdd} \n folderGPX: #{folderGPX}  \n gpsPhotoPerl: #{gpsPhotoPerl}  \n tzoLoc: #{tzoLoc} added manually. TODO ask for"
+#   perlOutput = addCoordinates(srcGpsAdd, folderGPX, gpsPhotoPerl, tzoLoc) # Don't need perlOutput since abort
+#   puts "#{lineNum}. Added coordinates to photos in #{srcGpsAdd}\nMultiline perlOutput follows:\n#{perlOutput}"
+#   abort # break gives compile error
+#   # abort if (whichDrive == "R") # break doesn't work, but abort seems to
+# end
 
-# Option for adding location information based on GPS coordinates while not moving photos
+# Option for adding location information based on GPS coordinates while not moving photos. An option in the first dialog window, haven't used in long time
 if fromWhere["gpsLocation"] == "1"
   srcAddLocation = addLocationGUI(srcAddLocation)  # Puts up dialog box, sends default file location and retrieves selected file location. reusing variable. One above made new temporary variable
   srcAddLocation = srcAddLocation["srcSelect"].to_s  + "/" # Name in dialog box which may be different than default
@@ -821,7 +902,7 @@ if fromWhere["gpsLocation"] == "1"
   # abort if (whichDrive == "R") # break doesn't work, but abort seems to
 end
 
-lastPhotoReadTextFile = sdCard + "/lastPhotoRead.txt"
+lastPhotoReadTextFile = sdCard + "lastPhotoRead.txt"
 # if File.exist?(lastPhotoReadTextFile) # If SD card not mounted. TODO logic with else to try again
 
 if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner coding
@@ -854,14 +935,14 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
 
 # Don't know if this is needed, why not use srcSD directly
   src = srcSD
-  prefsPhoto = pPashua2(src,lastPhotoFilename,destPhoto,destOrig) # calling Photo_Handling_Pashua-SD. (Titled: 2. SD card photo downloading options)
+  prefsPhoto = pPashua2(src,lastPhotoFilename,mylioStaging,archiveFolder) # calling Photo_Handling_Pashua-SD. (Titled: 2. SD card photo downloading options)
   # to get a value use prefsPhoto("theNameInFileNamingEtcPashua.rb"), nothing to do with the name above
   # puts "Prefs as set by pPashua"
   # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
 else # whichOne=="HD", but what
   src = srcHD
   # puts "#{lineNum}. `srcHD`: #{src}. Does it have a slash?"
-  prefsPhoto = pGUI(src, destPhoto, destOrig) # is this only sending values in? 
+  prefsPhoto = pGUI(src, mylioStaging, archiveFolder) # is this only sending values in? 
   # to get a value use prefsPhoto("theNameInFileNamingEtcPashue.rb"), nothing to do with the name above
   # puts "Prefs as set by pGUI"
   # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
@@ -873,14 +954,16 @@ end # whichOne=="SD"
 #   abort
 # end #SD card mounted
 
-destPhoto = prefsPhoto["destPhotoP"].to_s + "/" 
-destOrig  = prefsPhoto["destOrig"].to_s + "/"
+mylioStaging = prefsPhoto["destPhotoP"].to_s + "/" 
+# puts "#{lineNum}. mylioStaging: #{mylioStaging} from Pashua" # debugging
+
+archiveFolder = prefsPhoto["destOrig"].to_s + "/"
 # Above are true whether SD or from another folder
 
-# But first check that destPhoto is empty. I'm assuming destPhoto has been determined at this point
-destPhotoCount = Dir.entries(destPhoto).count
-if destPhotoCount > 3 # 
-  puts "\n#{lineNum}. #{destPhotoCount} files are in the destination folder"
+# But first check that mylioStaging is empty. I'm assuming mylioStaging has been determined at this point
+mylioStagingCount = Dir.entries(mylioStaging).count
+if mylioStagingCount > 3 # 
+  puts "\n#{lineNum}. #{mylioStagingCount} files are in the destination folder"
   # Put up a notice or ask if want to delete them. Or list the first few
 end
 
@@ -900,10 +983,12 @@ puts "\n#{lineNum}. Photos will now be copied and moved in readiness for renamin
 
 # COPY AND MOVE and sort jpgs
 # Which drive has already been decided. (this note because it hadn't yet if Daguerre wasn't available)
-photosArray = copyAndMove(srcHD, destPhoto, tempJpg, destOrig, photosArray)
+
+# puts "#{lineNum}. mylioStaging: #{mylioStaging}" # debugging
+photosArray = mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArray)
 # Now do the same for the jpg files. Going to tempJpg and moving files to same places, except no jpg's will move to tempJpg
 
-# photosArray = copyAndMove(tempJpg, destPhoto, tempJpg, destOrig, photosArray)
+# photosArray = mylioStageAndArchive(tempJpg, mylioStaging, tempJpg, archiveFolder, photosArray)
 # puts "#{lineNum}. photosArray:" # Arrays seem to get mixed up if put in a {}
 # puts photosArray
 #  To see how it looks
@@ -922,18 +1007,19 @@ puts "\n#{lineNum}. Photos will now be renamed. #{timeNowWas = timeStamp(timeNow
 puts "\n#{lineNum}. Rename [tzoLoc = rename(…)] the photo files with date and an ID for the camera or photographer (except for the paired jpgs in #{tempJpg}). #{timeNowWas}\n"
 # tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # Second time this variable name is used, other is in a method
 # RENAME Raw
-tzoLoc = - rename(destPhoto, timeZonesFile , timeNowWas).to_i # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
+puts "#{lineNum}. mylioStaging: #{mylioStaging}. Renaming photo files with date-time. Failing with this call to rename()" # debugging
+tzoLoc = - rename(mylioStaging, timeZonesFile , timeNowWas).to_i # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
 
 timeNowWas = timeStamp(timeNowWas, lineNum)
 #Rename the jpgs and then move to Latest Download
-puts "\n#{lineNum}. Rename the jpgs in #{tempJpg} and then move to #{destPhoto}. #{timeNowWas = timeStamp(timeNowWas, lineNum)}"
+puts "\n#{lineNum}. Rename the jpgs in #{tempJpg} and then move to #{mylioStaging}. #{timeNowWas = timeStamp(timeNowWas, lineNum)}"
 rename(tempJpg, timeZonesFile, timeNowWas)
-#  Move the jpgs to destPhoto (Latest Download)
+#  Move the jpgs to mylioStaging (Latest Download)
 jpgsMovedCount = 0 # Initializing for debugging puts
 Dir.foreach(tempJpg) do |item|
   next if ignoreNonFiles(item) == true
   fn  = tempJpg   + item # sourced from temporary storage for jpgs 
-  fnp = destPhoto + item # new jpg file in Latest Download
+  fnp = mylioStaging + item # new jpg file in Latest Download
   # puts "#{lineNum}.#{jpgsMovedCount += 1}. #{fn} moved to #{fnp}" # dubugging
   FileUtils.move(fn, fnp)
 end
@@ -944,7 +1030,7 @@ puts "\n#{lineNum}. Using perl script to add gps coordinates. Will take a while 
 
 puts "\n#{lineNum} tzoLoc: #{tzoLoc}. Because GX8 and some other cameras use local time and not GMT as this script was originally written for. All photos must be in same time zone."
 # Add GPS coordinates.
-perlOutput = addCoordinates(destPhoto, folderGPX, gpsPhotoPerl, tzoLoc)
+perlOutput = addCoordinates(mylioStaging, folderGPX, gpsPhotoPerl, tzoLoc)
 
 timeNowWas = timeStamp(timeNowWas, lineNum)
 
@@ -957,182 +1043,10 @@ timeNowWas = timeStamp(timeNowWas, lineNum)
 
 puts "\n#{lineNum}. All Finished. Note that \"Adding location information to photo files\" is commented out, i.e., geographic descriptions not being added."
 
-# puts "\n#{lineNum}. Adding location information to photo files"
-# # Add location information to photo file
-# addLocation(destPhoto, geoNamesUser)
-
 # Move to Mylio folder (can't process in this folder or Mylio might import before changes are made)
 mylioFolder = iMacMylio # need to generalize this
 mylioFolder = "/Volumes/MtnBikerSSD/Mylio_87103a/2022/GX8-2022/"
-moveToMylio(destPhoto, mylioFolder, timeNowWas)
+moveToMylio(mylioStaging, mylioFolder, timeNowWas)
 
 # timeNowWas = timeStamp(timeNowWas, lineNum)
 # puts "\n#{lineNum}.-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - All done"
-
-
-
-# def addLocation(src, geoNamesUser)
-#   # read coords and add a hierarchy of choices for location information. Look at GPS Log Renaming for what works.
-#     countTotal = 0
-#     countLoc = 0
-#     latPrev = 0.0
-#     lonPrev = 0.0
-#     countryCode = country = state = city = location = ""
-#     Dir.foreach(src) do |item|
-#       next if ignoreNonFiles(item) == true # skipping file when true
-#       fn = src + item
-#       if File.file?(fn)
-#         countTotal += 1
-#         # puts "\n#{lineNum}. #{countTotal}. #{item}. Adding location information using geonames based on coordinates. " # amounts to a progress bar, even if a bit verbose #{timeStamp(timeNowWas)}
-#         print "." # Minimal progress bar
-#         fileEXIF = MiniExiftool.new(fn)
-#         # Get lat and lon from photo file. What is this fileEXIF.specialinstructions. This must be written by the perl script.
-#         puts "#{lineNum}. No gps information for #{item}. #{fileEXIF.title}. fileEXIF.specialinstructions: #{fileEXIF.specialinstructions}" if fileEXIF.specialinstructions == nil
-#         next if fileEXIF.specialinstructions == nil # can I combine this step and the one above into one step or if statement? I think I'm writing GPS coords to this field because easier to parse? I think the perl script does it. I can't find where I did it.
-#         # puts "#{lineNum}. fileEXIF.specialinstructions: #{fileEXIF.specialinstructions}"
-#         gps = fileEXIF.specialinstructions.split(", ") # or some way of getting lat and lon. This is a good start. Look at input form needed
-#         lat = (gps[0][4,11]).to_f # Capture long numbers like -123.123456, but short ones aren't that long, but nothing is there
-#         lon = (gps[1][4,11].split(" ")[0]).to_f # needs to 11 long to capture when -xxx.xxxxxx, but then can capture the - when it's xx.xxxxxx. Then grab whats between the first two spaces. Still need the 4,11 because there seems to be a space at the beginning if leave out [4,11]
-#         # puts " #{lineNum}. #{lat} #{lon} for #{fn}" # put here because of fail with TS5 file with erroneous lat lon
-#         # puts " #{lineNum}. #{lat.to_i} #{lon.to_i} for #{fn}" # put here because of fail with TS5 file with erroneous lat lon
-#         # Quick and dirty to block erroneous TS5 results, but need to fix coordinates earlier.
-#         if lat.to_i > 180
-#           puts "#{lineNum}. #{fn} is a TS5 photo with erroneous GPS data, but the script needs to be fixed to add data"
-#         end
-#         next if lat.to_i > 180 # takes care of erroneous GPS coords in TS5 photos, but need to fix
-#         countLoc += 1 # gives an error here or at the end.
-#         # puts "#{lineNum}..#{countTotal}. Use geonames to determine city, state, country, and location for #{item}"
-#         api = GeoNames.new(username: geoNamesUser)
-#         # puts "#{lineNum}..#{countTotal}... geoNamesUser: #{geoNamesUser}. api: #{api}"
-#
-#         # Reusing info for nearby points
-#         # puts "#{lineNum}. latPrev: #{latPrev}. latPrev.class: #{latPrev.class}. lat: #{lat}.  lat.class: #{lat.class}" # debug
-#        distanceMeters = distanceMeters(lat, lon, latPrev, lonPrev)
-#        if distanceMeters > 100.0 # distance between reference lat lon is greater than 100m recalculate location, otherwise use         # Determine country
-#           begin
-#             # doesn't work for Istanbul, works for Croatia, Canada
-#             countryCodeGeo = api.country_code(lat: lat, lng: lon) # doesn't work in Turkey
-#            puts "\n#{lineNum}.. countryCodeGeo: #{countryCodeGeo}" # debug
-#             countryCode  = countryCodeGeo['countryCode']
-#             puts "#{lineNum}.. countryCode #{countryCode}." # DEBUG
-#           rescue
-#             # begin
-#              $stderr.print
-#              puts "#{lineNum}. $stderr: #{$stderr} for api.country_code (lat: #{lat}, lng: #{lon}) or countryCode  = countryCodeGeo['countryCode']: #{countryCode}. for #{item}"
-#              # Was trying to capture the message, but now failing even when not exceeded hourly limit, so comment out
-#              # if message.include?("the hourly limit")
-#              #   puts "#{lineNum}. #{e.message}, so we will wait an hour"
-#              #   sleep(1.hour)
-#              # else
-#                countryCodeGeo = api.find_nearby_place_name(lat: lat, lng: lon).first # works for Turkey
-#                #          $stderr.print  $! # Thomas p. 108
-#              # end
-#           end # rescue
-#
-#         # puts "#{lineNum}.. countryCode:  #{countryCode}"
-#         # puts "#{lineNum}. NEED TO UNCOMMENT THIS AFTER INDONESIA ##############################################"
-#         country = countryCodeGeo['countryName'] # works with both country_code  and find_nearby_place_name above
-#         # puts "#{lineNum}.. country:      #{country}"
-#
-#         # Determine city, state, location
-#         if countryCode == "US" # geocodio works in US and Canada, could use as an option to geocode.org
-#           begin # state
-#             postalCodes = api.find_nearby_postal_codes(lat: lat, lng: lon, maxRows: 1) # this comes up blank for some locations in the US eg P1230119, so did find_nearest_address
-#             state = postalCodes.first['adminName1']
-#             # puts "#{lineNum}.. api.find_nearby_postal_codes worked"
-#           rescue
-#             state = api.country_subdivision(lat: lat, lng: lon, maxRows: 1)['adminName1']
-#             # puts "#{lineNum}. api.find_nearby_postal_codes failed, so used  api.country_subdivision"
-#           end # if country code
-#           # puts "#{lineNum}.. state:        #{state}"
-#
-#           begin  # city, location
-#             neigh = api.neighbourhood(lat: lat, lng: lon) # errors outside the US and at other time
-#             city =  neigh['city']
-#             # puts "#{lineNum}.. city:         #{city}"
-#             location = neigh['name']
-#             # puts "386.. location:     #{location}"
-#           rescue # could use api.find_nearby_postal_codes for some of this
-#             # puts "344.  api.neighbourhood failed for #{lat} #{lon}"
-#
-#             begin # within a rescue
-#               city = postalCodes.first['placeName'] # breaking for some points, but is it better than replacement? If so add another rescue
-#               # puts "#{lineNum}.. city (rescue): #{city}"
-#               findNearbyPlaceName = api.find_nearby_place_name(lat: lat, lng: lon)
-#               location = findNearbyPlaceName.first['toponymName']
-#               # puts "#{lineNum}.. location (rescue): #{location}"
-#             rescue # probably end up here for a remote place, so wikipedia may be the best
-#               # puts "#{lineNum}.. find_nearby_postal_codes failed for city, so use Wikipedia to find a location"
-#               city = ""
-#               distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance']
-#               location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']
-#               puts "#{lineNum}.. location:     #{location}. distance: #{distance}" # may need to screen as for outside US
-#             end # of within a rescue
-#           end # begin rescue outer
-#
-#         else # outside US. Doesn't work in Indonesia
-#
-#           # Uncomment below for Indonesia. Could probably generalize this for other countries. But it requires downloading the file to pgAdmin and building a database.
-#           # locationIN  = indoLocation(lat,lon)
-#    #        countryCode  = locationIN[0]
-#    #        city         = locationIN[1]
-#    #        location     = locationIN[2]
-#    #        if countryCode == "ID"
-#    #          country = "Indonesia"
-#    #        else
-#    #          country = ""
-#    #        end
-#
-#           # off for Indonesia and Ethiopia, just skip if
-#           begin
-#             findNearbyPostalCodes = api.find_nearby_postal_codes(lat: lat, lng: lon, maxRows: 1).first
-#             state = findNearbyPostalCodes['adminName1']
-#             # puts "#{lineNum}.. state (outside US): #{state}" # DEBUG
-#             city = findNearbyPostalCodes['placeName'] # close to city, but misses Dubrovnik and Zagreb
-#             # Below was normal I think, but turned off to try to get Canada to work
-#             city = api.find_nearby_place_name(lat: lat, lng: lon, maxRows: 1).first['toponymName'] # name or adminName1 could work too
-#             # puts "#{lineNum}.. city (outside US):  #{city}" # DEBUG
-#           rescue
-#             # puts "#{lineNum}. findNearbyPostalCodes failed, therefore try getting location from Wikipedia" # This can work outside the US, maybe fails when not near a city.  # DEBUG
-#           end
-#
-#           # puts city =  api.find_nearby_wikipedia(lat: lat, lng: lon)["geonames"].first["title"] # the third item is a city, maybe could regex wikipedia, but doubt it's consistent enough to work
-#           # puts "#{lineNum}.. Four lines below must be commented out for Canada"
-#
-#           begin # put this in with failure anotating Ethiopia photos
-#             location = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['title']
-#             distance = api.find_nearby_wikipedia(lat: lat, lng: lon, maxRows: 1)['geonames'].first['distance'].to_f
-#             locationDistance = "#{location} is #{distance}km away."
-#             puts "#{lineNum}. location:     #{location}. distance: #{distance}. If distance > 0.3km location not used"
-#             if  distance < 0.3
-#               location = ""
-#             elsif fileEXIF.caption == nil
-#               fileEXIF.caption = locationDistance
-#             else
-#               fileEXIF.usercomment = locationDistance
-#             end # if distance
-#           rescue
-#             # maybe this whole exception needs reworking
-#           ensure
-#             # puts "#{lineNum}. #{item} find api.find_nearby_wikipedia failed. Maybe a foreign country? " # DEBUG
-#             location = "" # added this to help prevent failure on test below. May not be necessary
-#           end
-#         end # if countryCode
-#         location = "" if city == location # cases where they where the same (Myers Flat, Callahan and Etna). Could try to find a location with some other find, maybe Wikipedia, but would want a distance check
-#         latPrev  = lat
-#         lonPrev = lon
-#       # else # commented out since not usng, but can for debug
-#         # puts "#{lineNum}. #{distanceMeters.ceil}m between the current and previous photo and since less than 100m will use the location information from the previous photo." # Debug
-#       end # if > 100m (so if greater recalculated above, other wise just reuse below)
-#
-#       # puts "#{lineNum}.. Use MiniExiftool to write location info to photo files\n" # Have already set fileEXIF
-#       fileEXIF.CountryCode = countryCode
-#       fileEXIF.country     = country
-#       fileEXIF.state       = state
-#       fileEXIF.city        = city
-#       fileEXIF.location    = location
-#       fileEXIF.save
-#     end
-#   end
-#   puts "\n#{lineNum}. Location information found for #{countLoc} of #{countTotal} photos processed"
-# end # addLocation
