@@ -1,7 +1,7 @@
 .ruby_version # not used by TextMate anyway
 # "Ruby- to backup alias"
 # "Ruby-old stuff to backup alias"
-Icon\r
+# Icon\r # error if doesn't exist when commit
 # "Ruby- to back up alias"
 TODO
 TODO.md

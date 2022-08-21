@@ -1,4 +1,4 @@
-# Created by Greg Scarich on 2007-07-30.  
+# Created by Greg Scarich on 2007-07-30.  Still being used 2022.08.20
 # require 'Pashua' # for GUI
 require File.expand_path(File.join(File.dirname(__FILE__), 'Pashua'))
 include Pashua
@@ -49,21 +49,17 @@ rename.label = Rename the files only and do not move.
 rename.tooltip = More than one can be selected
   
 gpsCoords.type = checkbox
-gpsCoords.label = GPS coordinates add while leaving the files in place. (Awkward name to get first letter as G)
-
-gpsLocation.type = checkbox
-gpsLocation.label = Location information added while leaving the files in place. (Awkward name to get first letter as L)
-gpsLocation.default = Folder where the photos are selected in next window.
+gpsCoords.label = GPS coordinates add while leaving the files in place. SELECT OPTIONS ABOVE ALSO (Awkward name to get first letter as G)
 
 # Add a cancel button with default label
 cb.type = cancelbutton
 
 end_of_string
 
- # Set the images' paths relative to this file's path / 
+  # Set the images' paths relative to this file's path / 
   # skip images if they can not be found in this file's path
   icon  = File.dirname($0) << "/.icon.png";
- bgimg = File.dirname($0) << "/.demo.png";
+  bgimg = File.dirname($0) << "/.demo.png";
 
   if File::exists?(icon)    # Display Pashua's icon
       Config << "img.type = image

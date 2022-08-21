@@ -20,7 +20,7 @@ require_relative 'lib/Photo_Naming_Pashua–HD2'
 require_relative 'lib/SDorHD'
 require_relative 'lib/renamePashua' # Dialog for renaming without moving
 require_relative 'lib/gpsCoordsPashua' # Dialog for adding GPS coordinates without moving
-require_relative 'lib/gpsAddLocationPashua' # Dialog for adding location information based GPS coordinates in file EXIF without moving
+# require_relative 'lib/gpsAddLocationPashua' # Dialog for adding location information based GPS coordinates in file EXIF without moving. No longer supported
 
 HOME = "/Users/gscar/"
 thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
@@ -432,7 +432,7 @@ def rename(src, timeZonesFile, timeNowWas)
       end # if fileDateTimeOriginal == nil
       panasonicLocation = fileEXIF.location # Defined by Panasonic if on trip (and also may exist for photos exported from other apps such as Photos). If defined then time stamp is that local time
       # puts "#{lineNum}. panasonicLocation: #{panasonicLocation}"
-      tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile ) # the time zone the picture was taken in, doesn't say anything about what times are recorded in the photo's EXIF. I'm doing this slightly wrong, because it's using the photo's recorded date which could be either GMT or local time. But only wrong if the photo was taken too close to the time when camera changed time zones
+      tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # the time zone the picture was taken in, doesn't say anything about what times are recorded in the photo's EXIF. I'm doing this slightly wrong, because it's using the photo's recorded date which could be either GMT or local time. But only wrong if the photo was taken too close to the time when camera changed time zones
       # puts "#{lineNum}. #{count}. tzoLoc: #{tzoLoc} from timeZonesFile"
       if count == 1 | 1*100 # only gets written every 100 files.
         puts "#{lineNum}. panasonicLocation: #{panasonicLocation}. tzoLoc: #{tzoLoc}. Time zone photo was taken in from Greg camera time zones.yml\n"
@@ -713,28 +713,43 @@ if fromWhere["rename"] == "1" # Renaming only or could use if whichOne == "Renam
 end
 
 # Option for adding GPS coordinates while not moving photos
-# if fromWhere["gpsCoords"] == "1" # Renaming only or could use if whichOne == "Rename"
-#   srcGpsAdd = gpsCoordsGUI(srcGpsAdd) # Puts up dialog box, sends default file location and retrieves selected file location
-#   srcGpsAdd = srcGpsAdd["srcSelect"].to_s  + "/" # Name in dialog box which may be different than default
-#   puts "\n#{lineNum}. NOT WORKING YET. Photos in #{srcGpsAdd} will have GPS coordinates added in place."
-#   puts "PAY ATTENTION TO YEAR AS NOT SURE MORE THAN ONE YEAR IS INCLUDED IN MY MODULE"
-#   puts "#{lineNum} Debugging.\n srcGpsAdd: #{srcGpsAdd} \n folderGPX: #{folderGPX}  \n gpsPhotoPerl: #{gpsPhotoPerl}  \n tzoLoc: #{tzoLoc} added manually. TODO ask for"
-#   perlOutput = addCoordinates(srcGpsAdd, folderGPX, gpsPhotoPerl, tzoLoc) # Don't need perlOutput since abort
-#   puts "#{lineNum}. Added coordinates to photos in #{srcGpsAdd}\nMultiline perlOutput follows:\n#{perlOutput}"
-#   abort # break gives compile error
-#   # abort if (whichDrive == "R") # break doesn't work, but abort seems to
-# end
-
-# Option for adding location information based on GPS coordinates while not moving photos. An option in the first dialog window, haven't used in long time
-if fromWhere["gpsLocation"] == "1"
-  srcAddLocation = addLocationGUI(srcAddLocation)  # Puts up dialog box, sends default file location and retrieves selected file location. reusing variable. One above made new temporary variable
-  srcAddLocation = srcAddLocation["srcSelect"].to_s  + "/" # Name in dialog box which may be different than default
-  puts "\n#{lineNum}. NOT IMPLEMENTED. Photos in #{srcAddLocation} will have location information added based on GPS coordinates in EXIF data without moving the file. NOT IMPLEMENTED."
-  puts "#{lineNum}. Need to confirm that the following works. May need to change year of folder for gpx tracks"
-  addLocation(srcAddLocation, geoNamesUser)
+if fromWhere["gpsCoords"] == "1" # Renaming only or could use if whichOne == "Rename"
+  # srcGpsAdd folder with photos to add gps coordinates
+  srcGpsAdd = gpsCoordsGUI(srcGpsAdd) # Puts up dialog box, sends default file location and retrieves selected file location
+  srcGpsAdd = srcGpsAdd["srcSelect"].to_s  + "/" # Name in dialog box which may be different than default
+  puts "\n#{lineNum}. Photos in #{srcGpsAdd} will have GPS coordinates added in place."
+  puts "PAY ATTENTION TO YEAR AS NOT SURE MORE THAN ONE YEAR IS INCLUDED IN MY MODULE"
+  # Need to find date of a file so know what part of timeZonesFile to use
+  # Use to find first photo in folder and get fileDateTimeOriginal
+  fileDateTimeOriginal = ""
+  Dir.foreach(srcGpsAdd) do |item| # for each photo file
+    next if ignoreNonFiles(item) == true # skipping file when true, i.e., not a file
+    # puts "#{lineNum}. File skipped because already renamed, i.e., the filename starts with 20xx #{item.start_with?("20")}"
+    next if item.start_with?("20") # Skipping files that have already been renamed.
+    next if item.end_with?("xmp") # Skipping .xmp files in Mylio and elsewhere. The files may become orphans
+    fn = src + item # long file name
+    fileEXIF = MiniExiftool.new(fn) # used several times
+    fileDateTimeOriginal = fileEXIF.dateTimeOriginal
+    break # stop once get to first file in folder. 
+  end
+  tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) 
+  # puts "#{lineNum} Debugging.\n srcGpsAdd: #{srcGpsAdd} \n folderGPX: #{folderGPX}  \n gpsPhotoPerl: #{gpsPhotoPerl}  \n tzoLoc: #{tzoLoc}"
+  perlOutput = addCoordinates(srcGpsAdd, folderGPX, gpsPhotoPerl, tzoLoc)
+  puts "#{lineNum}. Added coordinates to photos in #{srcGpsAdd}\nMultiline perlOutput follows:\n#{perlOutput}"
   abort # break gives compile error
   # abort if (whichDrive == "R") # break doesn't work, but abort seems to
 end
+
+# Option for adding location information based on GPS coordinates while not moving photos. An option in the first dialog window, haven't used in long time
+# if fromWhere["gpsLocation"] == "1"
+#   srcAddLocation = addLocationGUI(srcAddLocation)  # Puts up dialog box, sends default file location and retrieves selected file location. reusing variable. One above made new temporary variable
+#   srcAddLocation = srcAddLocation["srcSelect"].to_s  + "/" # Name in dialog box which may be different than default
+#   puts "\n#{lineNum}. NOT IMPLEMENTED. Photos in #{srcAddLocation} will have location information added based on GPS coordinates in EXIF data without moving the file. NOT IMPLEMENTED."
+#   puts "#{lineNum}. Need to confirm that the following works. May need to change year of folder for gpx tracks"
+#   addLocation(srcAddLocation, geoNamesUser)
+#   abort # break gives compile error
+#   # abort if (whichDrive == "R") # break doesn't work, but abort seems to
+# end
 
 lastPhotoReadTextFile = sdCard + "lastPhotoRead.txt"
 # if File.exist?(lastPhotoReadTextFile) # If SD card not mounted. TODO logic with else to try again
