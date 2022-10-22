@@ -34,8 +34,7 @@ txt.default = Select the location of the files to be renamed without moving the 
 # FIX put in just mounted card when get app to detect mounted cards
 srcSelect.type = openbrowser
 srcSelect.label = Select the folder containing the photos:
-srcSelect.width=550
-# presumably can use a variable
+srcSelect.width = 550
 srcSelect.default = #{srcPhoto}
 
 
@@ -44,7 +43,7 @@ cb.type = cancelbutton
 
 end_of_string
 
- # Set the images' paths relative to this file's path / 
+  # Set the images' paths relative to this file's path
   # skip images if they can not be found in this file's path
   icon  = File.dirname($0) << "/.icon.png";
  bgimg = File.dirname($0) << "/.demo.png";

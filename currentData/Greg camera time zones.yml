@@ -9,7 +9,7 @@
     zone: -7
     comments: "Paris to LAX"
 "601":
-    Description: "PDT. California Daylight Time. But camera was mis set to EEST"
+    Description: "PDT. California Daylight Time. But camera was mis-set to EEST"
     timeGMT: 2022-08-09T18-00-00Z
     zone: 3
     comments: "Paris to LAX"

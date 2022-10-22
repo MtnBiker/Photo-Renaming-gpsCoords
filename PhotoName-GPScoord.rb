@@ -3,7 +3,7 @@
 
 # 2022 Clock Set is Setting camera to local time which will show as FileModifyDate, DateTimeOriginal, CreateDate, SubSecCreateDate…
 # TimeStamp will be offset according to camera setting for World Time which should be UTC if the zone matches the Clock Set
-# This may be wrong if those settings aren't updated or even worse if one is right and the other wrong'
+# This may be wrong if those settings aren't updated or even worse if one is right and the other wrong
 
 require 'fileutils'
 include FileUtils
@@ -97,8 +97,8 @@ folderGPX = HOME + "Documents/GPS-Maps-docs/  GPX daily logs/2022 GPX logs/" # C
 puts "#{lineNum}. Must manually set folderGPX for GPX file folders. Particularly important at start of new year AND if working on photos not in current year.\n       Using: #{folderGPX}\n"
 
 # MODULES
-def ignoreNonFiles(item) # invisible files that shouldn't be processed
-  item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon ' or item.slice(0,7) == ".MYLock"
+def ignoreNonFiles(item) # invisible files or .xmp that shouldn't be processed
+  item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon ' or item.slice(0,7) == ".MYLock" or item.slice(-4,4) == ".xmp"
 end
 
 def gpsFilesUpToDate(folderGPX)
@@ -540,11 +540,12 @@ def addCoordinates(photoFolder, folderGPX, gpsPhotoPerl, tzoLoc)
   Dir.foreach(photoFolder) do |item|
     # This is only run once, so efficiency doesn't matter
     count = 0
+    # puts "#{lineNum}. item.slice(0,4): #{item.slice(-4,4)}" # debug for following
     next if ignoreNonFiles(item)  # skipping file when true == true
     fn = photoFolder + item
     fileEXIF = MiniExiftool.new(fn) # used several times
     camModel = fileEXIF.model
-    # puts "#{lineNum}. model: #{camModel} fn: #{fn}" # debug
+    puts "#{lineNum}. model: #{camModel} fn: #{fn}" # debug
     panasonicLocation = fileEXIF.location
     # timeOffset = 0 # could leave this in and remove the else 
     if File.file?(fn)
@@ -673,8 +674,8 @@ else
    puts "\n#{lineNum}. #{downloadsFolders} isn't mounted, so will use local laptop folders to process"
   # Daguerre folders location loaded by default, changed as needed
   downloadsFolders = laptopDownloadsFolder # line ~844
-  mylioStaging        = laptopDestination
-  archiveFolder         = laptopDestOrig
+  mylioStaging     = laptopDestination
+  archiveFolder    = laptopDestOrig
   tempJpg          = laptopTempJpg
   srcHD            = downloadsFolders # is this being used?
   # loadingToLaptop = true # No longer used
@@ -721,7 +722,7 @@ if fromWhere["rename"] == "1" # Renaming only or could use if whichOne == "Renam
 end
 
 # Option for adding GPS coordinates while not moving photos
-if fromWhere["gpsCoords"] == "1" # Renaming only or could use if whichOne == "Rename"
+if fromWhere["gpsCoords"] == "1"
   # srcGpsAdd folder with photos to add gps coordinates
   srcGpsAdd = gpsCoordsGUI(srcGpsAdd) # Puts up dialog box, sends default file location and retrieves selected file location
   srcGpsAdd = srcGpsAdd["srcSelect"].to_s  + "/" # Name in dialog box which may be different than default

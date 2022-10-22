@@ -77,7 +77,7 @@ def pPashua(srcPhoto,lastPhotoFilename, destPhoto,destOrig)
 
   end_of_string
 
- # Set the images' paths relative to this file's path / 
+  # Set the images' paths relative to this file's path / 
   # skip images if they can not be found in this file's path
   icon  = File.dirname($0) << "/.icon.png";
   bgimg = File.dirname($0) << "/.demo.png";

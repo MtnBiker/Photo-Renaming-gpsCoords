@@ -19,6 +19,7 @@ def pPashua2(srcPhoto,lastPhotoFilename, destPhoto,destOrig)
 
   $:.push(File.dirname($0))
 
+# The following must be flush left
 config = <<end_of_string
 # Set transparency: 0 is transparent, 1 is opaque
 *.transparency=0.95
@@ -33,7 +34,7 @@ txt.default = Setting up the downloading and/or copying from SD card.
 # Photo folder select
 srcSelect.type = openbrowser
 srcSelect.label = Select the folder containing the photos (default is latest card, but may not be up to date):
-srcSelect.width=550
+srcSelect.width = 550
 # presumably can use a variable
 srcSelect.default = #{srcPhoto}
 
@@ -67,10 +68,10 @@ cb.type = cancelbutton
 
 end_of_string
 
- # Set the images' paths relative to this file's path / 
+  # Set the images' paths relative to this file's path / 
   # skip images if they can not be found in this file's path
   icon  = File.dirname($0) << "/.icon.png";
- bgimg = File.dirname($0) << "/.demo.png";
+  bgimg = File.dirname($0) << "/.demo.png";
 
   if File::exists?(icon)    # Display Pashua's icon
       Config << "img.type = image

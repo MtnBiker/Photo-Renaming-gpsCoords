@@ -26,14 +26,13 @@ config = <<end_of_string
 # Introductory text
 txt.type = text
 txt.width = 500
-txt.default = Select the location of the files to which GPS coordinates are to be added[return] without moving the files
+txt.default = Select the location of the files to which GPS coordinates are to be added[return]without moving the files
 
 # Photo folder select
 # FIX put in just mounted card when get app to detect mounted cards
 srcSelect.type = openbrowser
-srcSelect.label = Select the folder containing the photos:
-srcSelect.width=550
-# presumably can use a variable
+srcSelect.label = Select the folder containing the photos (may have to drag in the folder):
+srcSelect.width = 550
 srcSelect.default = #{srcPhoto}
 
 
@@ -42,10 +41,10 @@ cb.type = cancelbutton
 
 end_of_string
 
- # Set the images' paths relative to this file's path / 
+  # Set the images' paths relative to this file's path
   # skip images if they can not be found in this file's path
   icon  = File.dirname($0) << "/.icon.png";
- bgimg = File.dirname($0) << "/.demo.png";
+  bgimg = File.dirname($0) << "/.demo.png";
 
   if File::exists?(icon)    # Display Pashua's icon
       Config << "img.type = image
@@ -67,4 +66,4 @@ end_of_string
   res = pashua_run config
   return  res
   
-end # …GUI
+end # gpsCoordsGUI
