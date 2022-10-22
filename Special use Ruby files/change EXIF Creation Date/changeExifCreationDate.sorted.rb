@@ -9,10 +9,10 @@
 # Must set these variables manually. Next five lines
 # src = "/Users/gscar/Pictures/Epson V600 scans/" # Keeping as a frequently used folder
 src = "/Users/gscar/Mylio/New Folder With Items/"
-src = "/Users/gscar/Mylio/2022/bikecology_1980_mercian_catalogue_p 7.jpg"
+src = "/Users/gscar/Doc iMac only/City Directories/1910-19 Los Angeles City Directories/1918 Los Angeles City Directory/"
 
 # Making it easier (less error prone) to change the date
-year = "1980" # 1898
+year = "1918" # 1898
 month =  "01" # 01
 day =    "01" # 01
 # hour =   "12" # "00"

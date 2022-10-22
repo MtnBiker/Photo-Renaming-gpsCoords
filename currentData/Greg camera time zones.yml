@@ -1,18 +1,23 @@
-"602":
+"603":
     Description: "PST. California Standard Time"
     timeGMT: 2022-11-06T14-00-00Z
     zone: -8
     comments: "End of PDT. Beginning of PST"
-"601":
-    Description: "PDT. California Daylight Time"
-    timeGMT: 2022-08-09T18-00-00Z
+"602":
+    Description: "PDT. California Daylight Time. Camera now set to PT"
+    timeGMT: 2022-10-20T18-00-00Z
     zone: -7
+    comments: "Paris to LAX"
+"601":
+    Description: "PDT. California Daylight Time. But camera was mis set to EEST"
+    timeGMT: 2022-08-09T18-00-00Z
+    zone: 3
     comments: "Paris to LAX"
 "600":
     Description: "CEST. Central European Summer Time"
     timeGMT: 2022-08-07T09-00-00Z
-    zone: 2
-    comments: "Bucharest to Paris"
+    zone: 3
+    comments: "Bucharest to Paris. Probably no pics in Paris during this time"
 "599":
     Description: "EEST. Eastern European Summer Time"
     timeGMT: 2022-07-14T13-00-00Z

@@ -10,30 +10,29 @@ BEGIN { unshift @INC, "/usr/local/bin/lib/" }
 
 # $Id: gpsPhoto.pl,v 1.160 2012/10/10 19:51:46 girlich Exp $ #Still current as of 2017.01.12
 
-#Copyright (C) 2005 Peter Sykora, Andreas Neumann
+#  Copyright (C) 2005 Peter Sykora, Andreas Neumann
 
-#This program is free software; you can redistribute it and/or
-#modify it under the terms of the GNU General Public License
-#as published by the Free Software Foundation; either version 2
-#of the License, or (at your option) any later version.
+#  This program is free software; you can redistribute it and/or
+#  modify it under the terms of the GNU General Public License
+#  as published by the Free Software Foundation; either version 2
+#  of the License, or (at your option) any later version.
 
-#This program is distributed in the hope that it will be useful,
-#but WITHOUT ANY WARRANTY; without even the implied warranty of
-#MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#GNU General Public License for more details.
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
 
-#You should have received a copy of the GNU General Public License
-#along with this program; if not, write to the Free Software
-#Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#  You should have received a copy of the GNU General Public License
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-# Requirements: Perl >5.8, 
-# Module XML::Parser (Activestate: XML-Parser)
-# Module Image::ExifTool (Activestate: Image-ExifTool, warning: Activestate has usually an old version of this module that won't work well with NEF files)
-# Macosx: xcode tools (for gcc compiler)
-# (exiftags: http://www.sno.phy.queensu.ca/~phil/exiftool/)
-
-
+#   Requirements: Perl >5.8,
+#   Module XML::Parser (Activestate: XML-Parser)
+#   Module Image::ExifTool (Activestate: Image-ExifTool, warning: Activestate has usually an old version of this module that won't work well with NEF files)
+#   Macosx: xcode tools (for gcc compiler)
+#   (exiftags: http://www.sno.phy.queensu.ca/~phil/exiftool/)
 ########################################################################
+
 package util;
 
 use strict;

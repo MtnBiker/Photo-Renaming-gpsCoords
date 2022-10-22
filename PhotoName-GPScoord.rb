@@ -1,6 +1,10 @@
 #!/usr/bin/env ruby
 # mini_exiftool couldn't be found. Was a problem with  TM_RUBY, GEM_PATH, AND GEM_HOME not matching the what TextMate is using. TM does not use .ruby_version
 
+# 2022 Clock Set is Setting camera to local time which will show as FileModifyDate, DateTimeOriginal, CreateDate, SubSecCreateDate…
+# TimeStamp will be offset according to camera setting for World Time which should be UTC if the zone matches the Clock Set
+# This may be wrong if those settings aren't updated or even worse if one is right and the other wrong'
+
 require 'fileutils'
 include FileUtils
 require 'find'
@@ -8,7 +12,7 @@ require 'yaml'
 require "time"
 require 'irb' # binding.irb where error checking is desired
 require 'mini_exiftool'
-# The these first three requires are for geonames and then the class
+# The following three requires are for geonames and then the class
 require 'json'
 require 'open-uri'
 require 'addressable/template' #  gem install addressable
@@ -61,7 +65,8 @@ downloadsFolders = "/Volumes/Daguerre/_Download folder/"
 if File.exists?(downloadsFolders)
   puts "#{lineNum}. Daguerre is mounted"
 else
-  downloadsFolders = "/Volumes/MtnBikerSSD/_Download folder/"
+  downloadsFolders = "/Volumes/MtnBikerSSD/_Download folder/" # Obviously with MtnBikerSSD
+  # downloadsFolders = "/Users/gscar/Pictures/_Photo Processing Folders/Download folder/" # MBP
   puts "#{lineNum}. Daguerre is NOT mounted, so using #{downloadsFolders}"
 end
 # See at approx line 985 where decide where to move files
@@ -76,6 +81,7 @@ srcRename = "/Volumes/Seagate 8TB Backup/Mylio_87103a/Greg Scarich’s iPhone Li
 srcAddLocation  = "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio/" # = srcRename # Change to another location for convenience. This location picked so don't screw up a bunch of files
 
 # Mylio folder. Moved to this folder after all processing. Can't process in this folder or Mylio might add before this script's processing is finished. Processing is mainly done in mylioStaging. The following needs to change based on comments at line 79
+# Should computer be identified, then go from there?
 iMacMylio = HOME + "Mylio/2022/GX8-2022/" # ANNUALLY: ADD IN MYLIO, NOT IN FINDER. Good on both iMac and MBP M1 although it's not under iCloud, so requires Mylio for syncing
 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
@@ -337,11 +343,11 @@ def fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc)
   else
     tzoLocPrint = "+" + tzoLoc.to_s
   end
-  fileEXIF.instructions = "#{fileDateTimeOriginalstr} #{tzoLocPrint})" if !fileEXIF.DateTimeStamp # Time zone of photo is GMT #{tzoLoc} unless TS5?" or travel. TODO find out what this field is really for
+  fileEXIF.instructions = "#{fileDateTimeOriginalstr} #{tzoLocPrint}. Sept-Oct. zone was wrong" if !fileEXIF.DateTimeStamp # Time zone of photo is GMT #{tzoLoc} unless TS5?" or travel. TODO find out what this field is really for
   # fileEXIF.comment = "Capture date: #{fileDateTimeOriginalstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Doesn't show up in Aperture
   # puts "#{lineNum}. fileEXIF.source: #{fileEXIF.source}.original file basename not getting written"
   # puts "#{File.basename(fn)} original filename to be written to EXIF.title"
-  fileEXIF.PreservedFileName = "#{File.basename(fn)}" # title ends up as Title above the caption. Source shows up in exiftool as IPTC::Source
+  fileEXIF.PreservedFileName = "#{File.basename(fn)}" # title ends up as Title above the caption. Source shows up in exiftool as IPTC::Source, but this field does not show up in Preview, but does in Mylio
   fileEXIF.TimeZoneOffset = tzoLoc # Time Zone Offset, (1 or 2 values: 1. The time zone offset of DateTimeOriginal from GMT in hours, 2. If present, the time zone offset of ModifyDate)
   # Am I misusing this? I may using it as the TimeZone for photos taken GMT 0 TODO
   # OffsetTimeOriginal	(time zone for DateTimeOriginal) which may or may not be the time zone the photo was taken in TODO
@@ -397,7 +403,7 @@ def rename(src, timeZonesFile, timeNowWas)
     next if item.start_with?("20") # Skipping files that have already been renamed.
     next if item.end_with?("xmp") # Skipping .xmp files in Mylio and elsewhere. The files may become orphans
     # puts "#{lineNum}. #{src} " # #{timeNowWas = timeStamp(timeNowWas)}
-    puts "#{lineNum}. #{item} will be renamed. " # #{timeNowWas = timeStamp(timeNowWas)}
+    # puts "#{lineNum}. #{item} will be renamed. " # #{timeNowWas = timeStamp(timeNowWas)}
     fn = src + item # long file name
     fileEXIF = MiniExiftool.new(fn) # used several times
     # fileEXIF = Exif::Data.new(fn) # see if can just make this change, probably break something. 2017.01.13 doesn't work with Raw, but developer is working it.
@@ -522,7 +528,7 @@ def addCoordinates(photoFolder, folderGPX, gpsPhotoPerl, tzoLoc)
   # photoFolder is where the photos are that are going to have gps coordinates added. A temporary location. Usually called mylioStaging is the overall script
   # folderGPX is where the gpx tracks are
   # gpsPhotoPerl is where gpsPhoto.pl is
-  # tzoLoc is the time zone from Greg camera time zones.yml file. Since GPS records UTM. Camera time zone setting varies. Camera only recordeds the time it is set for, but doesn't accurately report the zone. Currently exiftool is saying the zone is the zone of the computer running the script. tzoLoc value can be changed in this module. tzoLoc is hours and gets changed to seconds as timeOffset for use by gpsPhoto.pl
+  # tzoLoc is the time zone from Greg camera time zones.yml file. Since GPS records UTM. Camera time zone setting varies. Camera only records the time it is set for, but doesn't accurately report the zone. Currently exiftool is saying the zone is the zone of the computer running the script. tzoLoc value can be changed in this module. tzoLoc is hours and gets changed to seconds as timeOffset for use by gpsPhoto.pl
   # <--timeoffset seconds> A positive value means that the camera is behind in time, a negative value means that the camera is ahead in time.
   
 
@@ -545,9 +551,10 @@ def addCoordinates(photoFolder, folderGPX, gpsPhotoPerl, tzoLoc)
       if camModel == "DMC-GX8" # Assumes GX8 always on local time. And TimeZone is set
         # timeOffset = tzoLoc * 3600 # old way which may be fine, but the following seems more direct. May not account for camera not being in the zone it's set for, but I don't think that matters. It matters for time labeling, but this is only GPS coords
         timeOffset =  (fileEXIF.TimeStamp -  fileEXIF.CreateDate) # seconds, so how much GMT is ahead of local. So opposite time zone
+        puts "#{lineNum} timeOffset: #{timeOffset} = (fileEXIF.TimeStamp: #{fileEXIF.TimeStamp} -  fileEXIF.CreateDate:#{fileEXIF.CreateDate})"
         puts "#{lineNum}. timeOffset: #{timeOffset} seconds (#{timeOffset/3600} hours) with GX-8 photos stamped in local time. FYI: tzoLoc: #{tzoLoc} per zones file which isn't being used for coordinates but seems like it could with hrs to secs change."
-        # timeOffset = 3600 * 7
-        # puts "#{lineNum}. Hardwired to #{timeOffset} seconds for this run"
+        timeOffset = -3600 * 7
+        puts "#{lineNum}. Hardwired to #{timeOffset} seconds for this run"
 
       elsif camModel.include?("DMC") and panasonicLocation.length > 0 # Panasonic in Travel Mode, but also some photos exported from Photos.
         timeOffset = tzoLoc * 3600
@@ -574,6 +581,7 @@ def addCoordinates(photoFolder, folderGPX, gpsPhotoPerl, tzoLoc)
   # Daguerre version. /Volumes/Daguerre/_Download folder/Latest Download/
   
   perlOutput = `perl '#{gpsPhotoPerl}' --dir '#{photoFolder}' --gpsdir '#{folderGPX}' --timeoffset #{timeOffset} --maxtimediff 50000`
+  # puts "#{lineNum}. perlOutput:\n#{perlOutput}\n\n"
   # The following is identical, so apparently was taken care of elsewhere. So now use the single line above
     # if loadingToLaptop
     #   # perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Users/gscar/Pictures/_Photo Processing Folders/Processed\ photos\ to\ be\ imported\ to\ Aperture/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2017\ Massaged/' --timeoffset #{timeOffset} --maxtimediff 50000` # saved in case something goes wrong. This works
@@ -730,9 +738,9 @@ if fromWhere["gpsCoords"] == "1" # Renaming only or could use if whichOne == "Re
     fn = src + item # long file name
     fileEXIF = MiniExiftool.new(fn) # used several times
     fileDateTimeOriginal = fileEXIF.dateTimeOriginal
-    break # stop once get to first file in folder. 
+    break # stop once get to first file in folder.
   end
-  tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) 
+  tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile)
   # puts "#{lineNum} Debugging.\n srcGpsAdd: #{srcGpsAdd} \n folderGPX: #{folderGPX}  \n gpsPhotoPerl: #{gpsPhotoPerl}  \n tzoLoc: #{tzoLoc}"
   perlOutput = addCoordinates(srcGpsAdd, folderGPX, gpsPhotoPerl, tzoLoc)
   puts "#{lineNum}. Added coordinates to photos in #{srcGpsAdd}\nMultiline perlOutput follows:\n#{perlOutput}"
@@ -895,6 +903,8 @@ puts "\n#{lineNum}. All Finished. Note that \"Adding location information to pho
 # Move to Mylio folder (can't process in this folder or Mylio might import before changes are made)
 mylioFolder = iMacMylio # need to generalize this
 mylioFolder = "/Volumes/MtnBikerSSD/Mylio_87103a/2022/GX8-2022/"
+# MBP
+mylioFolder = "/Users/gscar/Mylio/2022/GX8-2022/"
 moveToMylio(mylioStaging, mylioFolder, timeNowWas)
 
 # timeNowWas = timeStamp(timeNowWas, lineNum)
