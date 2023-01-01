@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 # mini_exiftool couldn't be found. Was a problem with  TM_RUBY, GEM_PATH, AND GEM_HOME not matching the what TextMate is using. TM does not use .ruby_version
 
-# 2022 Clock Set is Setting camera to local time which will show as FileModifyDate, DateTimeOriginal, CreateDate, SubSecCreateDate…
+# 2023 Clock Set is Setting camera to local time which will show as FileModifyDate, DateTimeOriginal, CreateDate, SubSecCreateDate…
 # TimeStamp will be offset according to camera setting for World Time which should be UTC if the zone matches the Clock Set
 # This may be wrong if those settings aren't updated or even worse if one is right and the other wrong
 
@@ -82,7 +82,7 @@ srcAddLocation  = "/Volumes/Daguerre/_Download folder/Latest Processed photos-Im
 
 # Mylio folder. Moved to this folder after all processing. Can't process in this folder or Mylio might add before this script's processing is finished. Processing is mainly done in mylioStaging. The following needs to change based on comments at line 79
 # Should computer be identified, then go from there?
-iMacMylio = HOME + "Mylio/2022/GX8-2022/" # ANNUALLY: ADD IN MYLIO, NOT IN FINDER. Good on both iMac and MBP M1 although it's not under iCloud, so requires Mylio for syncing
+iMacMylio = HOME + "Mylio/2023/GX8-2023/" # ANNUALLY: ADD IN MYLIO, NOT IN FINDER. Good on both iMac and MBP M1 although it's not under iCloud, so requires Mylio for syncing
 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
 puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. ?? But it's being stored on LUMIX card"
@@ -93,7 +93,7 @@ timeZonesFile = thisScript + "currentData/Greg camera time zones.yml"
 gpsPhotoPerl = thisScript + "lib/gpsPhoto.pl"
 
 # GPS log files. Will this work from laptop
-folderGPX = HOME + "Documents/GPS-Maps-docs/  GPX daily logs/2022 GPX logs/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
+folderGPX = HOME + "Documents/GPS-Maps-docs/  GPX daily logs/2023 GPX logs/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
 puts "#{lineNum}. Must manually set folderGPX for GPX file folders. Particularly important at start of new year AND if working on photos not in current year.\n       Using: #{folderGPX}\n"
 
 # MODULES
@@ -554,8 +554,8 @@ def addCoordinates(photoFolder, folderGPX, gpsPhotoPerl, tzoLoc)
         timeOffset =  (fileEXIF.TimeStamp -  fileEXIF.CreateDate) # seconds, so how much GMT is ahead of local. So opposite time zone
         puts "#{lineNum} timeOffset: #{timeOffset} = (fileEXIF.TimeStamp: #{fileEXIF.TimeStamp} -  fileEXIF.CreateDate:#{fileEXIF.CreateDate})"
         puts "#{lineNum}. timeOffset: #{timeOffset} seconds (#{timeOffset/3600} hours) with GX-8 photos stamped in local time. FYI: tzoLoc: #{tzoLoc} per zones file which isn't being used for coordinates but seems like it could with hrs to secs change."
-        timeOffset = -3600 * 7
-        puts "#{lineNum}. Hardwired to #{timeOffset} seconds for this run"
+        # timeOffset = -3600 * 7
+        # puts "#{lineNum}. Hardwired to #{timeOffset} seconds for this run"
 
       elsif camModel.include?("DMC") and panasonicLocation.length > 0 # Panasonic in Travel Mode, but also some photos exported from Photos.
         timeOffset = tzoLoc * 3600
@@ -656,7 +656,7 @@ end
 timeNowWas = timeStamp(Time.now, lineNum) # Initializing. Later calls are different
 # timeNowWas = timeStamp(timeNowWas)
 puts "Are the gps logs up to date?" # Should check for this since I don't see the message
-puts "FileUtilse naming and moving started  . . . . . . . . . . . . " # for trial runs  #{timeNowWas}
+# puts "File Utilse naming and moving started  . . . . . . . . . . . . " # for trial runs  #{timeNowWas}
 
 # Two names for SD cards seem common
 unless File.directory?(srcSDfolder) # negative if, so if srcSDfolder exists skip, other wise change reference to …Alt
@@ -903,9 +903,9 @@ puts "\n#{lineNum}. All Finished. Note that \"Adding location information to pho
 
 # Move to Mylio folder (can't process in this folder or Mylio might import before changes are made)
 mylioFolder = iMacMylio # need to generalize this
-mylioFolder = "/Volumes/MtnBikerSSD/Mylio_87103a/2022/GX8-2022/"
+mylioFolder = "/Volumes/MtnBikerSSD/Mylio_87103a/2023/GX8-2023/"
 # MBP
-mylioFolder = "/Users/gscar/Mylio/2022/GX8-2022/"
+mylioFolder = "/Users/gscar/Mylio/2023/GX8-2023/"
 moveToMylio(mylioStaging, mylioFolder, timeNowWas)
 
 # timeNowWas = timeStamp(timeNowWas, lineNum)
