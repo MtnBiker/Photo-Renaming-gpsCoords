@@ -905,7 +905,7 @@ puts "\n#{lineNum}. All Finished. Note that \"Adding location information to pho
 mylioFolder = iMacMylio # need to generalize this
 mylioFolder = "/Volumes/MtnBikerSSD/Mylio_87103a/2023/GX8-2023/"
 # MBP
-mylioFolder = "/Users/gscar/Mylio/2023/GX8-2023/"
+mylioFolder = "/Users/gscar/Mylio/Mylio Main Library Folder/2023/GX8-2023/"
 moveToMylio(mylioStaging, mylioFolder, timeNowWas)
 
 # timeNowWas = timeStamp(timeNowWas, lineNum)
