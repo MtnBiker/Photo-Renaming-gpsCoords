@@ -5,12 +5,14 @@
 # Got an error running from command line. Works in TextMate
 
 # Requirements
-# Ruby
+# Ruby, will it work with default version?
 # Three requires below. One is a gem? Others are part of Ruby.
 #
-# To set up. chruby, ruby-install, TextMate?
+# To set up. chruby, ruby-install, TextMate? (since can't run from command line)
+# Add two folders in Finder to copy to
 # Only tested on my Macs which have all of the above.
-# See below about allowing TextMate to have permissions to access 
+# See below about allowing TextMate to have permissions to access
+# photo_file_extensions may need additions
 
 require 'find'
 require 'fileutils'
@@ -24,7 +26,7 @@ folder_too_small = "/Users/gscar/Documents only on MBA/◊ Pre-trash (MBA)/Photo
 # on MBP
 # folder = "/Users/gscar/Pictures/Photos Library.photoslibrary/"
 # folder = "/Users/gscar/Pictures/Photos Library.photoslibrary/originals/0/"
-# # If "Operation not permitted @ dir_initialize"  https://stackoverflow.com/questions/58479686/permissionerror-errno-1-operation-not-permitted-after-macos-catalina-update
+# # If "Operation not permitted @ dir_initialize" https://stackoverflow.com/questions/58479686/permissionerror-errno-1-operation-not-permitted-after-macos-catalina-update
 # # / at end needed for rename module
 # folder_to = "/Users/gscar/Documents only on MBP/◊ Pre-trash (MBP)/PhotoExtraction/photos_copied/"
 # folder_too_small = "/Users/gscar/Documents only on MBP/◊ Pre-trash (MBP)/PhotoExtraction/too_small/"
@@ -209,6 +211,6 @@ def rename(src)
   puts "Photo files in #{src} renamed with date-time-etc"
 end # rename ing photo files in the downloads folder and writing in original time.
 
-puts "287. Now rename files with date-time-etc"
+puts "287. Now rename copied files with date-time-etc"
 rename(folder_to)
 rename(folder_too_small)

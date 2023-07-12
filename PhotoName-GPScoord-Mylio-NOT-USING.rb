@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# The Mylio version.
 # mini_exiftool couldn't be found. Was a problem with  TM_RUBY, GEM_PATH, AND GEM_HOME not matching the what TextMate is using. TM does not use .ruby_version
 
 # 2023 Clock Set is Setting camera to local time which will show as FileModifyDate, DateTimeOriginal, CreateDate, SubSecCreateDate…

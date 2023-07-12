@@ -1,3 +1,43 @@
+"611":
+    Description: "PDT. California Daylight Time. Camera now set to PT"
+    timeGMT: 2024-03-10T00-00-00Z
+    zone: -7
+    comments: "ST to DT"
+"610":
+    Description: "Return from Austin"
+    timeGMT: 2023-1130T14-00-00Z
+    zone: -8
+    comments: "CST to PST"
+"609":
+    Description: "LAX to Austin"
+    timeGMT: 2023-11-18T14-00-00Z
+    zone: -6
+    comments: "PST to CST"
+"608":
+    Description: "PST. California Standard Time (switched to ST while we were gone)"
+    timeGMT: 2023-11-14T08-00-00Z
+    zone: -8
+    comments: "Indonesia to LAX ignoring stopovers"
+"607":
+    Description: "PST to Denpassar. Indonesia does not observe DST!"
+    timeGMT: 2023-10-24T22-00-00Z
+    zone: 8
+    comments: "LAX to Indonesia ignoring stopovers"
+"606":
+    Description: "PDT. California Daylight Time. 4:12 flight"
+    timeGMT: 2023-09-01T01-00-00Z
+    zone: -7
+    comments: "Wrangel to Seattle (ignoring Ketichan connection)"
+"605":
+    Description: "Alaska Daylight Time"
+    timeGMT: 2023-08-26T20-00-00Z
+    zone: -8
+    comments: "Stikine River into Alaska at around noon"
+"604":
+    Description: "PDT. California Daylight Time. Until 2023.05.01 GX8 was on Standard Time"
+    timeGMT: 2023-03-12T14-00-00Z
+    zone: -7
+    comments: "PST to PDT and to Smithers, BC"
 "603":
     Description: "PST. California Standard Time"
     timeGMT: 2022-11-06T14-00-00Z

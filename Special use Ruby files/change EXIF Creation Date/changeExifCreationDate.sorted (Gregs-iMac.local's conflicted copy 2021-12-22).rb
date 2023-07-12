@@ -8,12 +8,12 @@
 
 # Must set these variables manually. Next five lines
 # src = "/Users/gscar/Pictures/Epson V600 scans/" # Keeping as a frequently used folder
-src = "/Users/gscar/Mylio/◊ Skaric--Genealogy-CroRes scans/Chas Wick Army 1917-8 (2).jpg"
+src = "/Users/gscar/Mylio/Mylio Main Library Folder/2017/2017.04.19.Bronzeville.png"
 # Making it easier (less error prone) to change the date
 
-year = "1917" # 1898
-month =  "05" # 01
-day =    "20" # 01
+year = "2017" # 1898
+month =  "04" # 01
+day =    "19" # 01
 
 # date_partial = "1881:01:01:01 00:00:00" # Could change back to date and get line 39 to date.next!
 date_partial = "#{year}:#{month}:#{day} 00:00:00" # Time set is UTC relative to here, slightly better if could make midnight UTC FIXME
