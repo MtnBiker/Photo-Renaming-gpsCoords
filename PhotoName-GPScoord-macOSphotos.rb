@@ -390,7 +390,8 @@ end # timeZone
 def rename(src, timeZonesFile, timeNowWas)
   # src is mylioStaging folder
   # timeZonesFile is my log of which time zones I was in when
-  # timeNowWas used for timing various parts of the script. 
+  # timeNowWas used for timing various parts of the script.
+  # puts ("#{lineNum}. in rename. src: #{src}. timeZonesFile #{timeZonesFile}. timeNowWas: #{timeNowWas}")
   # Until 2017, this assumed camera on UTC, but doesn't work well for cameras with a GPS or set to local time
   # So have to ascertain what time zone the camera is set to by other means in this script, none of them foolproof
   # 60 minutes for ~1000 photos to rename TODO ie, very slow
@@ -407,7 +408,7 @@ def rename(src, timeZonesFile, timeNowWas)
     # puts "#{lineNum}. File skipped because already renamed, i.e., the filename starts with 20xx #{item.start_with?("20")}"
     next if item.start_with?("20") # Skipping files that have already been renamed.
     next if item.end_with?("xmp") # Skipping .xmp files in Mylio and elsewhere. The files may become orphans
-    # puts "#{lineNum}. #{src} " # #{timeNowWas = timeStamp(timeNowWas)}
+    puts "#{lineNum}. #{src} " # #{timeNowWas = timeStamp(timeNowWas)}
     # puts "#{lineNum}. #{item} will be renamed. " # #{timeNowWas = timeStamp(timeNowWas)}
     fn = src + item # long file name
     fileEXIF = MiniExiftool.new(fn) # used several times
@@ -422,8 +423,7 @@ def rename(src, timeZonesFile, timeNowWas)
       filtered = ""
     end
 
-    # puts "\n#{lineNum}. #{fileCount}. fn: #{fn}"
-    # puts "#{lineNum}.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
+    puts "#{lineNum}.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
     if File.file?(fn) # why is this needed. Do a check above
       # Determine the time and time zone where the photo was taken
       # puts "#{lineNum}.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}." #  #{timeNowWas = timeStamp(timeNowWas)}

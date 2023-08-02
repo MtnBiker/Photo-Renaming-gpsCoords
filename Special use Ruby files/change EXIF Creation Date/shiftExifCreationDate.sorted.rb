@@ -14,7 +14,7 @@
 
 # Must set these variables manually. Next five lines
 src = "//Users/gscar/Mylio/2022/GX8-2022/temp/"
-src = "/Users/gscar/Pictures/_Photo Processing Folders/Download folder/"
+src = "/Users/gscar/Mylio/Mylio Main Library Folder/2018/Rich bike ride/"
 
 # Seconds to add to existing time of photo, i.e. move to future 2:31 = 151
 delta = -151
