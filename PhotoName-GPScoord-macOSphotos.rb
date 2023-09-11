@@ -237,7 +237,7 @@ def mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArra
   itemPrev = "" # need something for first time through
   itemPrevExtName = ""
   fnp = ""
-  puts "#{lineNum}. Files in #{srcHD}: #{Dir.entries(srcHD).sort.reverse}" # list of files to be processed
+  # puts "#{lineNum}. Files in #{srcHD}: #{Dir.entries(srcHD).sort.reverse}" # list of files to be processed
   Dir.entries(srcHD).sort.reverse.each do |item| # This construct goes through each in order. Sometimes the files are not in order with Dir.foreach or Dir.entries without sort. Reverse sorting so can do Raws first
     # Item is the file name
     # puts "\n#{lineNum}.. photoFinalCount: #{photoFinalCount + 1}. item: #{item}." # kind of a progress bar
@@ -251,8 +251,8 @@ def mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArra
 
     # if Raw or mp4, copy to staging
     if itemExt != ".jpg"
+      # puts "#{lineNum}. #{fn} since #{itemExt} is not jpg to be staged"
       FileUtils.copy(fn, fnm)
-      puts "#{lineNum}. #{fn} since #{itemExt} is not jpg to be staged"
     end
 
    # If a jpg and has an effect, copy to mylioStaging via
@@ -265,7 +265,7 @@ def mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArra
     end
 
     # if two jpgs in a row, then no associated raw, therefore stage
-    if itemPrevExtName == itemExt
+    if itemExt == ".jpg" && itemPrevExtName == itemExt
       fnt = tempJpg + item
       FileUtils.copy(fn, fnt)
       puts "#{lineNum}. #{fn} to be staged since #{itemPrevExtName} == #{itemExt} was #{itemPrevExtName == itemExt}"
@@ -408,22 +408,21 @@ def rename(src, timeZonesFile, timeNowWas)
     # puts "#{lineNum}. File skipped because already renamed, i.e., the filename starts with 20xx #{item.start_with?("20")}"
     next if item.start_with?("20") # Skipping files that have already been renamed.
     next if item.end_with?("xmp") # Skipping .xmp files in Mylio and elsewhere. The files may become orphans
-    puts "#{lineNum}. #{src} " # #{timeNowWas = timeStamp(timeNowWas)}
+    # puts "#{lineNum}. #{src} " # #{timeNowWas = timeStamp(timeNowWas)}
     # puts "#{lineNum}. #{item} will be renamed. " # #{timeNowWas = timeStamp(timeNowWas)}
     fn = src + item # long file name
     fileEXIF = MiniExiftool.new(fn) # used several times
     # fileEXIF = Exif::Data.new(fn) # see if can just make this change, probably break something. 2017.01.13 doesn't work with Raw, but developer is working it.
     camModel = fileEXIF.model
 
-    # To add display for Mylio
+    # To add display for Mylio. Don't think this is needed anymore
+    filtered = ""
     filterEffect = fileEXIF.FilterEffect
     if File.extname(item).downcase == ".jpg" && filterEffect != "Expressive" # Expressive is default, so not much of an effect, but may need to change this
       filtered = "_display"
-    else
-      filtered = ""
     end
 
-    puts "#{lineNum}.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
+    # puts "#{lineNum}.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
     if File.file?(fn) # why is this needed. Do a check above
       # Determine the time and time zone where the photo was taken
       # puts "#{lineNum}.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}." #  #{timeNowWas = timeStamp(timeNowWas)}
@@ -467,7 +466,7 @@ def rename(src, timeZonesFile, timeNowWas)
         # timeChange = 0
         fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
 #       puts "#{lineNum}: camModel: #{camModel}. tzoLoc: #{tzoLoc}. timeChange.class: #{timeChange.class} timeChange: #{timeChange.to_i}"
-        puts "#{lineNum}. fileDateTimeOriginal #{fileDateTimeOriginal}. timeChange: #{timeChange} for #{camModel}"
+        # puts "#{lineNum}. fileDateTimeOriginal #{fileDateTimeOriginal}. timeChange: #{timeChange} for #{camModel}"
       elsif camModel == "iPhone X"  # DateTimeOriginal is in local time
         # timeChange = 0
         fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
@@ -513,6 +512,7 @@ def rename(src, timeZonesFile, timeNowWas)
 #       puts "#{lineNum}. fn: #{fn}. fnp (fnpPrev): #{fnp}. subSec: #{subSec}"
       subSecPrev = subSec.to_s
       File.rename(fn,fnp)
+      puts "#{lineNum}. #{File.basename(fn)} was renamed to #{File.basename(fnp)}. If this works, write a file so can track these."
       count += 1
      else
       puts "#{lineNum}. CHECKING why `if File.file?(fn)` is needed. File.file?(fn): #{File.file?(fn)} for fn: #{fn}"
@@ -883,7 +883,7 @@ Dir.foreach(tempJpg) do |item|
   next if ignoreNonFiles(item) == true
   fn  = tempJpg   + item # sourced from temporary storage for jpgs 
   fnp = mylioStaging + item # new jpg file in Latest Download
-  # puts "#{lineNum}.#{jpgsMovedCount += 1}. #{fn} moved to #{fnp}" # dubugging
+  puts "#{lineNum}.#{jpgsMovedCount += 1}. #{fn} moved to #{fnp}" # dubugging
   FileUtils.move(fn, fnp)
 end
 
