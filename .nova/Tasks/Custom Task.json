@@ -1,0 +1,18 @@
+{
+  "actions" : {
+    "build" : {
+      "enabled" : true
+    },
+    "run" : {
+      "enabled" : true,
+      "postActions" : [
+        {
+          "script" : "PhotoName-GPScoord-macOSphotos.rb",
+          "type" : "runScript"
+        }
+      ],
+      "script" : "ruby PhotoName-GPScoord-macOSphotos.rb"
+    }
+  },
+  "openLogOnRun" : "start"
+}

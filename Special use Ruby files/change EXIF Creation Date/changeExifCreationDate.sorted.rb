@@ -10,7 +10,7 @@
 # src = "/Users/gscar/Pictures/Epson V600 scans/" # Keeping as a frequently used folder
 # src = "/Users/gscar/Mylio/2012/New Folder With Items/"
 # src = "/Users/gscar/Doc iMac only/City Directories/1910-19 Los Angeles City Directories/1918 Los Angeles City Directory/"
-src = "/Users/gscar/Mylio/Mylio Main Library Folder/2018/Rich bike ride/"
+src = "/Users/gscar/Pictures/Pops and Greg ~69.jpeg"
 
 # Making it easier (less error prone) to change the date
 year = "2018" # 1898
@@ -23,7 +23,7 @@ second = "31" # "00"
 date_partial = "#{year}:#{month}:#{day} 00:00:00" # Time set is UTC relative to here, slightly better if could make midnight UTC FIXME
 date_partial = "#{year}:#{month}:#{day} #{hour}:#{minute}:#{second}" # Probably easier to do manually below or hms
 
-# date_partial = "2021.09.26-14.05.00" # From Mylio. Copy file name, change . to : and  - to space
+date_partial = "1969.07.15-15.05.00" # From Mylio. Copy file name, change . to : and  - to space
 
 require 'mini_exiftool'
 require 'naturally' # for natural sort https://github.com/dogweather/naturally
