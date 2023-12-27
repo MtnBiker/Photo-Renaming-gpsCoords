@@ -3,6 +3,8 @@
 # Folder names use Mylio and the ones for temporary use are fine. It's just the final location that matters. And I'm trying to move them to a folder that Photos.app will watch.
 # TODO camera time zones file is hard to maintain. Would a simple table or CSV be easier? Harder to setup for this Ruby script, but that's once
 
+# Problem with File::exist in the Pashua .rb files So commented them out, see how that goes. No idea where I got the syntax from but no longer working
+
 # mini_exiftool couldn't be found. Was a problem with  TM_RUBY, GEM_PATH, AND GEM_HOME not matching the what TextMate is using. TM does not use .ruby_version
 
 # 2023 Clock Set is Setting camera to local time which will show as FileModifyDate, DateTimeOriginal, CreateDate, SubSecCreateDate…
@@ -694,16 +696,21 @@ else
   srcHD            = downloadsFolders # is this being used?
   # loadingToLaptop = true # No longer used
 end
-
+ puts "#{lineNum}. Temporary for error checking. mylioStaging: #{mylioStaging}"
+ puts "#{lineNum}. Temporary for error checking. File.exist?(mylioStaging): #{File.exist?(mylioStaging)}" # true
+ Dir.foreach(mylioStaging) {|x| puts "Got #{x}" } # Task “Custom Task” exited with a non-zero exit status: 1.
+ puts "#{lineNum}. Temporary for error checking. Dir.entries(mylioStaging): #{Dir.entries(mylioStaging)}" # Task “Custom Task” exited with a non-zero exit status: 1. and from terminal: No such file or directory @ dir_initialize - mylioStaging (Errno::ENOENT)
+ puts "#{lineNum}. Temporary for error checking. mylioStaging: #{mylioStaging}. Dir.entries(mylioStaging).count: #{Dir.entries(mylioStaging).count}"
 # Check if photos are already in Latest Download folder. A problem because they get reprocessed by gps coordinate adding.
 folderPhotoCount = Dir.entries(mylioStaging).count - 3 # -3 is a crude way to take care of ., .., .. Crude is probably OK since this isn't critical. If one real photo is there, not a big problem
+puts "#{lineNum}. Temporary for error checking. folderPhotoCount: #{folderPhotoCount}"
 if folderPhotoCount > 0
+  puts "#{lineNum}. Temporary for error checking"
   # puts "#{lineNum}. downloadsFolders: #{downloadsFolders}. Check if Pashua warning window appears"
   # downloadsFolderEmpty(mylioStaging, folderPhotoCount) # Pashua window
 else
   puts "\n#{lineNum}. 'Processed photos to be imported to Mylio/' folder is empty and script will continue."
 end
-
 # Ask whether working with photo files from SD card or HD
 # fromWhere are the photos?
 fromWhere = whichLoc() # This is pulling in first Pashua window (1. ), SDorHD.rb which has been required # 

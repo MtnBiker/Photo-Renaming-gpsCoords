@@ -63,7 +63,7 @@ laptopTempJpg         = laptopLocation + "Latest Downloads temp jpg/"
 downloadsFolders = "/Volumes/Daguerre/_Download folder/"
 # Maybe should start with what computer I'm on then make decisions about what's plugged in. Also consider the 10GB as a primary?
 # Process in MtnBikerSSD or Daguerre if plugged in, otherwise the computer in use which is decided later?
-if File.exists?(downloadsFolders)
+if File.exist?(downloadsFolders)
   puts "#{lineNum}. Daguerre is mounted"
 else
   downloadsFolders = "/Volumes/MtnBikerSSD/_Download folder/" # Obviously with MtnBikerSSD
@@ -213,7 +213,7 @@ def uniqueFileName(filename)
   # https://www.ruby-forum.com/topic/191831#836607
   count = 0
   unique_name = filename
-  while File.exists?(unique_name)
+  while File.exist?(unique_name)
     count += 1
     unique_name = "#{File.join(File.dirname(filename),File.basename(filename, ".*"))}-#{count}#{File.extname(filename)}"
   end
@@ -269,13 +269,13 @@ def mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArra
 
     itemPrevExtName = itemExt # since reusing below. jpg, orf (Olympus) or RW2 (Panasonic). So will work as long as Raw comes after jpg alphabetically
 
-    if File.exists?(fna)  # moving the original to _imported-archive, but not writing over existing files
+    if File.exist?(fna)  # moving the original to _imported-archive, but not writing over existing files
       fna = uniqueFileName(fna)
       FileUtils.move(fn, fna)
       puts "#{lineNum}. A file already existed with this name so it was changed to fna: #{fna}"
     else # no copies, so move
       FileUtils.move(fn, fna)
-    end # File.exists?
+    end # File.exist?
     # "#{lineNum}.. #{photoFinalCount + delCount} #{fn}" # More for debugging, but maybe OK as progress in this slow process
     photoFinalCount += 1
     arrayIndex = photoFinalCount - 1 # Need spaces around the minus
@@ -669,8 +669,8 @@ end
 # srcSD = srcSDfolder + sdFolder(sdFolderFile)
 
 # if Daguerre isn't mounted use folders on laptop. 
-if File.exists?(downloadsFolders)
-  puts "#{lineNum}. Using Daguerre or MtnBikerSSD. File.exists?(downloadsFolders (#{downloadsFolders})): #{File.exists?(downloadsFolders)}"
+if File.exist?(downloadsFolders)
+  puts "#{lineNum}. Using Daguerre or MtnBikerSSD. File.exist?(downloadsFolders (#{downloadsFolders})): #{File.exist?(downloadsFolders)}"
 else
    puts "\n#{lineNum}. #{downloadsFolders} isn't mounted, so will use local laptop folders to process"
   # Daguerre folders location loaded by default, changed as needed

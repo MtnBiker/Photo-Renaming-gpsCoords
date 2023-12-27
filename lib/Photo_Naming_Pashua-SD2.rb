@@ -73,21 +73,22 @@ end_of_string
   icon  = File.dirname($0) << "/.icon.png";
   bgimg = File.dirname($0) << "/.demo.png";
 
-  if File::exists?(icon)    # Display Pashua's icon
+# Causing error and think I can live without the icon
+#   if File::exist?(icon)    # Display Pashua's icon # exist or exists causing an error
       Config << "img.type = image
       img.x = 530
       img.y = 255
       img.path = #{icon}
       "
-  end
-
-  if File::exists?(bgimg)       # Display Pashua's icon
-      Config << "bg.type = image
-      bg.x = 30
-      bg.y = 2
-      bg.path = #{bgimg}
-      "
-  end
+#   end
+# 
+#   if File::exist?(bgimg)       # Display Pashua's icon
+#       Config << "bg.type = image
+#       bg.x = 30
+#       bg.y = 2
+#       bg.path = #{bgimg}
+#       "
+#   end
 
  # pashuaReturn = pashua_run config
   res = pashua_run config
