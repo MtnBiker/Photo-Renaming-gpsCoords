@@ -4,6 +4,8 @@
 # TODO camera time zones file is hard to maintain. Would a simple table or CSV be easier? Harder to setup for this Ruby script, but that's once
 
 # Problem with File::exist in the Pashua .rb files So commented them out, see how that goes. No idea where I got the syntax from but no longer working
+# Won't run in Nova but does from command line: 
+# ruby "/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb"
 
 # mini_exiftool couldn't be found. Was a problem with  TM_RUBY, GEM_PATH, AND GEM_HOME not matching the what TextMate is using. TM does not use .ruby_version
 
@@ -63,7 +65,7 @@ laptopDownloadsFolder = laptopLocation + "Download folder/"
 laptopDestination     = laptopLocation + "Processed photos to be imported to Mylio/" # a temp folder.
 laptopDestOrig        = laptopLocation + "Originals to archive/" # FIXME Should be a flag to move to Daguerre when Daguerre available
 laptopTempJpg         = laptopLocation + "Latest Downloads temp jpg/"
-photosRenamedTo       = HOME + "Pictures/photosRenamedTo.txt" # Should keep this on Daguerre, but not always connected
+photosRenamedTo       = thisScript + "currentData/photosRenamedTo.txt" #  Had it on the SD card. How about keeping with the script? Was: HOME + "Pictures/photosRenamedTo.txt" # Should keep this on Daguerre, but not always connected.
 
 # Folders on portable drive: Daguerre. This is the normal location with Daguerre plugged into iMac
 downloadsFolders = "/Volumes/Daguerre/_Download folder/"
@@ -515,7 +517,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
 #       puts "#{lineNum}. fn: #{fn}. fnp (fnpPrev): #{fnp}. subSec: #{subSec}"
       subSecPrev = subSec.to_s
       File.rename(fn,fnp)
-      photoRenamed = "#{File.basename(fn)} was renamed to #{File.basename(fnp)}"
+      photoRenamed = "#{lineNum}. photosRenamedTo: ${photosRenamedTo}. #{File.basename(fn)} was renamed to #{File.basename(fnp)}"
       # puts "#{lineNum}. #{photoRenamed}. If this works, write a file so can track these."
       begin
         file_prepend(photosRenamedTo, photoRenamed)
@@ -697,8 +699,9 @@ else
   # loadingToLaptop = true # No longer used
 end
  puts "#{lineNum}. Temporary for error checking. mylioStaging: #{mylioStaging}"
+ puts "# Won't run in Nova but does from command line: See line ~10 for command"
  puts "#{lineNum}. Temporary for error checking. File.exist?(mylioStaging): #{File.exist?(mylioStaging)}" # true
- Dir.foreach(mylioStaging) {|x| puts "Got #{x}" } # Task “Custom Task” exited with a non-zero exit status: 1.
+ Dir.foreach(mylioStaging) {|x| puts "Got #{x}" } # Task “Custom Task” exited with a non-zero exit status: 1., but runs from command line
  puts "#{lineNum}. Temporary for error checking. Dir.entries(mylioStaging): #{Dir.entries(mylioStaging)}" # Task “Custom Task” exited with a non-zero exit status: 1. and from terminal: No such file or directory @ dir_initialize - mylioStaging (Errno::ENOENT)
  puts "#{lineNum}. Temporary for error checking. mylioStaging: #{mylioStaging}. Dir.entries(mylioStaging).count: #{Dir.entries(mylioStaging).count}"
 # Check if photos are already in Latest Download folder. A problem because they get reprocessed by gps coordinate adding.

@@ -75,11 +75,11 @@ end_of_string
 
 # Causing error and think I can live without the icon
 #   if File::exist?(icon)    # Display Pashua's icon # exist or exists causing an error
-      Config << "img.type = image
-      img.x = 530
-      img.y = 255
-      img.path = #{icon}
-      "
+      # Config << "img.type = image # uninitialized constant Config (NameError)
+      # img.x = 530
+      # img.y = 255
+      # img.path = #{icon}
+      # "
 #   end
 # 
 #   if File::exist?(bgimg)       # Display Pashua's icon
