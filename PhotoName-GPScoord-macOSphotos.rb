@@ -91,7 +91,7 @@ srcAddLocation  = "/Volumes/Daguerre/_Download folder/Latest Processed photos-Im
 
 # Mylio folder. Moved to this folder after all processing. Can't process in this folder or Mylio might add before this script's processing is finished. Processing is mainly done in mylioStaging. The following needs to change based on comments at line 79
 # Should computer be identified, then go from there?
-iMacMylio = HOME + "Mylio/2023/GX8-2023/" # ANNUALLY: ADD IN MYLIO, NOT IN FINDER. Good on both iMac and MBP M1 although it's not under iCloud, so requires Mylio for syncing
+iMacMylio = HOME + "Mylio/2024/GX8-2024/" # ANNUALLY: ADD IN MYLIO, NOT IN FINDER. Good on both iMac and MBP M1 although it's not under iCloud, so requires Mylio for syncing
 watchedFolderForImport = HOME + "Pictures/_Photo Processing Folders/Watched folder for import to Photos/"
 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
@@ -103,7 +103,7 @@ timeZonesFile = thisScript + "currentData/Greg camera time zones.yml"
 gpsPhotoPerl = thisScript + "lib/gpsPhoto.pl"
 
 # GPS log files. Will this work from laptop
-folderGPX = HOME + "Documents/GPS-Maps-docs/  GPX daily logs/2023 GPX logs/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
+folderGPX = HOME + "Documents/GPS-Maps-docs/  GPX daily logs/2024 GPX logs/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
 puts "#{lineNum}. Must manually set folderGPX for GPX file folders. Particularly important at start of new year AND if working on photos not in current year.\n       Using: #{folderGPX}\n"
 
 # MODULES
@@ -698,17 +698,18 @@ else
   srcHD            = downloadsFolders # is this being used?
   # loadingToLaptop = true # No longer used
 end
- puts "#{lineNum}. Temporary for error checking. mylioStaging: #{mylioStaging}"
- puts "# Won't run in Nova but does from command line: See line ~10 for command"
+ # puts "#{lineNum}. Temporary for error checking. mylioStaging: #{mylioStaging}"
+ # puts "# Won't run in Nova but does from command line: See line ~10 for command"
  puts "#{lineNum}. Temporary for error checking. File.exist?(mylioStaging): #{File.exist?(mylioStaging)}" # true
+ puts "ruby \"/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb\" Crashing here, can run script from command line"
  Dir.foreach(mylioStaging) {|x| puts "Got #{x}" } # Task “Custom Task” exited with a non-zero exit status: 1., but runs from command line
- puts "#{lineNum}. Temporary for error checking. Dir.entries(mylioStaging): #{Dir.entries(mylioStaging)}" # Task “Custom Task” exited with a non-zero exit status: 1. and from terminal: No such file or directory @ dir_initialize - mylioStaging (Errno::ENOENT)
- puts "#{lineNum}. Temporary for error checking. mylioStaging: #{mylioStaging}. Dir.entries(mylioStaging).count: #{Dir.entries(mylioStaging).count}"
+ # puts "#{lineNum}. Temporary for error checking. Dir.entries(mylioStaging): #{Dir.entries(mylioStaging)}" # Task “Custom Task” exited with a non-zero exit status: 1. and from terminal: No such file or directory @ dir_initialize - mylioStaging (Errno::ENOENT)
+ # puts "#{lineNum}. Temporary for error checking. mylioStaging: #{mylioStaging}. Dir.entries(mylioStaging).count: #{Dir.entries(mylioStaging).count}"
 # Check if photos are already in Latest Download folder. A problem because they get reprocessed by gps coordinate adding.
 folderPhotoCount = Dir.entries(mylioStaging).count - 3 # -3 is a crude way to take care of ., .., .. Crude is probably OK since this isn't critical. If one real photo is there, not a big problem
-puts "#{lineNum}. Temporary for error checking. folderPhotoCount: #{folderPhotoCount}"
+# puts "#{lineNum}. Temporary for error checking. folderPhotoCount: #{folderPhotoCount}"
 if folderPhotoCount > 0
-  puts "#{lineNum}. Temporary for error checking"
+  # puts "#{lineNum}. Temporary for error checking"
   # puts "#{lineNum}. downloadsFolders: #{downloadsFolders}. Check if Pashua warning window appears"
   # downloadsFolderEmpty(mylioStaging, folderPhotoCount) # Pashua window
 else
