@@ -46,7 +46,7 @@ EOS
 icon  = File.dirname($0) << "/.icon.png";
 bgimg = File.dirname($0) << "/.demo.png";
 
-if File::exists?(icon)
+if File::exist?(icon)
 	# Display Pashua's icon
 	Config << "img.type = image
 	img.x = 530
@@ -55,7 +55,7 @@ if File::exists?(icon)
 	"
 end
 
-if File::exists?(bgimg)
+if File::exist?(bgimg)
 	# Display Pashua's icon
 	Config << "bg.type = image
 	bg.x = 30

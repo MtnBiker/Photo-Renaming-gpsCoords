@@ -1,3 +1,495 @@
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230758.JPG was renamed to 2024.02.28-14.58.08.gs.P.jpg
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230757.JPG was renamed to 2024.02.28-14.57.57.gs.P.jpg
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230756.JPG was renamed to 2024.02.28-14.57.31.gs.P.jpg
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230755.JPG was renamed to 2024.02.28-14.54.06.gs.P.jpg
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230778.RW2 was renamed to 2024.02.29-11.12.01.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230777.RW2 was renamed to 2024.02.29-11.11.53.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230776.RW2 was renamed to 2024.02.29-11.11.34.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230775.RW2 was renamed to 2024.02.29-11.11.18.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230774.RW2 was renamed to 2024.02.29-11.11.16.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230773.RW2 was renamed to 2024.02.29-11.11.13.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230772.RW2 was renamed to 2024.02.29-11.11.03.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230771.RW2 was renamed to 2024.02.29-11.10.49.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230770.RW2 was renamed to 2024.02.29-11.10.46.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230769.RW2 was renamed to 2024.02.29-11.10.25.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230768.RW2 was renamed to 2024.02.29-11.10.21.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230767.RW2 was renamed to 2024.02.29-11.09.57.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230766.RW2 was renamed to 2024.02.29-11.09.54.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230765.RW2 was renamed to 2024.02.29-11.09.39.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230764.RW2 was renamed to 2024.02.29-11.09.23.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230763.RW2 was renamed to 2024.02.28-15.00.12.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230762.RW2 was renamed to 2024.02.28-15.00.06.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230761.RW2 was renamed to 2024.02.28-14.58.51.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230760.RW2 was renamed to 2024.02.28-14.58.34.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230754.RW2 was renamed to 2024.02.28-14.53.53.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230752.RW2 was renamed to 2024.02.28-14.51.38.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230751.RW2 was renamed to 2024.02.23-09.50.15.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230750.RW2 was renamed to 2024.02.23-09.44.39.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230749.RW2 was renamed to 2024.02.20-17.46.23.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230748.RW2 was renamed to 2024.02.20-17.46.16.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230747.RW2 was renamed to 2024.02.20-17.46.13.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230746.RW2 was renamed to 2024.02.20-17.46.04.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230745.RW2 was renamed to 2024.02.20-17.44.34.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230744.RW2 was renamed to 2024.02.20-17.44.32.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230743.RW2 was renamed to 2024.02.20-17.44.30.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230742.RW2 was renamed to 2024.02.20-17.44.29.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230741.RW2 was renamed to 2024.02.20-17.44.27.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230740.RW2 was renamed to 2024.02.20-17.44.24.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230739.RW2 was renamed to 2024.02.20-17.44.23.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230738.RW2 was renamed to 2024.02.20-17.44.22.92.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230737.RW2 was renamed to 2024.02.20-17.44.22.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230736.RW2 was renamed to 2024.02.20-17.44.21.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230735.RW2 was renamed to 2024.02.20-17.44.18.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230734.RW2 was renamed to 2024.02.20-17.44.15.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230733.RW2 was renamed to 2024.02.20-17.44.14.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230732.RW2 was renamed to 2024.02.20-17.43.24.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230731.RW2 was renamed to 2024.02.19-10.19.07.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230730.RW2 was renamed to 2024.02.19-10.18.46.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230729.RW2 was renamed to 2024.02.19-10.18.29.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230728.RW2 was renamed to 2024.02.19-09.25.45.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230727.RW2 was renamed to 2024.02.19-09.25.44.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230726.RW2 was renamed to 2024.02.19-09.25.41.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230725.RW2 was renamed to 2024.02.19-09.25.40.87.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230724.RW2 was renamed to 2024.02.19-09.25.40.gs.P.rw2
+522. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230723.RW2 was renamed to 2024.02.19-09.25.38.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230758.JPG was renamed to 2024.02.28-14.58.08.gs.P.jpg
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230757.JPG was renamed to 2024.02.28-14.57.57.gs.P.jpg
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230756.JPG was renamed to 2024.02.28-14.57.31.gs.P.jpg
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230755.JPG was renamed to 2024.02.28-14.54.06.gs.P.jpg
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230778.RW2 was renamed to 2024.02.29-11.12.01.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230777.RW2 was renamed to 2024.02.29-11.11.53.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230776.RW2 was renamed to 2024.02.29-11.11.34.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230775.RW2 was renamed to 2024.02.29-11.11.18.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230774.RW2 was renamed to 2024.02.29-11.11.16.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230773.RW2 was renamed to 2024.02.29-11.11.13.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230772.RW2 was renamed to 2024.02.29-11.11.03.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230771.RW2 was renamed to 2024.02.29-11.10.49.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230770.RW2 was renamed to 2024.02.29-11.10.46.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230769.RW2 was renamed to 2024.02.29-11.10.25.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230768.RW2 was renamed to 2024.02.29-11.10.21.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230767.RW2 was renamed to 2024.02.29-11.09.57.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230766.RW2 was renamed to 2024.02.29-11.09.54.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230765.RW2 was renamed to 2024.02.29-11.09.39.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230764.RW2 was renamed to 2024.02.29-11.09.23.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230763.RW2 was renamed to 2024.02.28-15.00.12.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230762.RW2 was renamed to 2024.02.28-15.00.06.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230761.RW2 was renamed to 2024.02.28-14.58.51.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230760.RW2 was renamed to 2024.02.28-14.58.34.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230754.RW2 was renamed to 2024.02.28-14.53.53.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230752.RW2 was renamed to 2024.02.28-14.51.38.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230751.RW2 was renamed to 2024.02.23-09.50.15.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230750.RW2 was renamed to 2024.02.23-09.44.39.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230749.RW2 was renamed to 2024.02.20-17.46.23.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230748.RW2 was renamed to 2024.02.20-17.46.16.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230747.RW2 was renamed to 2024.02.20-17.46.13.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230746.RW2 was renamed to 2024.02.20-17.46.04.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230745.RW2 was renamed to 2024.02.20-17.44.34.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230744.RW2 was renamed to 2024.02.20-17.44.32.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230743.RW2 was renamed to 2024.02.20-17.44.30.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230742.RW2 was renamed to 2024.02.20-17.44.29.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230741.RW2 was renamed to 2024.02.20-17.44.27.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230740.RW2 was renamed to 2024.02.20-17.44.24.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230739.RW2 was renamed to 2024.02.20-17.44.23.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230738.RW2 was renamed to 2024.02.20-17.44.22.92.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230737.RW2 was renamed to 2024.02.20-17.44.22.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230736.RW2 was renamed to 2024.02.20-17.44.21.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230735.RW2 was renamed to 2024.02.20-17.44.18.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230734.RW2 was renamed to 2024.02.20-17.44.15.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230733.RW2 was renamed to 2024.02.20-17.44.14.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230732.RW2 was renamed to 2024.02.20-17.43.24.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230731.RW2 was renamed to 2024.02.19-10.19.07.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230730.RW2 was renamed to 2024.02.19-10.18.46.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230729.RW2 was renamed to 2024.02.19-10.18.29.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230728.RW2 was renamed to 2024.02.19-09.25.45.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230727.RW2 was renamed to 2024.02.19-09.25.44.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230726.RW2 was renamed to 2024.02.19-09.25.41.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230725.RW2 was renamed to 2024.02.19-09.25.40.87.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230724.RW2 was renamed to 2024.02.19-09.25.40.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230723.RW2 was renamed to 2024.02.19-09.25.38.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230722.MP4 was renamed to 2024.02.17-17.30.59.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230721.RW2 was renamed to 2024.02.17-17.30.32.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230720.RW2 was renamed to 2024.02.17-17.30.30.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230719.RW2 was renamed to 2024.02.17-17.30.29.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230718.RW2 was renamed to 2024.02.17-17.27.57.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230717.RW2 was renamed to 2024.02.17-17.27.56.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230716.RW2 was renamed to 2024.02.17-17.26.49.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230715.RW2 was renamed to 2024.02.17-17.26.48.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230714.RW2 was renamed to 2024.02.17-17.26.46.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230713.RW2 was renamed to 2024.02.17-17.26.02.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230712.RW2 was renamed to 2024.02.17-17.24.27.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230711.RW2 was renamed to 2024.02.17-17.24.25.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230710.RW2 was renamed to 2024.02.17-17.24.23.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230709.RW2 was renamed to 2024.02.17-17.23.59.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230708.RW2 was renamed to 2024.02.17-17.23.48.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230707.RW2 was renamed to 2024.02.17-17.23.47.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230706.RW2 was renamed to 2024.02.17-17.23.34.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230705.RW2 was renamed to 2024.02.17-17.23.24.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230704.RW2 was renamed to 2024.02.17-10.58.01.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230703.RW2 was renamed to 2024.02.16-15.24.12.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230702.RW2 was renamed to 2024.02.16-15.24.08.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230701.RW2 was renamed to 2024.02.16-15.22.57.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230700.RW2 was renamed to 2024.02.16-15.22.52.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230699.RW2 was renamed to 2024.02.16-15.21.54.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230698.RW2 was renamed to 2024.02.16-15.21.51.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230697.RW2 was renamed to 2024.02.16-15.20.34.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230696.RW2 was renamed to 2024.02.16-15.20.23.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230695.RW2 was renamed to 2024.02.16-14.01.20.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230694.RW2 was renamed to 2024.02.16-14.01.16.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230693.RW2 was renamed to 2024.02.16-13.16.57.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230692.RW2 was renamed to 2024.02.16-13.16.56.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230691.RW2 was renamed to 2024.02.16-13.16.55.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230690.RW2 was renamed to 2024.02.16-13.16.47.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230689.RW2 was renamed to 2024.02.16-13.16.42.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230688.RW2 was renamed to 2024.02.16-13.16.40.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230687.RW2 was renamed to 2024.02.16-13.16.20.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230686.RW2 was renamed to 2024.02.16-13.16.13.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230685.RW2 was renamed to 2024.02.16-13.16.10.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230684.RW2 was renamed to 2024.02.16-13.10.54.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230683.RW2 was renamed to 2024.02.16-13.10.10.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230682.RW2 was renamed to 2024.02.16-13.10.07.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230681.RW2 was renamed to 2024.02.16-13.09.33.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230680.RW2 was renamed to 2024.02.16-13.09.23.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230679.RW2 was renamed to 2024.02.16-11.46.54.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230678.RW2 was renamed to 2024.02.16-11.46.40.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230677.RW2 was renamed to 2024.02.16-11.46.25.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230676.RW2 was renamed to 2024.02.15-17.50.46.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230675.RW2 was renamed to 2024.02.15-17.50.37.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230674.RW2 was renamed to 2024.02.15-17.49.45.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230673.RW2 was renamed to 2024.02.15-17.49.38.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230672.RW2 was renamed to 2024.02.15-17.49.37.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230671.RW2 was renamed to 2024.02.15-17.49.34.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230670.RW2 was renamed to 2024.02.15-17.49.33.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230669.RW2 was renamed to 2024.02.15-17.49.32.99.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230668.RW2 was renamed to 2024.02.15-17.49.32.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230667.RW2 was renamed to 2024.02.15-17.49.31.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230666.RW2 was renamed to 2024.02.15-17.49.30.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230665.RW2 was renamed to 2024.02.15-17.49.25.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230664.RW2 was renamed to 2024.02.15-17.45.44.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230663.RW2 was renamed to 2024.02.15-17.39.23.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230662.RW2 was renamed to 2024.02.15-17.35.37.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230661.RW2 was renamed to 2024.02.15-17.35.31.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230660.RW2 was renamed to 2024.02.15-17.35.25.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230659.RW2 was renamed to 2024.02.15-17.32.45.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230658.RW2 was renamed to 2024.02.15-17.32.27.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230657.RW2 was renamed to 2024.02.15-17.30.24.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230656.RW2 was renamed to 2024.02.15-17.29.33.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230655.RW2 was renamed to 2024.02.15-17.29.31.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230654.RW2 was renamed to 2024.02.15-17.28.08.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230653.RW2 was renamed to 2024.02.15-17.28.05.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230652.RW2 was renamed to 2024.02.15-17.27.40.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230651.RW2 was renamed to 2024.02.15-17.27.23.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230650.RW2 was renamed to 2024.02.15-17.27.10.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230649.RW2 was renamed to 2024.02.15-17.27.09.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230648.RW2 was renamed to 2024.02.15-17.27.07.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230647.RW2 was renamed to 2024.02.15-17.26.57.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230646.RW2 was renamed to 2024.02.15-17.25.35.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230645.RW2 was renamed to 2024.02.15-17.24.56.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230644.RW2 was renamed to 2024.02.15-17.24.26.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230643.RW2 was renamed to 2024.02.15-17.16.48.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230642.RW2 was renamed to 2024.02.15-17.15.58.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230641.RW2 was renamed to 2024.02.15-17.15.55.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230640.RW2 was renamed to 2024.02.15-17.15.52.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230639.RW2 was renamed to 2024.02.15-12.03.19.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230638.RW2 was renamed to 2024.02.15-12.03.05.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230637.RW2 was renamed to 2024.02.15-12.02.18.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230636.RW2 was renamed to 2024.02.15-12.02.09.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230635.RW2 was renamed to 2024.02.15-12.01.28.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230634.RW2 was renamed to 2024.02.15-12.01.04.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230633.RW2 was renamed to 2024.02.15-12.00.57.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230632.RW2 was renamed to 2024.02.10-17.46.06.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230631.RW2 was renamed to 2024.02.10-17.45.03.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230630.RW2 was renamed to 2024.02.10-17.44.27.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230629.RW2 was renamed to 2024.02.10-17.42.52.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230628.RW2 was renamed to 2024.02.10-17.42.41.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230627.RW2 was renamed to 2024.02.10-17.42.04.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230626.RW2 was renamed to 2024.02.10-17.42.01.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230625.RW2 was renamed to 2024.02.10-17.41.59.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230624.RW2 was renamed to 2024.02.10-17.39.56.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230623.RW2 was renamed to 2024.02.10-17.38.29.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230622.RW2 was renamed to 2024.02.10-17.38.22.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230621.RW2 was renamed to 2024.02.10-17.38.16.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230620.RW2 was renamed to 2024.02.10-17.29.03.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230619.RW2 was renamed to 2024.02.10-17.28.40.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230618.RW2 was renamed to 2024.02.10-17.22.15.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230617.RW2 was renamed to 2024.02.10-17.17.56.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230616.RW2 was renamed to 2024.02.10-17.17.51.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230615.RW2 was renamed to 2024.02.10-13.39.24.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230614.RW2 was renamed to 2024.02.10-13.38.40.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230613.RW2 was renamed to 2024.02.10-13.37.10.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230612.RW2 was renamed to 2024.02.10-13.36.25.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230611.RW2 was renamed to 2024.02.10-13.36.16.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230610.RW2 was renamed to 2024.02.10-13.36.06.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230609.RW2 was renamed to 2024.02.10-13.36.00.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230608.RW2 was renamed to 2024.02.10-13.35.53.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230607.RW2 was renamed to 2024.02.10-13.35.02.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230606.RW2 was renamed to 2024.02.10-13.34.57.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230605.RW2 was renamed to 2024.02.08-17.39.05.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230604.MP4 was renamed to 2024.02.08-17.38.47.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230603.MP4 was renamed to 2024.02.08-17.38.43.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230602.MP4 was renamed to 2024.02.08-17.38.40.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230601.MP4 was renamed to 2024.02.08-17.38.23.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230600.MP4 was renamed to 2024.02.08-17.38.19.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230599.MP4 was renamed to 2024.02.08-17.38.15.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230598.MP4 was renamed to 2024.02.08-17.29.36.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230597.MP4 was renamed to 2024.02.08-17.28.26.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230596.MP4 was renamed to 2024.02.08-17.28.16.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230595.MP4 was renamed to 2024.02.08-17.23.25.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230594.MP4 was renamed to 2024.02.08-17.23.21.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230593.MP4 was renamed to 2024.02.08-17.18.34.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230592.MP4 was renamed to 2024.02.08-17.18.28.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230591.MP4 was renamed to 2024.02.08-17.18.17.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230590.MP4 was renamed to 2024.02.08-17.18.14.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230589.MP4 was renamed to 2024.02.08-17.18.08.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230588.MP4 was renamed to 2024.02.08-17.17.29.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230587.MP4 was renamed to 2024.02.08-17.12.36.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230586.MP4 was renamed to 2024.02.08-17.12.32.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230585.MP4 was renamed to 2024.02.08-17.12.28.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230584.MP4 was renamed to 2024.02.08-17.12.24.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230583.MP4 was renamed to 2024.02.08-17.12.12.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230582.MP4 was renamed to 2024.02.08-17.12.07.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230581.MP4 was renamed to 2024.02.08-17.12.01.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230580.MP4 was renamed to 2024.02.08-17.11.55.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230579.MP4 was renamed to 2024.02.08-17.11.46.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230578.MP4 was renamed to 2024.02.08-17.11.43.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230577.MP4 was renamed to 2024.02.08-17.11.34.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230576.MP4 was renamed to 2024.02.08-17.02.56.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230575.MP4 was renamed to 2024.02.08-17.02.44.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230574.MP4 was renamed to 2024.02.08-17.01.24.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230573.MP4 was renamed to 2024.02.08-17.01.20.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230572.MP4 was renamed to 2024.02.08-17.00.50.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230571.MP4 was renamed to 2024.02.08-17.00.42.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230570.MP4 was renamed to 2024.02.08-16.59.38.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230569.MP4 was renamed to 2024.02.08-16.59.27.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230568.MP4 was renamed to 2024.02.08-16.59.15.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230567.MP4 was renamed to 2024.02.08-16.59.05.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230566.MP4 was renamed to 2024.02.08-16.58.39.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230565.MP4 was renamed to 2024.02.08-16.57.59.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230564.MP4 was renamed to 2024.02.08-16.57.43.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230563.MP4 was renamed to 2024.02.08-16.57.40.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230562.MP4 was renamed to 2024.02.08-16.57.29.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230561.MP4 was renamed to 2024.02.08-16.57.08.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230560.MP4 was renamed to 2024.02.08-16.56.39.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230559.MP4 was renamed to 2024.02.08-16.56.31.gs.P.mp4
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230558.RW2 was renamed to 2024.02.08-16.55.57.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230557.RW2 was renamed to 2024.02.08-16.55.49.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230556.RW2 was renamed to 2024.02.08-16.55.44.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230555.RW2 was renamed to 2024.02.08-16.55.43.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230554.RW2 was renamed to 2024.02.08-16.55.42.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230553.RW2 was renamed to 2024.02.08-16.55.39.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230552.RW2 was renamed to 2024.02.08-16.55.37.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230551.RW2 was renamed to 2024.02.08-16.55.34.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230550.RW2 was renamed to 2024.02.08-16.53.21.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230549.RW2 was renamed to 2024.02.08-16.52.45.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230548.RW2 was renamed to 2024.02.08-16.51.30.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230547.RW2 was renamed to 2024.02.08-16.51.20.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230546.RW2 was renamed to 2024.02.08-16.50.23.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230545.RW2 was renamed to 2024.02.08-16.50.16.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230544.RW2 was renamed to 2024.02.07-12.49.11.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230543.RW2 was renamed to 2024.02.07-12.49.06.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230542.RW2 was renamed to 2024.02.05-16.56.07.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230541.RW2 was renamed to 2024.02.05-16.53.18.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230540.RW2 was renamed to 2024.02.05-16.53.15.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230539.RW2 was renamed to 2024.02.05-16.53.14.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230538.RW2 was renamed to 2024.02.05-16.53.13.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230537.RW2 was renamed to 2024.02.05-16.53.02.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230536.RW2 was renamed to 2024.02.05-16.52.45.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230535.RW2 was renamed to 2024.02.05-16.52.44.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230534.RW2 was renamed to 2024.02.05-16.52.43.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230533.RW2 was renamed to 2024.02.05-16.52.39.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230532.RW2 was renamed to 2024.02.05-16.52.19.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230531.RW2 was renamed to 2024.02.05-16.52.16.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230530.RW2 was renamed to 2024.02.05-16.52.15.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230529.RW2 was renamed to 2024.02.05-16.51.52.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230528.RW2 was renamed to 2024.02.05-16.51.39.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230527.RW2 was renamed to 2024.02.05-16.51.38.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230526.RW2 was renamed to 2024.02.05-16.51.36.90.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230525.RW2 was renamed to 2024.02.05-16.51.36.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230524.RW2 was renamed to 2024.02.05-16.51.35.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230523.RW2 was renamed to 2024.02.05-16.51.34.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230522.RW2 was renamed to 2024.02.05-16.51.33.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230521.RW2 was renamed to 2024.02.05-16.51.03.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230520.RW2 was renamed to 2024.02.05-16.50.58.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230519.RW2 was renamed to 2024.02.05-11.20.16.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230518.RW2 was renamed to 2024.02.05-11.18.56.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230517.RW2 was renamed to 2024.02.05-11.17.56.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230516.RW2 was renamed to 2024.02.05-11.17.28.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230515.RW2 was renamed to 2024.02.05-11.17.09.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230514.RW2 was renamed to 2024.02.05-11.15.16.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230513.RW2 was renamed to 2024.02.04-10.55.41.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230512.RW2 was renamed to 2024.02.04-10.55.39.90.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230511.RW2 was renamed to 2024.02.04-10.55.39.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230510.RW2 was renamed to 2024.02.04-10.55.37.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230509.RW2 was renamed to 2024.02.04-10.55.33.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230508.RW2 was renamed to 2024.02.04-10.55.31.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230507.RW2 was renamed to 2024.02.04-08.30.54.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230506.RW2 was renamed to 2024.02.04-08.30.25.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230505.RW2 was renamed to 2024.02.04-08.26.48.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230504.RW2 was renamed to 2024.02.04-08.25.44.gs.P.rw2
+520. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. P1230503.RW2 was renamed to 2024.02.04-07.19.06.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230439.JPG was renamed to 2024.01.31-09.31.49.gs.P_display.jpg
+520. photosRenamedTo: ${photosRenamedTo}. P1230502.RW2 was renamed to 2024.02.03-16.39.30.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230501.MP4 was renamed to 2024.02.03-16.39.21.gs.P.mp4
+520. photosRenamedTo: ${photosRenamedTo}. P1230500.MP4 was renamed to 2024.02.03-16.25.19.gs.P.mp4
+520. photosRenamedTo: ${photosRenamedTo}. P1230499.MP4 was renamed to 2024.02.03-16.25.14.gs.P.mp4
+520. photosRenamedTo: ${photosRenamedTo}. P1230498.MP4 was renamed to 2024.02.03-16.24.27.gs.P.mp4
+520. photosRenamedTo: ${photosRenamedTo}. P1230497.MP4 was renamed to 2024.02.03-16.24.24.gs.P.mp4
+520. photosRenamedTo: ${photosRenamedTo}. P1230496.MP4 was renamed to 2024.02.03-16.24.18.gs.P.mp4
+520. photosRenamedTo: ${photosRenamedTo}. P1230495.MP4 was renamed to 2024.02.03-16.24.13.gs.P.mp4
+520. photosRenamedTo: ${photosRenamedTo}. P1230494.MP4 was renamed to 2024.02.03-16.23.13.gs.P.mp4
+520. photosRenamedTo: ${photosRenamedTo}. P1230493.MP4 was renamed to 2024.02.03-16.23.10.gs.P.mp4
+520. photosRenamedTo: ${photosRenamedTo}. P1230492.MP4 was renamed to 2024.02.03-16.22.42.gs.P.mp4
+520. photosRenamedTo: ${photosRenamedTo}. P1230491.RW2 was renamed to 2024.02.03-16.22.29.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230490.RW2 was renamed to 2024.02.03-16.22.28.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230489.RW2 was renamed to 2024.02.03-16.21.40.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230488.RW2 was renamed to 2024.02.03-16.21.37.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230487.RW2 was renamed to 2024.02.03-16.21.35.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230486.RW2 was renamed to 2024.02.03-16.20.47.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230485.RW2 was renamed to 2024.02.03-16.20.41.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230484.MP4 was renamed to 2024.02.03-16.14.16.gs.P.mp4
+520. photosRenamedTo: ${photosRenamedTo}. P1230483.MP4 was renamed to 2024.02.03-16.14.10.gs.P.mp4
+520. photosRenamedTo: ${photosRenamedTo}. P1230482.MP4 was renamed to 2024.02.03-16.14.03.gs.P.mp4
+520. photosRenamedTo: ${photosRenamedTo}. P1230481.MP4 was renamed to 2024.02.03-16.14.00.gs.P.mp4
+520. photosRenamedTo: ${photosRenamedTo}. P1230480.MP4 was renamed to 2024.02.03-16.13.40.gs.P.mp4
+520. photosRenamedTo: ${photosRenamedTo}. P1230479.MP4 was renamed to 2024.02.03-16.13.14.gs.P.mp4
+520. photosRenamedTo: ${photosRenamedTo}. P1230478.MP4 was renamed to 2024.02.03-16.12.34.gs.P.mp4
+520. photosRenamedTo: ${photosRenamedTo}. P1230477.MP4 was renamed to 2024.02.03-16.12.07.gs.P.mp4
+520. photosRenamedTo: ${photosRenamedTo}. P1230476.MP4 was renamed to 2024.02.03-16.12.00.gs.P.mp4
+520. photosRenamedTo: ${photosRenamedTo}. P1230475.RW2 was renamed to 2024.02.03-16.11.17.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230474.RW2 was renamed to 2024.02.03-16.11.03.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230473.RW2 was renamed to 2024.02.03-16.10.30.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230472.RW2 was renamed to 2024.02.03-16.10.25.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230471.RW2 was renamed to 2024.02.03-16.07.39.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230470.RW2 was renamed to 2024.02.03-16.07.37.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230469.RW2 was renamed to 2024.02.03-16.06.56.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230468.RW2 was renamed to 2024.02.03-16.06.53.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230467.RW2 was renamed to 2024.02.03-16.06.51.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230466.RW2 was renamed to 2024.02.03-16.05.58.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230465.RW2 was renamed to 2024.02.03-16.05.07.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230464.RW2 was renamed to 2024.02.03-16.04.08.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230463.RW2 was renamed to 2024.02.03-16.04.05.38.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230462.RW2 was renamed to 2024.02.03-16.04.05.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230461.RW2 was renamed to 2024.02.03-16.03.55.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230460.RW2 was renamed to 2024.02.03-16.03.54.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230459.RW2 was renamed to 2024.02.03-16.03.50.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230458.RW2 was renamed to 2024.02.03-16.03.47.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230457.RW2 was renamed to 2024.02.03-16.03.46.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230456.RW2 was renamed to 2024.02.03-16.01.58.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230455.RW2 was renamed to 2024.02.03-16.01.28.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230454.RW2 was renamed to 2024.02.03-16.01.20.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230453.RW2 was renamed to 2024.02.03-15.59.42.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230452.RW2 was renamed to 2024.02.03-15.58.57.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230451.RW2 was renamed to 2024.02.03-15.57.52.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230450.RW2 was renamed to 2024.02.03-15.57.49.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230449.RW2 was renamed to 2024.02.03-15.57.44.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230448.RW2 was renamed to 2024.02.03-15.57.43.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230447.RW2 was renamed to 2024.02.03-15.57.29.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230446.RW2 was renamed to 2024.02.03-15.46.01.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230445.RW2 was renamed to 2024.02.03-15.45.59.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230444.RW2 was renamed to 2024.02.02-06.27.23.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230443.RW2 was renamed to 2024.02.02-06.27.04.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230442.RW2 was renamed to 2024.02.02-06.26.52.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230441.RW2 was renamed to 2024.02.02-06.26.14.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230440.RW2 was renamed to 2024.02.02-06.25.10.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230438.RW2 was renamed to 2024.01.31-09.31.28.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230437.RW2 was renamed to 2024.01.31-09.30.45.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230436.RW2 was renamed to 2024.01.26-12.58.41.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230435.RW2 was renamed to 2024.01.26-12.06.13.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230434.RW2 was renamed to 2024.01.26-12.06.12.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230433.RW2 was renamed to 2024.01.26-12.06.09.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230432.RW2 was renamed to 2024.01.26-12.06.05.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230431.RW2 was renamed to 2024.01.25-16.34.01.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230430.RW2 was renamed to 2024.01.25-16.31.08.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230429.RW2 was renamed to 2024.01.25-16.31.00.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230428.RW2 was renamed to 2024.01.25-16.30.54.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230427.RW2 was renamed to 2024.01.25-16.30.09.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230426.RW2 was renamed to 2024.01.25-16.30.01.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230425.RW2 was renamed to 2024.01.25-16.29.39.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230424.RW2 was renamed to 2024.01.25-16.29.31.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230423.RW2 was renamed to 2024.01.25-16.28.56.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230422.RW2 was renamed to 2024.01.25-16.28.51.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230421.RW2 was renamed to 2024.01.25-16.28.41.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230420.RW2 was renamed to 2024.01.25-16.28.23.55.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230419.RW2 was renamed to 2024.01.25-16.28.23.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230418.RW2 was renamed to 2024.01.25-16.28.20.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230417.RW2 was renamed to 2024.01.25-16.28.19.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230416.RW2 was renamed to 2024.01.25-16.28.18.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230415.RW2 was renamed to 2024.01.25-10.33.02.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230414.RW2 was renamed to 2024.01.25-10.31.03.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230413.RW2 was renamed to 2024.01.25-10.30.26.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230412.RW2 was renamed to 2024.01.25-10.29.26.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230411.RW2 was renamed to 2024.01.25-10.28.46.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230410.RW2 was renamed to 2024.01.25-10.28.40.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230409.RW2 was renamed to 2024.01.25-10.27.56.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230408.RW2 was renamed to 2024.01.25-10.27.52.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230407.RW2 was renamed to 2024.01.25-10.27.51.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230406.RW2 was renamed to 2024.01.25-10.27.28.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230405.RW2 was renamed to 2024.01.25-10.27.00.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230404.RW2 was renamed to 2024.01.25-09.32.24.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230403.RW2 was renamed to 2024.01.25-09.14.05.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230402.RW2 was renamed to 2024.01.25-09.13.56.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230401.RW2 was renamed to 2024.01.25-09.13.43.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230400.RW2 was renamed to 2024.01.25-09.13.26.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230399.RW2 was renamed to 2024.01.25-09.13.23.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230398.RW2 was renamed to 2024.01.25-09.13.15.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230397.RW2 was renamed to 2024.01.22-09.25.39.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230396.RW2 was renamed to 2024.01.22-09.24.54.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230395.RW2 was renamed to 2024.01.22-09.24.04.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230394.RW2 was renamed to 2024.01.17-13.00.45.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230393.RW2 was renamed to 2024.01.17-13.00.41.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230392.RW2 was renamed to 2024.01.17-13.00.39.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230391.RW2 was renamed to 2024.01.01-14.17.23.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230390.RW2 was renamed to 2024.01.01-14.01.52.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230389.RW2 was renamed to 2024.01.01-14.01.48.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230388.RW2 was renamed to 2024.01.01-14.01.47.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230387.RW2 was renamed to 2024.01.01-14.01.41.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230386.RW2 was renamed to 2024.01.01-13.52.08.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230385.RW2 was renamed to 2023.12.31-13.49.04.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230384.RW2 was renamed to 2023.12.31-13.47.53.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230383.RW2 was renamed to 2023.12.31-13.46.31.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230382.RW2 was renamed to 2023.12.31-13.46.16.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230381.RW2 was renamed to 2023.12.31-13.46.03.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230380.RW2 was renamed to 2023.12.31-13.45.21.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230379.RW2 was renamed to 2023.12.31-13.45.16.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230378.RW2 was renamed to 2023.12.31-13.45.08.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230377.RW2 was renamed to 2023.12.31-10.35.34.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230376.RW2 was renamed to 2023.12.31-10.35.33.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230375.RW2 was renamed to 2023.12.31-10.35.27.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230374.RW2 was renamed to 2023.12.31-10.35.09.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230373.RW2 was renamed to 2023.12.31-10.35.07.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230372.RW2 was renamed to 2023.12.31-10.35.06.95.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230371.RW2 was renamed to 2023.12.31-10.35.06.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230370.RW2 was renamed to 2023.12.31-10.34.56.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230369.RW2 was renamed to 2023.12.31-10.34.53.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230368.RW2 was renamed to 2023.12.31-10.34.50.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230367.RW2 was renamed to 2023.12.31-10.34.44.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230366.RW2 was renamed to 2023.12.31-10.34.40.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230365.RW2 was renamed to 2023.12.31-10.34.38.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230364.RW2 was renamed to 2023.12.31-10.34.34.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230363.RW2 was renamed to 2023.12.31-10.34.32.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230362.RW2 was renamed to 2023.12.31-10.34.30.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230361.RW2 was renamed to 2023.12.31-10.34.29.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230360.RW2 was renamed to 2023.12.31-10.34.26.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230359.RW2 was renamed to 2023.12.31-10.34.23.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230358.RW2 was renamed to 2023.12.31-10.34.07.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230357.RW2 was renamed to 2023.12.31-10.34.04.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230356.RW2 was renamed to 2023.12.31-10.33.57.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230385.RW2 was renamed to 2023.12.31-13.49.04.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230384.RW2 was renamed to 2023.12.31-13.47.53.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230383.RW2 was renamed to 2023.12.31-13.46.31.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230382.RW2 was renamed to 2023.12.31-13.46.16.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230381.RW2 was renamed to 2023.12.31-13.46.03.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230380.RW2 was renamed to 2023.12.31-13.45.21.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230379.RW2 was renamed to 2023.12.31-13.45.16.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230378.RW2 was renamed to 2023.12.31-13.45.08.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230377.RW2 was renamed to 2023.12.31-10.35.34.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230376.RW2 was renamed to 2023.12.31-10.35.33.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230375.RW2 was renamed to 2023.12.31-10.35.27.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230374.RW2 was renamed to 2023.12.31-10.35.09.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230373.RW2 was renamed to 2023.12.31-10.35.07.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230372.RW2 was renamed to 2023.12.31-10.35.06.95.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230371.RW2 was renamed to 2023.12.31-10.35.06.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230370.RW2 was renamed to 2023.12.31-10.34.56.gs.P.rw2
+520. photosRenamedTo: ${photosRenamedTo}. P1230369.RW2 was renamed to 2023.12.31-10.34.53.gs.P.rw2
 520. photosRenamedTo: ${photosRenamedTo}. P1230368.RW2 was renamed to 2023.12.31-10.34.50.gs.P.rw2
 520. photosRenamedTo: ${photosRenamedTo}. P1230367.RW2 was renamed to 2023.12.31-10.34.44.gs.P.rw2
 520. photosRenamedTo: ${photosRenamedTo}. P1230366.RW2 was renamed to 2023.12.31-10.34.40.gs.P.rw2

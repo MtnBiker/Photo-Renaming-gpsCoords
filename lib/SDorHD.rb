@@ -61,7 +61,7 @@ end_of_string
   icon  = File.dirname($0) << "/.icon.png";
   bgimg = File.dirname($0) << "/.demo.png";
 
-  if File::exists?(icon)    # Display Pashua's icon
+  if File::exist?(icon)    # Display Pashua's icon
       Config << "img.type = image
       img.x = 530
       img.y = 255
@@ -69,7 +69,7 @@ end_of_string
       "
   end
 
-  if File::exists?(bgimg)       # Display Pashua's icon
+  if File::exist?(bgimg)       # Display Pashua's icon
       Config << "bg.type = image
       bg.x = 30
       bg.y = 2

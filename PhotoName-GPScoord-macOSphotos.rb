@@ -322,11 +322,13 @@ def userCamCode(fn)
   fileEXIF = MiniExiftool.new(fn)
   ## not very well thought out and the order of the tests matters
   case fileEXIF.model
+    when "OM-1MarkII"
+      userCamCode = ".gs.O" # gs for photographer. P for *P*anasonic Lumix
     when "DMC-GX8"
       userCamCode = ".gs.P" # gs for photographer. P for *P*anasonic Lumix
     when "iPhone 13"
       userCamCode = "gs.i" # gs for photographer. i for iPhone
-    when "iPhone X"
+    when "iPhone 15"
       userCamCode = "lb.i" # gs for photographer. i for iPhone
     when "Canon PowerShot S100"
       userCamCode = ".lb" # initials of the photographer who usually shoots with the S100
@@ -517,7 +519,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
 #       puts "#{lineNum}. fn: #{fn}. fnp (fnpPrev): #{fnp}. subSec: #{subSec}"
       subSecPrev = subSec.to_s
       File.rename(fn,fnp)
-      photoRenamed = "#{lineNum}. photosRenamedTo: ${photosRenamedTo}. #{File.basename(fn)} was renamed to #{File.basename(fnp)}"
+      photoRenamed = "#{lineNum}. photosRenamedTo: #{photosRenamedTo}. #{File.basename(fn)} was renamed to #{File.basename(fnp)}"
       # puts "#{lineNum}. #{photoRenamed}. If this works, write a file so can track these."
       begin
         file_prepend(photosRenamedTo, photoRenamed)
@@ -563,11 +565,15 @@ def addCoordinates(photoFolder, folderGPX, gpsPhotoPerl, tzoLoc)
     fn = photoFolder + item
     fileEXIF = MiniExiftool.new(fn) # used several times
     camModel = fileEXIF.model
-    puts "#{lineNum}. model: #{camModel} fn: #{fn}" # debug
+    puts "#{__LINE__}. model: #{camModel} fn: #{fn}" # debug
     panasonicLocation = fileEXIF.location
     # timeOffset = 0 # could leave this in and remove the else 
     if File.file?(fn)
-      if camModel == "DMC-GX8" # Assumes GX8 always on local time. And TimeZone is set
+      if camModel == "OM-1MarkII"
+        # Copied from GX8 for starters
+        timeOffset =  (fileEXIF.TimeStamp -  fileEXIF.CreateDate) # seconds, so how much GMT is ahead of local. So opposite time zone
+        puts "#{lineNum} timeOffset: #{timeOffset} = (fileEXIF.TimeStamp: #{fileEXIF.TimeStamp} -  fileEXIF.CreateDate:#{fileEXIF.CreateDate})"
+      elsif camModel == "DMC-GX8" # Assumes GX8 always on local time. And TimeZone is set
         # timeOffset = tzoLoc * 3600 # old way which may be fine, but the following seems more direct. May not account for camera not being in the zone it's set for, but I don't think that matters. It matters for time labeling, but this is only GPS coords
         timeOffset =  (fileEXIF.TimeStamp -  fileEXIF.CreateDate) # seconds, so how much GMT is ahead of local. So opposite time zone
         puts "#{lineNum} timeOffset: #{timeOffset} = (fileEXIF.TimeStamp: #{fileEXIF.TimeStamp} -  fileEXIF.CreateDate:#{fileEXIF.CreateDate})"
@@ -578,14 +584,14 @@ def addCoordinates(photoFolder, folderGPX, gpsPhotoPerl, tzoLoc)
       elsif camModel.include?("DMC") and panasonicLocation.length > 0 # Panasonic in Travel Mode, but also some photos exported from Photos.
         timeOffset = tzoLoc * 3600
         puts "#{lineNum}. timeOffset: #{timeOffset} sec (#{tzoLoc} hours) with photos stamped in local time."
-      elsif camModel  == "DMC-TS5"
-        # Offset sign is same as GMT offset, eg, we are -8, but need to increase the time to match UST, therefore negative
-        timeOffset = - fileEXIF.dateTimeOriginal.utc_offset # Time zone is set in camera, i.e. local time in this case
-        # What does utc_offset do for the above. dateTimeOriginal is just a time, e.g., 2018:12:31 21:38:32, which is the time the camera thinks it is. Camera doesn't know about zone. Camera may, but from dateTimeOriginal, can't tell the time zone.
-        puts "#{lineNum}. timeOffset: #{timeOffset} for DMC-TS5 photos stamped in local time."
-      else # GX7 time is UTC. iPhone ends up here too
-        timeOffset = 0 # camelCase, but perl variable is lowercase
-        puts "#{lineNum}. timeOffset: #{timeOffset} sec (#{tzoLoc} hours) with photos stamped in GMT"
+      # elsif camModel  == "DMC-TS5"
+    #     # Offset sign is same as GMT offset, eg, we are -8, but need to increase the time to match UST, therefore negative
+    #     timeOffset = - fileEXIF.dateTimeOriginal.utc_offset # Time zone is set in camera, i.e. local time in this case
+    #     # What does utc_offset do for the above. dateTimeOriginal is just a time, e.g., 2018:12:31 21:38:32, which is the time the camera thinks it is. Camera doesn't know about zone. Camera may, but from dateTimeOriginal, can't tell the time zone.
+    #     puts "#{lineNum}. timeOffset: #{timeOffset} for DMC-TS5 photos stamped in local time."
+    #   else # GX7 time is UTC. iPhone ends up here too
+    #     timeOffset = 0 # camelCase, but perl variable is lowercase
+    #     puts "#{lineNum}. timeOffset: #{timeOffset} sec (#{tzoLoc} hours) with photos stamped in GMT"
       end # if camModel
       # puts "#{lineNum} timeOffset: #{timeOffset} triple checking"
       fileEXIF.save 

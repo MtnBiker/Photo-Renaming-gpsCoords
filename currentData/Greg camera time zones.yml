@@ -1,3 +1,23 @@
+"617":
+  Description: "PDT. California Daylight Time. Camera now set to PT"
+  timeGMT: 2024-10-01T00-00-00Z
+  zone: -7
+  comments: "Return from Mongolia et al"
+"616":
+  Description: "Back to Ulaanbaatar"
+  timeGMT: 2024-09-23T00-00-00Z
+  zone: 8
+  comments: "ULAT"
+"615":
+  Description: "Ölgii et al"
+  timeGMT: 2024-09-11T05-00-00Z
+  zone: 7
+  comments: "HOVT"
+"614":
+  Description: "Ulaanbaatar"
+  timeGMT: 2024-09-10T00-00-00Z
+  zone: 8
+  comments: "ULAT"
 "613":
   Description: "PDT. California Daylight Time. Camera now set to PT"
   timeGMT: 2024-03-10T00-00-00Z
