@@ -1,7 +1,9 @@
 {
   "actions" : {
     "build" : {
-      "enabled" : true
+      "enabled" : true,
+      "path" : "PhotoName-GPScoord-macOSphotos.rb",
+      "shell" : "\/usr\/bin\/env ruby"
     },
     "run" : {
       "enabled" : true,

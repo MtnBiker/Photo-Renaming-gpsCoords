@@ -12,7 +12,7 @@
 # 2023 Clock Set is Setting camera to local time which will show as FileModifyDate, DateTimeOriginal, CreateDate, SubSecCreateDate…
 # TimeStamp will be offset according to camera setting for World Time which should be UTC if the zone matches the Clock Set
 # This may be wrong if those settings aren't updated or even worse if one is right and the other wrong
-
+puts "#{__LINE__}. Top of script. Setting variables and at about line no. 680 enter processing."
 require 'fileutils'
 include FileUtils
 require 'find'
@@ -44,7 +44,18 @@ def lineNum() # Had to move this to above the first call or it didn't work. Didn
 end # line numbers of this file, useful for debugging and logging info to progress screen
 
 photosArray = [] # can create initially, but I don't know how to add other "fields" to a file already on the list. I'll be better off with an indexed data base. I suppose could delete the existing item for that index and then put in revised. Not using this, but maybe some day
-sdCard      = "/Volumes/LUMIX/"
+if File.exist?("/Volumes/OM SYSTEM/")
+  sdCard      = "/Volumes/OM SYSTEM/"
+  srcSDsuffix = "OMSYS"
+  puts "#{__LINE__}. #{sdCard} SD card mounted"
+elsif File.exist?("/Volumes/LUMIX/")  
+  sdCard      = "/Volumes/LUMIX/"
+  srcSDsuffix = "_PANA"
+  puts "#{__LINE__}. #{sdCard} SD card mounted"
+else
+  puts "#{__LINE__}. No SD card mounted"
+end
+
 puts "#{lineNum}. Could be a problem with differently named SD cards: #{sdCard}. If the name is different, change #{lineNum.to_i - 1}" # In 2022, I got creative and named the LUMIX cards with a suffix in numerical order.
 lastPhotoReadTextFile = sdCard + "/DCIM/" # SD folder alternate since both this and one below occur
 sdCardAlt   = "/Volumes/NO NAME/"
@@ -95,7 +106,7 @@ iMacMylio = HOME + "Mylio/2024/GX8-2024/" # ANNUALLY: ADD IN MYLIO, NOT IN FINDE
 watchedFolderForImport = HOME + "Pictures/_Photo Processing Folders/Watched folder for import to Photos/"
 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
-puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. ?? But it's being stored on LUMIX card"
+puts "#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. ?? But it should stored on #{sdCard} card"
 
 # timeZonesFile = HOME + "Dropbox/scriptsEtc/Greg camera time zones.yml"
 timeZonesFile = thisScript + "currentData/Greg camera time zones.yml"
@@ -261,12 +272,13 @@ def mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArra
     end
 
    # If a jpg and has an effect, copy to mylioStaging via
+   # ArtFilter: Off; 0; 0; 0 may be the screen
     fileEXIF = MiniExiftool.new(fn)
     filterEffect = fileEXIF.FilterEffect
     if itemExt.downcase == ".jpg" && filterEffect != "Expressive" # Expressive is default, so not much of an effect, but may need to change this
       fnt = tempJpg + item
       FileUtils.copy(fn, fnt)
-      puts "#{lineNum}. #{fn} to be staged since filterEffect is #{filterEffect}"
+      puts "#{lineNum}. #{fn} to be staged since filterEffect is #{filterEffect} or OM-1 without support for orf yet. See "
     end
 
     # if two jpgs in a row, then no associated raw, therefore stage
@@ -423,10 +435,14 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
     camModel = fileEXIF.model
 
     # To add display for Mylio. Don't think this is needed anymore
+    # Generally jpgs are not added to Mylio, but if there is a filter effect want the jpg.
+    # May need to change the terminology for OM-1
+    # ArtFilter: Off; 0; 0; 0 may be the screen. This is used in two places
     filtered = ""
+    filterEffect = ""
     filterEffect = fileEXIF.FilterEffect
-    if File.extname(item).downcase == ".jpg" && filterEffect != "Expressive" # Expressive is default, so not much of an effect, but may need to change this
-      filtered = "_display"
+    puts "#{__LINE__}. filterEffect: #{filterEffect}"
+    if File.extname(item).downcase == ".jpg" && filterEffect != "Expressive" && camModel != "OM-1MarkII" # Expressive is default, so not much of an effect, but may need to change this. OM-1 photos get caught up and they should not      filtered = "_display"
     end
 
     # puts "#{lineNum}.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
@@ -570,9 +586,11 @@ def addCoordinates(photoFolder, folderGPX, gpsPhotoPerl, tzoLoc)
     # timeOffset = 0 # could leave this in and remove the else 
     if File.file?(fn)
       if camModel == "OM-1MarkII"
-        # Copied from GX8 for starters
-        timeOffset =  (fileEXIF.TimeStamp -  fileEXIF.CreateDate) # seconds, so how much GMT is ahead of local. So opposite time zone
-        puts "#{lineNum} timeOffset: #{timeOffset} = (fileEXIF.TimeStamp: #{fileEXIF.TimeStamp} -  fileEXIF.CreateDate:#{fileEXIF.CreateDate})"
+        # CreateDate is local time with time zone noted, e.g.,  2024:03:03 15:56:50-08:00 3:15 pm in tz -8
+        # Date Time UTC                   : 2024:03:03 23:56:50
+        # Offset Time                     : -08:00 # so can get directly from photo
+        timeOffset = -fileEXIF.OffsetTime(0..2).to_i # so how much GMT is ahead of local. So opposite time zone
+        puts "#{__LINE__} timeOffset: #{timeOffset}. Sign is opposite tz. -fileEXIF.OffsetTime(0..2).to_i"
       elsif camModel == "DMC-GX8" # Assumes GX8 always on local time. And TimeZone is set
         # timeOffset = tzoLoc * 3600 # old way which may be fine, but the following seems more direct. May not account for camera not being in the zone it's set for, but I don't think that matters. It matters for time labeling, but this is only GPS coords
         timeOffset =  (fileEXIF.TimeStamp -  fileEXIF.CreateDate) # seconds, so how much GMT is ahead of local. So opposite time zone
@@ -606,7 +624,7 @@ def addCoordinates(photoFolder, folderGPX, gpsPhotoPerl, tzoLoc)
   # Daguerre version. /Volumes/Daguerre/_Download folder/Latest Download/
   
   perlOutput = `perl '#{gpsPhotoPerl}' --dir '#{photoFolder}' --gpsdir '#{folderGPX}' --timeoffset #{timeOffset} --maxtimediff 50000`
-  # puts "#{lineNum}. perlOutput:\n#{perlOutput}\n\n"
+  puts "#{lineNum}. perlOutput:\n#{perlOutput}\n\n"
   # The following is identical, so apparently was taken care of elsewhere. So now use the single line above
     # if loadingToLaptop
     #   # perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Users/gscar/Pictures/_Photo Processing Folders/Processed\ photos\ to\ be\ imported\ to\ Aperture/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2017\ Massaged/' --timeoffset #{timeOffset} --maxtimediff 50000` # saved in case something goes wrong. This works
@@ -679,8 +697,7 @@ end
 ## The "PROGRAM" ############ ##################### ###################### ##################### ##########################
 timeNowWas = timeStamp(Time.now, lineNum) # Initializing. Later calls are different
 # timeNowWas = timeStamp(timeNowWas)
-puts "Are the gps logs up to date?" # Should check for this since I don't see the message
-# puts "File Utilse naming and moving started  . . . . . . . . . . . . " # for trial runs  #{timeNowWas}
+puts "#{__LINE__}. Are the gps logs up to date?" # Should check for this since I don't see the message
 
 # Two names for SD cards seem common
 unless File.directory?(srcSDfolder) # negative if, so if srcSDfolder exists skip, other wise change reference to …Alt
@@ -804,27 +821,31 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
     puts "\n#{lineNum}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. NEED an error here if card not mounted!!. Have a kludge fix in the next rescue."
     file = File.new(lastPhotoReadTextFile, "r")
     lastPhotoFilename = file.gets # apparently grabbing a return. maybe not the best reading method.
-    puts "\n#{lineNum}. lastPhotoFilename: #{lastPhotoFilename.chop}. Value can be changed by user, so this may not be the value used."
+    puts "\n#{lineNum}. lastPhotoFilename: #{lastPhotoFilename}. Value can be changed by user, so this may not be the value used. was #lastPhotoFilename.chop"
     # lastPhotoFilename is 8 characters long (P plus 7 digits) at present.
     # Adding date to this line, so will take first 12 characters (would be cleaner if made the write an array or json and worked with that, but this is the quick and dirty)
     lastPhotoFilename = lastPhotoFilename[0..7]
-    puts "#{lineNum}. lastPhotoFilename: #{lastPhotoFilename}. Confirming new method of reading. Should look like line above. Not implemented as haven't found an easy way to write to the beginning of the file."
+    # puts "#{lineNum}. lastPhotoFilename: #{lastPhotoFilename}. Confirming new method of reading. Should look like line above. Not implemented as haven't found an easy way to write to the beginning of the file."
     file.close
   # rescue Exception => err # Not good to rescue Exception
   rescue => err
     puts "Exception: #{err}. Not critical as value can be entered manually by user.\n"
   end
 
+# Lumix file naming: /Volumes/LUMIX/DCIM/123_PANA/
+# OMDS file naming: /Volumes/OM SYSTEM/DCIM/100OMSYS/
+  puts "#{__LINE__}. srcSDfolder: #{srcSDfolder}.  srcSDsuffix: #{srcSDsuffix}"
   begin
-    srcSD = srcSDfolder + lastPhotoFilename.chop.slice(1,3) + "_PANA"
+    srcSD = srcSDfolder + lastPhotoFilename.chop.slice(1,3) + srcSDsuffix
   rescue Exception => e
     puts "#{lineNum} +++++++++++++ SD card not available, so will EXIT.++++++++++. Probably selected wrong option."
     exit
   end
+  puts "#{__LINE__}. srcSD: #{srcSD}"
 
-# Don't know if this is needed, why not use srcSD directly
+# Don't know if this is needed, why not use srcSD directly. src is used in copySD at ~lineNo 880
   src = srcSD
-  prefsPhoto = pPashua2(src,lastPhotoFilename,mylioStaging,archiveFolder) # calling Photo_Handling_Pashua-SD. (Titled: 2. SD card photo downloading options)
+  prefsPhoto = pPashua2(srcSD,lastPhotoFilename,mylioStaging,archiveFolder) # calling Photo_Handling_Pashua-SD. (Titled: 2. SD card photo downloading options)
   # to get a value use prefsPhoto("theNameInFileNamingEtcPashua.rb"), nothing to do with the name above
   # puts "Prefs as set by pPashua"
   # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
@@ -861,9 +882,9 @@ puts "\n#{lineNum}. Initialization complete. File renaming and copying/moving be
 timeNowWas = timeStamp(timeNowWas, lineNum)
 
 #  If working from SD card, copy or move files to " Drag Photos HERE Drag Photos HERE" folder, then will process from there.
-# puts "#{lineNum}..   src: #{src} \nsrcHD: #{srcHD}"
+puts "#{lineNum}. src: #{src} \n      srcHD: #{srcHD}"
 
-copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
+copySD(srcSD, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
 #  Note that file creation date is the time of copying. May want to fix this. Maybe a mv is a copy and move which is sort of a recreation. 
 
 timeNowWas = timeStamp(timeNowWas, lineNum)
@@ -930,7 +951,7 @@ writeTimeDiff(perlOutput)
 timeNowWas = timeStamp(timeNowWas, lineNum)
 # Parce perlOutput and add maxTimeDiff info to photo files
 
-puts "\n#{lineNum}.Finished with writing timeDiff. Now move files. Note that \"Adding location information to photo files\" is commented out, i.e., geographic descriptions not being added."
+puts "\n#{lineNum}.Finished with writing timeDiff. Now move files. Note that \"Adding location information to photo files\" is commented out, i.e., geographic descriptions not being added, because Mylio finds this info."
 
 # Move to Mylio folder (can't process in this folder or Mylio might import before changes are made)
 mylioFolder = watchedFolderForImport # need to generalize this
