@@ -14,7 +14,7 @@ include Pashua
 #  This is revised to eliminate the old cruft
 
 
-def pPashua2(srcPhoto,lastPhotoFilename, destPhoto,destOrig)  
+def pPashua2(srcPhoto,lastPhotoFilename, destPhoto, destOrig)  
   # Need a symlink to Pashua in this folder too, include and require moved to top
 
   $:.push(File.dirname($0))

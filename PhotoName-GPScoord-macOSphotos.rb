@@ -169,22 +169,24 @@ end
 
 def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript)
   # some of the above counter variables could be set at the beginning of this script and used locally
-  puts "\n#{__LINE__}. Copying photos from an SD card starting with #{lastPhotoFilename} or from another value manually entered"
+  puts "\n#{__LINE__}. Copying photos from an SD card starting with #{lastPhotoFilename} or from another value manually entered. #{Time.now.strftime("%I:%M:%S %p")}. May take a while"
   # OM starts with O and Panasonic with P, used to be hardwired for P
   # OM folder name 100OMSYS
   # Dir.glob I think can select on the beginning characters
   # Crud because assumes not changed. If OM goes back to default won't work
   globStart = lastPhotoFilename.slice(0)+"*" # Selected first letter of last file name
-  puts "#{__LINE__}. globStart: #{globStart}. Using to select folder, but not working for OM since folder and file name might be related if use mdd"
+  # puts "#{__LINE__}. globStart: #{globStart}. Using to select folder LUMIX, but not OM. #{Time.now.strftime("%I:%M:%S %p")}. "
   cardCount = 0
   cardCountCopied = 0
   doAgain = true # name isn't great, now means do it. A no doubt crude way to run back through the copy loop if we moved to another folder.
   # timesThrough = 1
-  fileSDbasename = "" # got an error at puts fileSDbasename
+  fileSDbasename = ""
   while doAgain==true # and timesThrough<=2 
     Dir.chdir(src) # needed for glob
     Dir.glob(globStart) do |item| # Presumably filename has globStart defined above
       cardCount += 1
+      # puts src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript
+      # break These two lines some for error checking, bu break didn't stop the script
       print(".") # crude activity bar. This doesn't happen
       # put cardCount # another try at activity bar
       # puts "#{__LINE__}.. src/item: #{src}#{item}."
@@ -212,22 +214,22 @@ def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, th
         else
           doAgain = false
         end     
-        puts "#{__LINE__}. Now copying from #{src} as we finished copying from the previous folder.\n"
+        puts "#{__LINE__}. Now copying from #{src} as we finished copying from the previous folder LUMIX or OM (not tested).\n"
     end
   end # if doAgain…
   # Writing which file on the card we ended on
-  firstLine = fileSDbasename + " was the last file read on " + Time.now.to_s
+  firstLine = "#{__LINE__}." + fileSDbasename + " was the last file read from SD card. " + Time.now.to_s # error if __LINE__ not in {}
   begin
     file_prepend(lastPhotoReadTextFile, firstLine)
     # Following just puts in the last file and wipes out the rest. Can delete all of this
     # fileNow = File.open(lastPhotoReadTextFile, "w") # must use explicit path, otherwise will use wherever we are are on the SD card
     #   fileNow.puts firstLine
     #   fileNow.close
-      puts "\n#{__LINE__}. The last file processed. fileSDbasename, #{fileSDbasename}, written to  # {fileNow} ??."
+      puts "\n#{__LINE__}. The last file processed. fileSDbasename, #{fileSDbasename}, written to #{fnp} ??."
   rescue IOError => e
     puts "Something went wrong. Could not write last photo read (#{fileSDbasename}) to #{fileNow}"
   end # begin
-    puts "\n#{__LINE__}. Of the #{cardCount} photos on the SD card, #{cardCountCopied} were copied to #{src}" # last item was src, doesn't make sense
+    puts "\n#{__LINE__}. Of the #{cardCount} photos on the SD card, #{cardCountCopied} were copied from #{src} to #{fnp}. Are these correct???. " # last item was src, doesn't make sense
 end # copySD
 
 def uniqueFileName(filename)
@@ -279,7 +281,7 @@ def mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArra
     if itemExt.downcase == ".jpg" && filterEffect != "Expressive" # Expressive is default, so not much of an effect, but may need to change this
       fnt = tempJpg + item
       FileUtils.copy(fn, fnt)
-      puts "#{__LINE__}. #{fn} to be staged since filterEffect is #{filterEffect} or OM-1 without support for orf yet. See "
+      puts "#{__LINE__}. #{fn} to be staged since filterEffect is #{filterEffect} or OM-1 without support for orf yet."
     end
 
     # if two jpgs in a row, then no associated raw, therefore stage
@@ -530,7 +532,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
           puts "#{__LINE__}. fn: #{fn} in 'if oneBack'.     fileBaseName: #{fileBaseName}. fileDate: #{fileDate}. dupCount: #{dupCount}. userCamCode(fn): #{userCamCode(fn)}.  filtered: #{filtered}. debug"
           # fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  seqLetter[dupCount] + userCamCode(fn) + filtered
           # Giving up on seqLetter because too many, use dupCount
-          fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "." + dupCount + userCamCode(fn) + filtered
+          fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "." + dupCount.to_s + userCamCode(fn) + filtered
           puts "#{__LINE__}. fn: #{fn} in 'if oneBack'.     fileBaseName: #{fileBaseName}."
         end # subSecExists
       else # normal condition that this photo is at a different time than previous photo
@@ -741,7 +743,7 @@ end
  # puts "# Won't run in Nova but does from command line: See line ~10 for command"
  puts "#{__LINE__}. Temporary for error checking. File.exist?(mylioStaging): #{File.exist?(mylioStaging)}" # true
  puts "ruby \"/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb\" Crashing here, can run script from command line"
- Dir.foreach(mylioStaging) {|x| puts "Got #{x}" } # Task “Custom Task” exited with a non-zero exit status: 1., but runs from command line
+ Dir.foreach(mylioStaging) {|x| puts "#{__LINE__}. File #{x} already in #{mylioStaging}" } # Task “Custom Task” exited with a non-zero exit status: 1., but runs from command line
  # puts "#{__LINE__}. Temporary for error checking. Dir.entries(mylioStaging): #{Dir.entries(mylioStaging)}" # Task “Custom Task” exited with a non-zero exit status: 1. and from terminal: No such file or directory @ dir_initialize - mylioStaging (Errno::ENOENT)
  # puts "#{__LINE__}. Temporary for error checking. mylioStaging: #{mylioStaging}. Dir.entries(mylioStaging).count: #{Dir.entries(mylioStaging).count}"
 # Check if photos are already in Latest Download folder. A problem because they get reprocessed by gps coordinate adding.
@@ -837,27 +839,31 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
     puts "\n#{__LINE__}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. NEED an error here if card not mounted!!. Have a kludge fix in the next rescue."
     file = File.new(lastPhotoReadTextFile, "r")
     lastPhotoFilename = file.gets # apparently grabbing a return. maybe not the best reading method.
-    puts "\n#{__LINE__}. lastPhotoFilename: #{lastPhotoFilename}. Value can be changed by user, so this may not be the value used. was #lastPhotoFilename.chop"
-    # lastPhotoFilename is 8 characters long (P plus 7 digits) at present.
+    # lastPhotoFilename  = lastPhotoFilename.chop
+  #   puts "\n#{__LINE__}. lastPhotoFilename: #{lastPhotoFilename}. Value can be changed by user, so this may not be the value used. was #lastPhotoFilename.chop"
+    # lastPhotoFilename is 8 characters long (P plus 7 digits) - starts with ) for OM (at least I try to remember to set it to that. Default is P (which I liked to think was Panasonic, but maybe it means photo)).
     # Adding date to this line, so will take first 12 characters (would be cleaner if made the write an array or json and worked with that, but this is the quick and dirty)
     lastPhotoFilename = lastPhotoFilename[0..7]
-    # puts "#{__LINE__}. lastPhotoFilename: #{lastPhotoFilename}. Confirming new method of reading. Should look like line above. Not implemented as haven't found an easy way to write to the beginning of the file."
+    puts "\n#{__LINE__}. lastPhotoFilename: #{lastPhotoFilename}. Value can be changed by user, so this may not be the value used." # was #lastPhotoFilename.chop
     file.close
-  # rescue Exception => err # Not good to rescue Exception
   rescue => err
     puts "Exception: #{err}. Not critical as value can be entered manually by user.\n"
   end
 
-# Lumix file naming: /Volumes/LUMIX/DCIM/123_PANA/
-# OMDS file naming: /Volumes/OM SYSTEM/DCIM/100OMSYS/
-  puts "#{__LINE__}. srcSDfolder: #{srcSDfolder}.  srcSDsuffix: #{srcSDsuffix}"
+# Lumix folder naming: /Volumes/LUMIX/DCIM/123_PANA/ # digits are same as first three numbers in file name
+# OMDS folder  naming: /Volumes/OM SYSTEM/DCIM/100OMSYS/ # seems not related to filename in general. OM has more file and folder naming options
+  puts "#{__LINE__}. srcSDfolder: #{srcSDfolder}.  srcSDsuffix: #{srcSDsuffix}" # srcSDfolder: /Volumes/OM SYSTEM/DCIM/.  srcSDsuffix: OMSYS
   begin
-    srcSD = srcSDfolder + lastPhotoFilename.chop.slice(1,3) + srcSDsuffix
+    if srcSDsuffix == "OMSYS"
+      srcSD = "/Volumes/OM SYSTEM/DCIM/100OMSYS"
+    else # LUMIX
+      srcSD = srcSDfolder + lastPhotoFilename.chop.slice(1,3) + srcSDsuffix
+    end
   rescue Exception => e
     puts "#{__LINE__} +++++++++++++ SD card not available, so will EXIT.++++++++++. Probably selected wrong option."
     exit
   end
-  puts "#{__LINE__}. srcSD: #{srcSD}"
+  puts "#{__LINE__}. srcSD: #{srcSD}" # srcSD: /Volumes/OM SYSTEM/DCIM/325OMSYS. Needs to be /Volumes/OM SYSTEM/DCIM/100OMSYS
 
 # Don't know if this is needed, why not use srcSD directly. src is used in copySD at ~lineNo 880
   src = srcSD
@@ -936,7 +942,7 @@ puts "\n#{__LINE__}. Rename [tzoLoc = rename(…)] the photo files with date and
 puts "#{__LINE__}. mylioStaging: #{mylioStaging}. Renaming photo files with date-time. Failing with this call to rename()" # debugging
 tzoLoc = - rename(mylioStaging, timeZonesFile, timeNowWas, photosRenamedTo).to_i # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
 
-timeNowWas = timeStamp(timeNowWas, )
+timeNowWas = timeStamp(timeNowWas, lineNum)
 #Rename the jpgs and then move to Latest Download
 puts "\n#{__LINE__}. Rename the jpgs in #{tempJpg} and then move to #{mylioStaging}. #{timeNowWas = timeStamp(timeNowWas, )}"
 rename(tempJpg, timeZonesFile, timeNowWas, photosRenamedTo)
