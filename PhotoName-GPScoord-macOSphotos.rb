@@ -103,13 +103,11 @@ mylioStaging = downloadsFolders + "Latest Processed photos-Import to Mylio/" #  
 tempJpg   = downloadsFolders + "Latest Downloads temp jpg/"
 archiveFolder  = downloadsFolders + "_imported-archive" # folder to move originals to if not done in. No slash because getting double slash with one
 srcRename = "/Volumes/Seagate 8TB Backup/Mylio_87103a/Greg Scarich’s iPhone Library/" # Frequent location to perfom this. iPhone photos brought into Mylio
-#  Below is temporary file location for testing
-# srcGpsAdd = HOME + "Documents/◊ Pre-trash/Cheeseboro/" # srcRename # Could to another location for convenience. Debug ??
-srcAddLocation  = "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio/" # = srcRename # Change to another location for convenience. This location picked so don't screw up a bunch of files
+srcAddLocation  = downloadsFolders + "Latest Processed photos-Import to Mylio/" # = srcRename # Change to another location for convenience. This location picked so don't screw up a bunch of files
 
 # Mylio folder. Moved to this folder after all processing. Can't process in this folder or Mylio might add before this script's processing is finished. Processing is mainly done in mylioStaging. The following needs to change based on comments at line 79
 # Should computer be identified, then go from there?
-iMacMylio = HOME + "Mylio/2024/GX8-2024/" # ANNUALLY: ADD IN MYLIO, NOT IN FINDER. Good on both iMac and MBP M1 although it's not under iCloud, so requires Mylio for syncing
+# macMiniMylio = HOME + "Mylio/2024/GX8-2024/" # ANNUALLY: ADD IN MYLIO, NOT IN FINDER. Good on both iMac and MBP M1 although it's not under iCloud, so requires Mylio for syncing. Not being used
 watchedFolderForImport = HOME + "Pictures/_Photo Processing Folders/Watched folder for import to Photos/"
 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
@@ -122,7 +120,7 @@ gpsPhotoPerl = thisScript + "lib/gpsPhoto.pl"
 
 # GPS log files. Will this work from laptop
 folderGPX = HOME + "Documents/GPS-Maps-docs/  GPX daily logs/2024 GPX logs/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
-puts "#{}. Must manually set folderGPX for GPX file folders. Particularly important at start of new year AND if working on photos not in current year.\n       Using: #{folderGPX}\n"
+puts "#{__LINE__}. Must manually set folderGPX for GPX file folders. Particularly important at start of new year AND if working on photos not in current year.\n       Using: #{folderGPX}\n"
 
 # MODULES
 def ignoreNonFiles(item) # invisible files or .xmp that shouldn't be processed
@@ -173,9 +171,10 @@ def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, th
   # some of the above counter variables could be set at the beginning of this script and used locally
   puts "\n#{}. Copying photos from an SD card starting with #{lastPhotoFilename} or from another value manually entered"
   # OM starts with O and Panasonic with P, used to be hardwired for P
+  # OM folder name 100OMSYS
   # Dir.glob I think can select on the beginning characters
   # Crud because assumes not changed. If OM goes back to default won't work
-  globStart = lastPhotoFilename.slice(0)+"*"
+  globStart = lastPhotoFilename.slice(0)+"*" # Selected first letter of last file name
   puts "#{__LINE__}. globStart: #{globStart}. Using to select folder, but not working for OM since folder and file name might be related if use mdd"
   cardCount = 0
   cardCountCopied = 0
@@ -201,22 +200,12 @@ def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, th
       # write the number of the last photo copied or moved
       # if fileSDbasename ends in 999, we need to move on to the next folder, and the while should allow another go around.
     doAgain = false
+    
+    # The following was written for LUMIX, don't know what's going to happen with OM
     if fileSDbasename[-3,3]=="999" # and NEXT PAIRED FILE DOES NOT EXIST, then can uncomment the two last lines of this if, but may also have to start the loop over, but it seems to be OK with mid calculation change.
         nextFolderNum = fileSDbasename[-7,3].to_i + 1 # getting first three digits of filename since that is also part of the folder name
         nextFolderName = nextFolderNum.to_s + "_PANA"
         
-        # This begin rescue end not needed since now getting folder name from file name
-        # begin
-        #   # Writing which folder we're now in
-        #   # fileNow = File.open(thisScript + sdFolderFile, "w") # Was 2014.02.28 How could this have worked?
-        #   fileNow = File.open(sdFolderFile, "w")
-        #   fileNow.write(nextFolderName)
-        # rescue IOError => e
-        #   puts "Something went wrong. Could not write last photo read (#{nextFolderName}) to #{sdFolderFile}"
-        # ensure
-        #     fileNow.close unless fileNow == nil
-        # end # begin writing sdFolderFile
-        # puts "\n#{nextFolderName} File.exist?(nextFolderName): #{File.exist?(nextFolderName)}" 
         src = srcSDfolder + nextFolderName + "/"
         if File.exist?(src)
           doAgain = true
