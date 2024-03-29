@@ -1,19 +1,18 @@
 {
   "actions" : {
     "build" : {
-      "enabled" : true,
       "path" : "PhotoName-GPScoord-macOSphotos.rb",
       "shell" : "\/usr\/bin\/env ruby"
     },
     "run" : {
       "enabled" : true,
+      "path" : "PhotoName-GPScoord-macOSphotos.rb",
       "postActions" : [
         {
           "script" : "PhotoName-GPScoord-macOSphotos.rb",
           "type" : "runScript"
         }
-      ],
-      "script" : "ruby PhotoName-GPScoord-macOSphotos.rb"
+      ]
     }
   },
   "openLogOnRun" : "start"

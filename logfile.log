@@ -1,0 +1,5 @@
+# Logfile created on 2024-03-29 12:00:34 -0700 by logger.rb/v1.6.0
+E, [2024-03-29T12:00:34.947663 #65186] ERROR -- : An error occurred: Operation not permitted @ dir_initialize - /Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio/
+E, [2024-03-29T12:00:34.947692 #65186] ERROR -- : <internal:dir>:184:in `open'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:753:in `foreach'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:753:in `<main>'
