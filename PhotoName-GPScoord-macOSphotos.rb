@@ -185,6 +185,7 @@ def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, th
   doAgain = true # name isn't great, now means do it. A no doubt crude way to run back through the copy loop if we moved to another folder.
   # timesThrough = 1
   fileSDbasename = ""
+  fnp  = "" # so available outside loop?
   while doAgain==true # and timesThrough<=2 
     Dir.chdir(src) # needed for glob
     Dir.glob(globStart) do |item| # Presumably filename has globStart defined above
@@ -222,7 +223,7 @@ def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, th
     end
   end # if doAgain…
   # Writing which file on the card we ended on
-  firstLine = "#{__LINE__} ." + fileSDbasename + " was the last file read from SD card. " + Time.now.to_s # error if __LINE__ not in {}
+  firstLine = fileSDbasename + " was the last file read from SD card. " + Time.now.to_s # No __LINE__ because used to write this to  lastPhotoReadTextFile
   begin
     file_prepend(lastPhotoReadTextFile, firstLine)
     # Following just puts in the last file and wipes out the rest. Can delete all of this
@@ -413,6 +414,49 @@ def timeZone(fileDateTimeOriginal, timeZonesFile )
   # puts "#{__LINE__}. #{i}. fileDateTimeOriginal: #{fileDateTimeOriginal} fileDateTimeOriginal.class: #{fileDateTimeOriginal.class}. theTimeZone: #{theTimeZone}. "  return theTimeZone
 end # timeZone
 
+def oneBackTrue(fn, fileEXIF, subSecExists, fileDate, driveMode, dupCount)
+  dupCount += 1
+  puts "#{__LINE__}. fn: #{fn}. driveMode: #{driveMode}. fileEXIF: #{fileEXIF}. subSecExists: #{subSecExists}. fileDate: #{fileDate}. debug"
+  if subSecExists # mainly GX8. and maybe iPhone bursts
+    fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  subSec + userCamCode(fn) # this doesn't happen for the first one in the same second.
+    # puts "#{__LINE__}. fn: #{fn} in 'if subSecExists'.     fileBaseName: #{fileBaseName}. dupCount: #{dupCount}"
+    if dupCount == 1
+      # Can use old fileDate because it's the same and userCamCode. 
+      fnp = src + fileDate.strftime("%Y.%m.%d-%H.%M.%S") + subSecPrev + userCamCode(fn)+  File.extname(fn).downcase
+      # puts "#{__LINE__}. We will relabel #{fnpPrev} to #{fnp} since it didn't get subSecPrev: #{subSecPrev}. dupCount: #{dupCount} "
+      File.rename(fnpPrev,fnp)
+    end # if dup count
+  elsif driveMode.to_i > 0 # photos without subsecs. OM-1 but with shot number. 
+    # Getting sequence no. for OM-1
+    driveMode = fileEXIF.DriveMode # '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'
+    match = driveMode.match(/Shot (\d{1,3})/)
+    shot_no = match[1].to_i if match
+    # puts shot_no
+    # End getting seqence no
+    fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no + userCamCode(fn) + filtered
+    puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileBaseName: #{fileBaseName}. fileDate: #{fileDate}. shot_no: {shot_no}. userCamCode(fn): #{userCamCode(fn)}.  filtered: #{filtered}. debug"
+  else # photos without subsecs, pre GX8 and other OM-1 in same second
+    puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileDate: #{fileDate}. dupCount: #{dupCount}. userCamCode(fn): #{userCamCode(fn)}. debug"
+    # fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  seqLetter[dupCount] + userCamCode(fn) + filtered
+    # Giving up on seqLetter because too many, use dupCount, but also add shot no. 
+    driveMode = fileEXIF.DriveMode # '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'
+    puts "#{__LINE__}. driveMode: #{driveMode}. driveMode.class: #{driveMode.class} for . " # error if?
+    if driveMode.class == "NilClass"
+      fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s + userCamCode(fn)
+    # elsif driveMode.length > 0
+  #     match = driveMode.match(/Shot (\d{1,3})/)
+  #     shot_no = match[1].to_i if match
+  #     fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s + "(" + shot_no + ")" + userCamCode(fn)
+    else
+      puts "#{__LINE__}. driveMode: #{driveMode}. driveMode.class: #{driveMode.class}." 
+      fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s  + userCamCode(fn)
+    end
+    
+    puts "#{__LINE__}. fn: #{fn} in 'if oneBack'.     fileBaseName: #{fileBaseName}."
+  end # subSecExists
+  return fileBaseName
+end # oneBackTrue
+
 def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
   # src is mylioStaging folder
   # timeZonesFile is my log of which time zones I was in when
@@ -510,35 +554,11 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       fileDateTimeOriginalstr = fileDateTimeOriginal.to_s[0..-6]
 
       oneBack = fileDate == fileDatePrev && fileExt != fileExtPrev # at the moment this is meaningless because all of tne type
-      driveMode = fileEXIF.DriveMode # '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'. This exists for OM-1 for at least some sequence shooting
-      puts "#{__LINE__}. driveMode: #{driveMode}"
-      if oneBack # at the moment only handles two in the same second
-        dupCount += 1
-        if subSecExists # mainly GX8. and maybe iPhone bursts
-          fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  subSec + userCamCode(fn) # this doesn't happen for the first one in the same second.
-          # puts "#{__LINE__}. fn: #{fn} in 'if subSecExists'.     fileBaseName: #{fileBaseName}. dupCount: #{dupCount}"
-          if dupCount == 1
-            # Can use old fileDate because it's the same and userCamCode. 
-            fnp = src + fileDate.strftime("%Y.%m.%d-%H.%M.%S") + subSecPrev + userCamCode(fn)+  File.extname(fn).downcase
-            # puts "#{__LINE__}. We will relabel #{fnpPrev} to #{fnp} since it didn't get subSecPrev: #{subSecPrev}. dupCount: #{dupCount} "
-            File.rename(fnpPrev,fnp)
-          end # if dup count
-        elsif driveMode.to_i > 0 # photos without subsecs. OM-1 but with shot number. 
-          # Getting sequence no. for OM-1
-          driveMode = fileEXIF.DriveMode # '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'
-          match = driveMode.match(/Shot (\d{1,3})/)
-          shot_no = match[1].to_i if match
-          # puts shot_no
-          # End getting seqence no
-          fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "." + shot_no + userCamCode(fn) + filtered
-          puts "#{__LINE__}. fn: #{fn} in 'if oneBack'.     fileBaseName: #{fileBaseName}. fileDate: #{fileDate}. shot_no: {shot_no}. userCamCode(fn): #{userCamCode(fn)}.  filtered: #{filtered}. debug"
-        else # photos without subsecs, pre GX8 and maybe other OM-1 in same second
-          puts "#{__LINE__}. fn: #{fn} in 'if oneBack'.     fileBaseName: #{fileBaseName}. fileDate: #{fileDate}. dupCount: #{dupCount}. userCamCode(fn): #{userCamCode(fn)}.  filtered: #{filtered}. debug"
-          # fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  seqLetter[dupCount] + userCamCode(fn) + filtered
-          # Giving up on seqLetter because too many, use dupCount
-          fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "." + dupCount.to_s + userCamCode(fn) + filtered
-          puts "#{__LINE__}. fn: #{fn} in 'if oneBack'.     fileBaseName: #{fileBaseName}."
-        end # subSecExists
+      driveMode = fileEXIF.DriveMode # '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'. This exists for OM-1 for at least some sequence shooting. Also: `SpecialMode                     : Fast, Sequence: 9, Panorama: (none)`
+      match, shot_no = ""
+      puts "#{__LINE__}. fn: #{fn}. driveMode: #{driveMode}. oneBack: #{oneBack} = true is two photos in same second. If true, oneBackTrue will be called."
+      if oneBack # Two photos in same second?
+        fileBaseName = oneBackTrue(fn, fileEXIF, subSecExists, fileDate, driveMode, dupCount)
       else # normal condition that this photo is at a different time than previous photo
         dupCount = 0 # resets dupCount after having a group of photos in the same second
         fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S")  + userCamCode(fn) + filtered
@@ -557,7 +577,6 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       subSecPrev = subSec.to_s
       File.rename(fn,fnp)
       photoRenamed = "#{__LINE__}. photosRenamedTo: #{photosRenamedTo}. #{File.basename(fn)} was renamed to #{File.basename(fnp)}"
-      puts "#{__LINE__}.  A log of photo file renaming is at #{photoRenamed}. For debugging uncomment the line about 3 lines below to get the list in the running log."
       begin
         file_prepend(photosRenamedTo, photoRenamed)
         # puts "#{__LINE__}. #{Time.now} #{photoRenamed}"
@@ -572,6 +591,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
     # puts "#{__LINE__}. Got to here. tzoLoc: #{tzoLoc}"
     
   end # 2. Dir.foreach(src)
+  # puts "#{__LINE__}.  A log of photo file renaming is at #{photoRenamed}. For debugging uncomment the line about 3 lines below to get the list in the running log."
   return tzoLoc # the time zone the picture was taken in,
 end # rename ing photo files in the downloads folder and writing in original time.
 
@@ -953,7 +973,7 @@ puts "\n#{__LINE__}. Photos will now be renamed. #{timeNowWas = timeStamp(timeNo
 puts "\n#{__LINE__}. Rename [tzoLoc = rename(…)] the photo files with date and an ID for the camera or photographer (except for the paired jpgs in #{tempJpg}). #{timeNowWas}\n"
 # tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # Second time this variable name is used, other is in a method
 # RENAME Raw
-puts "#{__LINE__}. mylioStaging: #{mylioStaging}. Renaming photo files with date-time. Failing with this call to rename()" # debugging
+puts "#{__LINE__}. mylioStaging: #{mylioStaging}. Renaming photo files with date-time. Failing with this call to rename()\n\n" # debugging
 tzoLoc = - rename(mylioStaging, timeZonesFile, timeNowWas, photosRenamedTo).to_i # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
 
 timeNowWas = timeStamp(timeNowWas, lineNum)
@@ -966,7 +986,7 @@ Dir.foreach(tempJpg) do |item|
   next if ignoreNonFiles(item) == true
   fn  = tempJpg   + item # sourced from temporary storage for jpgs 
   fnp = mylioStaging + item # new jpg file in Latest Download
-  puts "#{__LINE__}.#{jpgsMovedCount += 1}. #{fn} moved to #{fnp}" # dubugging
+  # puts "#{__LINE__}.#{jpgsMovedCount += 1}. #{fn} moved to #{fnp}" # dubugging
   FileUtils.move(fn, fnp)
 end
 
