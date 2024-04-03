@@ -3,3 +3,23 @@ E, [2024-03-31T09:41:12.667516 #58904] ERROR -- : An error occurred: Operation n
 E, [2024-03-31T09:41:12.667632 #58904] ERROR -- : <internal:dir>:184:in `open'
 /Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:766:in `foreach'
 /Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:766:in `<main>'
+E, [2024-04-01T12:19:53.662049 #26927] ERROR -- : An error occurred: Operation not permitted @ dir_initialize - /Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio/
+E, [2024-04-01T12:19:53.662577 #26927] ERROR -- : <internal:dir>:184:in `open'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:773:in `foreach'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:773:in `<main>'
+E, [2024-04-02T09:22:36.791662 #97759] ERROR -- : An error occurred: Operation not permitted @ dir_initialize - /Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio/
+E, [2024-04-02T09:22:36.792000 #97759] ERROR -- : <internal:dir>:184:in `open'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:778:in `foreach'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:778:in `<main>'
+E, [2024-04-02T09:45:43.705684 #5678] ERROR -- : An error occurred: Operation not permitted @ dir_initialize - /Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio/
+E, [2024-04-02T09:45:43.706060 #5678] ERROR -- : <internal:dir>:184:in `open'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:778:in `foreach'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:778:in `<main>'
+E, [2024-04-02T12:51:47.905802 #76273] ERROR -- : An error occurred: Operation not permitted @ dir_initialize - /Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio/
+E, [2024-04-02T12:51:47.905932 #76273] ERROR -- : <internal:dir>:184:in `open'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:779:in `foreach'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:779:in `<main>'
+E, [2024-04-03T12:19:03.209131 #8486] ERROR -- : An error occurred: Operation not permitted @ dir_initialize - /Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio/
+E, [2024-04-03T12:19:03.209586 #8486] ERROR -- : <internal:dir>:184:in `open'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:806:in `foreach'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:806:in `<main>'

@@ -42,3 +42,27 @@ Lat 33.8036305555556, Lon -118.383177777778 - Bearing: unknown - Altitude: 112m 
 2024.03.15 Working on OM-1 integration. Larger number of sequence shots possible. But in some cases at least there is a shot no. Did some maybe messed up fixes. Use dupCount for now. No should be able to use seq no
 
 - how handle two cards in OM-1?
+
+mini_exiftool did not handle getting DriveMode or Special Mode (author responded and is trying to fix it), but in the interim: https://stackoverflow.com/questions/78257612/how-to-introduce-a-filename-into-shell-script-in-ruby-script#78257612 provided answers and work around.
+
+Regular photo:
+Drive Mode : Single Shot; Electronic shutter
+Special Mode : Normal, Sequence: 0, Panorama: (none)
+
+29. Focus bracketing:
+    Drive Mode : Focus Bracketing, Shot 6; Electronic shutter
+    Special Mode : Fast, Sequence: 6, Panorama: (none)
+
+30. High speed sequential, SH1:
+    Drive Mode : Continuous Shooting, Shot 80; Electronic shutter
+    Special Mode : Fast, Sequence: 80, Panorama: (none)
+
+For at least focus bracketing and SH1, DriveMode may be more useful info
+Special Mode always has Sequence which could be used for sorting, but still wouldn't include photos just taken in the same second
+--
+Problem is multiple shots in same second, particularly since OM doesn't report subsecs. And can take up to 120 fps, so my old scheme of using letters fell short
+At the moment I see three scenarios: 1) Normal repeated shots within same second (unlikely to be more than a few), 2) ProCapture (SH1, SH2, etc. ~ 8 variations), 3) Focus Stacking and Bracketing.
+Could just add a number for each shot. That is fine for scenario 1, but for 2 and 3 might be nice to have a sequential number even or multiple seconds. Or is this unnecessarily confusing? Maybe, but I'll pursue this in this format `2024.03.30-16.48.45-5.gs.O.orf`. And using current method, the `-0` won't be shown. One complication at the moment is having to keep .jpg in Mylio since macOS doesn't handle OM-1 II files yet.
+Could add a notation based on Drive Mode: brk or similar for Bracketing and `pc` or `sh` for ProCapture modes. But leave this for later. What's SH stand for? `pc` stands for too many other things
+
+So: look for photos in same second (could miss if sequential but first is in the preceding second) and look for shot_no in Drive Mode of Special Mode. Preferring Drive Mode since also has what shooting mode.

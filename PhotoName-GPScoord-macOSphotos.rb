@@ -1,9 +1,12 @@
 #!/usr/bin/env ruby
+# Set the PATH to include the Homebrew bin directory. 4/3/2024 problems with locating exiftool and this fixed it. Tried to do in .zshrc, but maybe needs a reboot? Doesn't help running in Nova
+ENV['PATH'] = '/opt/homebrew/bin:' + ENV['PATH']
+# Won't run in ruby-3.3.0
 # for macOS Photos. Mylio version exists.
 # Folder names use Mylio and the ones for temporary use are fine. It's just the final location that matters. And I'm trying to move them to a folder that Photos.app will watch.
 # TODO camera time zones file is hard to maintain. Would a simple table or CSV be easier? Harder to setup for this Ruby script, but that's once
 
-# Problem with File::exist in the Pashua .rb files So commented them out, see how that goes. No idea where I got the syntax from but no longer working
+# Problem with File::exist in the Pashua .rb files So commented them out, see how that goes. No idea where I got the syntax from but no longer working 
 # Won't run in Nova but does from command line: 
 # ruby "/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb"
 
@@ -414,9 +417,24 @@ def timeZone(fileDateTimeOriginal, timeZonesFile )
   # puts "#{__LINE__}. #{i}. fileDateTimeOriginal: #{fileDateTimeOriginal} fileDateTimeOriginal.class: #{fileDateTimeOriginal.class}. theTimeZone: #{theTimeZone}. "  return theTimeZone
 end # timeZone
 
-def oneBackTrue(fn, fileEXIF, subSecExists, fileDate, driveMode, dupCount)
+def oneBackTrue(fn, subSecExists, fileDate, driveMode, dupCount)
+  # puts "\n#{__LINE__}. Entered oneBackTrue(). DEBUG"
   dupCount += 1
-  puts "#{__LINE__}. fn: #{fn}. driveMode: #{driveMode}. fileEXIF: #{fileEXIF}. subSecExists: #{subSecExists}. fileDate: #{fileDate}. debug"
+  # Getting sequence no./shot no. for OM-1. DriveMode is "Single Shot; Electronic shutter" for normal photos
+  match = driveMode.match(/Shot (\d{1,3})/)
+  shot_no = match[1].to_i if match
+  
+  # Also get the shooting mode from `Drive Mode                      : Focus Bracketing, Shot 6; Electronic shutter`
+  matches = driveMode.match(/Drive Mode\s*:\s*([^,;]+)/)  
+  if matches
+    shootingMode = matches[1].strip
+    # puts "#{__LINE__}. shootingMode: #{shootingMode}. DEBUG"
+  else
+    puts "#{__LINE__}. Drive mode not found."
+    # shootingMode = "" # if necessary to prevent errors
+  end
+
+  # puts "#{__LINE__}. fn: #{fn}. driveMode: #{driveMode}. shot_no: #{shot_no}. shootingMode: #{shootingMode}. subSecExists: #{subSecExists}. fileDate: #{fileDate}. DEBUG"
   if subSecExists # mainly GX8. and maybe iPhone bursts
     fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  subSec + userCamCode(fn) # this doesn't happen for the first one in the same second.
     # puts "#{__LINE__}. fn: #{fn} in 'if subSecExists'.     fileBaseName: #{fileBaseName}. dupCount: #{dupCount}"
@@ -426,27 +444,25 @@ def oneBackTrue(fn, fileEXIF, subSecExists, fileDate, driveMode, dupCount)
       # puts "#{__LINE__}. We will relabel #{fnpPrev} to #{fnp} since it didn't get subSecPrev: #{subSecPrev}. dupCount: #{dupCount} "
       File.rename(fnpPrev,fnp)
     end # if dup count
-  elsif driveMode.to_i > 0 # photos without subsecs. OM-1 but with shot number. 
-    # Getting sequence no. for OM-1
-    driveMode = fileEXIF.DriveMode # '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'
-    match = driveMode.match(/Shot (\d{1,3})/)
-    shot_no = match[1].to_i if match
-    # puts shot_no
+  end
+  if shot_no.to_i > 0 # photos without subsecs. OM-1 but with shot number.
+    # Getting sequence no. for OM-1. DriveMode is "Single Shot; Electronic shutter" for normal photos
+       # puts shot_no
     # End getting seqence no
-    fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no + userCamCode(fn) + filtered
-    puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileBaseName: #{fileBaseName}. fileDate: #{fileDate}. shot_no: {shot_no}. userCamCode(fn): #{userCamCode(fn)}.  filtered: #{filtered}. debug"
+    fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no.to_s + userCamCode(fn) # + filtered Why is this
+    puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileBaseName: #{fileBaseName}. fileDate: #{fileDate}. shot_no: #{shot_no}. userCamCode(fn): #{userCamCode(fn)}. DEBUG" # .  filtered: #{filtered}
   else # photos without subsecs, pre GX8 and other OM-1 in same second
     puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileDate: #{fileDate}. dupCount: #{dupCount}. userCamCode(fn): #{userCamCode(fn)}. debug"
     # fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  seqLetter[dupCount] + userCamCode(fn) + filtered
     # Giving up on seqLetter because too many, use dupCount, but also add shot no. 
-    driveMode = fileEXIF.DriveMode # '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'
+    # driveMode = fileEXIF.DriveMode # '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'
     puts "#{__LINE__}. driveMode: #{driveMode}. driveMode.class: #{driveMode.class} for . " # error if?
     if driveMode.class == "NilClass"
       fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s + userCamCode(fn)
-    # elsif driveMode.length > 0
-  #     match = driveMode.match(/Shot (\d{1,3})/)
-  #     shot_no = match[1].to_i if match
-  #     fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s + "(" + shot_no + ")" + userCamCode(fn)
+    elsif driveMode.length > 0
+      match = driveMode.match(/Shot (\d{1,3})/)
+      shot_no = match[1].to_i if match
+      fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s + "(" + shot_no + ")" + userCamCode(fn)
     else
       puts "#{__LINE__}. driveMode: #{driveMode}. driveMode.class: #{driveMode.class}." 
       fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s  + userCamCode(fn)
@@ -553,12 +569,29 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       fileDate = fileDateTimeOriginal + timeChange.to_i # date in local time photo was taken. No idea why have to change this to i, but was nil class even though zero  
       fileDateTimeOriginalstr = fileDateTimeOriginal.to_s[0..-6]
 
-      oneBack = fileDate == fileDatePrev && fileExt != fileExtPrev # at the moment this is meaningless because all of tne type
-      driveMode = fileEXIF.DriveMode # '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'. This exists for OM-1 for at least some sequence shooting. Also: `SpecialMode                     : Fast, Sequence: 9, Panorama: (none)`
+      oneBack = fileDate == fileDatePrev && fileExt != fileExtPrev # at the moment this is meaningless because all of one type?
+      
+      # mini_exiftool doesn't work for DriveMode. Comes up blank
+      #  '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'. This exists for OM-1 for at least some sequence shooting. Also: `SpecialMode                     : Fast, Sequence: 9, Panorama: (none)`
+      # SpecialMode may be more useful since zero if not a sequence : Normal, Sequence: 0, Panorama: (none)
+      # But DriveMode can tell what kind of sequence, although not sure that's needed in this script
+      # driveMode   = system('exiftool', '-Camera:DriveMode', fn) # returns true or false
+      r, w = IO.pipe
+      system('exiftool', '-Camera:DriveMode', fn, out: w)
+      w.close
+      driveMode = r.read      
+
+      # Not using specialMode now, but as an option
+      specialMode = system('exiftool', '-Camera:SpecialMode', fn) # returns true or false
+
       match, shot_no = ""
-      puts "#{__LINE__}. fn: #{fn}. driveMode: #{driveMode}. oneBack: #{oneBack} = true is two photos in same second. If true, oneBackTrue will be called."
-      if oneBack # Two photos in same second?
-        fileBaseName = oneBackTrue(fn, fileEXIF, subSecExists, fileDate, driveMode, dupCount)
+      
+      puts "#{__LINE__}. fn: #{fn}. driveMode: #{driveMode}.\nspecialMode: #{specialMode} oneBack: #{oneBack} = true is two photos in same second. If true, oneBackTrue will be called."
+      # Maybe should enter if there is a shot no.
+      match = driveMode.match(/Shot (\d{1,3})/)
+      shot_no = match[1].to_i if match
+      if oneBack || match # Two photos in same second? Not sure this is working
+        fileBaseName = oneBackTrue(fn, subSecExists, fileDate, driveMode, dupCount)
       else # normal condition that this photo is at a different time than previous photo
         dupCount = 0 # resets dupCount after having a group of photos in the same second
         fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S")  + userCamCode(fn) + filtered
@@ -656,7 +689,7 @@ def addCoordinates(photoFolder, folderGPX, gpsPhotoPerl, tzoLoc)
       fileEXIF.save 
       count += 1
     end # if File.file
-    break if count == 1 # once have a real photo file, can get out of this. Only check htis once
+    break if count == 1 # once have a real photo file, can get out of this. Only check this once
   end # Dir.foreach
   puts "#{__LINE__}. timeOffset: #{timeOffset}. camModel: #{camModel}. All photos must be same camera and time zone or photos may be mislabeled and geo-located."
    
