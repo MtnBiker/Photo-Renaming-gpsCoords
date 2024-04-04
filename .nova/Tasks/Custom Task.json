@@ -6,7 +6,7 @@
     },
     "run" : {
       "enabled" : true,
-      "path" : "PhotoName-GPScoord-macOSphotos.rb",
+      "path" : "\/Volumes\/Mac Mini HD\/Users\/gscar\/Documents\/Ruby\/Photo handling\/PhotoName-GPScoord-macOSphotos.rb",
       "postActions" : [
         {
           "script" : "PhotoName-GPScoord-macOSphotos.rb",

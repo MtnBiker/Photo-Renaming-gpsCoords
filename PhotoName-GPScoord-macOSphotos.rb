@@ -2,6 +2,7 @@
 # Set the PATH to include the Homebrew bin directory. 4/3/2024 problems with locating exiftool and this fixed it. Tried to do in .zshrc, but maybe needs a reboot? Doesn't help running in Nova
 ENV['PATH'] = '/opt/homebrew/bin:' + ENV['PATH']
 # Won't run in ruby-3.3.0
+# /Users/gscar/.rubies/ruby-3.2.2/bin/ruby added to Custom Task doesn't help for Nova
 # for macOS Photos. Mylio version exists.
 # Folder names use Mylio and the ones for temporary use are fine. It's just the final location that matters. And I'm trying to move them to a folder that Photos.app will watch.
 # TODO camera time zones file is hard to maintain. Would a simple table or CSV be easier? Harder to setup for this Ruby script, but that's once
@@ -176,7 +177,7 @@ end
 
 def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript)
   # some of the above counter variables could be set at the beginning of this script and used locally
-  puts "\n#{__LINE__}. Copying photos from an SD card starting with #{lastPhotoFilename} or from another value manually entered. #{Time.now.strftime("%I:%M:%S %p")}. May take a while"
+  puts "\n#{__LINE__}. Copying photos from an SD card starting with #{lastPhotoFilename} or from another value manually entered. \n#{Time.now.strftime("%I:%M:%S %p")}. May take a while"
   # OM starts with O and Panasonic with P, used to be hardwired for P
   # OM folder name 100OMSYS
   # Dir.glob I think can select on the beginning characters
@@ -461,7 +462,11 @@ def oneBackTrue(fn, subSecExists, fileDate, driveMode, dupCount)
       fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s + userCamCode(fn)
     elsif driveMode.length > 0
       match = driveMode.match(/Shot (\d{1,3})/)
-      shot_no = match[1].to_i if match
+      if match
+        shot_no = match[1].to_i 
+      else 
+        shot_no = ""
+      end
       fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s + "(" + shot_no + ")" + userCamCode(fn)
     else
       puts "#{__LINE__}. driveMode: #{driveMode}. driveMode.class: #{driveMode.class}." 
@@ -548,7 +553,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       if camModel ==  "MISC" # MISC is for photos without fileDateTimeOriginal, e.g., movies
         # timeChange = 0
        fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
-       puts "#{__LINE__}.. fileDateTimeOriginal #{fileDateTimeOriginal}. timeChange: #{timeChange} for #{camModel} meaning movies"
+       # puts "#{__LINE__}. fileDateTimeOriginal #{fileDateTimeOriginal}. timeChange: #{timeChange} for #{camModel} meaning movies. DEBUG"
       elsif camModel == "DMC-TS5" or camModel == "DMC-GX8"
       # elsif camModel.include?("DMC-GX7") and panasonicLocation.length > 0 or camModel == "DMC-TS5" or camModel == "DMC-GX8" # Not sure what the first check was, but GX& isn't being used anymore so took it out. Was giving an error for a jpg created by QuickTime Player 2021.07.15. DateTimeOriginal is in local time. Look at https://sno.phy.queensu.ca/~phil/exiftool/TagNames/Panasonic.html for other Tags that could be used
         # Above first checking that is a Panasonic Lumix GX7 using travel, otherwise will error on second test which checks if using travel, 
@@ -572,6 +577,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       oneBack = fileDate == fileDatePrev && fileExt != fileExtPrev # at the moment this is meaningless because all of one type?
       
       # mini_exiftool doesn't work for DriveMode. Comes up blank
+      # But if fixed, note that system captures the title too, so may have to modify
       #  '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'. This exists for OM-1 for at least some sequence shooting. Also: `SpecialMode                     : Fast, Sequence: 9, Panorama: (none)`
       # SpecialMode may be more useful since zero if not a sequence : Normal, Sequence: 0, Panorama: (none)
       # But DriveMode can tell what kind of sequence, although not sure that's needed in this script
@@ -590,6 +596,12 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       # Maybe should enter if there is a shot no.
       match = driveMode.match(/Shot (\d{1,3})/)
       shot_no = match[1].to_i if match
+      # First photo in a sequence won't get -1
+      if shot_no.to_i == 1
+        fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no.to_s + userCamCode(fn)
+        puts "#{__LINE__}. Because this was the first in a sequence a `1` was added to the filename for #{fileBaseName}. DEBUG"
+      end
+        
       if oneBack || match # Two photos in same second? Not sure this is working
         fileBaseName = oneBackTrue(fn, subSecExists, fileDate, driveMode, dupCount)
       else # normal condition that this photo is at a different time than previous photo
@@ -641,7 +653,6 @@ def addCoordinates(photoFolder, folderGPX, gpsPhotoPerl, tzoLoc)
   # tzoLoc is the time zone from Greg camera time zones.yml file. Since GPS records UTM. Camera time zone setting varies. Camera only records the time it is set for, but doesn't accurately report the zone. Currently exiftool is saying the zone is the zone of the computer running the script. tzoLoc value can be changed in this module. tzoLoc is hours and gets changed to seconds as timeOffset for use by gpsPhoto.pl
   # <--timeoffset seconds> A positive value means that the camera is behind in time, a negative value means that the camera is ahead in time.
   
-
 # Assuming all the photos are from the same camera, get info on one and use that information.
 # GX8 is usually local time, but may get
 # GX7 is UST
@@ -772,7 +783,7 @@ end
 ## The "PROGRAM" ############ ##################### ###################### ##################### ##########################
 timeNowWas = timeStamp(Time.now, lineNum) # Initializing. Later calls are different
 # timeNowWas = timeStamp(timeNowWas)
-puts "#{__LINE__}. Are the gps logs up to date?" # Should check for this since I don't see the message
+puts "\n#{__LINE__}. Are the gps logs up to date?\n\n" # Should check for this since I don't see the message
 
 # Two names for SD cards seem common. Is this needed anymore? Caused an error
 # unless File.directory?(srcSDfolder) # negative if, so if srcSDfolder exists skip, other wise change reference to …Alt
