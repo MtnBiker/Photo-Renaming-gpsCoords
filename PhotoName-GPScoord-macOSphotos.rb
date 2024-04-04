@@ -577,21 +577,25 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       oneBack = fileDate == fileDatePrev && fileExt != fileExtPrev # at the moment this is meaningless because all of one type?
       
       # mini_exiftool doesn't work for DriveMode. Comes up blank
-      # But if fixed, note that system captures the title too, so may have to modify
+      # Let's try again and now it works
+      # driveModeMini = fileEXIF.DriveMode
+      # puts "#{__LINE__}. fn: #{fn}. driveModeMini: #{driveModeMini}. DEBUG" 
+      # # But if fixed, note that system captures the title too, so may have to modify
       #  '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'. This exists for OM-1 for at least some sequence shooting. Also: `SpecialMode                     : Fast, Sequence: 9, Panorama: (none)`
       # SpecialMode may be more useful since zero if not a sequence : Normal, Sequence: 0, Panorama: (none)
       # But DriveMode can tell what kind of sequence, although not sure that's needed in this script
       # driveMode   = system('exiftool', '-Camera:DriveMode', fn) # returns true or false
-      r, w = IO.pipe
-      system('exiftool', '-Camera:DriveMode', fn, out: w)
-      w.close
-      driveMode = r.read      
+      # r, w = IO.pipe
+      # system('exiftool', '-Camera:DriveMode', fn, out: w)
+      # w.close
+      # driveMode = r.read
+      driveMode = fileEXIF.DriveMode
 
       # Not using specialMode now, but as an option
       specialMode = system('exiftool', '-Camera:SpecialMode', fn) # returns true or false
 
       match, shot_no = ""
-      
+
       puts "#{__LINE__}. fn: #{fn}. driveMode: #{driveMode}.\nspecialMode: #{specialMode} oneBack: #{oneBack} = true is two photos in same second. If true, oneBackTrue will be called."
       # Maybe should enter if there is a shot no.
       match = driveMode.match(/Shot (\d{1,3})/)

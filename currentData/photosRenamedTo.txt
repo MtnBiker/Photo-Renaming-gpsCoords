@@ -1,3 +1,5 @@
+628. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. O4021610.JPG was renamed to 2024.04.02-09.07.24-4.gs.O.jpg
+628. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. O4021610.JPG was renamed to 2024.04.02-09.07.24-4.gs.O.jpg
 618. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. O4031850.JPG was renamed to 2024.04.03-20.08.38.gs.O.jpg
 618. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. O4031849.JPG was renamed to 2024.04.03-20.08.34.gs.O.jpg
 618. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. O4031848.JPG was renamed to 2024.04.03-20.08.31.gs.O.jpg
