@@ -67,6 +67,6 @@ Could add a notation based on Drive Mode: brk or similar for Bracketing and `pc`
 
 So: look for photos in same second (could miss if sequential but first is in the preceding second) and look for shot_no in Drive Mode of Special Mode. Preferring Drive Mode since also has what shooting mode. Done I think except first photo in a series isn't labeled as such
 
-GPS not getting added ??
+Have added something to get shot 1, but untested as of yet. Works. mini_exiftool now working
 
-Have added something to get shot 1, but untested as of yet
+But GPS does not appear to be working.

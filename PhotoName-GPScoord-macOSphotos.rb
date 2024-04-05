@@ -53,7 +53,7 @@ end # line numbers of this file, useful for debugging and logging info to progre
 
 photosArray = [] # can create initially, but I don't know how to add other "fields" to a file already on the list. I'll be better off with an indexed data base. I suppose could delete the existing item for that index and then put in revised. Not using this, but maybe some day
 sdCard = "No SD card mounted"
-if File.exist?("/Volumes/OM SYSTEM/")
+if File.exist?("/Volumes/OM SYSTEM/") ||  File.exist?("/Volumes/OM SYSTEM 1/")
   sdCard      = "/Volumes/OM SYSTEM/"
   srcSDsuffix = "OMSYS"
   puts "#{__LINE__}. #{sdCard} SD card mounted"
@@ -115,8 +115,8 @@ srcAddLocation  = downloadsFolders + "Latest Processed photos-Import to Mylio/" 
 
 # Mylio folder. Moved to this folder after all processing. Can't process in this folder or Mylio might add before this script's processing is finished. Processing is mainly done in mylioStaging. The following needs to change based on comments at line 79
 # Should computer be identified, then go from there?
-# macMiniMylio = HOME + "Mylio/2024/GX8-2024/" # ANNUALLY: ADD IN MYLIO, NOT IN FINDER. Good on both iMac and MBP M1 although it's not under iCloud, so requires Mylio for syncing. Not being used
-watchedFolderForImport = HOME + "Pictures/_Photo Processing Folders/Watched folder for import to Photos/"
+# watchedFolderForImport = HOME + "Pictures/_Photo Processing Folders/Watched folder for import to Photos/" # Used with Photos app
+mylioFolder = HOME + "Mylio/Mylio Main Library Folder/2024/" # ANNUALLY: ADD IN MYLIO, NOT IN FINDER. Good on both iMac and MBP M1 although it's not under iCloud, so requires Mylio for syncing. Not being used
 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
 puts "#{__LINE__}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. ?? But it should stored on #{sdCard} card"
@@ -370,7 +370,7 @@ def userCamCode(fn)
   return userCamCode
 end # userCamCode
 
-def fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc)
+def fileAnnotate(n, fileDateTimeOriginalstr, shootingMode, tzoLoc)
   # Called from rename
   # writing original filename and dateTimeOrig to the photo file.
   fileEXIF = MiniExiftool.new(fn)
@@ -379,7 +379,18 @@ def fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc)
   else
     tzoLocPrint = "+" + tzoLoc.to_s
   end
-  fileEXIF.instructions = "#{fileDateTimeOriginalstr} #{tzoLocPrint}. Sept-Oct. zone was wrong" if !fileEXIF.DateTimeStamp # Time zone of photo is GMT #{tzoLoc} unless TS5?" or travel. TODO find out what this field is really for
+  # fileEXIF.instructions = "#{fileDateTimeOriginalstr} #{tzoLocPrint}. Sept-Oct. zone was wrong" if !fileEXIF.DateTimeStamp # Time zone of photo is GMT #{tzoLoc} unless TS5?" or travel. TODO find out what this field is really for
+  # Birds
+  text = fileEXIF.AISubjectTrackingMode
+  matches = text.match(/\A(\w+),\s*(?=.*?Birds; Object Found)/)
+   if matches
+    trkMode = matches[1]
+    # puts first_word
+  else
+    puts "No match found."
+  end
+  # Want original filename somewhere. And trying for SH1 type info
+  fileEXIF.instructions = "#{fn}. #{shootingMode}. #{trkMode}"
   # fileEXIF.comment = "Capture date: #{fileDateTimeOriginalstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Doesn't show up in Aperture
   # puts "#{__LINE__}. fileEXIF.source: #{fileEXIF.source}.original file basename not getting written"
   # puts "#{File.basename(fn)} original filename to be written to EXIF.title"
@@ -592,15 +603,15 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       driveMode = fileEXIF.DriveMode
 
       # Not using specialMode now, but as an option
-      specialMode = system('exiftool', '-Camera:SpecialMode', fn) # returns true or false
+      specialMode = fileEXIF.SpecialMode
 
       match, shot_no = ""
 
       puts "#{__LINE__}. fn: #{fn}. driveMode: #{driveMode}.\nspecialMode: #{specialMode} oneBack: #{oneBack} = true is two photos in same second. If true, oneBackTrue will be called."
       # Maybe should enter if there is a shot no.
-      match = driveMode.match(/Shot (\d{1,3})/)
+      match = driveMode.match(/Shot (\d{1,3})/) # Getting shot no. from `Continuous Shooting, Shot 12; Electronic shutter`
       shot_no = match[1].to_i if match
-      # First photo in a sequence won't get -1
+      # First photo in a sequence won't get -1 in oneBackTrue.
       if shot_no.to_i == 1
         fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no.to_s + userCamCode(fn)
         puts "#{__LINE__}. Because this was the first in a sequence a `1` was added to the filename for #{fileBaseName}. DEBUG"
@@ -618,7 +629,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       fileExtPrev = fileExt
       # fileBaseNamePrev = fileBaseName
 
-      fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc) # was passing fileEXIF, but saving wasn't happening, so reopen in the module?
+      fileAnnotate(fn, fileDateTimeOriginalstr, shootingMode, tzoLoc) # was passing fileEXIF, but saving wasn't happening, so reopen in the module?
 
       fnp = fnpPrev = src + fileBaseName + File.extname(fn).downcase # unless #Why was the unless here?
       # puts "Place holder to make the script work. where did the unless come from"
@@ -1058,7 +1069,7 @@ timeNowWas = timeStamp(timeNowWas, lineNum)
 puts "\n#{__LINE__}.Finished with writing timeDiff. Now move files. Note that \"Adding location information to photo files\" is commented out, i.e., geographic descriptions not being added, because Mylio finds this info."
 
 # Move to Mylio folder (can't process in this folder or Mylio might import before changes are made)
-mylioFolder = watchedFolderForImport # need to generalize this
+# mylioFolder = watchedFolderForImport # Used with Photos app
 
 moveToMylio(mylioStaging, mylioFolder, timeNowWas)
 
