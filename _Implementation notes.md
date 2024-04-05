@@ -69,4 +69,17 @@ So: look for photos in same second (could miss if sequential but first is in the
 
 Have added something to get shot 1, but untested as of yet. Works. mini_exiftool now working
 
-But GPS does not appear to be working.
+But GPS does not appear to be working. gpsPhoto.pl seems to have stopped working. Maybe `exiftool -geotag=<trackfile> <image_dir>`
+Use wildcards to load multiple track files (the quotes are necessary for most operating systems to prevent filename expansion):
+
+exiftool -geotag "TRACKDIR/\*.log" IMAGEDIR
+exiftool -geotag "logs/\*.log" dir https://exiftool.org/geotag.html#Examples
+Use wildcards to load multiple track files (the quotes are necessary for most operating systems to prevent filename expansion):
+
+Test. -overwrite_original goes at end. Following for command line
+exiftool -geotag "/Users/gscar/Documents/GPS-Maps-docs/ GPX daily logs/2024 GPX logs/\*.gpx" "/Volumes/Daguerre/\_Download folder/ Drag Photos HERE/" -overwrite_original
+
+For script, double quotes for all, not backtick
+exiftoolGps = system("exiftool", "-geotag", "#{gpxLogs}", "#{photoFolder}", "-overwrite_original")
+
+Confirm doesn't overwrite existing geotags, would matter if had already done in OM or for iPhone photos. Asked exiftool forum
