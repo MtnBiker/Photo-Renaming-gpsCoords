@@ -2,3 +2,7 @@
 E, [2024-04-04T10:57:25.444121 #15098] ERROR -- : <internal:dir>:184:in `open'
 /Volumes/Mac Mini HD/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:817:in `foreach'
 /Volumes/Mac Mini HD/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:817:in `<main>'
+E, [2024-04-04T21:12:41.377631 #94713] ERROR -- : An error occurred: Operation not permitted @ dir_initialize - /Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio/
+E, [2024-04-04T21:12:41.378341 #94713] ERROR -- : <internal:dir>:184:in `open'
+/Volumes/Mac Mini HD/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:833:in `foreach'
+/Volumes/Mac Mini HD/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:833:in `<main>'
