@@ -1,3 +1,17 @@
+642. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. O4041877.JPG was renamed to 2024.04.04-16.55.58-1.gs.O.jpg
+642. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. O4041876.JPG was renamed to 2024.04.04-16.54.13-17.gs.O.jpg
+642. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. O4041875.JPG was renamed to 2024.04.04-16.54.13-16.gs.O.jpg
+642. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. O4041874.JPG was renamed to 2024.04.04-16.54.13-15.gs.O.jpg
+642. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. O4041873.JPG was renamed to 2024.04.04-16.54.13-14.gs.O.jpg
+642. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. O4041872.JPG was renamed to 2024.04.04-16.54.13-13.gs.O.jpg
+642. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. O4041871.JPG was renamed to 2024.04.04-16.54.13-12.gs.O.jpg
+642. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. O4041870.JPG was renamed to 2024.04.04-16.54.13-11.gs.O.jpg
+642. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. O4041869.JPG was renamed to 2024.04.04-16.54.13-10.gs.O.jpg
+642. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. O4041868.JPG was renamed to 2024.04.04-16.54.13-9.gs.O.jpg
+642. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. O4041867.JPG was renamed to 2024.04.04-16.54.13-8.gs.O.jpg
+642. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. O4041866.JPG was renamed to 2024.04.04-16.54.13-7.gs.O.jpg
+642. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. O4041865.JPG was renamed to 2024.04.04-16.54.13-6.gs.O.jpg
+642. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. O4041864.JPG was renamed to 2024.04.04-16.54.13-5.gs.O.jpg
 642. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. O4041863.JPG was renamed to 2024.04.04-16.54.13-4.gs.O.jpg
 642. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. O4041862.JPG was renamed to 2024.04.04-16.54.13-3.gs.O.jpg
 642. photosRenamedTo: /Users/gscar/Documents/Ruby/Photo handling/currentData/photosRenamedTo.txt. O4041861.JPG was renamed to 2024.04.04-16.54.13-2.gs.O.jpg

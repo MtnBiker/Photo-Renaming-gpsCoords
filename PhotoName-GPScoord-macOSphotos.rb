@@ -382,7 +382,10 @@ def fileAnnotate(fn, fileDateTimeOriginalstr, shootingMode, tzoLoc)
     tzoLocPrint = "+" + tzoLoc.to_s
   end
   # fileEXIF.instructions = "#{fileDateTimeOriginalstr} #{tzoLocPrint}. Sept-Oct. zone was wrong" if !fileEXIF.DateTimeStamp # Time zone of photo is GMT #{tzoLoc} unless TS5?" or travel. TODO find out what this field is really for
-  # Birds
+  # Birds, shooting mode
+  # AFPointDetails : Birds; Face Priority; AF on Half Press; No Eye-AF; Face Detection; With MF; AF Priority; No Object found; S-AF
+  # AISubjectTrackingMode : Birds; Object Not Found
+  # Nothing about shooting mode except: 
   text = fileEXIF.AISubjectTrackingMode
   matches = text.match(/\A(\w+),\s*(?=.*?Birds; Object Found)/)
    if matches
@@ -391,12 +394,12 @@ def fileAnnotate(fn, fileDateTimeOriginalstr, shootingMode, tzoLoc)
   else
     puts "No match found."
   end
-  # Want original filename somewhere. And trying for SH1 type info
-  fileEXIF.instructions = "#{fn}. #{shootingMode}. #{trkMode}"
+  # Want original filename somewhere. And trying to add shooting modes such as SH1 although terms are different, eg DriveMode : Continuous Shooting 
+  fileEXIF.instructions = "Original: #{File.basename(fn)}. #{shootingMode}. #{trkMode}"
   # fileEXIF.comment = "Capture date: #{fileDateTimeOriginalstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Doesn't show up in Aperture
   # puts "#{__LINE__}. fileEXIF.source: #{fileEXIF.source}.original file basename not getting written"
   # puts "#{File.basename(fn)} original filename to be written to EXIF.title"
-  fileEXIF.PreservedFileName = "#{File.basename(fn)}" # title ends up as Title above the caption. Source shows up in exiftool as IPTC::Source, but this field does not show up in Preview, but does in Mylio
+  fileEXIF.PreservedFileName = "#{File.basename(fn)}" # works but does not show up in Preview nor Mylio, but does in Mylio, so continue to also add to Instructions above
   fileEXIF.TimeZoneOffset = tzoLoc # Time Zone Offset, (1 or 2 values: 1. The time zone offset of DateTimeOriginal from GMT in hours, 2. If present, the time zone offset of ModifyDate)
   # Am I misusing this? I may using it as the TimeZone for photos taken GMT 0 TODO
   # OffsetTimeOriginal	(time zone for DateTimeOriginal) which may or may not be the time zone the photo was taken in TODO
@@ -442,9 +445,9 @@ def oneBackTrue(fn, subSecExists, fileDate, driveMode, dupCount)
   matches = driveMode.match(/Drive Mode\s*:\s*([^,;]+)/)  
   if matches
     shootingMode = matches[1].strip
-    # puts "#{__LINE__}. shootingMode: #{shootingMode}. DEBUG"
+    puts "#{__LINE__}. shootingMode: #{shootingMode}. DEBUG"
   else
-    puts "#{__LINE__}. Drive mode not found."
+    puts "#{__LINE__}. Shooting mode not found."
     # shootingMode = "" # if necessary to prevent errors
   end
 
@@ -507,7 +510,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
   tzoLoc = ""
   seqLetter = %w(a b c d e f h i j k l m n o p q r s t u v w x y z aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt uu vv ww xx yy zz) # used when subsec doesn't exist, but failing for large sequences possible on OM-1, so maybe use sequential numbers, i.e., dupCount?. Yes
   # puts "#{__LINE__}. Entered rename and ready to enter foreach. src: #{src}"
-  Dir.foreach(src) do |item| # for each photo file
+  Dir.each_child(src) do |item| # for each photo file
     next if ignoreNonFiles(item) == true # skipping file when true, i.e., not a file
     # puts "#{__LINE__}. File skipped because already renamed, i.e., the filename starts with 20xx #{item.start_with?("20")}"
     next if item.start_with?("20") # Skipping files that have already been renamed.
@@ -653,112 +656,112 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
     end # 3. if File.file?(fn)
     # puts "#{__LINE__}. Got to here. tzoLoc: #{tzoLoc}"
     
-  end # 2. Dir.foreach(src)
+  end # 2. Dir.each_child(src)
   # puts "#{__LINE__}.  A log of photo file renaming is at #{photoRenamed}. For debugging uncomment the line about 3 lines below to get the list in the running log."
   return tzoLoc # the time zone the picture was taken in,
 end # rename ing photo files in the downloads folder and writing in original time.
 
-#  Replaced by exiftoolAddCoordinates(mylioStaging, folderGPX, tzoLoc)
-def addCoordinates(photoFolder, folderGPX, gpsPhotoPerl, tzoLoc)
-  # Remember writing a command line command, so telling perl, then which perl file, then the gpsphoto.pl script options
-  # --timeoffset seconds     Camera time + seconds = GMT. No default.  
-  # maxTimeDiff = 50000 # seconds, default 120, but I changed it 2011.07.26 to allow for pictures taken at night but GPS off. Distance still has to be reasonable, that is the GPS had to be at the same place in the morning as the night before as set by the variable below
-  # This works, put in because having problems with file locations
-  # perlOutput = `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{photoFolder.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`
-  
-  # photoFolder is where the photos are that are going to have gps coordinates added. A temporary location. Usually called mylioStaging is the overall script
-  # folderGPX is where the gpx tracks are
-  # gpsPhotoPerl is where gpsPhoto.pl is
-  # tzoLoc is the time zone from Greg camera time zones.yml file. Since GPS records UTM. Camera time zone setting varies. Camera only records the time it is set for, but doesn't accurately report the zone. Currently exiftool is saying the zone is the zone of the computer running the script. tzoLoc value can be changed in this module. tzoLoc is hours and gets changed to seconds as timeOffset for use by gpsPhoto.pl
-  # <--timeoffset seconds> A positive value means that the camera is behind in time, a negative value means that the camera is ahead in time.
-  
-# Assuming all the photos are from the same camera, get info on one and use that information.
-# GX8 is usually local time, but may get
-# GX7 is UST
-  camModel = ""
-  timeOffset = 0
-  Dir.foreach(photoFolder) do |item|
-    # This is only run once, so efficiency doesn't matter
-    count = 0
-    # puts "#{__LINE__}. item.slice(0,4): #{item.slice(-4,4)}" # debug for following
-    next if ignoreNonFiles(item)  # skipping file when true == true
-    fn = photoFolder + item
-    fileEXIF = MiniExiftool.new(fn) # used several times
-    camModel = fileEXIF.model
-    puts "#{__LINE__}. model: #{camModel} fn: #{fn}" # debug
-    panasonicLocation = fileEXIF.location
-    # timeOffset = 0 # could leave this in and remove the else 
-    if File.file?(fn)
-      if camModel == "OM-1MarkII"
-        # CreateDate is local time with time zone noted, e.g.,  2024:03:03 15:56:50-08:00 3:15 pm in tz -8
-        # Date Time UTC                   : 2024:03:03 23:56:50
-        # Offset Time                     : -08:00 # so can get directly from photo
-        timeOffset = -fileEXIF.OffsetTime(0..2).to_i # so how much GMT is ahead of local. So opposite time zone
-        puts "#{__LINE__} timeOffset: #{timeOffset} for #{camModel}. Sign is opposite tz. -fileEXIF.OffsetTime(0..2).to_i"
-      elsif camModel == "DMC-GX8" # Assumes GX8 always on local time. And TimeZone is set
-        # timeOffset = tzoLoc * 3600 # old way which may be fine, but the following seems more direct. May not account for camera not being in the zone it's set for, but I don't think that matters. It matters for time labeling, but this is only GPS coords
-        timeOffset =  (fileEXIF.TimeStamp -  fileEXIF.CreateDate) # seconds, so how much GMT is ahead of local. So opposite time zone
-        puts "#{__LINE__} timeOffset: #{timeOffset} = (fileEXIF.TimeStamp: #{fileEXIF.TimeStamp} -  fileEXIF.CreateDate:#{fileEXIF.CreateDate}) for for #{camModel}. "
-        puts "#{__LINE__}. timeOffset: #{timeOffset} seconds (#{timeOffset/3600} hours) with GX-8 photos stamped in local time. FYI: tzoLoc: #{tzoLoc} per zones file which isn't being used for coordinates but seems like it could with hrs to secs change."
-        # timeOffset = -3600 * 7
-        # puts "#{__LINE__}. Hardwired to #{timeOffset} seconds for this run"
-
-      elsif camModel.include?("DMC") and panasonicLocation.length > 0 # Panasonic in Travel Mode, but also some photos exported from Photos.
-        timeOffset = tzoLoc * 3600
-        puts "#{__LINE__}. timeOffset: #{timeOffset} sec (#{tzoLoc} hours) with photos stamped in local time for #{camModel}."
-      # elsif camModel  == "DMC-TS5"
-    #     # Offset sign is same as GMT offset, eg, we are -8, but need to increase the time to match UST, therefore negative
-    #     timeOffset = - fileEXIF.dateTimeOriginal.utc_offset # Time zone is set in camera, i.e. local time in this case
-    #     # What does utc_offset do for the above. dateTimeOriginal is just a time, e.g., 2018:12:31 21:38:32, which is the time the camera thinks it is. Camera doesn't know about zone. Camera may, but from dateTimeOriginal, can't tell the time zone.
-    #     puts "#{__LINE__}. timeOffset: #{timeOffset} for DMC-TS5 photos stamped in local time."
-    #   else # GX7 time is UTC. iPhone ends up here too
-    #     timeOffset = 0 # camelCase, but perl variable is lowercase
-    #     puts "#{__LINE__}. timeOffset: #{timeOffset} sec (#{tzoLoc} hours) with photos stamped in GMT"
-      end # if camModel
-      # puts "#{__LINE__} timeOffset: #{timeOffset} triple checking"
-      fileEXIF.save 
-      count += 1
-    end # if File.file
-    break if count == 1 # once have a real photo file, can get out of this. Only check this once
-  end # Dir.foreach
-  puts "#{__LINE__}. timeOffset: #{timeOffset}. camModel: #{camModel}. All photos must be same camera and time zone or photos may be mislabeled and geo-located."
-   
-  puts "\n#{__LINE__}. Variables input to perlOutput for DEBUGing follow"
-  puts "gpsPhotoPerl: #{gpsPhotoPerl}\nphotoFolder: #{photoFolder}\nfolderGPX: #{folderGPX}\ntimeoffset: #{timeOffset}"
-  puts "\n#{__LINE__}. Finding all gps points from all the gpx files using gpsPhoto.pl. This may take a while.\n"
-  puts "#{__LINE__}. Anything below here and before \"perlOutput\" is generated by the perl script\n==========  #{Time.now}\n"
-  # Since have to manually craft the perl call, need one for with Daguerre and one for on laptop
-  # Daguerre version. /Volumes/Daguerre/_Download folder/Latest Download/
-  perlOutput = `perl '#{gpsPhotoPerl}' --dir '#{photoFolder}' --gpsdir '#{folderGPX}' --timeoffset #{timeOffset} --maxtimediff 50000`
-  puts "#{__LINE__}. perlOutput script finished #{Time.now}"
-  puts "\n#{__LINE__}========Beginning of perlOutput========== #{Time.now}\nperlOutput:\n#{perlOutput}\n#{__LINE__}========End of perlOutput==========  #{Time.now}\n"
-  # The following is identical, so apparently was taken care of elsewhere. So now use the single line above
-    # if loadingToLaptop
-    #   # perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Users/gscar/Pictures/_Photo Processing Folders/Processed\ photos\ to\ be\ imported\ to\ Aperture/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2017\ Massaged/' --timeoffset #{timeOffset} --maxtimediff 50000` # saved in case something goes wrong. This works
-    #   perlOutput = `perl '#{gpsPhotoPerl}' --dir '#{photoFolder}' --gpsdir '#{folderGPX}' --timeoffset #{timeOffset} --maxtimediff 50000`
-    # else # default location on Daguerre or Knobby Aperture Two
-    #   # perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby Aperture Two/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2017\ Massaged/' --timeoffset #{timeOffset} --maxtimediff 50000` # this works, saving in case the following doesn't
-    #   perlOutput = `perl '#{gpsPhotoPerl}' --dir '#{photoFolder}' --gpsdir '#{folderGPX}' --timeoffset #{timeOffset} --maxtimediff 50000`
-    #   # Double quotes needed for variables to be evalated
-    #   # perlOutput = "`perl \'#{gpsPhotoPerl.shellescape}\' --dir \'#{photoFolder.shellescape}\' --gpsdir \'#{folderGPX.shellescape}\' --timeoffset #{timeOffset} --maxtimediff 50000`" #  2>&1
-    #   # perlOutput = "`perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby Aperture Two/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2017\ Massaged/' --timeoffset #{timeOffset} --maxtimediff 50000 2>&1` " #  2>&1 is needed to capture output, but not to run
-    #
-    #   puts "#{__LINE__}. perlOutput: #{perlOutput}"
-    # end
-      
-  # puts "\n374.. perlOutput: \n#{perlOutput} \n\nEnd of perlOutput ================… end 374\n\n" # This didn't seem to be happening with 2>&1 appended? But w/o it, error not captured
-  # perlOutput =~ /timediff\=([0-9]+)/
-  # timediff = $1 # class string
-  # # puts"\n #{__LINE__} timediff: #{timediff}. timediff.class: #{timediff.class}. "
-  # if timediff.to_i > 240
-  #   timeDiffReport = ". Note that timediff is #{timediff} seconds. "
-  #   # writing to the photo file about high timediff
-  #   writeTimeDiff(imageFile,timediff)
-  # else
-  #   timeDiffReport = ""
-  # end # timediff.to…
-  return perlOutput
-end # addCoordinates
+#  Replaced by exiftoolAddCoordinates(mylioStaging, folderGPX, tzoLoc) Can delete some time after 4/5/2024. Was used as basis for exiftool add coordinates
+# def addCoordinates(photoFolder, folderGPX, gpsPhotoPerl, tzoLoc)
+#   # Remember writing a command line command, so telling perl, then which perl file, then the gpsphoto.pl script options
+#   # --timeoffset seconds     Camera time + seconds = GMT. No default.  
+#   # maxTimeDiff = 50000 # seconds, default 120, but I changed it 2011.07.26 to allow for pictures taken at night but GPS off. Distance still has to be reasonable, that is the GPS had to be at the same place in the morning as the night before as set by the variable below
+#   # This works, put in because having problems with file locations
+#   # perlOutput = `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{photoFolder.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`
+#   
+#   # photoFolder is where the photos are that are going to have gps coordinates added. A temporary location. Usually called mylioStaging is the overall script
+#   # folderGPX is where the gpx tracks are
+#   # gpsPhotoPerl is where gpsPhoto.pl is
+#   # tzoLoc is the time zone from Greg camera time zones.yml file. Since GPS records UTM. Camera time zone setting varies. Camera only records the time it is set for, but doesn't accurately report the zone. Currently exiftool is saying the zone is the zone of the computer running the script. tzoLoc value can be changed in this module. tzoLoc is hours and gets changed to seconds as timeOffset for use by gpsPhoto.pl
+#   # <--timeoffset seconds> A positive value means that the camera is behind in time, a negative value means that the camera is ahead in time.
+#   
+# # Assuming all the photos are from the same camera, get info on one and use that information.
+# # GX8 is usually local time, but may get
+# # GX7 is UST
+#   camModel = ""
+#   timeOffset = 0
+#   Dir.foreach(photoFolder) do |item|
+#     # This is only run once, so efficiency doesn't matter
+#     count = 0
+#     # puts "#{__LINE__}. item.slice(0,4): #{item.slice(-4,4)}" # debug for following
+#     next if ignoreNonFiles(item)  # skipping file when true == true
+#     fn = photoFolder + item
+#     fileEXIF = MiniExiftool.new(fn) # used several times
+#     camModel = fileEXIF.model
+#     puts "#{__LINE__}. model: #{camModel} fn: #{fn}" # debug
+#     panasonicLocation = fileEXIF.location
+#     # timeOffset = 0 # could leave this in and remove the else 
+#     if File.file?(fn)
+#       if camModel == "OM-1MarkII"
+#         # CreateDate is local time with time zone noted, e.g.,  2024:03:03 15:56:50-08:00 3:15 pm in tz -8
+#         # Date Time UTC                   : 2024:03:03 23:56:50
+#         # Offset Time                     : -08:00 # so can get directly from photo
+#         timeOffset = -fileEXIF.OffsetTime(0..2).to_i # so how much GMT is ahead of local. So opposite time zone
+#         puts "#{__LINE__} timeOffset: #{timeOffset} for #{camModel}. Sign is opposite tz. -fileEXIF.OffsetTime(0..2).to_i"
+#       elsif camModel == "DMC-GX8" # Assumes GX8 always on local time. And TimeZone is set
+#         # timeOffset = tzoLoc * 3600 # old way which may be fine, but the following seems more direct. May not account for camera not being in the zone it's set for, but I don't think that matters. It matters for time labeling, but this is only GPS coords
+#         timeOffset =  (fileEXIF.TimeStamp -  fileEXIF.CreateDate) # seconds, so how much GMT is ahead of local. So opposite time zone
+#         puts "#{__LINE__} timeOffset: #{timeOffset} = (fileEXIF.TimeStamp: #{fileEXIF.TimeStamp} -  fileEXIF.CreateDate:#{fileEXIF.CreateDate}) for for #{camModel}. "
+#         puts "#{__LINE__}. timeOffset: #{timeOffset} seconds (#{timeOffset/3600} hours) with GX-8 photos stamped in local time. FYI: tzoLoc: #{tzoLoc} per zones file which isn't being used for coordinates but seems like it could with hrs to secs change."
+#         # timeOffset = -3600 * 7
+#         # puts "#{__LINE__}. Hardwired to #{timeOffset} seconds for this run"
+# 
+#       elsif camModel.include?("DMC") and panasonicLocation.length > 0 # Panasonic in Travel Mode, but also some photos exported from Photos.
+#         timeOffset = tzoLoc * 3600
+#         puts "#{__LINE__}. timeOffset: #{timeOffset} sec (#{tzoLoc} hours) with photos stamped in local time for #{camModel}."
+#       # elsif camModel  == "DMC-TS5"
+#     #     # Offset sign is same as GMT offset, eg, we are -8, but need to increase the time to match UST, therefore negative
+#     #     timeOffset = - fileEXIF.dateTimeOriginal.utc_offset # Time zone is set in camera, i.e. local time in this case
+#     #     # What does utc_offset do for the above. dateTimeOriginal is just a time, e.g., 2018:12:31 21:38:32, which is the time the camera thinks it is. Camera doesn't know about zone. Camera may, but from dateTimeOriginal, can't tell the time zone.
+#     #     puts "#{__LINE__}. timeOffset: #{timeOffset} for DMC-TS5 photos stamped in local time."
+#     #   else # GX7 time is UTC. iPhone ends up here too
+#     #     timeOffset = 0 # camelCase, but perl variable is lowercase
+#     #     puts "#{__LINE__}. timeOffset: #{timeOffset} sec (#{tzoLoc} hours) with photos stamped in GMT"
+#       end # if camModel
+#       # puts "#{__LINE__} timeOffset: #{timeOffset} triple checking"
+#       fileEXIF.save 
+#       count += 1
+#     end # if File.file
+#     break if count == 1 # once have a real photo file, can get out of this. Only check this once
+#   end # Dir.foreach
+#   puts "#{__LINE__}. timeOffset: #{timeOffset}. camModel: #{camModel}. All photos must be same camera and time zone or photos may be mislabeled and geo-located."
+#    
+#   puts "\n#{__LINE__}. Variables input to perlOutput for DEBUGing follow"
+#   puts "gpsPhotoPerl: #{gpsPhotoPerl}\nphotoFolder: #{photoFolder}\nfolderGPX: #{folderGPX}\ntimeoffset: #{timeOffset}"
+#   puts "\n#{__LINE__}. Finding all gps points from all the gpx files using gpsPhoto.pl. This may take a while.\n"
+#   puts "#{__LINE__}. Anything below here and before \"perlOutput\" is generated by the perl script\n==========  #{Time.now}\n"
+#   # Since have to manually craft the perl call, need one for with Daguerre and one for on laptop
+#   # Daguerre version. /Volumes/Daguerre/_Download folder/Latest Download/
+#   perlOutput = `perl '#{gpsPhotoPerl}' --dir '#{photoFolder}' --gpsdir '#{folderGPX}' --timeoffset #{timeOffset} --maxtimediff 50000`
+#   puts "#{__LINE__}. perlOutput script finished #{Time.now}"
+#   puts "\n#{__LINE__}========Beginning of perlOutput========== #{Time.now}\nperlOutput:\n#{perlOutput}\n#{__LINE__}========End of perlOutput==========  #{Time.now}\n"
+#   # The following is identical, so apparently was taken care of elsewhere. So now use the single line above
+#     # if loadingToLaptop
+#     #   # perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Users/gscar/Pictures/_Photo Processing Folders/Processed\ photos\ to\ be\ imported\ to\ Aperture/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2017\ Massaged/' --timeoffset #{timeOffset} --maxtimediff 50000` # saved in case something goes wrong. This works
+#     #   perlOutput = `perl '#{gpsPhotoPerl}' --dir '#{photoFolder}' --gpsdir '#{folderGPX}' --timeoffset #{timeOffset} --maxtimediff 50000`
+#     # else # default location on Daguerre or Knobby Aperture Two
+#     #   # perlOutput = `perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby Aperture Two/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2017\ Massaged/' --timeoffset #{timeOffset} --maxtimediff 50000` # this works, saving in case the following doesn't
+#     #   perlOutput = `perl '#{gpsPhotoPerl}' --dir '#{photoFolder}' --gpsdir '#{folderGPX}' --timeoffset #{timeOffset} --maxtimediff 50000`
+#     #   # Double quotes needed for variables to be evalated
+#     #   # perlOutput = "`perl \'#{gpsPhotoPerl.shellescape}\' --dir \'#{photoFolder.shellescape}\' --gpsdir \'#{folderGPX.shellescape}\' --timeoffset #{timeOffset} --maxtimediff 50000`" #  2>&1
+#     #   # perlOutput = "`perl '/Users/gscar/Documents/Ruby/Photo\ handling/lib/gpsPhoto.pl' --dir '/Volumes/Knobby Aperture Two/_Download\ folder/Latest\ Download/' --gpsdir '/Users/gscar/Dropbox/\ GPX\ daily\ logs/2017\ Massaged/' --timeoffset #{timeOffset} --maxtimediff 50000 2>&1` " #  2>&1 is needed to capture output, but not to run
+#     #
+#     #   puts "#{__LINE__}. perlOutput: #{perlOutput}"
+#     # end
+#       
+#   # puts "\n374.. perlOutput: \n#{perlOutput} \n\nEnd of perlOutput ================… end 374\n\n" # This didn't seem to be happening with 2>&1 appended? But w/o it, error not captured
+#   # perlOutput =~ /timediff\=([0-9]+)/
+#   # timediff = $1 # class string
+#   # # puts"\n #{__LINE__} timediff: #{timediff}. timediff.class: #{timediff.class}. "
+#   # if timediff.to_i > 240
+#   #   timeDiffReport = ". Note that timediff is #{timediff} seconds. "
+#   #   # writing to the photo file about high timediff
+#   #   writeTimeDiff(imageFile,timediff)
+#   # else
+#   #   timeDiffReport = ""
+#   # end # timediff.to…
+#   return perlOutput
+# end # addCoordinates
 
 def exiftoolAddCoordinates(photoFolder, folderGPX, tzoLoc)
   # Remember writing a command line command
@@ -778,7 +781,7 @@ def exiftoolAddCoordinates(photoFolder, folderGPX, tzoLoc)
 # GX7 is UST
   camModel = ""
   timeOffset = 0
-  Dir.foreach(photoFolder) do |item|
+  Dir.each_child(photoFolder) do |item|
     # This is only run once, so efficiency doesn't matter
     count = 0
     # puts "#{__LINE__}. item.slice(0,4): #{item.slice(-4,4)}" # debug for following
@@ -827,18 +830,12 @@ def exiftoolAddCoordinates(photoFolder, folderGPX, tzoLoc)
   puts "\n#{__LINE__}. Variables input to exiftool for GPS annotating for DEBUGing:"
   puts "photoFolder: #{photoFolder}\nfolderGPX: #{folderGPX}\ntimeoffset: #{timeOffset}"
   puts "\n#{__LINE__}. Finding all gps points from all the gpx files using exiftool. This may take a while.\n"
-  puts "#{__LINE__}. Anything below here and before \"exiftoolGps\" is generated by the exiftool\n==========  #{Time.now}\n"
-  # Since have to manually craft the perl call, need one for with Daguerre and one for on laptop
-  # Daguerre version. /Volumes/Daguerre/_Download folder/Latest Download/
-  # perlOutput = `perl '#{gpsPhotoPerl}' --dir '#{photoFolder}' --gpsdir '#{folderGPX}' --timeoffset #{timeOffset} --maxtimediff 50000`
+  puts "#{__LINE__}.========= Beginning of  exiftool geotag ==========  #{Time.now}\n"
   gpxLogs = folderGPX + "/*.gpx" # to get multiple files in the folder
-  # sample system(`exiftool -Camera:DriveMode`,` "#{gsubfilename}"`)
-  # system("exiftool", "-Camera:DriveMode", "#{gsubfilename}")
-  # exiftoolGps = system(`exiftool`, `-geotag`,  `"#{gpxLogs}"`, `"#{photoFolder}"`, `-overwrite_original`)
-  exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "-overwrite_original")
+  exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "-overwrite_original") # returns true or?
   puts "#{__LINE__}. exiftool geotag finished #{Time.now}"
-  puts "\n#{__LINE__}========Beginning of exiftool geotag========== #{Time.now}\npexiftoolGps:\n#{exiftoolGps}\n#{__LINE__}========End of exiftool geotag==========  #{Time.now}\n"
-  return exiftoolGps # although now putting results in above
+  puts "\n#{__LINE__}======== End of exiftool geotag ==========  #{Time.now}\n"
+  # return exiftoolGps # return is true unless want to get the notes, but they show in script results
 end # exiftoolAddCoordinates
 
 def writeTimeDiff(perlOutput)
@@ -871,7 +868,7 @@ end
 # puts "#{__LINE__}. mylioStaging: #{mylioStaging}" # debugging
 def moveToMylio(mylioStaging, mylioFolder, timeNowWas)
   puts "\n#{__LINE__}. Moving processed photos from #{mylioStaging} to Mylio folder #{mylioFolder}"
-  Dir.foreach(mylioStaging) do |item|
+  Dir.each_child(mylioStaging) do |item|
     fn  = mylioStaging + item # mylioStaging is now temporary destination, so nomenclature is weird
     fnp = mylioFolder + item
     # puts "#{__LINE__}.#{jpgsMovedCount += 1}. #{fn} moved to #{fnp}" # dubugging
@@ -885,8 +882,8 @@ end
 ## The "PROGRAM" ############ ##################### ###################### ##################### ##########################
 timeNowWas = timeStamp(Time.now, lineNum) # Initializing. Later calls are different
 # timeNowWas = timeStamp(timeNowWas)
-Dir.foreach(folderGPX) {|x| puts "#{__LINE__}. GPX files available #{x}  in #{folderGPX}. Are the gps logs up to date?" } # Task “Custom Task” exited with a non-zero exit status: 1., but runs from 
-# puts "\n#{__LINE__}. Are the gps logs up to date?\n\n" # Should check for this since I don't see the message
+Dir.each_child(folderGPX) {|x| puts "#{__LINE__}. GPX file available #{x}" } # Task “Custom Task” exited with a non-zero exit status: 1., but runs from 
+puts "\n#{__LINE__}. Are the gps logs needed listed above?\nin #{folderGPX}.\n" # Should check for this since I don't see the message
 
 # Two names for SD cards seem common. Is this needed anymore? Caused an error
 # unless File.directory?(srcSDfolder) # negative if, so if srcSDfolder exists skip, other wise change reference to …Alt
@@ -912,12 +909,12 @@ else
 end
  # puts "#{__LINE__}. Temporary for error checking. mylioStaging: #{mylioStaging}"
  # puts "# Won't run in Nova but does from command line: See line ~10 for command"
- puts "#{__LINE__}. Temporary for error checking. mylioStaging: #{mylioStaging}.  File.exist?(mylioStaging): #{File.exist?(mylioStaging)}" 
- puts "#{__LINE__}. Crashing at next line in Nova, can run script TextMate or from command line:\n ruby \"/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb\""
+ # puts "#{__LINE__}. Temporary for error checking. mylioStaging: #{mylioStaging}.  File.exist?(mylioStaging): #{File.exist?(mylioStaging)}" 
+ puts "\n#{__LINE__}. Crashing at next line in Nova, can run script TextMate or from command line:\n ruby \"/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb\""
  puts "#{__LINE__}. Logging errors for the offending command in NOVA.
-  File is logfile.log in  #{__FILE__}"
+  File is logfile.log in  #{__FILE__}\n"
  begin
-  Dir.foreach(mylioStaging) {|x| puts "#{__LINE__}. File #{x} already in #{mylioStaging}. Tells which files need to be removed?" } # Task “Custom Task” exited with a non-zero exit status: 1., but runs from command line
+  Dir.each_child(mylioStaging) {|x| puts "#{__LINE__}. File #{x} already in #{mylioStaging}. Tells which files need to be removed?" } # Task “Custom Task” exited with a non-zero exit status: 1., but runs from command line
  rescue => e
    logger.error("An error occurred: #{e.message}")
    logger.error(e.backtrace.join("\n"))
@@ -978,7 +975,7 @@ if fromWhere["gpsCoords"] == "1"
   # Need to find date of a file so know what part of timeZonesFile to use
   # Use to find first photo in folder and get fileDateTimeOriginal
   fileDateTimeOriginal = ""
-  Dir.foreach(srcGpsAdd) do |item| # for each photo file
+  Dir.each_child(srcGpsAdd) do |item| # for each photo file
     next if ignoreNonFiles(item) == true # skipping file when true, i.e., not a file
     # puts "#{__LINE__}. File skipped because already renamed, i.e., the filename starts with 20xx #{item.start_with?("20")}"
     next if item.start_with?("20") # Skipping files that have already been renamed.
@@ -991,7 +988,7 @@ if fromWhere["gpsCoords"] == "1"
   tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile)
   # puts "#{__LINE__} Debugging.\n srcGpsAdd: #{srcGpsAdd} \n folderGPX: #{folderGPX}  \n gpsPhotoPerl: #{gpsPhotoPerl}  \n tzoLoc: #{tzoLoc}"
   # perlOutput = addCoordinates(srcGpsAdd, folderGPX, gpsPhotoPerl, tzoLoc)
-  addGpsCoordinates = exiftoolAddCoordinates(mylioStaging, folderGPX, tzoLoc)
+  addGpsCoordinates = exiftoolAddCoordinates(mylioStaging, folderGPX, tzoLoc) # not using addGpsCoordinates = 
   puts "#{__LINE__}. Added coordinates to photos in #{srcGpsAdd}" # \nMultiline perlOutput follows:\n#{perlOutput}" # doing this in the addCoordinates()
   abort # break gives compile error
   # abort if (whichDrive == "R") # break doesn't work, but abort seems to
@@ -1130,7 +1127,7 @@ puts "\n#{__LINE__}. Rename the jpgs in #{tempJpg} and then move to #{mylioStagi
 rename(tempJpg, timeZonesFile, timeNowWas, photosRenamedTo)
 #  Move the jpgs to mylioStaging (Latest Download)
 jpgsMovedCount = 0 # Initializing for debugging puts
-Dir.foreach(tempJpg) do |item|
+Dir.each_child(tempJpg) do |item|
   next if ignoreNonFiles(item) == true
   fn  = tempJpg   + item # sourced from temporary storage for jpgs 
   fnp = mylioStaging + item # new jpg file in Latest Download
@@ -1145,12 +1142,12 @@ puts "\n#{__LINE__}. Using exiftool to add gps coordinates. Will take a while as
 puts "\n#{__LINE__} tzoLoc: #{tzoLoc}. Because GX8 and some other cameras use local time and not GMT as this script was originally written for. All photos must be in same time zone."
 # Add GPS coordinates.
 # perlOutput = addCoordinates(mylioStaging, folderGPX, gpsPhotoPerl, tzoLoc)
-addGpsCoordinates = exiftoolAddCoordinates(mylioStaging, folderGPX, tzoLoc)
+addGpsCoordinates = exiftoolAddCoordinates(mylioStaging, folderGPX, tzoLoc) # not using `addGpsCoordinates = `
 
 timeNowWas = timeStamp(timeNowWas, lineNum)
 
 # Write timeDiff to the photo files
-puts "\n#{__LINE__}. Write timeDiff to the photo files NOT. Don't know if exiftool does this or do in addGpsCoordinates"
+puts "\n#{__LINE__}. Write timeDiff to the photo files NOT. Don't know if exiftool does this or do in exiftoolAddCoordinates"
 # writeTimeDiff(addGpsCoordinates)
 
 timeNowWas = timeStamp(timeNowWas, lineNum)
