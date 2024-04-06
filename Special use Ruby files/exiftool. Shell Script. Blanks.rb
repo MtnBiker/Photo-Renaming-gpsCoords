@@ -45,7 +45,7 @@ stackedImage  = system('exiftool', '-Camera:StackedImage', filename)
 puts "driveMode: #{driveMode}. specialMode: #{specialMode}. stackedImage: #{stackedImage}. driveMode.class: #{driveMode.class}. "
 
 puts "\n#{__LINE__}. High speed sequential:"
-filename = "/Volumes/Daguerre/_Download folder/_imported-archive/0100-OM-1/O40-ProCapture test-delete?/O4021626.JPG"
+filename = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/OM-1-2024/2024.04.05-15.23.34-38.gs.O.jpg"
 driveMode = system('exiftool', '-Camera:DriveMode', filename)
 specialMode = system('exiftool', '-Camera:SpecialMode', filename)
 stackedImage  = system('exiftool', '-Camera:StackedImage', filename)

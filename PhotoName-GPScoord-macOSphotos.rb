@@ -285,14 +285,14 @@ def mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArra
       FileUtils.copy(fn, fnm)
     end
 
-   # If a jpg and has an effect, copy to mylioStaging via
-   # ArtFilter: Off; 0; 0; 0 may be the screen
+    # If a jpg and has an effect, copy to mylioStaging via
+    # ArtFilter: Off; 0; 0; 0 may be the screen
     fileEXIF = MiniExiftool.new(fn)
     filterEffect = fileEXIF.FilterEffect
     if itemExt.downcase == ".jpg" && filterEffect != "Expressive" # Expressive is default, so not much of an effect, but may need to change this
       fnt = tempJpg + item
       FileUtils.copy(fn, fnt)
-      puts "#{__LINE__}. #{fn} to be staged since filterEffect is #{filterEffect} or OM-1 without support for orf yet."
+      puts "#{__LINE__}. #{Time.now.strftime("%I:%M:%S %p")}. #{fn} to be staged since filterEffect is #{filterEffect} or OM-1 without support for orf yet."
     end
 
     # if two jpgs in a row, then no associated raw, therefore stage
@@ -386,16 +386,18 @@ def fileAnnotate(fn, fileDateTimeOriginalstr, shootingMode, tzoLoc)
   # AFPointDetails : Birds; Face Priority; AF on Half Press; No Eye-AF; Face Detection; With MF; AF Priority; No Object found; S-AF
   # AISubjectTrackingMode : Birds; Object Not Found
   # Nothing about shooting mode except: 
-  text = fileEXIF.AISubjectTrackingMode
-  matches = text.match(/\A(\w+),\s*(?=.*?Birds; Object Found)/)
-   if matches
-    trkMode = matches[1]
-    # puts first_word
-  else
-    puts "No match found."
+  subjectTrackingMode = fileEXIF.AISubjectTrackingMode
+ 
+  shootingMode = driveMode.split(',')[0] # driveMode = fileEXIF.DriveMode determined outside module
+  
+  # matches = text.match(/\A(\w+),\s*(?=.*?Birds; Object Found)/)
+  subjectTrackingModeOne = subjectTrackingMode.split(';')[0]
+   if subjectTrackingModeOne
+   else
+    puts "AISubjectTrackingMode not found."
   end
   # Want original filename somewhere. And trying to add shooting modes such as SH1 although terms are different, eg DriveMode : Continuous Shooting 
-  fileEXIF.instructions = "Original: #{File.basename(fn)}. #{shootingMode}. #{trkMode}"
+  fileEXIF.instructions = "Original: #{File.basename(fn)}. #{subjectTrackingModeOne}. #{subjectTrackingModeOne}. shootingMode: #{shootingMode}. "
   # fileEXIF.comment = "Capture date: #{fileDateTimeOriginalstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Doesn't show up in Aperture
   # puts "#{__LINE__}. fileEXIF.source: #{fileEXIF.source}.original file basename not getting written"
   # puts "#{File.basename(fn)} original filename to be written to EXIF.title"
@@ -441,16 +443,17 @@ def oneBackTrue(fn, subSecExists, fileDate, driveMode, dupCount)
   match = driveMode.match(/Shot (\d{1,3})/)
   shot_no = match[1].to_i if match
   
-  # Also get the shooting mode from `Drive Mode                      : Focus Bracketing, Shot 6; Electronic shutter`
-  matches = driveMode.match(/Drive Mode\s*:\s*([^,;]+)/)  
-  if matches
-    shootingMode = matches[1].strip
-    puts "#{__LINE__}. shootingMode: #{shootingMode}. DEBUG"
-  else
-    puts "#{__LINE__}. Shooting mode not found."
-    # shootingMode = "" # if necessary to prevent errors
-  end
-
+  # driveMode = fileEXIF.DriveMode
+  # Also get the shooting mode from `Drive Mode : Focus Bracketing, Shot 6; Electronic shutter`
+  # matches = driveMode.match(/Drive Mode\s*:\s*([^,;]+)/)  
+  # if matches
+  #   shootingMode = matches[1].strip
+  #   puts "#{__LINE__}. shootingMode: #{shootingMode}. DEBUG"
+  # else
+  #   puts "#{__LINE__}. Shooting mode not found."
+  #   # shootingMode = "" # if necessary to prevent errors
+  # end
+  shootingMode = driveMode.split(',')[0]
   # puts "#{__LINE__}. fn: #{fn}. driveMode: #{driveMode}. shot_no: #{shot_no}. shootingMode: #{shootingMode}. subSecExists: #{subSecExists}. fileDate: #{fileDate}. DEBUG"
   if subSecExists # mainly GX8. and maybe iPhone bursts
     fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  subSec + userCamCode(fn) # this doesn't happen for the first one in the same second.
@@ -511,7 +514,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
   seqLetter = %w(a b c d e f h i j k l m n o p q r s t u v w x y z aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt uu vv ww xx yy zz) # used when subsec doesn't exist, but failing for large sequences possible on OM-1, so maybe use sequential numbers, i.e., dupCount?. Yes
   # puts "#{__LINE__}. Entered rename and ready to enter foreach. src: #{src}"
   Dir.each_child(src) do |item| # for each photo file
-    next if ignoreNonFiles(item) == true # skipping file when true, i.e., not a file
+    next if ignoreNonFiles(item) == true # skipping file when true, i.e., not a file, with each_child, this is probably redundant.
     # puts "#{__LINE__}. File skipped because already renamed, i.e., the filename starts with 20xx #{item.start_with?("20")}"
     next if item.start_with?("20") # Skipping files that have already been renamed.
     next if item.end_with?("xmp") # Skipping .xmp files in Mylio and elsewhere. The files may become orphans
@@ -829,12 +832,14 @@ def exiftoolAddCoordinates(photoFolder, folderGPX, tzoLoc)
    
   puts "\n#{__LINE__}. Variables input to exiftool for GPS annotating for DEBUGing:"
   puts "photoFolder: #{photoFolder}\nfolderGPX: #{folderGPX}\ntimeoffset: #{timeOffset}"
-  puts "\n#{__LINE__}. Finding all gps points from all the gpx files using exiftool. This may take a while.\n"
-  puts "#{__LINE__}.========= Beginning of  exiftool geotag ==========  #{Time.now}\n"
+  puts "\n#{__LINE__}. Finding all gps points from all the gpx files using exiftool and adding GPS info to each photo file. This may take a while.\n"
+  puts "#{__LINE__}.========= Beginning of  exiftool geotag ==========  #{Time.now.strftime("%I:%M:%S %p")}\n"
   gpxLogs = folderGPX + "/*.gpx" # to get multiple files in the folder
-  exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "-overwrite_original") # returns true or?
-  puts "#{__LINE__}. exiftool geotag finished #{Time.now}"
-  puts "\n#{__LINE__}======== End of exiftool geotag ==========  #{Time.now}\n"
+  subcommands = "-overwrite_original -if \"not $gpslatitude\""
+  exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "-overwrite_original -if 'not $gpslatitude'") # returns true or?
+  # exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "#{subcommands}") # if the above doesn't work
+  puts "#{__LINE__}. exiftool geotag finished #{Time.now.strftime("%I:%M:%S %p")}"
+  puts "\n#{__LINE__}======== End of exiftool geotag ==========  #{Time.now.strftime("%I:%M:%S %p")}\n"
   # return exiftoolGps # return is true unless want to get the notes, but they show in script results
 end # exiftoolAddCoordinates
 
@@ -883,7 +888,9 @@ end
 timeNowWas = timeStamp(Time.now, lineNum) # Initializing. Later calls are different
 # timeNowWas = timeStamp(timeNowWas)
 Dir.each_child(folderGPX) {|x| puts "#{__LINE__}. GPX file available #{x}" } # Task “Custom Task” exited with a non-zero exit status: 1., but runs from 
-puts "\n#{__LINE__}. Are the gps logs needed listed above?\nin #{folderGPX}.\n" # Should check for this since I don't see the message
+puts "\n#{__LINE__}. Are the gps logs needed listed above?\nin #{folderGPX}. Note 'not needed … is a folder'\n\n" # Should check for this since I don't see the message
+
+puts "#{__LINE__}. (an alternative to the above): #{Dir.each_child(folderGPX}. "
 
 # Two names for SD cards seem common. Is this needed anymore? Caused an error
 # unless File.directory?(srcSDfolder) # negative if, so if srcSDfolder exists skip, other wise change reference to …Alt

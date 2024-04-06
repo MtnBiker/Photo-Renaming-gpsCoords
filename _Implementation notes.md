@@ -82,4 +82,10 @@ exiftool -geotag "/Users/gscar/Documents/GPS-Maps-docs/ GPX daily logs/2024 GPX 
 For script, double quotes for all, not backtick
 exiftoolGps = system("exiftool", "-geotag", "#{gpxLogs}", "#{photoFolder}", "-overwrite_original")
 
-Confirm doesn't overwrite existing geotags, would matter if had already done in OM or for iPhone photos. Asked exiftool forum
+exiftool -geotag works. Confirm doesn't overwrite existing geotags (-if "not $gpslatitude"), would matter if had already done in OM or for iPhone photos. Asked exiftool forum
+
+Look at https://exiftool.org/geolocation.html when get to v
+
+7 hours to process 2920 images.
+
+Need to create a copy for OM only
