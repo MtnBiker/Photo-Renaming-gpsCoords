@@ -1,5 +1,9 @@
 #### Implementation notes
 
+Earlier version of this is at /Users/gscar/Documents/Ruby/Photo handling-Lumix/
+Too much cruft and very slow now. So will get rid of known cruft and anything not related to OM
+"Special use Ruby files" files will be deleted from this original project so not duped in new version
+
 GPS coords not being written to OM-1 files—maybe they are
 Is this error relevant?: 618. Finding all gps points from all the gpx files using gpsPhoto.pl. This may take a while.
 

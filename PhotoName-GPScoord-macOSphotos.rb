@@ -388,7 +388,7 @@ def fileAnnotate(fn, fileDateTimeOriginalstr, shootingMode, tzoLoc)
   # Nothing about shooting mode except: 
   subjectTrackingMode = fileEXIF.AISubjectTrackingMode
  
-  shootingMode = driveMode.split(',')[0] # driveMode = fileEXIF.DriveMode determined outside module
+  shootingMode = shootingMode.split(',')[0] # driveMode = fileEXIF.DriveMode determined outside module FIXME
   
   # matches = text.match(/\A(\w+),\s*(?=.*?Birds; Object Found)/)
   subjectTrackingModeOne = subjectTrackingMode.split(';')[0]
@@ -396,12 +396,12 @@ def fileAnnotate(fn, fileDateTimeOriginalstr, shootingMode, tzoLoc)
    else
     puts "AISubjectTrackingMode not found."
   end
-  # Want original filename somewhere. And trying to add shooting modes such as SH1 although terms are different, eg DriveMode : Continuous Shooting 
-  fileEXIF.instructions = "Original: #{File.basename(fn)}. #{subjectTrackingModeOne}. #{subjectTrackingModeOne}. shootingMode: #{shootingMode}. "
+  # Want original filename somewhere. Show up in PreservedFileName in Mylio, but that field DOES NOT show up in Preview. And trying to add shooting modes such as SH1 although terms are different, eg DriveMode : Continuous Shooting 
+  fileEXIF.instructions = "#{File.basename(fn)}. subjectTrackingMode. #{subjectTrackingModeOne}. shootingMode: #{shootingMode}. "
   # fileEXIF.comment = "Capture date: #{fileDateTimeOriginalstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Doesn't show up in Aperture
   # puts "#{__LINE__}. fileEXIF.source: #{fileEXIF.source}.original file basename not getting written"
   # puts "#{File.basename(fn)} original filename to be written to EXIF.title"
-  fileEXIF.PreservedFileName = "#{File.basename(fn)}" # works but does not show up in Preview nor Mylio, but does in Mylio, so continue to also add to Instructions above
+  fileEXIF.PreservedFileName = "#{File.basename(fn)}" # works but does not show up in Preview, but does in Mylio, so continue to also add to Instructions above
   fileEXIF.TimeZoneOffset = tzoLoc # Time Zone Offset, (1 or 2 values: 1. The time zone offset of DateTimeOriginal from GMT in hours, 2. If present, the time zone offset of ModifyDate)
   # Am I misusing this? I may using it as the TimeZone for photos taken GMT 0 TODO
   # OffsetTimeOriginal	(time zone for DateTimeOriginal) which may or may not be the time zone the photo was taken in TODO
@@ -888,9 +888,9 @@ end
 timeNowWas = timeStamp(Time.now, lineNum) # Initializing. Later calls are different
 # timeNowWas = timeStamp(timeNowWas)
 Dir.each_child(folderGPX) {|x| puts "#{__LINE__}. GPX file available #{x}" } # Task “Custom Task” exited with a non-zero exit status: 1., but runs from 
+# puts "#{__LINE__}. (an alternative to the above): #{Dir.each_child(folderGPX}." # except causes and erro
 puts "\n#{__LINE__}. Are the gps logs needed listed above?\nin #{folderGPX}. Note 'not needed … is a folder'\n\n" # Should check for this since I don't see the message
 
-puts "#{__LINE__}. (an alternative to the above): #{Dir.each_child(folderGPX}. "
 
 # Two names for SD cards seem common. Is this needed anymore? Caused an error
 # unless File.directory?(srcSDfolder) # negative if, so if srcSDfolder exists skip, other wise change reference to …Alt
