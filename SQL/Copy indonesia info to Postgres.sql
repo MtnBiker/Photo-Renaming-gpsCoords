@@ -1,2 +1,0 @@
-﻿copy Indonesia(geonameid,name ,asciiname,alternatenames ,latitude ,longitude,featureclass ,featureCode,countrycode,cc2,admin1code ,admin2code ,admin3code ,admin4code ,population, elevation,dem,timezone ,moddate) 
-from '/Volumes/Daguerre/ID/ID.txt' null as '';

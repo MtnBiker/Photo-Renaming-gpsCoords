@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-
+ENV['PATH'] = '/opt/homebrew/bin:' + ENV['PATH']
 require 'open-uri'
 require 'rubygems'
 require 'mini_exiftool'
@@ -13,7 +13,7 @@ require 'mini_exiftool'
 # Fetch an external photo
 # filename = open(ARGV.first).path
 
-filename = "/Users/gscar/Pictures/_Photo Processing Folders/Watched folder for import to Photos/2024.03.30-16.49.18.gs.O.orf"
+filename = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/OM-1-2024/2024.03.30-16.49.18.gs.O.orf"
 photo = MiniExiftool.new filename
 
 puts "\nAll EXIF data follows:\n"
@@ -43,20 +43,20 @@ result = system 'exiftool -a -u -g2 "/Users/gscar/Pictures/_Photo Processing Fol
 puts "#{result}\n==================================================="
 
 puts "\n-EXIF:CreateDate:\n"
-system 'exiftool -EXIF:CreateDate  "/Users/gscar/Pictures/_Photo Processing Folders/Watched folder for import to Photos/2024.03.25-16.09.59.gs.O.orf"'
+system 'exiftool -EXIF:CreateDate  "/Users/gscar/2024.03.25-16.09.59.gs.O.orf"'
 puts "==================================================="
 
 puts "\n-EXIF:DriveMode ():\n"
-system 'exiftool -EXIF:DriveMode "/Users/gscar/Pictures/_Photo Processing Folders/Watched folder for import to Photos/2024.03.25-16.09.59.gs.O.orf"'
+system 'exiftool -EXIF:DriveMode "/Users/gscar/2024.03.25-16.09.59.gs.O.orf"'
 puts "==================================================="
 
-filename = "/Users/gscar/Pictures/_Photo Processing Folders/Watched folder for import to Photos/2024.03.25-16.09.59.gs.O.orf"
+filename = "/Users/gscar/2024.03.25-16.09.59.gs.O.orf"
 puts "\n-EXIF:DriveMode for #{filename}:\n"
-system 'exiftool -EXIF:DriveMode "/Users/gscar/Pictures/_Photo Processing Folders/Watched folder for import to Photos/2024.03.25-16.09.59.gs.O.orf"'
+system 'exiftool -EXIF:DriveMode "/Users/gscar/2024.03.25-16.09.59.gs.O.orf"'
 puts "`DriveMode: Single Shot; Electronic shutter` is the result from command line"
 puts "==================================================="
 
-filename = "/Users/gscar/Pictures/_Photo Processing Folders/Watched folder for import to Photos/2024.03.25-16.09.59.gs.O.orf"
+filename = "/Users/gscar/2024.03.25-16.09.59.gs.O.orf"
 puts "\n-EXIF:DriveMode for #{filename}:\n"
-system 'exiftool -EXIF:DriveMode "/Users/gscar/Pictures/_Photo Processing Folders/Watched folder for import to Photos/2024.03.25-16.09.59.gs.O.orf"'
+system 'exiftool -EXIF:DriveMode "/Users/gscar/2024.03.25-16.09.59.gs.O.orf"'
 puts "==================================================="
