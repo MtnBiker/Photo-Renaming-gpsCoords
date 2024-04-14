@@ -372,7 +372,7 @@ def userCamCode(fn)
   return userCamCode
 end # userCamCode
 
-def fileAnnotate(fn, fileDateTimeOriginalstr, shootingMode, tzoLoc)
+def fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc)
   # Called from rename
   # writing original filename and dateTimeOrig to the photo file.
   fileEXIF = MiniExiftool.new(fn)
@@ -387,8 +387,9 @@ def fileAnnotate(fn, fileDateTimeOriginalstr, shootingMode, tzoLoc)
   # AISubjectTrackingMode : Birds; Object Not Found
   # Nothing about shooting mode except: 
   subjectTrackingMode = fileEXIF.AISubjectTrackingMode
- 
-  shootingMode = shootingMode.split(',')[0] # driveMode = fileEXIF.DriveMode determined outside module FIXME
+  
+  driveMode = fileEXIF.DriveMode
+  shootingMode = driveMode.split(',')[0] # will be added to below
   
   # matches = text.match(/\A(\w+),\s*(?=.*?Birds; Object Found)/)
   subjectTrackingModeOne = subjectTrackingMode.split(';')[0]
@@ -396,8 +397,21 @@ def fileAnnotate(fn, fileDateTimeOriginalstr, shootingMode, tzoLoc)
    else
     puts "AISubjectTrackingMode not found."
   end
+  
+  # To see if LiveND used add info to shootingMode. Not sure this is consistent
+  stackedImage = fileEXIF.StackedImage
+  puts "#{__LINE__}. StackedImage: #{stackedImage}"
+  # unless stackedImage == "No" skip if stackedImage == "No" # awkward for me
+  if stackedImage != "No"
+    puts "#{__LINE__}. StackedImage: #{stackedImage}"
+    shootingMode = stackedImage + " " + shootingMode
+    puts "#{__LINE__}. shootingMode + StackedImage: #{shootingMode}, and will be written to instructions as shootingMode"
+  else
+    puts "#{__LINE__}. StackedImage: #{stackedImage} and will not be written to instructions"
+  end
+  
   # Want original filename somewhere. Show up in PreservedFileName in Mylio, but that field DOES NOT show up in Preview. And trying to add shooting modes such as SH1 although terms are different, eg DriveMode : Continuous Shooting 
-  fileEXIF.instructions = "#{File.basename(fn)}. subjectTrackingMode. #{subjectTrackingModeOne}. shootingMode: #{shootingMode}. "
+  fileEXIF.instructions = "#{File.basename(fn)}. subjectTrackingMode. #{subjectTrackingModeOne}. shootingModes: #{shootingMode}. "
   # fileEXIF.comment = "Capture date: #{fileDateTimeOriginalstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Doesn't show up in Aperture
   # puts "#{__LINE__}. fileEXIF.source: #{fileEXIF.source}.original file basename not getting written"
   # puts "#{File.basename(fn)} original filename to be written to EXIF.title"
@@ -622,9 +636,9 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       fileDatePrev = fileDate
       fileExtPrev = fileExt
       # fileBaseNamePrev = fileBaseName
-      shootingMode = "shooting mode TBD"
+      # shootingMode = "shooting mode TBD"
 
-      fileAnnotate(fn, fileDateTimeOriginalstr, shootingMode, tzoLoc) # was passing fileEXIF, but saving wasn't happening, so reopen in the module?
+      fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc) # was passing fileEXIF, but saving wasn't happening, so reopen in the module?
 
       fnp = fnpPrev = src + fileBaseName + File.extname(fn).downcase # unless #Why was the unless here?
       # puts "Place holder to make the script work. where did the unless come from"
@@ -720,10 +734,18 @@ def exiftoolAddCoordinates(photoFolder, folderGPX, tzoLoc)
   puts "\n#{__LINE__}. Finding all gps points from all the gpx files using exiftool and adding GPS info to each photo file. This may take a while.\n"
   puts "#{__LINE__}.========= Beginning of  exiftool geotag ==========  #{Time.now.strftime("%I:%M:%S %p")}\n"
   gpxLogs = folderGPX + "/*.gpx" # to get multiple files in the folder
-  subcommands = "-overwrite_original -if \"not $gpslatitude\""
+  
+  puts "#{__LINE__}. Don't build a command line as a string. For example: system('exiftool', '-Camera:DriveMode', filename). Similar approaches work with Open3. If you do it like that then you won't launch a shell and you won't have to deal with the shell's quoting and escaping problems\n, if you give at least one argument besides the program name to the function, the shell is not invoked."
+  
+  # subcommands = "-overwrite_original -if 'not $gpslatitude'"
   # Ignored superfluous tag name or invalid option: -overwrite_original -if 'not $gpslatitude'
-  exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "-overwrite_original -if 'not $gpslatitude'") # returns true or?
-  # exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "#{subcommands}") # if the above doesn't work
+  # exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "-overwrite_original -if 'not $gpslatitude'") # returns true or?
+  # exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "#{subcommands}") # Invalid TAG name: "overwrite_original -if 'not $gpslatitude'" / Ignored superfluous tag name or invalid option: -overwrite_original -if 'not $gpslatitude'
+  # exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "-overwrite_original -if not $gpslatitude") # Invalid TAG name: "overwrite_original -if not $gpslatitude" as expected
+  # exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "-overwrite_original", " -if 'not $gpslatitude'") # No matching file found for -geotag option
+  # exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "-overwrite_original -if " , "'not $gpslatitude'") #Invalid TAG name: "overwrite_original -if " / No matching file found for -geotag option
+  puts "\n#{__LINE__}. Any existing geotags will be overwritten until I can figure out how to add -if 'not $gpslatitude')"
+  exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "-overwrite_original") # will overwrite existing tags
   puts "#{__LINE__}. exiftool geotag finished #{Time.now.strftime("%I:%M:%S %p")}"
   puts "\n#{__LINE__}======== End of exiftool geotag ==========  #{Time.now.strftime("%I:%M:%S %p")}\n"
   # return exiftoolGps # return is true unless want to get the notes, but they show in script results

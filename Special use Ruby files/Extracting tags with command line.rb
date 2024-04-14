@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# Presumably trying to debug problems with exiftool and mini_exiftool
 ENV['PATH'] = '/opt/homebrew/bin:' + ENV['PATH']
 require 'open-uri'
 require 'rubygems'

@@ -1,0 +1,16 @@
+{
+  "actions" : {
+    "run" : {
+      "enabled" : true,
+      "path" : "Special use Ruby files\/exiftool.Shell Script.Blanks.rb",
+      "postActions" : [
+        {
+          "script" : "#!\/usr\/bin\/env ruby\n\"Special use Ruby files\/exiftool.Shell Script.Blanks.rb\"",
+          "type" : "runScript"
+        }
+      ],
+      "shell" : "\/Users\/gscar\/.rubies\/ruby-3.3.0\/bin\/ruby"
+    }
+  },
+  "openLogOnRun" : "start"
+}

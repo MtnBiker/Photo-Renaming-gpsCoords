@@ -1,18 +1,19 @@
 {
   "actions" : {
     "build" : {
-      "path" : "PhotoName-GPScoord-macOSphotos.rb",
-      "shell" : "\/usr\/bin\/env ruby"
+      "enabled" : true,
+      "shell" : "\/.rubies\/ruby-3.3.0\/bin\/ruby"
     },
     "run" : {
       "enabled" : true,
-      "path" : "\/Volumes\/Mac Mini HD\/Users\/gscar\/Documents\/Ruby\/Photo handling\/PhotoName-GPScoord-macOSphotos.rb",
+      "path" : "PhotoName-GPScoord-macOSphotos.rb",
       "postActions" : [
         {
           "script" : "PhotoName-GPScoord-macOSphotos.rb",
           "type" : "runScript"
         }
-      ]
+      ],
+      "shell" : "\/Users\/gscar\/.rubies\/ruby-3.3.0\/bin\/ruby"
     }
   },
   "openLogOnRun" : "start"

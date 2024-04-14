@@ -2,7 +2,7 @@
 # Was exiftool. Shell Script.rb. Was getting too messy, so started over here with comments from
 # https://stackoverflow.com/questions/78257612/how-to-introduce-a-filename-into-shell-script-in-ruby-script
 # Set the PATH to include the Homebrew bin directory
-ENV['PATH'] = '/opt/homebrew/bin:' + ENV['PATH']
+ENV['PATH'] = '/opt/homebrew/bin:' + ENV['PATH'] # Doesn't work in TM on macMini without this. Does work on macMini command line with or without this and `which exiftool` is the same: /opt/homebrew/bin/exiftool
 require "Open3"
 puts "#{__LINE__}. system 'ruby -v'. Although I think it's the one in the top right that is what's running in TextMate"
 system 'ruby -v'
@@ -50,6 +50,15 @@ driveMode = system('exiftool', '-Camera:DriveMode', filename)
 specialMode = system('exiftool', '-Camera:SpecialMode', filename)
 stackedImage  = system('exiftool', '-Camera:StackedImage', filename)
 puts "driveMode: #{driveMode}. specialMode: #{specialMode}. stackedImage: #{stackedImage}."
+
+
+puts "\n#{__LINE__}. LiveND:"
+filename = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/OM-1-2024/2024.04.14-12.28.57.gs.O.jpg"
+driveMode = system('exiftool', '-Camera:DriveMode', filename)
+specialMode = system('exiftool', '-Camera:SpecialMode', filename)
+stackedImage  = system('exiftool', '-Camera:StackedImage', filename)
+puts "driveMode: #{driveMode}. specialMode: #{specialMode}. stackedImage: #{stackedImage}."
+puts "#{__LINE__}. LiveND: #{filename}"
 
 puts "\nStacked image must mean stacked in camera, not a frame of a stacked image. Don't have lens to do stacked image in camera now. Just looking for possible values to use in sorting photos into categories"
 
