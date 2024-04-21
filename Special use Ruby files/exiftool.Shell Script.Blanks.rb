@@ -12,7 +12,7 @@ puts "Preliminary info ===================================================\n\n"
 
 puts "#{__LINE__}. Don't build a command line as a string. For example: system('exiftool', '-Camera:DriveMode', filename). Similar approaches work with Open3. If you do it like that then you won't launch a shell and you won't have to deal with the shell's quoting and escaping problems, see the docs I linked to above.\n, if you give at least one argument besides the program name to the function, the shell is not invoked."
 
-filename = "/Users/gscar/Pictures/_Photo Processing Folders/Watched folder for import to Photos/2024.03.30-16.48.45.gs.O.orf"
+filename = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/OM-1-2024/2024.04.20-12.27.58.gs.O.jpg"
 
 system('exiftool', '-Camera:DriveMode', filename)
 

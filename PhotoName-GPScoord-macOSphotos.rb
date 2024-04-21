@@ -292,7 +292,7 @@ def mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArra
     if itemExt.downcase == ".jpg" && filterEffect != "Expressive" # Expressive is default, so not much of an effect, but may need to change this
       fnt = tempJpg + item
       FileUtils.copy(fn, fnt)
-      puts "#{__LINE__}. #{Time.now.strftime("%I:%M:%S %p")}. #{fn} to be staged since filterEffect is #{filterEffect} or OM-1 without support for orf yet."
+      puts "#{__LINE__}. #{File.basename(fn)} staged since filterEffect is #{filterEffect} or OM-1 without support for orf yet."
     end
 
     # if two jpgs in a row, then no associated raw, therefore stage
@@ -381,42 +381,45 @@ def fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc)
   else
     tzoLocPrint = "+" + tzoLoc.to_s
   end
-  # fileEXIF.instructions = "#{fileDateTimeOriginalstr} #{tzoLocPrint}. Sept-Oct. zone was wrong" if !fileEXIF.DateTimeStamp # Time zone of photo is GMT #{tzoLoc} unless TS5?" or travel. TODO find out what this field is really for
-  # Birds, shooting mode
-  # AFPointDetails : Birds; Face Priority; AF on Half Press; No Eye-AF; Face Detection; With MF; AF Priority; No Object found; S-AF
-  # AISubjectTrackingMode : Birds; Object Not Found
-  # Nothing about shooting mode except: 
-  subjectTrackingMode = fileEXIF.AISubjectTrackingMode
   
   driveMode = fileEXIF.DriveMode
   shootingMode = driveMode.split(',')[0] # will be added to below
   
+  # Birds, shooting mode
+  # AFPointDetails : Birds; Face Priority; AF on Half Press; No Eye-AF; Face Detection; With MF; AF Priority; No Object found; S-AF
+  # AISubjectTrackingMode : Birds; Object Not Found
+  # Nothing about shooting mode except below and now StackedImage: 
+  
+  subjectTrackingMode = fileEXIF.AISubjectTrackingMode
   # matches = text.match(/\A(\w+),\s*(?=.*?Birds; Object Found)/)
   subjectTrackingModeOne = subjectTrackingMode.split(';')[0]
-   if subjectTrackingModeOne
-   else
+  if subjectTrackingModeOne
+    shootingMode = "STM: " + subjectTrackingModeOne + " " + shootingMode
+  else
     puts "AISubjectTrackingMode not found."
   end
   
   # To see if LiveND used add info to shootingMode. Not sure this is consistent
   stackedImage = fileEXIF.StackedImage
-  puts "#{__LINE__}. StackedImage: #{stackedImage}"
+  # puts "#{__LINE__}. StackedImage: #{stackedImage}"
   # unless stackedImage == "No" skip if stackedImage == "No" # awkward for me
   if stackedImage != "No"
-    puts "#{__LINE__}. StackedImage: #{stackedImage}"
+    # puts "#{__LINE__}. StackedImage: #{stackedImage}"
     shootingMode = stackedImage + " " + shootingMode
-    puts "#{__LINE__}. shootingMode + StackedImage: #{shootingMode}, and will be written to instructions as shootingMode"
+    # puts "#{__LINE__}. shootingMode + StackedImage: #{shootingMode}, and will be written to instructions as shootingMode"
   else
-    puts "#{__LINE__}. StackedImage: #{stackedImage} and will not be written to instructions"
+    # puts "#{__LINE__}. StackedImage: #{stackedImage} and will not be written to instructions"
   end
   
   # Want original filename somewhere. Show up in PreservedFileName in Mylio, but that field DOES NOT show up in Preview. And trying to add shooting modes such as SH1 although terms are different, eg DriveMode : Continuous Shooting 
-  fileEXIF.instructions = "#{File.basename(fn)}. subjectTrackingMode. #{subjectTrackingModeOne}. shootingModes: #{shootingMode}. "
-  # fileEXIF.comment = "Capture date: #{fileDateTimeOriginalstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Doesn't show up in Aperture
-  # puts "#{__LINE__}. fileEXIF.source: #{fileEXIF.source}.original file basename not getting written"
-  # puts "#{File.basename(fn)} original filename to be written to EXIF.title"
+  # fileEXIF.instructions = "#{File.basename(fn)}. subjectTrackingMode. #{subjectTrackingModeOne}. shootingModes: #{shootingMode}.
+  fileEXIF.instructions = "#{File.basename(fn,".*")}. STM:#{subjectTrackingModeOne}. SM:#{shootingMode}" # less info but shorter
+  fileEXIF.comment = "Capture date: #{fileDateTimeOriginalstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Try in Mylio. Doesn't show up in Aperture
+  # fileEXIF.ImageDescription = "Testing to see if ImageDescription is written and visible in Mylio" # Is written to "Caption" field in Mylio, so not good for general use
   fileEXIF.PreservedFileName = "#{File.basename(fn)}" # works but does not show up in Preview, but does in Mylio, so continue to also add to Instructions above
   fileEXIF.TimeZoneOffset = tzoLoc # Time Zone Offset, (1 or 2 values: 1. The time zone offset of DateTimeOriginal from GMT in hours, 2. If present, the time zone offset of ModifyDate)
+  fileEXIF.ShootingModeGVS = "driveMode: #{driveMode}" # Don't see in Mylio or Preview
+  fileEXIF.GPSStatus = "driveMode: #{driveMode}" # Commandeering something seemingly unused in OM. Didn't seem to get written. still blank. COMMENT OUT IF DOES NOT WORK
   # Am I misusing this? I may using it as the TimeZone for photos taken GMT 0 TODO
   # OffsetTimeOriginal	(time zone for DateTimeOriginal) which may or may not be the time zone the photo was taken in TODO
   # TODO write GMT time to
@@ -546,7 +549,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
     filtered = ""
     filterEffect = ""
     filterEffect = fileEXIF.FilterEffect
-    puts "#{__LINE__}. filterEffect: #{filterEffect}"
+    # puts "#{__LINE__}. filterEffect: #{filterEffect}" # For Lumix, doesn't exist on OMDS
     if File.extname(item).downcase == ".jpg" && filterEffect != "Expressive" && camModel != "OM-1MarkII" # Expressive is default, so not much of an effect, but may need to change this. OM-1 photos get caught up and they should not      filtered = "_display"
     end
 
@@ -615,7 +618,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
 
       match, shot_no = ""
 
-      puts "#{__LINE__}. fn: #{fn}. driveMode: #{driveMode}.\nspecialMode: #{specialMode} oneBack: #{oneBack} = true is two photos in same second. If true, oneBackTrue will be called."
+      # puts "#{__LINE__}. fn: #{fn}. driveMode: #{driveMode}.\nspecialMode: #{specialMode} oneBack: #{oneBack} = true is two photos in same second. If true, oneBackTrue will be called."
       # Maybe should enter if there is a shot no.
       match = driveMode.match(/Shot (\d{1,3})/) # Getting shot no. from `Continuous Shooting, Shot 12; Electronic shutter`
       shot_no = match[1].to_i if match
@@ -636,8 +639,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       fileDatePrev = fileDate
       fileExtPrev = fileExt
       # fileBaseNamePrev = fileBaseName
-      # shootingMode = "shooting mode TBD"
-
+    
       fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc) # was passing fileEXIF, but saving wasn't happening, so reopen in the module?
 
       fnp = fnpPrev = src + fileBaseName + File.extname(fn).downcase # unless #Why was the unless here?
@@ -994,6 +996,8 @@ if mylioStagingCount > 3
 end
 
 puts "\n#{__LINE__}. Initialization complete. File renaming and copying/moving beginning.\n        Time below is responding to options requests via Pashua if copying an SD card, otherwise the two times will be the same."
+puts "\n#{__LINE__}. When a gpx file starting with '202' is added to Downloads they are moved to GPX logs folder by an Automator Action named 'Move my gpx tracking to GPX logs.'"
+
 
 timeNowWas = timeStamp(timeNowWas, lineNum)
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# ENV['PATH'] = '/opt/homebrew/bin:' + ENV['PATH'] # 
+ENV['PATH'] = '/opt/homebrew/bin:' + ENV['PATH'] #
 require 'rubygems' # # Needed by rbosa, mini_exiftool, and maybe by appscript,  
 #require 'appscript' # needed by Appscript
 #include Appscript # aka rb-appscript
@@ -12,8 +12,8 @@ require 'mini_exiftool' # a wrapper for the Perl ExifTool
 #  Created by Greg Scarich on 2007-07-11.  Copyright (©) 2007. All rights reserved.
 
 
-fn = "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio/2019.08.05-10.49.54.gs.P.jpg"
-fn = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/OM-1-2024/2024.04.09-14.29.04.gs.O.jpg"
+# fn = "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio/2019.08.05-10.49.54.gs.P.jpg"
+fn = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/OM-1-2024/2024.04.20-12.27.58.gs.O.jpg"
 tagCount = 0 # existing
 totalTagCount = 0
 puts "All writable MiniExiftool tags for #{fn}"

@@ -17,8 +17,9 @@ include FileUtils
 
 fn = "/Users/gscar/Documents/◊ Pre-trash/galleryTest/Fonts Point Badlands Dry Stream.jpg"
 fn = "/Volumes/Daguerre/_Download folder/_imported-archive/P114-GX8/P1140931.RW2"
-# fn = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/OM-1-2024/2024.04.09-14.29.04.gs.O.jpg"
-fn = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/OM-1-2024/2024.04.14-12.28.57.gs.O.jpg" # LiveND
+fn = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/OM-1-2024/2024.04.09-14.29.04.gs.O.jpg"
+# fn = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/OM-1-2024/2024.04.14-12.28.57.gs.O.jpg" # LiveND
+fn = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/OM-1-2024/2024.04.10-09.30.54.gs.O.jpg" # out of focus
 
 puts "fn: #{fn}"
 puts "All readable MiniExifTool fields,i.e., MiniExiftool.new(fn)"
@@ -59,6 +60,7 @@ puts "TimeZoneOffset            #{photo.TimeZoneOffset}. 1. The time zone offset
 puts "OffsetTime                #{photo.OffsetTime}.          time zone for ModifyDate"
 puts "OffsetTimeOriginal        #{photo.OffsetTimeOriginal}.  time zone for DateTimeOriginal"
 puts "OffsetTimeDigitized	      #{photo.OffsetTimeDigitized}. time zone for CreateDate"
+
 subjectTrackingMode = photo.AISubjectTrackingMode
 puts "\nAISubjectTrackingMode     #{subjectTrackingMode}"
 if subjectTrackingMode.nil?
@@ -91,43 +93,43 @@ end
 # timeZoneOffset =  (photo.CreateDate - photo.DateTimeUTC)/3600
 timeZoneOffset = ""
 
-puts "\ntimeZoneOffset: #{timeZoneOffset} of class: #{timeZoneOffset.class}. Except can't calculate timeZoneOffset"
-puts "where timeZoneOffset = (photo.CreateDate - photo.TimeStamp)/3600"
-puts "WorldTimeLocation: #{photo.WorldTimeLocation}" # TimeInfo, PanasonicDateTime are null. WorldTimeLocation = Home eg
-puts "For GX8, this is using the fact that time is set to local, but the time zone can be specified"
+# puts "\ntimeZoneOffset: #{timeZoneOffset} of class: #{timeZoneOffset.class}. Except can't calculate timeZoneOffset"
+# puts "where timeZoneOffset = (photo.CreateDate - photo.TimeStamp)/3600"
+# puts "WorldTimeLocation: #{photo.WorldTimeLocation}" # TimeInfo, PanasonicDateTime are null. WorldTimeLocation = Home eg
+# puts "For GX8, this is using the fact that time is set to local, but the time zone can be specified"
+#
+# puts "\nTrying to strip time zone info"
+# puts "createDate.ctime:         #{photo.createDate.ctime} and this apparently does it"
+#
+# puts "\nCan a time zone be assigned?"
+# puts "Time.at(1582721899, in: \"+09:00\") "
+# createDateToI = photo.createDate.to_i
+# puts "\nphoto.createDate.to_i: #{createDateToI} of class #{createDateToI.class} and it's an integer"
+# # createDateToIZ = Time.at(createDateToI, in "+09:00")
+# puts "Time.at(createDateToI, in \"+09:00\"): can't do"
 
-puts "\nTrying to strip time zone info"
-puts "createDate.ctime:         #{photo.createDate.ctime} and this apparently does it" 
-
-puts "\nCan a time zone be assigned?"
-puts "Time.at(1582721899, in: \"+09:00\") "
-createDateToI = photo.createDate.to_i
-puts "\nphoto.createDate.to_i: #{createDateToI} of class #{createDateToI.class} and it's an integer"
-# createDateToIZ = Time.at(createDateToI, in "+09:00")
-puts "Time.at(createDateToI, in \"+09:00\"): can't do"
-
-puts "\nSince camera doesn't know about time zones, probably best to parse the response and convert back to the time zone desired"
-createDateToArray = photo.createDate.to_a
-puts "photo.createDate.to_a: #{createDateToArray}. [sec, min, hour, day, month, year, wday, yday, isdst, zone]"
-tz = "+09:00" # Forcing time zone, but for photos should be able to read from time zones file except I don't always get it right
-puts "Syntax: Time.new(2002, 10, 31, 2, 2, 2, \"+02:00\") #=> 2002-10-31 02:02:02 +0200"
-cda = createDateToArray # just so easier to read
-createDateToTz = Time.new(cda[5], cda[4], cda[3], cda[2], cda[1], cda[0], tz)
-puts "Time.new(cda[5], cda[4], cda[3], cda[2], cda[1], cda[0], tz): \n#{createDateToTz} \nwhere cda = createDateToArray = photo.createDate.to_a and tz: #{tz} set manually, and createDateToTz.class: #{createDateToTz.class}"
-puts "Stripping incorrect or arbitrary time zone from createDate, then adding the correct one"
+# puts "\nSince camera doesn't know about time zones, probably best to parse the response and convert back to the time zone desired"
+# createDateToArray = photo.createDate.to_a
+# puts "photo.createDate.to_a: #{createDateToArray}. [sec, min, hour, day, month, year, wday, yday, isdst, zone]"
+# tz = "+09:00" # Forcing time zone, but for photos should be able to read from time zones file except I don't always get it right
+# puts "Syntax: Time.new(2002, 10, 31, 2, 2, 2, \"+02:00\") #=> 2002-10-31 02:02:02 +0200"
+# cda = createDateToArray # just so easier to read
+# createDateToTz = Time.new(cda[5], cda[4], cda[3], cda[2], cda[1], cda[0], tz)
+# puts "Time.new(cda[5], cda[4], cda[3], cda[2], cda[1], cda[0], tz): \n#{createDateToTz} \nwhere cda = createDateToArray = photo.createDate.to_a and tz: #{tz} set manually, and createDateToTz.class: #{createDateToTz.class}"
+# puts "Stripping incorrect or arbitrary time zone from createDate, then adding the correct one"
 ### If set to local time TimeStamp is GMT
 
 
-puts "\n\nUNIX dates related to file"
-puts "File.mtime (last modified) :   #{File.mtime(fn)}"
-puts "File.ctime (status changed):   #{File.ctime(fn)}"
-puts "File.atime (last accessed) :   #{File.atime(fn)}"
+# puts "\n\nUNIX dates related to file"
+# puts "File.mtime (last modified) :   #{File.mtime(fn)}"
+# puts "File.ctime (status changed):   #{File.ctime(fn)}"
+# puts "File.atime (last accessed) :   #{File.atime(fn)}"
 
-puts
-puts ".minoltaDate Time: Don't know how to call them "        #{photo.MinoltaDate} #{MinoltaTime} # didn't work
-puts "AVI: dateTimeOriginal and FileModifyDate are the same for .avi. (Need to confirm whether they are shooting time or some other time)"
-puts "AVI: create date is blank"
-puts "Minolta .mov: "
+# puts
+# puts ".minoltaDate Time: Don't know how to call them "        #{photo.MinoltaDate} #{MinoltaTime} # didn't work
+# puts "AVI: dateTimeOriginal and FileModifyDate are the same for .avi. (Need to confirm whether they are shooting time or some other time)"
+# puts "AVI: create date is blank"
+# puts "Minolta .mov: "
 
 
 
