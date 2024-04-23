@@ -414,12 +414,13 @@ def fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc)
   # Want original filename somewhere. Show up in PreservedFileName in Mylio, but that field DOES NOT show up in Preview. And trying to add shooting modes such as SH1 although terms are different, eg DriveMode : Continuous Shooting 
   # fileEXIF.instructions = "#{File.basename(fn)}. subjectTrackingMode. #{subjectTrackingModeOne}. shootingModes: #{shootingMode}.
   fileEXIF.instructions = "#{File.basename(fn,".*")}. STM:#{subjectTrackingModeOne}. SM:#{shootingMode}" # less info but shorter
-  fileEXIF.comment = "Capture date: #{fileDateTimeOriginalstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Try in Mylio. Doesn't show up in Aperture
+  puts "#{__LINE__}. not getting written? fileEXIF.instructions: #{fileEXIF.instructions}"
+  # fileEXIF.comment = "Capture date: #{fileDateTimeOriginalstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Mo show in Mylio or Preview. Does get written
+  # fileEXIF.UserComment = "UserComment. Is this different that Comment. Preview as Exif UserComment. Doesn't show up in Mylio"
+  # fileEXIF.ImageDescription = "ImageDescription. Shows up in Preview. Mylio as Caption, so not good for general use"
   # fileEXIF.ImageDescription = "Testing to see if ImageDescription is written and visible in Mylio" # Is written to "Caption" field in Mylio, so not good for general use
   fileEXIF.PreservedFileName = "#{File.basename(fn)}" # works but does not show up in Preview, but does in Mylio, so continue to also add to Instructions above
   fileEXIF.TimeZoneOffset = tzoLoc # Time Zone Offset, (1 or 2 values: 1. The time zone offset of DateTimeOriginal from GMT in hours, 2. If present, the time zone offset of ModifyDate)
-  fileEXIF.ShootingModeGVS = "driveMode: #{driveMode}" # Don't see in Mylio or Preview
-  fileEXIF.GPSStatus = "driveMode: #{driveMode}" # Commandeering something seemingly unused in OM. Didn't seem to get written. still blank. COMMENT OUT IF DOES NOT WORK
   # Am I misusing this? I may using it as the TimeZone for photos taken GMT 0 TODO
   # OffsetTimeOriginal	(time zone for DateTimeOriginal) which may or may not be the time zone the photo was taken in TODO
   # TODO write GMT time to
@@ -797,7 +798,18 @@ end
 ## The "PROGRAM" ############ ##################### ###################### ##################### ##########################
 timeNowWas = timeStamp(Time.now, lineNum) # Initializing. Later calls are different
 # timeNowWas = timeStamp(timeNowWas)
-Dir.each_child(folderGPX) {|x| puts "#{__LINE__}. GPX file available #{x}" } # Task “Custom Task” exited with a non-zero exit status: 1., but runs from 
+
+puts "\n#{__LINE__}. GPS file available for adding coordinates to photos"
+# Was Dir.each_child(folderGPX) {|x| puts "#{__LINE__}. GPX file available #{x}" }
+Dir.each_child(folderGPX) do |item| # for each photo file
+  # next if ignoreNonFiles(item) == true # skipping file when true, i.e., not a file or xmp
+  # next if item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon ' or item.slice(0,7) == ".MYLock" or item.slice(-4,4) == ".xmp"
+  # next if item.start_with?("20") # Skipping files that have already been renamed.
+  # next if item.end_with?("xmp") # Skipping .xmp files in Mylio and elsewhere. The files may become orphans. should be included in ignoreNonFiles
+  puts "#{__LINE__}. GPX file available #{item}"
+end
+
+
 # puts "#{__LINE__}. (an alternative to the above): #{Dir.each_child(folderGPX}." # except causes and erro
 puts "\n#{__LINE__}. Are the gps logs needed listed above?\nin #{folderGPX}. Note 'not needed … is a folder'\n\n" # Should check for this since I don't see the message
 

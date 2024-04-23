@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-
+ENV['PATH'] = '/opt/homebrew/bin:' + ENV['PATH'] # Doesn't work in TM on macMini without this.
 # Works for single file or directory. 
 # Caution: original file is being changed
 # Mylio picks up the changes.
@@ -10,14 +10,15 @@
 # src = "/Users/gscar/Pictures/Epson V600 scans/" # Keeping as a frequently used folder
 # src = "/Users/gscar/Mylio/2012/New Folder With Items/"
 # src = "/Users/gscar/Doc iMac only/City Directories/1910-19 Los Angeles City Directories/1918 Los Angeles City Directory/"
-src = "/Users/gscar/Mylio/Mylio Main Library Folder/1999/China Scans-1999/1999-China-13/"
+src = "/Users/gscar/Mylio/Mylio Main Library Folder/Missing photos Categorized as Private.pdf"
+src = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/Las Piletas Team Photo One.jpg"
 
 # Making it easier (less error prone) to change the date
-year = "1999" # 1898
-month =  "09" # 01
-day =    "04" # 01
-hour =   "12" # "00"
-minute = "00" # "00"
+year = "2024" # 1898
+month =  "04" # 01
+day =    "10" # 01
+hour =   "14" # "00"
+minute = "02" # "00"
 second = "00" # "00"
 
 date_partial = "#{year}:#{month}:#{day} 00:00:00" # Time set is UTC relative to here, slightly better if could make midnight UTC FIXME
