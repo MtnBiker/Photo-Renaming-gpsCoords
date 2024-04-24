@@ -11,7 +11,7 @@ include Pashua
 
 # This file is called first. If GPS info is to be added gpsYesPashua is then called from the main script
 
-def whichLoc()  
+def whichLoc(sdCard)  
   # Need a symlink to Pashua in this folder too, include and require moved to top
 
   $:.push(File.dirname($0))
@@ -33,7 +33,7 @@ whichDrive.type = radiobutton
 whichDrive.label = Do you want photos on an SD card or already copied to the hard drive?
 whichDrive.width = 310
 
-whichDrive.option = SD card to be selected in the next window
+whichDrive.option = SD card to be selected in the next window. #{sdCard} is mounted.
 
 whichDrive.option = Already downloaded to a folder on a hard drive to be selected in the next window
 whichDrive.default = SD card to be selected in the next window

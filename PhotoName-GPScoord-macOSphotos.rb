@@ -52,7 +52,7 @@ def lineNum() # Had to move this to above the first call or it didn't work. Didn
 end # line numbers of this file, useful for debugging and logging info to progress screen
 
 photosArray = [] # can create initially, but I don't know how to add other "fields" to a file already on the list. I'll be better off with an indexed data base. I suppose could delete the existing item for that index and then put in revised. Not using this, but maybe some day
-sdCard = "No SD card mounted"
+sdCard = "No SD card" # mounted used in two different places and syntax may be weird
 if File.exist?("/Volumes/OM SYSTEM/") ||  File.exist?("/Volumes/OM SYSTEM 1/")
   sdCard      = "/Volumes/OM SYSTEM/"
   srcSDsuffix = "OMSYS"
@@ -414,7 +414,6 @@ def fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc)
   # Want original filename somewhere. Show up in PreservedFileName in Mylio, but that field DOES NOT show up in Preview. And trying to add shooting modes such as SH1 although terms are different, eg DriveMode : Continuous Shooting 
   # fileEXIF.instructions = "#{File.basename(fn)}. subjectTrackingMode. #{subjectTrackingModeOne}. shootingModes: #{shootingMode}.
   fileEXIF.instructions = "#{File.basename(fn,".*")}. STM:#{subjectTrackingModeOne}. SM:#{shootingMode}" # less info but shorter
-  puts "#{__LINE__}. not getting written? fileEXIF.instructions: #{fileEXIF.instructions}"
   # fileEXIF.comment = "Capture date: #{fileDateTimeOriginalstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Mo show in Mylio or Preview. Does get written
   # fileEXIF.UserComment = "UserComment. Is this different that Comment. Preview as Exif UserComment. Doesn't show up in Mylio"
   # fileEXIF.ImageDescription = "ImageDescription. Shows up in Preview. Mylio as Caption, so not good for general use"
@@ -799,10 +798,11 @@ end
 timeNowWas = timeStamp(Time.now, lineNum) # Initializing. Later calls are different
 # timeNowWas = timeStamp(timeNowWas)
 
-puts "\n#{__LINE__}. GPS file available for adding coordinates to photos"
+puts "\n#{__LINE__}. GPS file available for adding coordinates to photos."
+puts "Should see line 809 get written DEBG"
 # Was Dir.each_child(folderGPX) {|x| puts "#{__LINE__}. GPX file available #{x}" }
 Dir.each_child(folderGPX) do |item| # for each photo file
-  # next if ignoreNonFiles(item) == true # skipping file when true, i.e., not a file or xmp
+  next if ignoreNonFiles(item) == true # skipping file when true, i.e., not a file or xmp
   # next if item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon ' or item.slice(0,7) == ".MYLock" or item.slice(-4,4) == ".xmp"
   # next if item.start_with?("20") # Skipping files that have already been renamed.
   # next if item.end_with?("xmp") # Skipping .xmp files in Mylio and elsewhere. The files may become orphans. should be included in ignoreNonFiles
@@ -865,7 +865,7 @@ else
 end
 # Ask whether working with photo files from SD card or HD
 # fromWhere are the photos?
-fromWhere = whichLoc() # This is pulling in first Pashua window (1. ), SDorHD.rb which has been required # 
+fromWhere = whichLoc(sdCard) # This is pulling in first Pashua window (1. ), SDorHD.rb which has been required # 
 # puts "#{__LINE__}. fromWhere: #{fromWhere}" #{"rename"=>"1", "whichDrive"=>"SD card to be selected in the next window", "gpsLocation"=>"0", "gpsCoords"=>"0", "cb"=>"0"}
 # puts "\n#{__LINE__}. fromWhere[\"rename\"]: #{fromWhere["rename"]}"
 # puts "#{__LINE__}. fromWhere[\"gpsCoords\"]: #{fromWhere["gpsCoords"]}"
