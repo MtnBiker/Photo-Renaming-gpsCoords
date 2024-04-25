@@ -12,8 +12,7 @@
           "script" : "PhotoName-GPScoord-macOSphotos.rb",
           "type" : "runScript"
         }
-      ],
-      "shell" : "\/Users\/gscar\/.rubies\/ruby-3.3.0\/bin\/ruby"
+      ]
     }
   },
   "openLogOnRun" : "start"

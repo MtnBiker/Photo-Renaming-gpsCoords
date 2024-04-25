@@ -126,7 +126,7 @@ folderGPX = HOME + "Documents/GPS-Maps-docs/  GPX daily logs/2024 GPX logs/" # C
 puts "#{__LINE__}. Must manually set folderGPX for GPX file folders. Particularly important at start of new year AND if working on photos not in current year.\n       Using: #{folderGPX}\n"
 
 # MODULES
-def ignoreNonFiles(item) # invisible files or .xmp that shouldn't be processed
+def filesToIgnore(item) # invisible files or .xmp that shouldn't be processed
   item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon ' or item.slice(0,7) == ".MYLock" or item.slice(-4,4) == ".xmp"
 end
 
@@ -265,7 +265,7 @@ def mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArra
     # Item is the file name
     # puts "\n#{__LINE__}.. photoFinalCount: #{photoFinalCount + 1}. item: #{item}." # kind of a progress bar
     next if item == '.' or item == '..' or item == '.DS_Store'
-    # next if ignoreNonFiles(item) == true
+    # next if filesToIgnore(item) == true
 
     fn  = srcHD + item
     fnm = mylioStaging + item
@@ -520,16 +520,16 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
   seqLetter = %w(a b c d e f h i j k l m n o p q r s t u v w x y z aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt uu vv ww xx yy zz) # used when subsec doesn't exist, but failing for large sequences possible on OM-1, so maybe use sequential numbers, i.e., dupCount?. Yes
   # puts "#{__LINE__}. Entered rename and ready to enter foreach. src: #{src}"
   Dir.each_child(src) do |item| # for each photo file
-    next if ignoreNonFiles(item) == true # skipping file when true, i.e., not a file, with each_child, this is probably redundant.
+    next if filesToIgnore(item) == true # skipping file when true, i.e., not a file, with each_child, this is probably redundant.
     # puts "#{__LINE__}. File skipped because already renamed, i.e., the filename starts with 20xx #{item.start_with?("20")}"
     next if item.start_with?("20") # Skipping files that have already been renamed.
-    next if item.end_with?("xmp") # Skipping .xmp files in Mylio and elsewhere. The files may become orphans
+    # next if item.end_with?("xmp") # Skipping .xmp files in Mylio and elsewhere. The files may become orphans. In filesToIgnore
     # puts "#{__LINE__}. #{src} " # #{timeNowWas = timeStamp(timeNowWas)}
     # puts "#{__LINE__}. #{item} will be renamed. " # #{timeNowWas = timeStamp(timeNowWas)}
     fn = src + item # long file name
     fileEXIF = MiniExiftool.new(fn) # used several times
     # fileEXIF = Exif::Data.new(fn) # see if can just make this change, probably break something. 2017.01.13 doesn't work with Raw, but developer is working it.
-    camModel = fileEXIF.model
+    camModel = fileEXIF.model # this will in general be the same for each file and the returned value will be for the last file
 
     # To add display for Mylio. Don't think this is needed anymore
     # Generally jpgs are not added to Mylio, but if there is a filter effect want the jpg.
@@ -571,8 +571,8 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       # puts "#{__LINE__}. camModel: #{camModel}. fileEXIF.OffsetTimeOriginal: #{fileEXIF.OffsetTimeOriginal}"
       if camModel ==  "MISC" # MISC is for photos without fileDateTimeOriginal, e.g., movies
         # timeChange = 0
-       fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
-       # puts "#{__LINE__}. fileDateTimeOriginal #{fileDateTimeOriginal}. timeChange: #{timeChange} for #{camModel} meaning movies. DEBUG"
+        fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
+        # puts "#{__LINE__}. fileDateTimeOriginal #{fileDateTimeOriginal}. timeChange: #{timeChange} for #{camModel} meaning movies. DEBUG"
       elsif camModel == "iPhone X"  # DateTimeOriginal is in local time
         # timeChange = 0
         fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
@@ -673,7 +673,7 @@ def exiftoolAddCoordinates(photoFolder, folderGPX, tzoLoc)
     # This is only run once, so efficiency doesn't matter
     count = 0
     # puts "#{__LINE__}. item.slice(0,4): #{item.slice(-4,4)}" # debug for following
-    next if ignoreNonFiles(item)  # skipping file when true == true
+    next if filesToIgnore(item)  # skipping file when true == true
     fn = photoFolder + item
     fileEXIF = MiniExiftool.new(fn) # used several times
     camModel = fileEXIF.model
@@ -771,7 +771,7 @@ def moveToMylio(mylioStaging, mylioFolder, timeNowWas)
     fn  = mylioStaging + item # mylioStaging is now temporary destination, so nomenclature is weird
     fnp = mylioFolder + item
     # puts "#{__LINE__}.#{jpgsMovedCount += 1}. #{fn} moved to #{fnp}" # dubugging
-    next if ignoreNonFiles(item) == true # skipping file when . or ..
+    next if filesToIgnore(item) == true # skipping file when . or ..
     FileUtils.move(fn, fnp)
   end
   puts "Photos moved to Mylio folder, #{mylioFolder}, where they will automagically be imported into Mylio."
@@ -785,17 +785,15 @@ timeNowWas = timeStamp(Time.now, lineNum) # Initializing. Later calls are differ
 puts "\n#{__LINE__}. GPS file available for adding coordinates to photos. Note 'not needed … is a folder'"
 # Was Dir.each_child(folderGPX) {|x| puts "#{__LINE__}. GPX file available #{x}" }
 Dir.each_child(folderGPX) do |item| # for each photo file
-  next if ignoreNonFiles(item) == true # skipping file when true, i.e., not a file or xmp
+  next if filesToIgnore(item) == true # skipping file when true, i.e., not a file or xmp
   # next if item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon ' or item.slice(0,7) == ".MYLock" or item.slice(-4,4) == ".xmp"
   # next if item.start_with?("20") # Skipping files that have already been renamed.
-  # next if item.end_with?("xmp") # Skipping .xmp files in Mylio and elsewhere. The files may become orphans. should be included in ignoreNonFiles
+  # next if item.end_with?("xmp") # Skipping .xmp files in Mylio and elsewhere. The files may become orphans. should be included in filesToIgnore
   puts "GPX file available #{item}"
 end
 
-
 # puts "#{__LINE__}. (an alternative to the above): #{Dir.each_child(folderGPX}." # except causes and erro
 puts "\n#{__LINE__}. Are the gps logs needed listed above?\nin #{folderGPX}. Note 'not needed … is a folder'\n\n" # Should check for this since I don't see the message
-
 
 # Two names for SD cards seem common. Is this needed anymore? Caused an error
 # unless File.directory?(srcSDfolder) # negative if, so if srcSDfolder exists skip, other wise change reference to …Alt
@@ -822,9 +820,10 @@ end
  # puts "#{__LINE__}. Temporary for error checking. mylioStaging: #{mylioStaging}"
  # puts "# Won't run in Nova but does from command line: See line ~10 for command"
  # puts "#{__LINE__}. Temporary for error checking. mylioStaging: #{mylioStaging}.  File.exist?(mylioStaging): #{File.exist?(mylioStaging)}" 
- puts "\n#{__LINE__}. Crashing at next line in Nova, can run script TextMate or from command line:\n ruby \"/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb\""
+ # puts "\n#{__LINE__}. Crashing at next line in Nova, can run script TextMate or from command line:\n ruby \"/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb\""
  puts "#{__LINE__}. Logging errors for the offending command in NOVA.
   File is logfile.log in  #{__FILE__}\n"
+
  begin
   Dir.each_child(mylioStaging) {|x| puts "#{__LINE__}. File #{x} already in #{mylioStaging}. Tells which files need to be removed?" } # Task “Custom Task” exited with a non-zero exit status: 1., but runs from command line
  rescue => e
@@ -888,7 +887,7 @@ if fromWhere["gpsCoords"] == "1"
   # Use to find first photo in folder and get fileDateTimeOriginal
   fileDateTimeOriginal = ""
   Dir.each_child(srcGpsAdd) do |item| # for each photo file
-    next if ignoreNonFiles(item) == true # skipping file when true, i.e., not a file
+    next if filesToIgnore(item) == true # skipping file when true, i.e., not a file
     # puts "#{__LINE__}. File skipped because already renamed, i.e., the filename starts with 20xx #{item.start_with?("20")}"
     next if item.start_with?("20") # Skipping files that have already been renamed.
     next if item.end_with?("xmp") # Skipping .xmp files in Mylio and elsewhere. The files may become orphans
@@ -958,7 +957,7 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
 
 # Don't know if this is needed, why not use srcSD directly. src is used in copySD at ~lineNo 880
   src = srcSD
-  prefsPhoto = pPashua2(srcSD,lastPhotoFilename,mylioStaging,archiveFolder) # calling Photo_Handling_Pashua-SD. (Titled: 2. SD card photo downloading options)
+  prefsPhoto = pPashua2(srcSD,lastPhotoFilename,mylioStaging,archiveFolder) # calling Photo_Naming_Pashua-SD2. (Titled: 2. SD card photo downloading options)
   # to get a value use prefsPhoto("theNameInFileNamingEtcPashua.rb"), nothing to do with the name above
   # puts "Prefs as set by pPashua"
   # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
@@ -1046,7 +1045,7 @@ rename(tempJpg, timeZonesFile, timeNowWas, photosRenamedTo)
 #  Move the jpgs to mylioStaging (Latest Download)
 jpgsMovedCount = 0 # Initializing for debugging puts
 Dir.each_child(tempJpg) do |item|
-  next if ignoreNonFiles(item) == true
+  next if filesToIgnore(item) == true
   fn  = tempJpg   + item # sourced from temporary storage for jpgs 
   fnp = mylioStaging + item # new jpg file in Latest Download
   # puts "#{__LINE__}.#{jpgsMovedCount += 1}. #{fn} moved to #{fnp}" # dubugging
@@ -1079,9 +1078,9 @@ puts "\n#{__LINE__}.Finished with writing timeDiff. Now move files. Note that \"
 mylioFolder = HOME + "Mylio/Mylio Main Library Folder/2024/" # move to here unless one of the following
 case camModel
 when  "OM-1MarkII"
-  mylioFolder = HOME + mylioFolder + "OM-1-2024/" # ANNUALLY: ADD IN MYLIO, NOT IN FINDER. Good on both iMac and MBP M1 although it's not under iCloud, so requires Mylio for syncing. Not being used
+  mylioFolder = mylioFolder + "OM-1-2024/" # ANNUALLY: ADD IN MYLIO, NOT IN FINDER. Good on both iMac and MBP M1 although it's not under iCloud, so requires Mylio for syncing. Not being used
 when "DMC-GX8"
-  mylioFolder = HOME + mylioFolder + "GX8-2024/"
+  mylioFolder = mylioFolder + "GX8-2024/"
 end
 moveToMylio(mylioStaging, mylioFolder, timeNowWas)
 
