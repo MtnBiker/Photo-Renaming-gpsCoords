@@ -93,3 +93,5 @@ Look at https://exiftool.org/geolocation.html when get to v
 7 hours to process 2920 images.
 
 Need to create a copy for OM only
+
+Separating OM and Lumix since different fields written to. Some of the logic may be a mess

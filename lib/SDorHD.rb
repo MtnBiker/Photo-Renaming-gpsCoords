@@ -30,10 +30,10 @@ txt1.default = Select whether to copy photos from SD card or use the files alrea
 
 # Moving photos. I think the first letter is used later to select the option. So first letter must be unique
 whichDrive.type = radiobutton
-whichDrive.label = Do you want photos on an SD card or already copied to the hard drive?
+whichDrive.label = #{sdCard} is mounted. Do you want photos on an SD card or already copied to the hard drive?
 whichDrive.width = 310
 
-whichDrive.option = SD card to be selected in the next window. #{sdCard} is mounted.
+whichDrive.option = SD card to be selected in the next window. 
 
 whichDrive.option = Already downloaded to a folder on a hard drive to be selected in the next window
 whichDrive.default = SD card to be selected in the next window

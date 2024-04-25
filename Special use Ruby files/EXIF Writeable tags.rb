@@ -11,7 +11,7 @@ require 'mini_exiftool' # a wrapper for the Perl ExifTool
 
 # fn = "/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio/2019.08.05-10.49.54.gs.P.jpg"
 fn = "/Volumes/Daguerre/_Download folder/_imported-archive/0100-OM-1/O4223929.JPG" # Straight from camera
-fn = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/OM-1-2024/2024.04.22-09.58.50.gs.O.jpg"
+fn = "/Volumes/Daguerre/_Download folder/ Drag Photos HERE/P1230782.RW2"
 tagCount = 0 # existing
 totalTagCount = 0 # could exist
 puts "Tags with data? MiniExiftool tags for #{fn}"
@@ -24,7 +24,7 @@ MiniExiftool.writable_tags.sort.each do |tag|
     puts "#{tag}:         #{tagArray[tag]}"
     tagCount += 1
   else
-    puts "#{tag}. Empty or ?"
+    # puts "#{tag}. Empty or ?"
   end
   totalTagCount += 1
 end

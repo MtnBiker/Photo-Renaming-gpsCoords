@@ -52,7 +52,7 @@ def lineNum() # Had to move this to above the first call or it didn't work. Didn
 end # line numbers of this file, useful for debugging and logging info to progress screen
 
 photosArray = [] # can create initially, but I don't know how to add other "fields" to a file already on the list. I'll be better off with an indexed data base. I suppose could delete the existing item for that index and then put in revised. Not using this, but maybe some day
-sdCard = "No SD card" # mounted used in two different places and syntax may be weird
+sdCard = "######## No SD card ########" # mounted used in two different places and syntax may be weird
 if File.exist?("/Volumes/OM SYSTEM/") ||  File.exist?("/Volumes/OM SYSTEM 1/")
   sdCard      = "/Volumes/OM SYSTEM/"
   srcSDsuffix = "OMSYS"
@@ -112,13 +112,6 @@ tempJpg   = downloadsFolders + "Latest Downloads temp jpg/"
 archiveFolder  = downloadsFolders + "_imported-archive" # folder to move originals to if not done in. No slash because getting double slash with one
 srcRename = "/Volumes/Seagate 8TB Backup/Mylio_87103a/Greg Scarich’s iPhone Library/" # Frequent location to perfom this. iPhone photos brought into Mylio
 srcAddLocation  = downloadsFolders + "Latest Processed photos-Import to Mylio/" # = srcRename # Change to another location for convenience. This location picked so don't screw up a bunch of files
-
-# Mylio folder. Moved to this folder after all processing. Can't process in this folder or Mylio might add before this script's processing is finished. Processing is mainly done in mylioStaging. The following needs to change based on comments at line 79
-# Should computer be identified, then go from there?
-# watchedFolderForImport = HOME + "Pictures/_Photo Processing Folders/Watched folder for import to Photos/" # Used with Photos app
-
-# Set for OM, can I check for options depending on camera?
-mylioFolder = HOME + "Mylio/Mylio Main Library Folder/2024/OM-1-2024/" # ANNUALLY: ADD IN MYLIO, NOT IN FINDER. Good on both iMac and MBP M1 although it's not under iCloud, so requires Mylio for syncing. Not being used
 
 lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
 puts "#{__LINE__}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. ?? But it should stored on #{sdCard} card"
@@ -372,7 +365,7 @@ def userCamCode(fn)
   return userCamCode
 end # userCamCode
 
-def fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc)
+def fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc, camModel)
   # Called from rename
   # writing original filename and dateTimeOrig to the photo file.
   fileEXIF = MiniExiftool.new(fn)
@@ -382,39 +375,31 @@ def fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc)
     tzoLocPrint = "+" + tzoLoc.to_s
   end
   
-  driveMode = fileEXIF.DriveMode
-  shootingMode = driveMode.split(',')[0] # will be added to below
-  
+  # Getting OM details on shooting modes
   # Birds, shooting mode
   # AFPointDetails : Birds; Face Priority; AF on Half Press; No Eye-AF; Face Detection; With MF; AF Priority; No Object found; S-AF
   # AISubjectTrackingMode : Birds; Object Not Found
-  # Nothing about shooting mode except below and now StackedImage: 
-  
-  subjectTrackingMode = fileEXIF.AISubjectTrackingMode
-  # matches = text.match(/\A(\w+),\s*(?=.*?Birds; Object Found)/)
-  subjectTrackingModeOne = subjectTrackingMode.split(';')[0]
-  if subjectTrackingModeOne
+  # Nothing about shooting mode except below and now StackedImage:
+  if camModel == "OM-1MarkII"
+    puts "#{__LINE__}. camModel: #{camModel}. DEBUG"
+    driveMode = fileEXIF.DriveMode
+    shootingMode = driveMode.split(',')[0]
+    subjectTrackingMode = fileEXIF.AISubjectTrackingMode
+    subjectTrackingModeOne = subjectTrackingMode.split(';')[0]
     shootingMode = "STM: " + subjectTrackingModeOne + " " + shootingMode
-  else
-    puts "AISubjectTrackingMode not found."
-  end
-  
-  # To see if LiveND used add info to shootingMode. Not sure this is consistent
-  stackedImage = fileEXIF.StackedImage
-  # puts "#{__LINE__}. StackedImage: #{stackedImage}"
-  # unless stackedImage == "No" skip if stackedImage == "No" # awkward for me
-  if stackedImage != "No"
-    # puts "#{__LINE__}. StackedImage: #{stackedImage}"
+    # To see if LiveND used add info to shootingMode. Not sure this is consistent
+    stackedImage = fileEXIF.StackedImage
     shootingMode = stackedImage + " " + shootingMode
-    # puts "#{__LINE__}. shootingMode + StackedImage: #{shootingMode}, and will be written to instructions as shootingMode"
+    fileEXIF.instructions = "#{File.basename(fn,".*")}. STM:#{subjectTrackingModeOne}. SM:#{shootingMode}" # less info but shorter
   else
-    # puts "#{__LINE__}. StackedImage: #{stackedImage} and will not be written to instructions"
+    shootingMode = "" # all other cameras. Next line probably negates the need for this
+    fileEXIF.instructions = "#{File.basename(fn)}"
+    puts "#{__LINE__}. camModel: #{camModel}. fileEXIF.instructions: #{fileEXIF.instructions} DEBUG"
   end
-  
+   
   # Want original filename somewhere. Show up in PreservedFileName in Mylio, but that field DOES NOT show up in Preview. And trying to add shooting modes such as SH1 although terms are different, eg DriveMode : Continuous Shooting 
   # fileEXIF.instructions = "#{File.basename(fn)}. subjectTrackingMode. #{subjectTrackingModeOne}. shootingModes: #{shootingMode}.
-  fileEXIF.instructions = "#{File.basename(fn,".*")}. STM:#{subjectTrackingModeOne}. SM:#{shootingMode}" # less info but shorter
-  # fileEXIF.comment = "Capture date: #{fileDateTimeOriginalstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Mo show in Mylio or Preview. Does get written
+   # fileEXIF.comment = "Capture date: #{fileDateTimeOriginalstr} UTC. Time zone of photo is GMT #{tzoLoc}. Comment field" # Mo show in Mylio or Preview. Does get written
   # fileEXIF.UserComment = "UserComment. Is this different that Comment. Preview as Exif UserComment. Doesn't show up in Mylio"
   # fileEXIF.ImageDescription = "ImageDescription. Shows up in Preview. Mylio as Caption, so not good for general use"
   # fileEXIF.ImageDescription = "Testing to see if ImageDescription is written and visible in Mylio" # Is written to "Caption" field in Mylio, so not good for general use
@@ -453,33 +438,36 @@ def timeZone(fileDateTimeOriginal, timeZonesFile )
   # puts "#{__LINE__}. #{i}. fileDateTimeOriginal: #{fileDateTimeOriginal} fileDateTimeOriginal.class: #{fileDateTimeOriginal.class}. theTimeZone: #{theTimeZone}. "  return theTimeZone
 end # timeZone
 
-def oneBackTrue(fn, subSecExists, fileDate, driveMode, dupCount)
-  # puts "\n#{__LINE__}. Entered oneBackTrue(). DEBUG"
+def oneBackTrue(src, fn, fnp, fnpPrev, subSecExists, subSec, subSecPrev, fileDate, driveMode, dupCount, camModel)
+  # Some of these fields may not be needed, I was fighting the wrong problem and may have added some that aren't needed
+  # puts "\n#{__LINE__}. fn: #{fn}. fnp: #{fnp}. subSecExists: #{subSecExists}. fileDate: #{fileDate}. driveMode: #{driveMode}.  dupCount: #{dupCount}. in oneBackTrue(). DEBUG"
   dupCount += 1
   # Getting sequence no./shot no. for OM-1. DriveMode is "Single Shot; Electronic shutter" for normal photos
-  match = driveMode.match(/Shot (\d{1,3})/)
-  shot_no = match[1].to_i if match
-  
-  # driveMode = fileEXIF.DriveMode
-  # Also get the shooting mode from `Drive Mode : Focus Bracketing, Shot 6; Electronic shutter`
-  # matches = driveMode.match(/Drive Mode\s*:\s*([^,;]+)/)  
-  # if matches
-  #   shootingMode = matches[1].strip
-  #   puts "#{__LINE__}. shootingMode: #{shootingMode}. DEBUG"
-  # else
-  #   puts "#{__LINE__}. Shooting mode not found."
-  #   # shootingMode = "" # if necessary to prevent errors
-  # end
-  shootingMode = driveMode.split(',')[0]
-  # puts "#{__LINE__}. fn: #{fn}. driveMode: #{driveMode}. shot_no: #{shot_no}. shootingMode: #{shootingMode}. subSecExists: #{subSecExists}. fileDate: #{fileDate}. DEBUG"
+  unless driveMode.nil? || driveMode.empty? # opposite of if, therefore if driveMode is not empty
+    match = driveMode.match(/Shot (\d{1,3})/)
+    shot_no = match[1].to_i if match
+    
+    # driveMode = fileEXIF.DriveMode
+    # Also get the shooting mode from `Drive Mode : Focus Bracketing, Shot 6; Electronic shutter`
+    # matches = driveMode.match(/Drive Mode\s*:\s*([^,;]+)/)  
+    # if matches
+    #   shootingMode = matches[1].strip
+    #   puts "#{__LINE__}. shootingMode: #{shootingMode}. DEBUG"
+    # else
+    #   puts "#{__LINE__}. Shooting mode not found."
+    #   # shootingMode = "" # if necessary to prevent errors
+    # end
+    shootingMode = driveMode.split(',')[0]
+    # puts "#{__LINE__}. fn: #{fn}. driveMode: #{driveMode}. shot_no: #{shot_no}. shootingMode: #{shootingMode}. subSecExists: #{subSecExists}. fileDate: #{fileDate}. DEBUG"
+  end
   if subSecExists # mainly GX8. and maybe iPhone bursts
     fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  subSec + userCamCode(fn) # this doesn't happen for the first one in the same second.
     # puts "#{__LINE__}. fn: #{fn} in 'if subSecExists'.     fileBaseName: #{fileBaseName}. dupCount: #{dupCount}"
     if dupCount == 1
       # Can use old fileDate because it's the same and userCamCode. 
       fnp = src + fileDate.strftime("%Y.%m.%d-%H.%M.%S") + subSecPrev + userCamCode(fn)+  File.extname(fn).downcase
-      # puts "#{__LINE__}. We will relabel #{fnpPrev} to #{fnp} since it didn't get subSecPrev: #{subSecPrev}. dupCount: #{dupCount} "
-      File.rename(fnpPrev,fnp)
+      # puts "#{__LINE__}. We will relabel #{fnpPrev} to #{fnp} since it didn't get subSecPrev: #{subSecPrev}. dupCount: #{dupCount} DEBUG"
+      File.rename(fnpPrev, fnp) # File.rename(oldName, newName)
     end # if dup count
   end
   if shot_no.to_i > 0 # photos without subsecs. OM-1 but with shot number.
@@ -528,6 +516,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
   dupCount = 0
   count    = 1
   tzoLoc = ""
+  camModel = ""
   seqLetter = %w(a b c d e f h i j k l m n o p q r s t u v w x y z aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt uu vv ww xx yy zz) # used when subsec doesn't exist, but failing for large sequences possible on OM-1, so maybe use sequential numbers, i.e., dupCount?. Yes
   # puts "#{__LINE__}. Entered rename and ready to enter foreach. src: #{src}"
   Dir.each_child(src) do |item| # for each photo file
@@ -598,39 +587,33 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
 
       oneBack = fileDate == fileDatePrev && fileExt != fileExtPrev # at the moment this is meaningless because all of one type?
       
-      # mini_exiftool doesn't work for DriveMode. Comes up blank
-      # Let's try again and now it works
-      # driveModeMini = fileEXIF.DriveMode
-      # puts "#{__LINE__}. fn: #{fn}. driveModeMini: #{driveModeMini}. DEBUG" 
-      # # But if fixed, note that system captures the title too, so may have to modify
       #  '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'. This exists for OM-1 for at least some sequence shooting. Also: `SpecialMode                     : Fast, Sequence: 9, Panorama: (none)`
       # SpecialMode may be more useful since zero if not a sequence : Normal, Sequence: 0, Panorama: (none)
       # But DriveMode can tell what kind of sequence, although not sure that's needed in this script
-      # driveMode   = system('exiftool', '-Camera:DriveMode', fn) # returns true or false
-      # r, w = IO.pipe
-      # system('exiftool', '-Camera:DriveMode', fn, out: w)
-      # w.close
-      # driveMode = r.read
-      driveMode = fileEXIF.DriveMode
+     driveMode = fileEXIF.DriveMode # OMDS only, not in Lumix
 
       # Not using specialMode now, but as an option
-      specialMode = fileEXIF.SpecialMode
+      # specialMode = fileEXIF.SpecialMode
 
       match, shot_no = ""
 
       # puts "#{__LINE__}. fn: #{fn}. driveMode: #{driveMode}.\nspecialMode: #{specialMode} oneBack: #{oneBack} = true is two photos in same second. If true, oneBackTrue will be called."
       # Maybe should enter if there is a shot no.
-      match = driveMode.match(/Shot (\d{1,3})/) # Getting shot no. from `Continuous Shooting, Shot 12; Electronic shutter`
-      shot_no = match[1].to_i if match
-      # First photo in a sequence won't get -1 in oneBackTrue.
-      if shot_no.to_i == 1
-        fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no.to_s + userCamCode(fn)
-        puts "#{__LINE__}. Because this was the first in a sequence a `1` was added to the filename for #{fileBaseName}. DEBUG"
+      unless driveMode.nil? || driveMode.empty? # opposite of if, therefore if driveMode is not empty
+        match = driveMode.match(/Shot (\d{1,3})/) # Getting shot no. from `Continuous Shooting, Shot 12; Electronic shutter`
+        shot_no = match[1].to_i if match
+        # First photo in a sequence won't get -1 in oneBackTrue.
+        if shot_no.to_i == 1
+          fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no.to_s + userCamCode(fn)
+          puts "#{__LINE__}. Because this was the first in a sequence a `1` was added to the filename for #{fileBaseName}. DEBUG"
+        end
       end
-        
-      if oneBack || match # Two photos in same second? Not sure this is working
-        fileBaseName = oneBackTrue(fn, subSecExists, fileDate, driveMode, dupCount)
+      # puts "#{__LINE__}. oneBack: #{oneBack}. match: #{match}. DEBUG"
+      if oneBack # || match # Two photos in same second? Not sure this is working. match is empty, then evaluates to true
+        puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match}. DEBUG"
+        fileBaseName =oneBackTrue(src, fn, fnp, fnpPrev, subSecExists, subSec, subSecPrev, fileDate, driveMode, dupCount, camModel)
       else # normal condition that this photo is at a different time than previous photo
+        puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match}. DEBUG"
         dupCount = 0 # resets dupCount after having a group of photos in the same second
         fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S")  + userCamCode(fn) + filtered
         # puts "#{__LINE__}. item: #{item} is at different time as previous.    fileBaseName: #{fileBaseName}"
@@ -640,7 +623,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       fileExtPrev = fileExt
       # fileBaseNamePrev = fileBaseName
     
-      fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc) # was passing fileEXIF, but saving wasn't happening, so reopen in the module?
+      fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc, camModel) # was passing fileEXIF, but saving wasn't happening, so reopen in the module?
 
       fnp = fnpPrev = src + fileBaseName + File.extname(fn).downcase # unless #Why was the unless here?
       # puts "Place holder to make the script work. where did the unless come from"
@@ -663,7 +646,8 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
     
   end # 2. Dir.each_child(src)
   # puts "#{__LINE__}.  A log of photo file renaming is at #{photoRenamed}. For debugging uncomment the line about 3 lines below to get the list in the running log."
-  return tzoLoc # the time zone the picture was taken in,
+   # tzoLoc the time zone the picture was taken in,
+  {tzoLoc: tzoLoc, camModel: camModel} #return
 end # rename ing photo files in the downloads folder and writing in original time.
 
 
@@ -737,7 +721,7 @@ def exiftoolAddCoordinates(photoFolder, folderGPX, tzoLoc)
   puts "#{__LINE__}.========= Beginning of  exiftool geotag ==========  #{Time.now.strftime("%I:%M:%S %p")}\n"
   gpxLogs = folderGPX + "/*.gpx" # to get multiple files in the folder
   
-  puts "#{__LINE__}. Don't build a command line as a string. For example: system('exiftool', '-Camera:DriveMode', filename). Similar approaches work with Open3. If you do it like that then you won't launch a shell and you won't have to deal with the shell's quoting and escaping problems\n, if you give at least one argument besides the program name to the function, the shell is not invoked."
+  # puts "#{__LINE__}. Don't build a command line as a string. For example: system('exiftool', '-Camera:DriveMode', filename). Similar approaches work with Open3. If you do it like that then you won't launch a shell and you won't have to deal with the shell's quoting and escaping problems\n, if you give at least one argument besides the program name to the function, the shell is not invoked."
   
   # subcommands = "-overwrite_original -if 'not $gpslatitude'"
   # Ignored superfluous tag name or invalid option: -overwrite_original -if 'not $gpslatitude'
@@ -798,15 +782,14 @@ end
 timeNowWas = timeStamp(Time.now, lineNum) # Initializing. Later calls are different
 # timeNowWas = timeStamp(timeNowWas)
 
-puts "\n#{__LINE__}. GPS file available for adding coordinates to photos."
-puts "Should see line 809 get written DEBG"
+puts "\n#{__LINE__}. GPS file available for adding coordinates to photos. Note 'not needed … is a folder'"
 # Was Dir.each_child(folderGPX) {|x| puts "#{__LINE__}. GPX file available #{x}" }
 Dir.each_child(folderGPX) do |item| # for each photo file
   next if ignoreNonFiles(item) == true # skipping file when true, i.e., not a file or xmp
   # next if item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon ' or item.slice(0,7) == ".MYLock" or item.slice(-4,4) == ".xmp"
   # next if item.start_with?("20") # Skipping files that have already been renamed.
   # next if item.end_with?("xmp") # Skipping .xmp files in Mylio and elsewhere. The files may become orphans. should be included in ignoreNonFiles
-  puts "#{__LINE__}. GPX file available #{item}"
+  puts "GPX file available #{item}"
 end
 
 
@@ -1050,8 +1033,12 @@ puts "\n#{__LINE__}. Rename [tzoLoc = rename(…)] the photo files with date and
 # tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # Second time this variable name is used, other is in a method
 # RENAME Raw
 puts "#{__LINE__}. mylioStaging: #{mylioStaging}. Renaming photo files with date-time. Failing with this call to rename()\n\n" # debugging
-tzoLoc = - rename(mylioStaging, timeZonesFile, timeNowWas, photosRenamedTo).to_i # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
 
+renameReturn = rename(mylioStaging, timeZonesFile, timeNowWas, photosRenamedTo) # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
+
+# tzoLoc, = means the first value in the array returned
+tzoLoc  = -renameReturn[:tzoLoc].to_i
+camModel = renameReturn[:camModel]
 timeNowWas = timeStamp(timeNowWas, lineNum)
 #Rename the jpgs and then move to Latest Download
 puts "\n#{__LINE__}. Rename the jpgs in #{tempJpg} and then move to #{mylioStaging}. #{timeNowWas}"
@@ -1088,7 +1075,14 @@ puts "\n#{__LINE__}.Finished with writing timeDiff. Now move files. Note that \"
 
 # Move to Mylio folder (can't process in this folder or Mylio might import before changes are made)
 # mylioFolder = watchedFolderForImport # Used with Photos app
-
+# Set for OM, can I check for options depending on camera?
+mylioFolder = HOME + "Mylio/Mylio Main Library Folder/2024/" # move to here unless one of the following
+case camModel
+when  "OM-1MarkII"
+  mylioFolder = HOME + mylioFolder + "OM-1-2024/" # ANNUALLY: ADD IN MYLIO, NOT IN FINDER. Good on both iMac and MBP M1 although it's not under iCloud, so requires Mylio for syncing. Not being used
+when "DMC-GX8"
+  mylioFolder = HOME + mylioFolder + "GX8-2024/"
+end
 moveToMylio(mylioStaging, mylioFolder, timeNowWas)
 
 # timeNowWas = timeStamp(timeNowWas, lineNum)
