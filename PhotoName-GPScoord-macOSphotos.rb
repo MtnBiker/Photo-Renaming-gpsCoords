@@ -1,9 +1,6 @@
 #!/usr/bin/env ruby
 # Set the PATH to include the Homebrew bin directory. 4/3/2024 problems with locating exiftool and this fixed it. Tried to do in .zshrc, but maybe needs a reboot? Doesn't help running in Nova
-ENV['PATH'] = '/opt/homebrew/bin:' + ENV['PATH']
-# Won't run in ruby-3.3.0
-# /Users/gscar/.rubies/ruby-3.2.2/bin/ruby added to Custom Task doesn't help for Nova
-# for macOS Photos. Mylio version exists.
+# ENV['PATH'] = '/opt/homebrew/bin:' + ENV['PATH'] Now working in 3.3.0
 # Folder names use Mylio and the ones for temporary use are fine. It's just the final location that matters. And I'm trying to move them to a folder that Photos.app will watch.
 # TODO camera time zones file is hard to maintain. Would a simple table or CSV be easier? Harder to setup for this Ruby script, but that's once
 
@@ -16,14 +13,16 @@ ENV['PATH'] = '/opt/homebrew/bin:' + ENV['PATH']
 # 2023 Clock Set is Setting camera to local time which will show as FileModifyDate, DateTimeOriginal, CreateDate, SubSecCreateDate…
 # TimeStamp will be offset according to camera setting for World Time which should be UTC if the zone matches the Clock Set
 # This may be wrong if those settings aren't updated or even worse if one is right and the other wrong
-puts "#{__LINE__}. Top of script. Setting variables and at about line no. 680 enter processing."
+puts "#{RUBY_DESCRIPTION} per var RUBY_DESCRIPTION. Ruby version seems to come from .irbrc if run in Nova"
+puts "#{__LINE__}. Top of script. Setting variables and defining methods, and at about line no. 780 enter processing. Search for `## The \"PROGRAM\"` to find that point"
+
 require 'fileutils'
 include FileUtils
 require 'find'
 require 'yaml'
 require "time"
 require 'irb' # binding.irb where error checking is desired
-require 'mini_exiftool'
+require 'mini_exiftool' # have to update for new versions of Ruby. Other gems seem to be OK
 # The following three requires are for geonames and then the class. Not using geonames
 # require 'json'
 # require 'open-uri'
@@ -52,6 +51,7 @@ def lineNum() # Had to move this to above the first call or it didn't work. Didn
 end # line numbers of this file, useful for debugging and logging info to progress screen
 
 photosArray = [] # can create initially, but I don't know how to add other "fields" to a file already on the list. I'll be better off with an indexed data base. I suppose could delete the existing item for that index and then put in revised. Not using this, but maybe some day
+
 sdCard = "######## No SD card ########" # mounted used in two different places and syntax may be weird
 if File.exist?("/Volumes/OM SYSTEM/") ||  File.exist?("/Volumes/OM SYSTEM 1/")
   sdCard      = "/Volumes/OM SYSTEM/"
@@ -66,17 +66,20 @@ else
 end
 
 if sdCard == "No SD card mounted"
-  puts "#{__LINE__}. Could be a problem with differently named SD cards: #{sdCard}. If the name is different, change #{lineNum.to_i - 1}" # In 2022, I got creative and named the LUMIX cards with a suffix in numerical order.
+  puts "#{__LINE__}. Could be a problem with differently named SD cards: #{sdCard}. If the name is different, change #{__LINE__.to_i - 1}" # In 2022, I got creative and named the LUMIX cards with a suffix in numerical order.
 else
-  lastPhotoReadTextFile = sdCard + "/DCIM/" # SD folder alternate since both this and one below occur
-  sdCardAlt   = "/Volumes/NO NAME/"
-  srcSDfolderAlt = sdCardAlt + "DCIM/" # SD folder alternate since both this and one below occur. Used at line 740
+  # Not sure what the following is about, but I've made a mess of this
+  # lastPhotoReadTextFile = sdCard + "/DCIM/" # SD folder alternate since both this and one below occur
+  # sdCardAlt   = "/Volumes/NO NAME/"
+  # srcSDfolderAlt = sdCardAlt + "DCIM/" # SD folder alternate since both this and one below occur. Used at line 740
+  # srcSDfolder = sdCard + "DCIM/"  # SD folder
+  
+  # lastPhotoReadTextFile = sdCard # I don't think this is needed here anymore # + "/DCIM/" # SD folder alternate since both this and one below occur
+  # Not being used, maybe needed to deal with Lumix, but not carried out successfully or solved with lines 54ff
+  # sdCardAlt   = "/Volumes/NO NAME/" # only used in the line below
+  # srcSDfolderAlt = sdCardAlt + "DCIM/" # SD folder alternate since both this and one below occur. Used at line 740
   srcSDfolder = sdCard + "DCIM/"  # SD folder 
-  lastPhotoReadTextFile = sdCard + "/DCIM/" # SD folder alternate since both this and one below occur
-  sdCardAlt   = "/Volumes/NO NAME/"
-  srcSDfolderAlt = sdCardAlt + "DCIM/" # SD folder alternate since both this and one below occur. Used at line 740
-  srcSDfolder = sdCard + "DCIM/"  # SD folder 
-  puts "#{__LINE__}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. If script failing may need to change the last file read to 0000 if folder change"
+  # puts "#{__LINE__}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. If script failing may need to change the last file read to 0000 if folder change"
   puts "#{__LINE__}. srcSDfolder: #{srcSDfolder} which may or may not be the folder being read from"
 end
 
@@ -113,8 +116,8 @@ archiveFolder  = downloadsFolders + "_imported-archive" # folder to move origina
 srcRename = "/Volumes/Seagate 8TB Backup/Mylio_87103a/Greg Scarich’s iPhone Library/" # Frequent location to perfom this. iPhone photos brought into Mylio
 srcAddLocation  = downloadsFolders + "Latest Processed photos-Import to Mylio/" # = srcRename # Change to another location for convenience. This location picked so don't screw up a bunch of files
 
-lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
-puts "#{__LINE__}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. ?? But it should stored on #{sdCard} card"
+# lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
+# puts "#{__LINE__}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. ?? But it should stored on #{sdCard} card"
 
 # timeZonesFile = HOME + "Dropbox/scriptsEtc/Greg camera time zones.yml"
 timeZonesFile = thisScript + "currentData/Greg camera time zones.yml"
@@ -782,18 +785,19 @@ end
 timeNowWas = timeStamp(Time.now, lineNum) # Initializing. Later calls are different
 # timeNowWas = timeStamp(timeNowWas)
 
-puts "\n#{__LINE__}. GPS file available for adding coordinates to photos. Note 'not needed … is a folder'"
+puts "\n#{__LINE__}. GPS file available for adding coordinates to photos."
 # Was Dir.each_child(folderGPX) {|x| puts "#{__LINE__}. GPX file available #{x}" }
 Dir.each_child(folderGPX) do |item| # for each photo file
   next if filesToIgnore(item) == true # skipping file when true, i.e., not a file or xmp
   # next if item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon ' or item.slice(0,7) == ".MYLock" or item.slice(-4,4) == ".xmp"
   # next if item.start_with?("20") # Skipping files that have already been renamed.
   # next if item.end_with?("xmp") # Skipping .xmp files in Mylio and elsewhere. The files may become orphans. should be included in filesToIgnore
-  puts "GPX file available #{item}"
+  next if item.start_with?("not") # There is a note/file with that name in the folder
+  puts "#{item}"
 end
 
 # puts "#{__LINE__}. (an alternative to the above): #{Dir.each_child(folderGPX}." # except causes and erro
-puts "\n#{__LINE__}. Are the gps logs needed listed above?\nin #{folderGPX}. Note 'not needed … is a folder'\n\n" # Should check for this since I don't see the message
+puts "\n#{__LINE__}. Are the gps logs needed listed above in #{folderGPX}?\n\n" # Should check for this since I don't see the message
 
 # Two names for SD cards seem common. Is this needed anymore? Caused an error
 # unless File.directory?(srcSDfolder) # negative if, so if srcSDfolder exists skip, other wise change reference to …Alt
@@ -844,6 +848,7 @@ if folderPhotoCount > 0
   # downloadsFolderEmpty(mylioStaging, folderPhotoCount) # Pashua window
 else
   puts "\n#{__LINE__}. 'Processed photos to be imported to Mylio/' folder is empty and script will continue."
+  puts "If script stops here, check Pashua, not going back"
 end
 # Ask whether working with photo files from SD card or HD
 # fromWhere are the photos?
@@ -927,17 +932,18 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
     # Read from SD card
     # lastPhotoReadTextFile = sdCard + "/lastPhotoRead.txt" # But this doesn't work if a new card.
     puts "\n#{__LINE__}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. NEED an error here if card not mounted!!. Have a kludge fix in the next rescue."
-    file = File.new(lastPhotoReadTextFile, "r")
+    file = File.new(lastPhotoReadTextFile, "r") # This causes an error when reading from computer
+    # puts  "\n#{__LINE__}. file: #{file} DEBUG. Are we getting to here?. No so error on above line when reading from camera"
     lastPhotoFilename = file.gets # apparently grabbing a return. maybe not the best reading method.
     # lastPhotoFilename  = lastPhotoFilename.chop
-  #   puts "\n#{__LINE__}. lastPhotoFilename: #{lastPhotoFilename}. Value can be changed by user, so this may not be the value used. was #lastPhotoFilename.chop"
+    # puts "\n#{__LINE__}. lastPhotoFilename: #{lastPhotoFilename}. Value can be changed by user, so this may not be the value used. was #lastPhotoFilename.chop"
     # lastPhotoFilename is 8 characters long (P plus 7 digits) - starts with ) for OM (at least I try to remember to set it to that. Default is P (which I liked to think was Panasonic, but maybe it means photo)).
     # Adding date to this line, so will take first 12 characters (would be cleaner if made the write an array or json and worked with that, but this is the quick and dirty)
     lastPhotoFilename = lastPhotoFilename[0..7]
     puts "\n#{__LINE__}. lastPhotoFilename: #{lastPhotoFilename}. Value can be changed by user, so this may not be the value used." # was #lastPhotoFilename.chop
     file.close
   rescue => err
-    puts "Exception: #{err}. Not critical as value can be entered manually by user.\n"
+    puts "Exception: #{err}. Not critical as value can be entered manually by user, but needs FIXME. Doesn't work when run from Nova. `Exception: Operation not permitted @ rb_sysopen`.\n"
   end
 
 # Lumix folder naming: /Volumes/LUMIX/DCIM/123_PANA/ # digits are same as first three numbers in file name

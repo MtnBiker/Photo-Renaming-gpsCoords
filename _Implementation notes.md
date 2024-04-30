@@ -95,3 +95,10 @@ Look at https://exiftool.org/geolocation.html when get to v
 Need to create a copy for OM only
 
 Separating OM and Lumix since different fields written to. Some of the logic may be a mess
+
+Getting confused when trying to get photos via USB-C cable reading direct from camera
+
+Exception: Operation not permitted @ rb_sysopen when try to open /Volumes/OM SYSTEM/lastPhotoRead.txt from Nova, works in TextMate
+sudo chmod a+rw "/Volumes/OM SYSTEM/lastPhotoRead.txt" # suggested as a fix and it worked
+
+May be working in Nova for OM. Need to confirm Lumix
