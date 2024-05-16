@@ -20,6 +20,7 @@ fn = "/Volumes/Daguerre/_Download folder/_imported-archive/P114-GX8/P1140931.RW2
 fn = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/OM-1-2024/2024.04.09-14.29.04.gs.O.jpg"
 # fn = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/OM-1-2024/2024.04.14-12.28.57.gs.O.jpg" # LiveND
 fn = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/OM-1-2024/2024.04.10-09.30.54.gs.O.jpg" # out of focus
+fn = "/Volumes/OM SYSTEM/DCIM/100OMSYS/O4304077.JPG"
 
 puts "fn: #{fn}"
 puts "All readable MiniExifTool fields,i.e., MiniExiftool.new(fn)"

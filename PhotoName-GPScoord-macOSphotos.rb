@@ -384,18 +384,24 @@ def fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc, camModel)
   # AISubjectTrackingMode : Birds; Object Not Found
   # Nothing about shooting mode except below and now StackedImage:
   if camModel == "OM-1MarkII"
-    puts "#{__LINE__}. camModel: #{camModel}. DEBUG"
-    driveMode = fileEXIF.DriveMode
-    shootingMode = driveMode.split(',')[0]
+    puts "#{__LINE__}. camModel: #{camModel}. fn: #{fn}. DEBUG for best formatting to work with Mylio."
+    driveMode = fileEXIF.DriveMode # Focus Bracketing, Shot 12; Electronic shutter (one of the shots)
+    shootingMode = driveMode.split(',')[0] # Focus Bracketing or whatever is before the first comma
+    # puts "#{__LINE__}. driveMode: #{driveMode}. shootingMode: #{shootingMode}. of class: #{shootingMode.class}. DEBUG"
+    shotNo = driveMode.scan(/\d+/).to_s # just the shot number. Surprised not already a string
+    shootingMode = shootingMode + "-" + shotNo # Focus Bracketing-xx will be the result. Note this is 
     subjectTrackingMode = fileEXIF.AISubjectTrackingMode
     subjectTrackingModeOne = subjectTrackingMode.split(';')[0]
-    shootingMode = "STM: " + subjectTrackingModeOne + " " + shootingMode
+    shootingMode = "STM: " + subjectTrackingModeOne + ". SM:" + shootingMode
     # To see if LiveND used add info to shootingMode. Not sure this is consistent
-    stackedImage = fileEXIF.StackedImage
-    shootingMode = stackedImage + " " + shootingMode
-    fileEXIF.instructions = "#{File.basename(fn,".*")}. STM:#{subjectTrackingModeOne}. SM:#{shootingMode}" # less info but shorter
+    stackedImage = fileEXIF.StackedImage # 
+    unless stackedImage == "No" # Stacked Image : No or Focus-stacked
+      shootingMode = stackedImage + ". " + shootingMode
+    end
+    instructions = fileEXIF.instructions = "#{shootingMode}. #{File.basename(fn,".*")}" # Maybe drop basename (original file name) to make it shorter. Is available in PreservedFileName
+    puts "#{__LINE__}. camModel: #{camModel}. fileEXIF.instructions: #{instructions} DEBUG"
   else
-    shootingMode = "" # all other cameras. Next line probably negates the need for this
+    # shootingMode = "" # all other cameras. Next line probably negates the need for this
     fileEXIF.instructions = "#{File.basename(fn)}"
     puts "#{__LINE__}. camModel: #{camModel}. fileEXIF.instructions: #{fileEXIF.instructions} DEBUG"
   end
@@ -478,13 +484,15 @@ def oneBackTrue(src, fn, fnp, fnpPrev, subSecExists, subSec, subSecPrev, fileDat
        # puts shot_no
     # End getting seqence no
     fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no.to_s + userCamCode(fn) # + filtered Why is this
-    puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileBaseName: #{fileBaseName}. fileDate: #{fileDate}. shot_no: #{shot_no}. userCamCode(fn): #{userCamCode(fn)}. DEBUG" # .  filtered: #{filtered}
+    # puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileBaseName: #{fileBaseName}. fileDate: #{fileDate}. shot_no: #{shot_no}. userCamCode(fn): #{userCamCode(fn)}. DEBUG" # .  filtered: #{filtered}
   else # photos without subsecs, pre GX8 and other OM-1 in same second
-    puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileDate: #{fileDate}. dupCount: #{dupCount}. userCamCode(fn): #{userCamCode(fn)}. debug"
+    # puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileDate: #{fileDate}. dupCount: #{dupCount}. userCamCode(fn): #{userCamCode(fn)}. debug"
     # fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") +  seqLetter[dupCount] + userCamCode(fn) + filtered
     # Giving up on seqLetter because too many, use dupCount, but also add shot no. 
+    
+    # FIXME. I think the next 12 or so lines are not being used.
     # driveMode = fileEXIF.DriveMode # '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'
-    puts "#{__LINE__}. driveMode: #{driveMode}. driveMode.class: #{driveMode.class} for . " # error if?
+    # puts "#{__LINE__}. driveMode: #{driveMode}. driveMode.class: #{driveMode.class} for . " # error if?
     if driveMode.class == "NilClass"
       fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s + userCamCode(fn)
     elsif driveMode.length > 0
@@ -492,9 +500,11 @@ def oneBackTrue(src, fn, fnp, fnpPrev, subSecExists, subSec, subSecPrev, fileDat
       if match
         shot_no = match[1].to_i 
       else 
-        shot_no = ""
+        shot_no = "FS" # for an in camera Focus Stacked image FIXME. This should not be in oneBackTrue
       end
       fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s + "(" + shot_no + ")" + userCamCode(fn)
+      
+      # fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s + ".FS" + userCamCode(fn) # for an in camera Focus Stacked image
     else
       puts "#{__LINE__}. driveMode: #{driveMode}. driveMode.class: #{driveMode.class}." 
       fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s  + userCamCode(fn)
@@ -553,7 +563,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       fileExtPrev = ""
       fileDateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
       # puts "#{__LINE__}. fileDateTimeOriginal = fileEXIF.dateTimeOriginal: #{fileDateTimeOriginal} of class: #{fileDateTimeOriginal.class}"
-      fileSubSecTimeOriginal = fileEXIF.SubSecTimeOriginal # no error if doesn't exist
+      fileSubSecTimeOriginal = fileEXIF.SubSecTimeOriginal # no error if doesn't exist and it does not in OM
       subSec = "." + fileSubSecTimeOriginal.to_s[0..1] #Truncating to 2 figs (could round but would need to make a float, divide by 10 and round or something. This should be close enough)
       subSecExists = fileEXIF.SubSecTimeOriginal.to_s.length > 2 #
       if fileDateTimeOriginal == nil 
@@ -594,6 +604,14 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       # SpecialMode may be more useful since zero if not a sequence : Normal, Sequence: 0, Panorama: (none)
       # But DriveMode can tell what kind of sequence, although not sure that's needed in this script
      driveMode = fileEXIF.DriveMode # OMDS only, not in Lumix
+     # DriveMode       : Focus Bracketing, Shot 8; Electronic shutter
+      
+     driveModeFb = driveMode.split(',')[0]
+     puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
+     fBmark = ""
+     if driveModeFb.to_s == "Focus Bracketing"
+       fBmark = "_fB"
+     end
 
       # Not using specialMode now, but as an option
       # specialMode = fileEXIF.SpecialMode
@@ -607,18 +625,19 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
         shot_no = match[1].to_i if match
         # First photo in a sequence won't get -1 in oneBackTrue.
         if shot_no.to_i == 1
-          fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no.to_s + userCamCode(fn)
+          fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no.to_s + fBmark + userCamCode(fn)
           puts "#{__LINE__}. Because this was the first in a sequence a `1` was added to the filename for #{fileBaseName}. DEBUG"
         end
       end
       # puts "#{__LINE__}. oneBack: #{oneBack}. match: #{match}. DEBUG"
-      if oneBack # || match # Two photos in same second? Not sure this is working. match is empty, then evaluates to true
+      # Add check for bracketing and treat as needed, then onBack and treat as needed.
+      if oneBack # || match # Two photos in same second? 
         puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match}. DEBUG"
         fileBaseName =oneBackTrue(src, fn, fnp, fnpPrev, subSecExists, subSec, subSecPrev, fileDate, driveMode, dupCount, camModel)
       else # normal condition that this photo is at a different time than previous photo
         puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match}. DEBUG"
         dupCount = 0 # resets dupCount after having a group of photos in the same second
-        fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S")  + userCamCode(fn) + filtered
+        fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + fBmark + userCamCode(fn) + filtered # All fB get to here
         # puts "#{__LINE__}. item: #{item} is at different time as previous.    fileBaseName: #{fileBaseName}"
       end # if oneBack
       # end # if subSecExists
@@ -940,7 +959,7 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
     # lastPhotoFilename is 8 characters long (P plus 7 digits) - starts with ) for OM (at least I try to remember to set it to that. Default is P (which I liked to think was Panasonic, but maybe it means photo)).
     # Adding date to this line, so will take first 12 characters (would be cleaner if made the write an array or json and worked with that, but this is the quick and dirty)
     lastPhotoFilename = lastPhotoFilename[0..7]
-    puts "\n#{__LINE__}. lastPhotoFilename: #{lastPhotoFilename}. Value can be changed by user, so this may not be the value used." # was #lastPhotoFilename.chop
+    puts "\n#{__LINE__}. lastPhotoFilename: #{lastPhotoFilename}. Value can be changed by user, so this may not be the value used. #{timeNowWas = timeStamp(timeNowWas, lineNum)}" # was #lastPhotoFilename.chop
     file.close
   rescue => err
     puts "Exception: #{err}. Not critical as value can be entered manually by user, but needs FIXME. Doesn't work when run from Nova. `Exception: Operation not permitted @ rb_sysopen`.\n"
@@ -948,7 +967,7 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
 
 # Lumix folder naming: /Volumes/LUMIX/DCIM/123_PANA/ # digits are same as first three numbers in file name
 # OMDS folder  naming: /Volumes/OM SYSTEM/DCIM/100OMSYS/ # seems not related to filename in general. OM has more file and folder naming options
-  puts "#{__LINE__}. srcSDfolder: #{srcSDfolder}.  srcSDsuffix: #{srcSDsuffix}" # srcSDfolder: /Volumes/OM SYSTEM/DCIM/.  srcSDsuffix: OMSYS
+  puts "/n#{__LINE__}. srcSDfolder: #{srcSDfolder}.  srcSDsuffix: #{srcSDsuffix}" # srcSDfolder: /Volumes/OM SYSTEM/DCIM/.  srcSDsuffix: OMSYS
   begin
     if srcSDsuffix == "OMSYS"
       srcSD = "/Volumes/OM SYSTEM/DCIM/100OMSYS"
@@ -1024,8 +1043,8 @@ photosArray = mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, 
 #  To see how it looks
 puts "\n#{__LINE__}. photosArray[2]: #{photosArray[2]}. Sample of photosArray. NEEDS to have dateTimeStamp if to be useful, which it doesn't now." # Shows everything
 # puts "photosArray[2]: " + photosArray[2] # only the index (3) shows up, not now
-puts "#{__LINE__}. Next should write photosArray to #{photoArrayFile}"
-File.write(photoArrayFile, photosArray) # A list of all the files processed. Saved with script. Work with this later
+puts "#{__LINE__}. Next should write photosArray to #{photoArrayFile}. Turned off now since not using"
+# File.write(photoArrayFile, photosArray) # A list of all the files processed. Saved with script. Work with this later
 # unmount card. Test if using the SD
 # puts "\n#{__LINE__}. fromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}"
 # whichOne =="SD" ? unmountCard(sdCard) : "" # not working so turned off TODO
