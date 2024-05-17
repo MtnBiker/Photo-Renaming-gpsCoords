@@ -447,6 +447,12 @@ def timeZone(fileDateTimeOriginal, timeZonesFile )
   # puts "#{__LINE__}. #{i}. fileDateTimeOriginal: #{fileDateTimeOriginal} fileDateTimeOriginal.class: #{fileDateTimeOriginal.class}. theTimeZone: #{theTimeZone}. "  return theTimeZone
 end # timeZone
 
+def bracketed(fn, fileDate, driveMode, stackedImageTrue, shot_no, camModel)
+  stackBracket = "-" + shot_no.to_s + "_fB"
+  stackBracket = "_FS" if stackedImageTrue
+  fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + stackBracket + userCamCode(fn) # only 'fileBaseName = ' to remind me how this is used
+end
+
 def oneBackTrue(src, fn, fnp, fnpPrev, subSecExists, subSec, subSecPrev, fileDate, driveMode, dupCount, camModel)
   # Some of these fields may not be needed, I was fighting the wrong problem and may have added some that aren't needed
   # puts "\n#{__LINE__}. fn: #{fn}. fnp: #{fnp}. subSecExists: #{subSecExists}. fileDate: #{fileDate}. driveMode: #{driveMode}.  dupCount: #{dupCount}. in oneBackTrue(). DEBUG"
@@ -543,6 +549,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
     fileEXIF = MiniExiftool.new(fn) # used several times
     # fileEXIF = Exif::Data.new(fn) # see if can just make this change, probably break something. 2017.01.13 doesn't work with Raw, but developer is working it.
     camModel = fileEXIF.model # this will in general be the same for each file and the returned value will be for the last file
+    stackedImage = fileEXIF.StackedImage
 
     # To add display for Mylio. Don't think this is needed anymore
     # Generally jpgs are not added to Mylio, but if there is a filter effect want the jpg.
@@ -610,7 +617,8 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
      puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
      fBmark = ""
      if driveModeFb.to_s == "Focus Bracketing"
-       fBmark = "_fB"
+       # fBmark = "_fB" 
+       bracketing = true
      end
 
       # Not using specialMode now, but as an option
@@ -631,13 +639,20 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       end
       # puts "#{__LINE__}. oneBack: #{oneBack}. match: #{match}. DEBUG"
       # Add check for bracketing and treat as needed, then onBack and treat as needed.
-      if oneBack # || match # Two photos in same second? 
+      stackedImageTrue = false
+       if stackedImage[0..12].to_s == "Focus-stacked"
+         stackedImageTrue = true
+       end
+      puts "#{__LINE__} stackedImage[0..12]: #{stackedImage[0..12]}. stackedImageTrue: #{stackedImageTrue}" #  stackedImage[0..12]: Focus-stacked. stackedImageTrue: false
+      if bracketing or stackedImageTrue
+        fileBaseName = bracketed(fn, fileDate, driveMode, stackedImageTrue, shot_no, camModel)
+      elsif oneBack # || match # Two photos in same second? 
         puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match}. DEBUG"
-        fileBaseName =oneBackTrue(src, fn, fnp, fnpPrev, subSecExists, subSec, subSecPrev, fileDate, driveMode, dupCount, camModel)
+        fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, subSecExists, subSec, subSecPrev, fileDate, driveMode, dupCount, camModel)
       else # normal condition that this photo is at a different time than previous photo
         puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match}. DEBUG"
         dupCount = 0 # resets dupCount after having a group of photos in the same second
-        fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + fBmark + userCamCode(fn) + filtered # All fB get to here
+        fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + fBmark + userCamCode(fn) + filtered
         # puts "#{__LINE__}. item: #{item} is at different time as previous.    fileBaseName: #{fileBaseName}"
       end # if oneBack
       # end # if subSecExists
