@@ -236,7 +236,7 @@ def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, th
   rescue IOError => e
     puts "Something went wrong. Could not write last photo read (#{fileSDbasename}) to #{fileNow}"
   end # begin
-    puts "\n#{__LINE__}. Of the #{cardCount} photos on the SD card, #{cardCountCopied} were copied from #{src} to #{fnp}. Are these correct???. " # last item was src, doesn't make sense
+    puts "\n#{__LINE__}. Of the #{cardCount} photos on the SD card, #{cardCountCopied} were copied from #{src} to #{srcHD}." # last item was src, doesn't make sense
 end # copySD
 
 def uniqueFileName(filename)
@@ -384,7 +384,7 @@ def fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc, camModel)
   # AISubjectTrackingMode : Birds; Object Not Found
   # Nothing about shooting mode except below and now StackedImage:
   if camModel == "OM-1MarkII"
-    puts "#{__LINE__}. camModel: #{camModel}. fn: #{fn}. DEBUG for best formatting to work with Mylio."
+    # puts "#{__LINE__}. camModel: #{camModel}. fn: #{fn}. DEBUG for best formatting to work with Mylio."
     driveMode = fileEXIF.DriveMode # Focus Bracketing, Shot 12; Electronic shutter (one of the shots)
     shootingMode = driveMode.split(',')[0] # Focus Bracketing or whatever is before the first comma
     # puts "#{__LINE__}. driveMode: #{driveMode}. shootingMode: #{shootingMode}. of class: #{shootingMode.class}. DEBUG"
@@ -399,7 +399,7 @@ def fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc, camModel)
       shootingMode = stackedImage + ". " + shootingMode
     end
     instructions = fileEXIF.instructions = "#{shootingMode}. #{File.basename(fn,".*")}" # Maybe drop basename (original file name) to make it shorter. Is available in PreservedFileName
-    puts "#{__LINE__}. camModel: #{camModel}. fileEXIF.instructions: #{instructions} DEBUG"
+    # puts "#{__LINE__}. camModel: #{camModel}. fileEXIF.instructions: #{instructions} DEBUG"
   else
     # shootingMode = "" # all other cameras. Next line probably negates the need for this
     fileEXIF.instructions = "#{File.basename(fn)}"
@@ -447,9 +447,11 @@ def timeZone(fileDateTimeOriginal, timeZonesFile )
   # puts "#{__LINE__}. #{i}. fileDateTimeOriginal: #{fileDateTimeOriginal} fileDateTimeOriginal.class: #{fileDateTimeOriginal.class}. theTimeZone: #{theTimeZone}. "  return theTimeZone
 end # timeZone
 
-def bracketed(fn, fileDate, driveMode, stackedImageTrue, shot_no, camModel)
-  stackBracket = "-" + shot_no.to_s + "_fB"
-  stackBracket = "_FS" if stackedImageTrue
+def bracketed(fn, fileDate, driveMode, stackedImageTrue, shot_no)
+  # fB for Focus Bracket. Bkt for bracket. The logic isn't the greatest to show whats going on. Assumed bracketed unless stacked
+  stackBracket = "-" + shot_no.to_s + "_Bkt" # _fB
+  # _FS for Focus Stacked. _Stk for stacked. Do I need to diffential different stacking modes
+  stackBracket = "_STK" if stackedImageTrue # _FS. All caps to stand out from Bkt
   fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + stackBracket + userCamCode(fn) # only 'fileBaseName = ' to remind me how this is used
 end
 
@@ -558,9 +560,9 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
     filtered = ""
     filterEffect = ""
     filterEffect = fileEXIF.FilterEffect
-    # puts "#{__LINE__}. filterEffect: #{filterEffect}" # For Lumix, doesn't exist on OMDS
-    if File.extname(item).downcase == ".jpg" && filterEffect != "Expressive" && camModel != "OM-1MarkII" # Expressive is default, so not much of an effect, but may need to change this. OM-1 photos get caught up and they should not      filtered = "_display"
-    end
+    # puts "#{__LINE__}. filterEffect: #{filterEffect}" # For Lumix, doesn't exist on OMDS. Was I using this to screen out certain Lumix files?
+    # if File.extname(item).downcase == ".jpg" && filterEffect != "Expressive" && camModel != "OM-1MarkII" # Expressive is default, so not much of an effect, but may need to change this. OM-1 photos get caught up and they should not      filtered = "_display"
+    # end
 
     # puts "#{__LINE__}.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
     if File.file?(fn) # why is this needed. Do a check above
@@ -573,13 +575,13 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       fileSubSecTimeOriginal = fileEXIF.SubSecTimeOriginal # no error if doesn't exist and it does not in OM
       subSec = "." + fileSubSecTimeOriginal.to_s[0..1] #Truncating to 2 figs (could round but would need to make a float, divide by 10 and round or something. This should be close enough)
       subSecExists = fileEXIF.SubSecTimeOriginal.to_s.length > 2 #
-      if fileDateTimeOriginal == nil 
-        # TODO This probably could be cleaned up, but then normally not used, movie files don't have this field
-        fileDateTimeOriginal = fileEXIF.DateCreated  # PNG don't have dateTimeOriginal
-        camModel ="MISC" # Dummy value for test below
-        fileDateTimeOriginal == nil ? fileDateTimeOriginal = fileEXIF.CreationDate : "" # now fixing .mov files
-        fileDateTimeOriginal == nil ? fileDateTimeOriginal = fileEXIF.MediaCreateDate : "" # now fixing .mp4 files. Has other dates, but at least for iPhone mp4s the gps info exists
-      end # if fileDateTimeOriginal == nil
+      # if fileDateTimeOriginal == nil 
+      #   # TODO This probably could be cleaned up, but then normally not used, movie files don't have this field
+      #   fileDateTimeOriginal = fileEXIF.DateCreated  # PNG don't have dateTimeOriginal
+      #   camModel ="MISC" # Dummy value for test below
+      #   fileDateTimeOriginal == nil ? fileDateTimeOriginal = fileEXIF.CreationDate : "" # now fixing .mov files
+      #   fileDateTimeOriginal == nil ? fileDateTimeOriginal = fileEXIF.MediaCreateDate : "" # now fixing .mp4 files. Has other dates, but at least for iPhone mp4s the gps info exists
+      # end # if fileDateTimeOriginal == nil
       tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # the time zone the picture was taken in, doesn't say anything about what times are recorded in the photo's EXIF. I'm doing this slightly wrong, because it's using the photo's recorded date which could be either GMT or local time. But only wrong if the photo was taken too close to the time when camera changed time zones
       # puts "#{__LINE__}. #{count}. tzoLoc: #{tzoLoc} from timeZonesFile"
       
@@ -614,11 +616,13 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
      # DriveMode       : Focus Bracketing, Shot 8; Electronic shutter
       
      driveModeFb = driveMode.split(',')[0]
-     puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
+     # puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
      fBmark = ""
      if driveModeFb.to_s == "Focus Bracketing"
        # fBmark = "_fB" 
        bracketing = true
+     else
+       bracketing = false
      end
 
       # Not using specialMode now, but as an option
@@ -633,19 +637,20 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
         shot_no = match[1].to_i if match
         # First photo in a sequence won't get -1 in oneBackTrue.
         if shot_no.to_i == 1
-          fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no.to_s + fBmark + userCamCode(fn)
+          fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no.to_s + userCamCode(fn) #  fBmark +
           puts "#{__LINE__}. Because this was the first in a sequence a `1` was added to the filename for #{fileBaseName}. DEBUG"
         end
       end
       # puts "#{__LINE__}. oneBack: #{oneBack}. match: #{match}. DEBUG"
       # Add check for bracketing and treat as needed, then onBack and treat as needed.
       stackedImageTrue = false
-       if stackedImage[0..12].to_s == "Focus-stacked"
-         stackedImageTrue = true
-       end
-      puts "#{__LINE__} stackedImage[0..12]: #{stackedImage[0..12]}. stackedImageTrue: #{stackedImageTrue}" #  stackedImage[0..12]: Focus-stacked. stackedImageTrue: false
+      # stackedImageTrue = true if stackedImage[0..12].to_s == "Focus-stacked" # will this work? 
+      if stackedImage[0..12].to_s == "Focus-stacked"
+       stackedImageTrue = true
+      end
+      # puts "#{__LINE__} stackedImage[0..12]: #{stackedImage[0..12]}. stackedImageTrue: #{stackedImageTrue}" #  stackedImage[0..12]: Focus-stacked. stackedImageTrue: false
       if bracketing or stackedImageTrue
-        fileBaseName = bracketed(fn, fileDate, driveMode, stackedImageTrue, shot_no, camModel)
+        fileBaseName = bracketed(fn, fileDate, driveMode, stackedImageTrue, shot_no)
       elsif oneBack # || match # Two photos in same second? 
         puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match}. DEBUG"
         fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, subSecExists, subSec, subSecPrev, fileDate, driveMode, dupCount, camModel)
@@ -1030,13 +1035,13 @@ if mylioStagingCount > 3
 end
 
 puts "\n#{__LINE__}. Initialization complete. File renaming and copying/moving beginning.\n        Time below is responding to options requests via Pashua if copying an SD card, otherwise the two times will be the same."
-puts "\n#{__LINE__}. When a gpx file starting with '202' is added to Downloads they are moved to GPX logs folder by an Automator Action named 'Move my gpx tracking to GPX logs.'"
+# puts "\n#{__LINE__}. When a gpx file starting with '202' is added to Downloads they are moved to GPX logs folder by an Automator Action named 'Move my gpx tracking to GPX logs.' Sometimes"
 
 
 timeNowWas = timeStamp(timeNowWas, lineNum)
 
 #  If working from SD card, copy or move files to " Drag Photos HERE Drag Photos HERE" folder, then will process from there.
-puts "#{__LINE__}. src: #{src} \n      srcHD: #{srcHD}"
+# puts "#{__LINE__}. src: #{src} \n      srcHD: #{srcHD}"
 
 copySD(srcSD, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
 #  Note that file creation date is the time of copying. May want to fix this. Maybe a mv is a copy and move which is sort of a recreation. 
@@ -1049,16 +1054,12 @@ puts "\n#{__LINE__}. Photos will now be copied and moved in readiness for renami
 # Which drive has already been decided. (this note because it hadn't yet if Daguerre wasn't available)
 
 # puts "#{__LINE__}. mylioStaging: #{mylioStaging}" # debugging
+# Not using this array, but could add metadata if need be
 photosArray = mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArray)
 # Now do the same for the jpg files. Going to tempJpg and moving files to same places, except no jpg's will move to tempJpg
 
-# photosArray = mylioStageAndArchive(tempJpg, mylioStaging, tempJpg, archiveFolder, photosArray)
-# puts "#{__LINE__}. photosArray:" # Arrays seem to get mixed up if put in a {}
-# puts photosArray
-#  To see how it looks
-puts "\n#{__LINE__}. photosArray[2]: #{photosArray[2]}. Sample of photosArray. NEEDS to have dateTimeStamp if to be useful, which it doesn't now." # Shows everything
-# puts "photosArray[2]: " + photosArray[2] # only the index (3) shows up, not now
-puts "#{__LINE__}. Next should write photosArray to #{photoArrayFile}. Turned off now since not using"
+puts "\n#{__LINE__}. Sample of photosArray. NEEDS to have dateTimeStamp if to be useful, which it doesn't now. photosArray[2]:\n#   {photosArray[2]}\n    arrayIndex, item, fnm, itemPrevExtName " # Shows everything
+# puts "#{__LINE__}. Next should write photosArray to #{photoArrayFile}."
 # File.write(photoArrayFile, photosArray) # A list of all the files processed. Saved with script. Work with this later
 # unmount card. Test if using the SD
 # puts "\n#{__LINE__}. fromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}"
@@ -1096,7 +1097,7 @@ timeNowWas = timeStamp(timeNowWas, lineNum)
 
 puts "\n#{__LINE__}. Using exiftool to add gps coordinates. Will take a while as all the gps files for the year will be processed and then all the photos. -tzoLoc, `i.e.: GMT #{-tzoLoc}"
 
-puts "\n#{__LINE__} tzoLoc: #{tzoLoc}. Because GX8 and some other cameras use local time and not GMT as this script was originally written for. All photos must be in same time zone."
+# puts "\n#{__LINE__} tzoLoc: #{tzoLoc}. Because GX8 and some other cameras use local time and not GMT as this script was originally written for. All photos must be in same time zone."
 # Add GPS coordinates.
 # perlOutput = addCoordinates(mylioStaging, folderGPX, gpsPhotoPerl, tzoLoc)
 addGpsCoordinates = exiftoolAddCoordinates(mylioStaging, folderGPX, tzoLoc) # not using `addGpsCoordinates = `
@@ -1104,13 +1105,13 @@ addGpsCoordinates = exiftoolAddCoordinates(mylioStaging, folderGPX, tzoLoc) # no
 timeNowWas = timeStamp(timeNowWas, lineNum)
 
 # Write timeDiff to the photo files
-puts "\n#{__LINE__}. Write timeDiff to the photo files NOT. Don't know if exiftool does this or do in exiftoolAddCoordinates"
+# puts "\n#{__LINE__}. Write timeDiff to the photo files NOT. Don't know if exiftool does this or do in exiftoolAddCoordinates"
 # writeTimeDiff(addGpsCoordinates)
 
-timeNowWas = timeStamp(timeNowWas, lineNum)
+# timeNowWas = timeStamp(timeNowWas, lineNum)
 # Parce perlOutput and add maxTimeDiff info to photo files
 
-puts "\n#{__LINE__}.Finished with writing timeDiff. Now move files. Note that \"Adding location information to photo files\" is commented out, i.e., geographic descriptions not being added, because Mylio finds this info."
+puts "\n#{__LINE__}.Finished adding coordinates. Now move files. Note that \"Adding location information to photo files\" is commented out, i.e., geographic descriptions not being added, because Mylio finds this info."
 
 # Move to Mylio folder (can't process in this folder or Mylio might import before changes are made)
 # mylioFolder = watchedFolderForImport # Used with Photos app
