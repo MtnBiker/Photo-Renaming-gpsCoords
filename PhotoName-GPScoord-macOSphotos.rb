@@ -274,6 +274,7 @@ def mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArra
     fnm = mylioStaging + item
     fna = archiveFolder + item # to already imported for archiving
     itemExt = File.extname(item).downcase
+    # itemBasename = File.basename(fn)
 
     # if Raw or mp4, copy to staging
     if itemExt != ".jpg"
@@ -284,6 +285,7 @@ def mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArra
     # If a jpg and has an effect, copy to mylioStaging via
     # ArtFilter: Off; 0; 0; 0 may be the screen
     fileEXIF = MiniExiftool.new(fn)
+    fileDateTimeOriginal = fileEXIF.dateTimeOriginal 
     filterEffect = fileEXIF.FilterEffect
     if itemExt.downcase == ".jpg" && filterEffect != "Expressive" # Expressive is default, so not much of an effect, but may need to change this
       fnt = tempJpg + item
@@ -310,7 +312,8 @@ def mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArra
     # "#{__LINE__}.. #{photoFinalCount + delCount} #{fn}" # More for debugging, but maybe OK as progress in this slow process
     photoFinalCount += 1
     arrayIndex = photoFinalCount - 1 # Need spaces around the minus
-    photosArray << [arrayIndex, item, fnm, itemPrevExtName] # count minus one, so indexed like an array starting at zero
+    
+    photosArray << [arrayIndex, item, fileDateTimeOriginal, itemPrevExtName] # count minus one, so indexed like an array starting at zero
     print "." # Trying to get a progress bar
   end # Dir.entries
   # puts "\#{__LINE__}. #{photoFinalCount} photos have been moved and are ready for renaming and gpsing. #{delCount-1} duplicate jpg were not
@@ -388,20 +391,20 @@ def fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc, camModel)
     driveMode = fileEXIF.DriveMode # Focus Bracketing, Shot 12; Electronic shutter (one of the shots)
     shootingMode = driveMode.split(',')[0] # Focus Bracketing or whatever is before the first comma
     # puts "#{__LINE__}. driveMode: #{driveMode}. shootingMode: #{shootingMode}. of class: #{shootingMode.class}. DEBUG"
-    shotNo = driveMode.scan(/\d+/).to_s # just the shot number. Surprised not already a string
-    shootingMode = shootingMode + "-" + shotNo # Focus Bracketing-xx will be the result. Note this is 
+    shotNo = driveMode.match(/Shot (\d{1,3})/).to_s # just the shot number. Surprised not already a string
+    shootingMode = shootingMode + "-" + shotNo # Focus Bracketing-xx will be the result. Note this is
     subjectTrackingMode = fileEXIF.AISubjectTrackingMode
     subjectTrackingModeOne = subjectTrackingMode.split(';')[0]
-    shootingMode = "STM: " + subjectTrackingModeOne + ". SM:" + shootingMode
-    # To see if LiveND used add info to shootingMode. Not sure this is consistent
+    instructions = "STM: " + subjectTrackingModeOne + ". SM:" + shootingMode
+    # To see if LiveND used add info to instructions. Not sure this is consistent
     stackedImage = fileEXIF.StackedImage # 
     unless stackedImage == "No" # Stacked Image : No or Focus-stacked
-      shootingMode = stackedImage + ". " + shootingMode
+      instructions = stackedImage + ". " + shootingMode
     end
-    instructions = fileEXIF.instructions = "#{shootingMode}. #{File.basename(fn,".*")}" # Maybe drop basename (original file name) to make it shorter. Is available in PreservedFileName
+    fileEXIF.instructions = "#{instructions}. #{File.basename(fn,".*")}" # Maybe drop basename (original file name) to make it shorter. Is available in PreservedFileName
     # puts "#{__LINE__}. camModel: #{camModel}. fileEXIF.instructions: #{instructions} DEBUG"
   else
-    # shootingMode = "" # all other cameras. Next line probably negates the need for this
+    # instructions = "" # all other cameras. Next line probably negates the need for this
     fileEXIF.instructions = "#{File.basename(fn)}"
     puts "#{__LINE__}. camModel: #{camModel}. fileEXIF.instructions: #{fileEXIF.instructions} DEBUG"
   end
@@ -638,7 +641,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
         # First photo in a sequence won't get -1 in oneBackTrue.
         if shot_no.to_i == 1
           fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no.to_s + userCamCode(fn) #  fBmark +
-          puts "#{__LINE__}. Because this was the first in a sequence a `1` was added to the filename for #{fileBaseName}. DEBUG"
+          # puts "#{__LINE__}. Because this was the first in a sequence a `1` was added to the filename for #{fileBaseName}. DEBUG" # Working for OM
         end
       end
       # puts "#{__LINE__}. oneBack: #{oneBack}. match: #{match}. DEBUG"
@@ -987,7 +990,7 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
 
 # Lumix folder naming: /Volumes/LUMIX/DCIM/123_PANA/ # digits are same as first three numbers in file name
 # OMDS folder  naming: /Volumes/OM SYSTEM/DCIM/100OMSYS/ # seems not related to filename in general. OM has more file and folder naming options
-  puts "/n#{__LINE__}. srcSDfolder: #{srcSDfolder}.  srcSDsuffix: #{srcSDsuffix}" # srcSDfolder: /Volumes/OM SYSTEM/DCIM/.  srcSDsuffix: OMSYS
+  puts "\n#{__LINE__}. srcSDfolder: #{srcSDfolder}.  srcSDsuffix: #{srcSDsuffix}" # srcSDfolder: /Volumes/OM SYSTEM/DCIM/.  srcSDsuffix: OMSYS
   begin
     if srcSDsuffix == "OMSYS"
       srcSD = "/Volumes/OM SYSTEM/DCIM/100OMSYS"
@@ -1041,7 +1044,7 @@ puts "\n#{__LINE__}. Initialization complete. File renaming and copying/moving b
 timeNowWas = timeStamp(timeNowWas, lineNum)
 
 #  If working from SD card, copy or move files to " Drag Photos HERE Drag Photos HERE" folder, then will process from there.
-# puts "#{__LINE__}. src: #{src} \n      srcHD: #{srcHD}"
+puts "#{__LINE__}. lastPhotoFilename: #{lastPhotoFilename}"
 
 copySD(srcSD, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
 #  Note that file creation date is the time of copying. May want to fix this. Maybe a mv is a copy and move which is sort of a recreation. 
@@ -1058,9 +1061,9 @@ puts "\n#{__LINE__}. Photos will now be copied and moved in readiness for renami
 photosArray = mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArray)
 # Now do the same for the jpg files. Going to tempJpg and moving files to same places, except no jpg's will move to tempJpg
 
-puts "\n#{__LINE__}. Sample of photosArray. NEEDS to have dateTimeStamp if to be useful, which it doesn't now. photosArray[2]:\n#   {photosArray[2]}\n    arrayIndex, item, fnm, itemPrevExtName " # Shows everything
+puts "\n#{__LINE__}. Sample of photosArray. NEEDS to have dateTimeStamp if to be useful, which it doesn't now. photosArray[2]:\n    #{photosArray[2]}\n    arrayIndex, item, fnm, itemPrevExtName " # Shows everything
 # puts "#{__LINE__}. Next should write photosArray to #{photoArrayFile}."
-# File.write(photoArrayFile, photosArray) # A list of all the files processed. Saved with script. Work with this later
+File.write(photoArrayFile, photosArray) # A list of all the files processed. Saved with script. Work with this later
 # unmount card. Test if using the SD
 # puts "\n#{__LINE__}. fromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}"
 # whichOne =="SD" ? unmountCard(sdCard) : "" # not working so turned off TODO

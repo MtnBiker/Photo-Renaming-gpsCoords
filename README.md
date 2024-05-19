@@ -16,7 +16,7 @@ The GPS info adding is tricky. All GPS devices (AFAIK) use UTM. Most cameras can
 
 mini_exiftools, a Ruby script, to connect with the Perl script ExifTool by Phil Harvey, http://www.sno.phy.queensu.ca/~phil/exiftool/, but has a Windows executable and a Mac OS X package installer available. This is a fantastic, well-maintained package to manipulate photo file EXIF data.
 
-Requires the app Pashua for some of the GUI. However the script is initiated from the command line (or equivalent. I run from TextMate).
+Requires the app Pashua for some of the GUI. However the script is initiated from the command line (or equivalent. I run from TextMate and Nova or the command line).
 
 ### Notes
 

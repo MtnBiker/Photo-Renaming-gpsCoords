@@ -14,7 +14,7 @@ src = "/Users/gscar/Mylio/Mylio Main Library Folder/Missing photos Categorized a
 # src = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/Las Piletas Team Photo One.jpg"
 
 # Making it easier (less error prone) to change the date
-year = "2030" # 1898
+year = "2024" # 1898
 month =  "04" # 01
 day =    "10" # 01
 hour =   "14" # "00"
