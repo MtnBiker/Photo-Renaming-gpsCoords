@@ -391,7 +391,8 @@ def fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc, camModel)
     driveMode = fileEXIF.DriveMode # Focus Bracketing, Shot 12; Electronic shutter (one of the shots)
     shootingMode = driveMode.split(',')[0] # Focus Bracketing or whatever is before the first comma
     # puts "#{__LINE__}. driveMode: #{driveMode}. shootingMode: #{shootingMode}. of class: #{shootingMode.class}. DEBUG"
-    shotNo = driveMode.match(/Shot (\d{1,3})/).to_s # just the shot number. Surprised not already a string
+    shotNo = driveMode.match(/(\d{1,3})/).to_s.rjust(2, '0') # just the shot number. Surprised not already a string
+    # puts "#{__LINE__}. shotNo: #{shotNo}. shotNo.class: #{shotNo.class}" # shotNo.class: MatchData
     shootingMode = shootingMode + "-" + shotNo # Focus Bracketing-xx will be the result. Note this is
     subjectTrackingMode = fileEXIF.AISubjectTrackingMode
     subjectTrackingModeOne = subjectTrackingMode.split(';')[0]
@@ -452,7 +453,7 @@ end # timeZone
 
 def bracketed(fn, fileDate, driveMode, stackedImageTrue, shot_no)
   # fB for Focus Bracket. Bkt for bracket. The logic isn't the greatest to show whats going on. Assumed bracketed unless stacked
-  stackBracket = "-" + shot_no.to_s + "_Bkt" # _fB
+  stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "_Bkt" # _fB
   # _FS for Focus Stacked. _Stk for stacked. Do I need to diffential different stacking modes
   stackBracket = "_STK" if stackedImageTrue # _FS. All caps to stand out from Bkt
   fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + stackBracket + userCamCode(fn) # only 'fileBaseName = ' to remind me how this is used
@@ -636,11 +637,11 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       # puts "#{__LINE__}. fn: #{fn}. driveMode: #{driveMode}.\nspecialMode: #{specialMode} oneBack: #{oneBack} = true is two photos in same second. If true, oneBackTrue will be called."
       # Maybe should enter if there is a shot no.
       unless driveMode.nil? || driveMode.empty? # opposite of if, therefore if driveMode is not empty
-        match = driveMode.match(/Shot (\d{1,3})/) # Getting shot no. from `Continuous Shooting, Shot 12; Electronic shutter`
+        match = driveMode.match(/(\d{1,3})/) # Getting shot no. from `Continuous Shooting, Shot 12; Electronic shutter`
         shot_no = match[1].to_i if match
         # First photo in a sequence won't get -1 in oneBackTrue.
         if shot_no.to_i == 1
-          fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no.to_s + userCamCode(fn) #  fBmark +
+          fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no.to_s.rjust(2, '0') + userCamCode(fn) #  fBmark +
           # puts "#{__LINE__}. Because this was the first in a sequence a `1` was added to the filename for #{fileBaseName}. DEBUG" # Working for OM
         end
       end
