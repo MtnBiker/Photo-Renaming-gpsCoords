@@ -28,6 +28,21 @@ require 'mini_exiftool' # have to update for new versions of Ruby. Other gems se
 # require 'open-uri'
 # require 'addressable/template' #  gem install addressable
 require 'logger'
+require 'puts_debuggerer'
+PutsDebuggerer.wrapper = true # Global for all pd
+PutsDebuggerer.formatter = -> (data) {
+  puts "-<#{data[:announcer]}>-"
+  puts "HEADER: #{data[:header]}"
+  puts "FILE: #{data[:file]}"
+  puts "LINE: #{data[:line_number]}"
+  puts "CLASS: #{data[:class]}"
+  puts "METHOD: #{data[:method]}"
+  puts "EXPRESSION: #{data[:pd_expression]}"
+  print "PRINT OUT: "
+  data[:object_printer].call
+  puts "CALLER: #{data[:caller].to_a.first}"
+  puts "FOOTER: #{data[:footer]}"
+}
 
 require_relative 'lib/gpsCoordsPashua' # Dialog for adding GPS coordinates without moving
 require_relative 'lib/gpsYesPashua'
@@ -61,6 +76,8 @@ elsif File.exist?("/Volumes/LUMIX/")
   sdCard      = "/Volumes/LUMIX/"
   srcSDsuffix = "_PANA"
   puts "#{__LINE__}. #{sdCard} SD card mounted"
+  puts "puts_debugger demo/test below"
+  pd sdCard, wrapper: true
 else
   puts "\n#{__LINE__}. ######## #{sdCard} ########\n\n"
 end
@@ -574,7 +591,12 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       # puts "#{__LINE__}.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}." #  #{timeNowWas = timeStamp(timeNowWas)}
       fileExt = File.extname(fn).tr(".","").downcase  # needed later for determining if dups at same time. Will be lowercase jpg or rw2 or whatever
       fileExtPrev = ""
-      fileDateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
+      case 
+      when fileExt == "mov" # OMDS movie
+        fileDateTimeOriginal = fileEXIF.CreateDate
+      else 
+        fileDateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
+      end
       # puts "#{__LINE__}. fileDateTimeOriginal = fileEXIF.dateTimeOriginal: #{fileDateTimeOriginal} of class: #{fileDateTimeOriginal.class}"
       fileSubSecTimeOriginal = fileEXIF.SubSecTimeOriginal # no error if doesn't exist and it does not in OM
       subSec = "." + fileSubSecTimeOriginal.to_s[0..1] #Truncating to 2 figs (could round but would need to make a float, divide by 10 and round or something. This should be close enough)
@@ -607,7 +629,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
         puts "#{__LINE__}.. fileDateTimeOriginal #{fileDateTimeOriginal}. timeChange: #{timeChange} for #{camModel}" if count == 1 # just once is enough
       end # if camModel
       fileEXIF.save # only set OffsetTimeOriginal, but did do some reading.
-
+      
       fileDate = fileDateTimeOriginal + timeChange.to_i # date in local time photo was taken. No idea why have to change this to i, but was nil class even though zero  
       fileDateTimeOriginalstr = fileDateTimeOriginal.to_s[0..-6]
 
@@ -659,7 +681,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
         puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match}. DEBUG"
         fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, subSecExists, subSec, subSecPrev, fileDate, driveMode, dupCount, camModel)
       else # normal condition that this photo is at a different time than previous photo
-        puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match}. DEBUG"
+        puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match} for item: #{item}. DEBUG"
         dupCount = 0 # resets dupCount after having a group of photos in the same second
         fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + fBmark + userCamCode(fn) + filtered
         # puts "#{__LINE__}. item: #{item} is at different time as previous.    fileBaseName: #{fileBaseName}"
@@ -821,7 +843,7 @@ def moveToMylio(mylioStaging, mylioFolder, timeNowWas)
     FileUtils.move(fn, fnp)
   end
   puts "Photos moved to Mylio folder, #{mylioFolder}, where they will automagically be imported into Mylio."
-  puts "All done! #{timeNowWas}"
+  puts "All done! #{timeNowWas}\n\n"
 end
 
 ## The "PROGRAM" ############ ##################### ###################### ##################### ##########################
