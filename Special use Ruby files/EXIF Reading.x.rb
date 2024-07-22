@@ -3,6 +3,8 @@
 #  Created by Greg Scarich on 2007-06-20.
 #  Copyright (c) 2007. All rights reserved.
 
+# To run `ruby "/Volumes/Mac Mini HD/Users/gscar/Documents/Ruby/Photo handling/Special use Ruby files/EXIF Reading.x.rb"`
+
 # Read EXIF fields, but doesn't seem to read IPTC fields
 
 # Didn't used to need this, but some PATH is missing
@@ -15,12 +17,14 @@ require 'fileutils'
 include FileUtils
 # require 'puts_debugger' # puts_debugger # gem seems to be found, but using doesn't  > NoMethodError: undefined method ‘puts_debugger’ for main:Object
 
-fn = "/Users/gscar/Documents/◊ Pre-trash/galleryTest/Fonts Point Badlands Dry Stream.jpg"
 fn = "/Volumes/Daguerre/_Download folder/_imported-archive/P114-GX8/P1140931.RW2"
-fn = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/OM-1-2024/2024.04.09-14.29.04.gs.O.jpg"
-# fn = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/OM-1-2024/2024.04.14-12.28.57.gs.O.jpg" # LiveND
-fn = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/OM-1-2024/2024.04.10-09.30.54.gs.O.jpg" # out of focus
-fn = "/Volumes/OM SYSTEM/DCIM/100OMSYS/O4304077.JPG"
+# fn = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/OM-1-2024/2024.04.09-14.29.04.gs.O.jpg"
+# # fn = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/OM-1-2024/2024.04.14-12.28.57.gs.O.jpg" # LiveND
+# fn = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/OM-1-2024/2024.04.10-09.30.54.gs.O.jpg" # out of focus
+# fn = "/Volumes/OM SYSTEM/DCIM/100OMSYS/O4304077.JPG"
+# fn = "/Users/gscar/Pictures/2024.08-waiting for Mylio/2024.07.21-15.16.06_02_Bkt.gs.O.jpg"
+# fn = "/Users/gscar/Pictures/2024.08-waiting for Mylio/2024.07.21-15.17.10_02_Bkt.gs.O.jpg"
+
 
 puts "fn: #{fn}"
 puts "All readable MiniExifTool fields,i.e., MiniExiftool.new(fn)"
@@ -78,6 +82,8 @@ else
   puts "driveMode.split(';')[0]     #{photo.DriveMode.split(';')[0]}"
   puts "driveMode.split(';')[1]     #{photo.DriveMode.split(';')[1]}"
 end
+
+# As of mid 2024 my OM lens will not take process bracketed images to make a stacked image, but the camera will take **bracketed** focus images
 stackedImage = photo.StackedImage
 puts "\nstackedImage = photo.StackedImage: #{stackedImage}"
 # A test of logic
@@ -86,6 +92,10 @@ if stackedImage != "No"
 else
   puts "#{__LINE__}. StackedImage: #{stackedImage} [or is nil] and will not be written to instructions"
 end
+
+# Bracket OM images
+focusBracketStepSize = photo.FocusBracketStepSize
+puts "#{__LINE__}. FocusBracketStepSize: #{focusBracketStepSize}. FocusBracketStepSize.class: #{focusBracketStepSize.class}"
 
 # puts "\nPossible time zone determination. (CreateDate - TimeStamp)/3600:"
 # photo.DateTimeUTC doesn't exist? and photo.CreateDate can't be divided

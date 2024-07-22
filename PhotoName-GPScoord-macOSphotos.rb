@@ -130,7 +130,7 @@ mylioStaging = downloadsFolders + "Latest Processed photos-Import to Mylio/" #  
 # puts "#{__LINE__}. mylioStaging: #{mylioStaging}. Where the photos are processed before being moved into Mylio folder" # debugging
 tempJpg   = downloadsFolders + "Latest Downloads temp jpg/"
 archiveFolder  = downloadsFolders + "_imported-archive" # folder to move originals to if not done in. No slash because getting double slash with one
-srcRename = "/Volumes/Seagate 8TB Backup/Mylio_87103a/Greg Scarich’s iPhone Library/" # Frequent location to perfom this. iPhone photos brought into Mylio
+srcRename = "/Volumes/Seagate 8TB Backup/Mylio_87103a/Greg Scarich’s iPhone Library/" # Frequent location to perform this. iPhone photos brought into Mylio
 srcAddLocation  = downloadsFolders + "Latest Processed photos-Import to Mylio/" # = srcRename # Change to another location for convenience. This location picked so don't screw up a bunch of files
 
 # lastPhotoReadTextFile = thisScript + "currentData/lastPhotoRead.txt"
@@ -295,7 +295,7 @@ def mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArra
 
     # if Raw or mp4, copy to staging
     if itemExt != ".jpg"
-      # puts "#{__LINE__}. #{fn} since #{itemExt} is not jpg to be staged"
+      # puts "#{__LINE__}. #{fn} since #{itemExt} is not jpg to be staged. DEBUG"
       FileUtils.copy(fn, fnm)
     end
 
@@ -413,7 +413,13 @@ def fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc, camModel)
     shootingMode = shootingMode + "-" + shotNo # Focus Bracketing-xx will be the result. Note this is
     subjectTrackingMode = fileEXIF.AISubjectTrackingMode
     subjectTrackingModeOne = subjectTrackingMode.split(';')[0]
-    instructions = "STM: " + subjectTrackingModeOne + ". SM:" + shootingMode
+    # focusBracketStepSize 1 to 10.
+    focusBracketStepSize = fileEXIF.FocusBracketStepSize
+    if focusBracketStepSize.nil?
+      instructions = "STM: " + subjectTrackingModeOne + ". SM:" + shootingMode
+    else
+      instructions = "STM: " + subjectTrackingModeOne + ". SM:" + shootingMode + ". FocusBrkStep " + focusBracketStepSize.to_s + " "
+    end
     # To see if LiveND used add info to instructions. Not sure this is consistent
     stackedImage = fileEXIF.StackedImage # 
     unless stackedImage == "No" # Stacked Image : No or Focus-stacked
@@ -1146,6 +1152,8 @@ mylioFolder = HOME + "Mylio/Mylio Main Library Folder/2024/" # move to here unle
 case camModel
 when  "OM-1MarkII"
   mylioFolder = mylioFolder + "OM-1-2024/" # ANNUALLY: ADD IN MYLIO, NOT IN FINDER. Good on both iMac and MBP M1 although it's not under iCloud, so requires Mylio for syncing. Not being used
+  mylioFolder =  "/Users/gscar/Pictures/2024.08-waiting for Mylio/" # Temporary hold while waiting for Mylio Fix
+  puts "\n#{__LINE__}. Putting files temporarily in `#{mylioFolder}` waiting for Mylio fix"
 when "DMC-GX8"
   mylioFolder = mylioFolder + "GX8-2024/"
 end
