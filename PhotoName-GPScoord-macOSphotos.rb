@@ -476,7 +476,8 @@ end # timeZone
 
 def bracketed(fn, fileDate, driveMode, stackedImageTrue, shot_no)
   # fB for Focus Bracket. Bkt for bracket. The logic isn't the greatest to show whats going on. Assumed bracketed unless stacked
-  stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "_Bkt" # _fB
+  # stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "_Bkt" _fB
+  stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "bkt" # trying to tighten name compared to above
   # _FS for Focus Stacked. _Stk for stacked. Do I need to diffential different stacking modes
   stackBracket = "_STK" if stackedImageTrue # _FS. All caps to stand out from Bkt
   fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + stackBracket + userCamCode(fn) # only 'fileBaseName = ' to remind me how this is used
