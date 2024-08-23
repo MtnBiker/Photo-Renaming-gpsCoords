@@ -14,7 +14,7 @@
 # TimeStamp will be offset according to camera setting for World Time which should be UTC if the zone matches the Clock Set
 # This may be wrong if those settings aren't updated or even worse if one is right and the other wrong
 puts "#{RUBY_DESCRIPTION} per var RUBY_DESCRIPTION. Ruby version seems to come from .irbrc if run in Nova"
-puts "#{__LINE__}. Top of script. Setting variables and defining methods, and at about line no. 780 enter processing. Search for `## The \"PROGRAM\"` to find that point"
+puts "#{__LINE__}. Top of script. Setting variables and defining methods, and \nat about line no. 780 enter processing. \nSearch for `## The \"PROGRAM\"` to find that point"
 
 require 'fileutils'
 include FileUtils
@@ -22,13 +22,13 @@ require 'find'
 require 'yaml'
 require "time"
 require 'irb' # binding.irb where error checking is desired
-require 'mini_exiftool' # have to update for new versions of Ruby. Other gems seem to be OK
+require 'mini_exiftool' # `gem install mini_exiftool` have to update for new versions of Ruby. 
 # The following three requires are for geonames and then the class. Not using geonames
 # require 'json'
 # require 'open-uri'
 # require 'addressable/template' #  gem install addressable
 require 'logger'
-require 'puts_debuggerer'
+require 'puts_debuggerer' # `gem install puts_debuggerer` for new Ruby versions
 PutsDebuggerer.wrapper = true # Global for all pd
 PutsDebuggerer.formatter = -> (data) {
   puts "-<#{data[:announcer]}>-"
@@ -1149,15 +1149,18 @@ puts "\n#{__LINE__}.Finished adding coordinates. Now move files. Note that \"Add
 # Move to Mylio folder (can't process in this folder or Mylio might import before changes are made)
 # mylioFolder = watchedFolderForImport # Used with Photos app
 # Set for OM, can I check for options depending on camera?
-mylioFolder = HOME + "Mylio/Mylio Main Library Folder/2024/" # move to here unless one of the following
-case camModel
-when  "OM-1MarkII"
-  mylioFolder = mylioFolder + "OM-1-2024/" # ANNUALLY: ADD IN MYLIO, NOT IN FINDER. Good on both iMac and MBP M1 although it's not under iCloud, so requires Mylio for syncing. Not being used
-  mylioFolder =  "/Users/gscar/Pictures/2024.08-waiting for Mylio/" # Temporary hold while waiting for Mylio Fix
-  puts "\n#{__LINE__}. Putting files temporarily in `#{mylioFolder}` waiting for Mylio fix"
-when "DMC-GX8"
-  mylioFolder = mylioFolder + "GX8-2024/"
+mylioFolder = "/Volumes/Mylio 4TB/Mylio_87103a/Mylio Main Library Folder/2024/" # Main Vault
+unless Dir.exist?(mylioFolder) # unless is negative of if
+  # If main vault not mounted use 
+  mylioFolder = HOME + "Mylio/Mylio Main Library Folder/2024/"
 end
+# Can live without this 
+# case camModel
+# when  "OM-1MarkII"
+#   mylioFolder = mylioFolder + "OM-1-2024/" # ANNUALLY: ADD IN MYLIO, NOT IN FINDER. Good on both iMac and MBP M1 although it's not under iCloud, so requires Mylio for syncing. Not being used
+# when "DMC-GX8"
+#   mylioFolder = mylioFolder + "GX8-2024/"
+# end
 moveToMylio(mylioStaging, mylioFolder, timeNowWas)
 
 # timeNowWas = timeStamp(timeNowWas, lineNum)

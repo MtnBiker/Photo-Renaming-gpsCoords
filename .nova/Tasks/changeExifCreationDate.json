@@ -1,0 +1,9 @@
+{
+  "actions" : {
+    "run" : {
+      "enabled" : true,
+      "path" : "Special use Ruby files\/change EXIF Creation Date\/changeExifCreationDate.sorted.rb"
+    }
+  },
+  "openLogOnRun" : "start"
+}
