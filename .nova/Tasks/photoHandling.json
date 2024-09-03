@@ -1,19 +1,19 @@
 {
-  "actions" : {
-    "build" : {
-      "enabled" : true,
-      "shell" : "\/.rubies\/ruby-3.3.0\/bin\/ruby"
+  "actions": {
+    "build": {
+      "enabled": true,
+      "shell": "/.rubies/ruby-3.3.4/bin/ruby"
     },
-    "run" : {
-      "enabled" : true,
-      "path" : "PhotoName-GPScoord-macOSphotos.rb",
-      "postActions" : [
+    "run": {
+      "enabled": true,
+      "path": "PhotoName-GPScoord-macOSphotos.rb",
+      "postActions": [
         {
-          "script" : "PhotoName-GPScoord-macOSphotos.rb",
-          "type" : "runScript"
+          "script": "PhotoName-GPScoord-macOSphotos.rb",
+          "type": "runScript"
         }
       ]
     }
   },
-  "openLogOnRun" : "start"
+  "openLogOnRun": "start"
 }

@@ -869,7 +869,8 @@ Dir.each_child(folderGPX) do |item| # for each photo file
 end
 
 # puts "#{__LINE__}. (an alternative to the above): #{Dir.each_child(folderGPX}." # except causes and erro
-puts "\n#{__LINE__}. Are the gps logs needed listed above in #{folderGPX}?\n\n" # Should check for this since I don't see the message
+puts "\n#{__LINE__}. ##### ARE THE GPS LOGS NEEDED LISTED ### above in #{folderGPX}?\n\n" # Should check for this since I don't see the message
+puts "Parse the dates in the gps files and if not today, put up a flag."
 
 # Two names for SD cards seem common. Is this needed anymore? Caused an error
 # unless File.directory?(srcSDfolder) # negative if, so if srcSDfolder exists skip, other wise change reference to …Alt
@@ -912,6 +913,10 @@ end
  # puts "#{__LINE__}. Temporary for error checking. Dir.entries(mylioStaging): #{Dir.entries(mylioStaging)}" # Task “Custom Task” exited with a non-zero exit status: 1. and from terminal: No such file or directory @ dir_initialize - mylioStaging (Errno::ENOENT)
  # puts "#{__LINE__}. Temporary for error checking. mylioStaging: #{mylioStaging}. Dir.entries(mylioStaging).count: #{Dir.entries(mylioStaging).count}"
 # Check if photos are already in Latest Download folder. A problem because they get reprocessed by gps coordinate adding.
+puts "#{__LINE__}. Got to here. mylioStaging: #{mylioStaging}"
+puts "#{__LINE__}. Got to here. Dir.exist?(mylioStaging) : #{Dir.exist?(mylioStaging)}"
+puts "#{__LINE__}. Breaks on next step if run from Nova. OK from command line. Both in ruby-3.3.4"
+puts "#{__LINE__}. Got to here. Dir.entries(mylioStaging) : #{Dir.entries(mylioStaging)}" #919. Got to here. Dir.entries(mylioStaging) : [".", "..", ".DS_Store"]
 folderPhotoCount = Dir.entries(mylioStaging).count - 3 # -3 is a crude way to take care of ., .., .. Crude is probably OK since this isn't critical. If one real photo is there, not a big problem
 # puts "#{__LINE__}. Temporary for error checking. folderPhotoCount: #{folderPhotoCount}"
 if folderPhotoCount > 0
@@ -922,6 +927,7 @@ else
   puts "\n#{__LINE__}. 'Processed photos to be imported to Mylio/' folder is empty and script will continue."
   puts "If script stops here, check Pashua, not going back"
 end
+
 # Ask whether working with photo files from SD card or HD
 # fromWhere are the photos?
 fromWhere = whichLoc(sdCard) # This is pulling in first Pashua window (1. ), SDorHD.rb which has been required # 
@@ -1152,7 +1158,7 @@ puts "\n#{__LINE__}.Finished adding coordinates. Now move files. Note that \"Add
 mylioFolder = "/Volumes/Mylio 4TB/Mylio_87103a/Mylio Main Library Folder/2024/" # Main Vault
 unless Dir.exist?(mylioFolder) # unless is negative of if
   # If main vault not mounted use 
-  mylioFolder = HOME + "Mylio/Mylio Main Library Folder/2024/"
+  mylioFolder = HOME + "Mylio/Mylio Main Library Folder/2020s/2024/"
 end
 # Can live without this 
 # case camModel
