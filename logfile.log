@@ -26,3 +26,63 @@ E, [2024-06-09T12:42:15.673697 #38994] ERROR -- : An error occurred: Operation n
 E, [2024-06-09T12:42:15.673755 #38994] ERROR -- : <internal:dir>:184:in `open'
 /Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:892:in `each_child'
 /Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:892:in `<main>'
+E, [2024-08-30T15:50:42.550970 #30780] ERROR -- : An error occurred: Operation not permitted @ dir_initialize - /Volumes/MtnBikerSSD/_Download folder/Latest Processed photos-Import to Mylio/
+E, [2024-08-30T15:50:42.560886 #30780] ERROR -- : <internal:dir>:184:in `open'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `each_child'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `<main>'
+E, [2024-08-30T15:57:00.201503 #30835] ERROR -- : An error occurred: Operation not permitted @ dir_initialize - /Volumes/MtnBikerSSD/_Download folder/Latest Processed photos-Import to Mylio/
+E, [2024-08-30T15:57:00.201565 #30835] ERROR -- : <internal:dir>:184:in `open'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:906:in `each_child'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:906:in `<main>'
+E, [2024-08-30T15:57:27.361429 #30841] ERROR -- : An error occurred: Operation not permitted @ dir_initialize - /Volumes/MtnBikerSSD/_Download folder/Latest Processed photos-Import to Mylio/
+E, [2024-08-30T15:57:27.361708 #30841] ERROR -- : <internal:dir>:184:in `open'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:906:in `each_child'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:906:in `<main>'
+E, [2024-08-30T15:58:10.553097 #30846] ERROR -- : An error occurred: Operation not permitted @ dir_initialize - /Volumes/MtnBikerSSD/_Download folder/Latest Processed photos-Import to Mylio/
+E, [2024-08-30T15:58:10.553225 #30846] ERROR -- : <internal:dir>:184:in `open'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:906:in `each_child'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:906:in `<main>'
+E, [2024-08-30T15:59:04.809300 #30851] ERROR -- : An error occurred: Operation not permitted @ dir_initialize - /Volumes/MtnBikerSSD/_Download folder/Latest Processed photos-Import to Mylio/
+E, [2024-08-30T15:59:04.811713 #30851] ERROR -- : <internal:dir>:184:in `open'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `each_child'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `<main>'
+E, [2024-08-30T15:59:53.028762 #30865] ERROR -- : An error occurred: Operation not permitted @ dir_initialize - /Volumes/MtnBikerSSD/_Download folder/Latest Processed photos-Import to Mylio/
+E, [2024-08-30T15:59:53.029638 #30865] ERROR -- : <internal:dir>:184:in `open'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `each_child'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `<main>'
+E, [2024-08-30T16:01:05.789453 #30868] ERROR -- : An error occurred: Operation not permitted @ dir_initialize - /Volumes/MtnBikerSSD/_Download folder/Latest Processed photos-Import to Mylio/
+E, [2024-08-30T16:01:05.789936 #30868] ERROR -- : <internal:dir>:184:in `open'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `each_child'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `<main>'
+E, [2024-08-30T19:35:41.125561 #33631] ERROR -- : An error occurred: Operation not permitted @ dir_initialize - /Volumes/MtnBikerSSD/_Download folder/Latest Processed photos-Import to Mylio/
+E, [2024-08-30T19:35:41.125862 #33631] ERROR -- : <internal:dir>:184:in `open'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `each_child'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `<main>'
+E, [2024-08-30T19:36:21.876183 #33645] ERROR -- : An error occurred: Operation not permitted @ dir_initialize - /Volumes/MtnBikerSSD/_Download folder/Latest Processed photos-Import to Mylio/
+E, [2024-08-30T19:36:21.876824 #33645] ERROR -- : <internal:dir>:184:in `open'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `each_child'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `<main>'
+E, [2024-08-30T19:40:55.901309 #33740] ERROR -- : An error occurred: Operation not permitted @ dir_initialize - /Volumes/MtnBikerSSD/_Download folder/Latest Processed photos-Import to Mylio/
+E, [2024-08-30T19:40:55.901823 #33740] ERROR -- : <internal:dir>:184:in `open'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `each_child'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `<main>'
+E, [2024-08-30T19:41:44.148893 #33759] ERROR -- : An error occurred: Operation not permitted @ dir_initialize - /Volumes/MtnBikerSSD/_Download folder/Latest Processed photos-Import to Mylio/
+E, [2024-08-30T19:41:44.149213 #33759] ERROR -- : <internal:dir>:184:in `open'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `each_child'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `<main>'
+E, [2024-08-30T19:43:02.989031 #33771] ERROR -- : An error occurred: Operation not permitted @ dir_initialize - /Volumes/MtnBikerSSD/_Download folder/Latest Processed photos-Import to Mylio/
+E, [2024-08-30T19:43:02.989272 #33771] ERROR -- : <internal:dir>:184:in `open'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `each_child'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `<main>'
+E, [2024-08-31T17:12:50.130339 #56306] ERROR -- : An error occurred: Operation not permitted @ dir_initialize - /Volumes/MtnBikerSSD/_Download folder/Latest Processed photos-Import to Mylio/
+E, [2024-08-31T17:12:50.132410 #56306] ERROR -- : <internal:dir>:184:in `open'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `each_child'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `<main>'
+E, [2024-09-01T07:57:55.520023 #79647] ERROR -- : An error occurred: Operation not permitted @ dir_initialize - /Volumes/MtnBikerSSD/_Download folder/Latest Processed photos-Import to Mylio/
+E, [2024-09-01T07:57:55.521604 #79647] ERROR -- : <internal:dir>:184:in `open'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `each_child'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `<main>'
+E, [2024-09-10T15:10:35.304274 #59177] ERROR -- : An error occurred: Operation not permitted @ dir_initialize - /Volumes/MtnBikerSSD/_Download folder/Latest Processed photos-Import to Mylio/
+E, [2024-09-10T15:10:35.305608 #59177] ERROR -- : <internal:dir>:184:in `open'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `each_child'
+/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb:905:in `<main>'

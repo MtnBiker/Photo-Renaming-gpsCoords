@@ -14,7 +14,7 @@
 # TimeStamp will be offset according to camera setting for World Time which should be UTC if the zone matches the Clock Set
 # This may be wrong if those settings aren't updated or even worse if one is right and the other wrong
 puts "#{RUBY_DESCRIPTION} per var RUBY_DESCRIPTION. Ruby version seems to come from .irbrc if run in Nova"
-puts "#{__LINE__}. Top of script. Setting variables and defining methods, and \nat about line no. 780 enter processing. \nSearch for `## The \"PROGRAM\"` to find that point"
+puts "#{__LINE__}. Top of script. Setting variables and defining methods, and \nat about line no. 860 enter processing. \nSearch for `## The \"PROGRAM\"` to find that point"
 
 require 'fileutils'
 include FileUtils
@@ -53,8 +53,8 @@ require_relative 'lib/renamePashua' # Dialog for renaming without moving
 require_relative 'lib/SDorHD'
 # require_relative 'lib/gpsAddLocationPashua' # Dialog for adding location information based GPS coordinates in file EXIF without moving. No longer supported
 # The following lines and require 'logger' create a log file 
-logger = Logger.new('logfile.log') # ChatGPT to find problems
-logger.level = Logger::DEBUG
+# logger = Logger.new('logfile.log') # ChatGPT to find problems
+# logger.level = Logger::DEBUG
 
 HOME = "/Users/gscar/"
 thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
@@ -143,6 +143,7 @@ timeZonesFile = thisScript + "currentData/Greg camera time zones.yml"
 
 # GPS log files. Will this work from laptop
 folderGPX = HOME + "Documents/GPS-Maps-docs/  GPX daily logs/2024 GPX logs/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
+folderGPX = "/Users/gscar/Library/Mobile Documents/com~apple~CloudDocs/Documents/GPS-Maps-docs/  GPX daily logs/2024 GPX logs"
 puts "#{__LINE__}. Must manually set folderGPX for GPX file folders. Particularly important at start of new year AND if working on photos not in current year.\n       Using: #{folderGPX}\n"
 
 # MODULES
@@ -580,7 +581,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
     # fileEXIF = Exif::Data.new(fn) # see if can just make this change, probably break something. 2017.01.13 doesn't work with Raw, but developer is working it.
     camModel = fileEXIF.model # this will in general be the same for each file and the returned value will be for the last file
     stackedImage = fileEXIF.StackedImage
-
+    # puts "#{__LINE__}. stackedImage #{stackedImage}"
     # To add display for Mylio. Don't think this is needed anymore
     # Generally jpgs are not added to Mylio, but if there is a filter effect want the jpg.
     # May need to change the terminology for OM-1
@@ -647,17 +648,18 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       # But DriveMode can tell what kind of sequence, although not sure that's needed in this script
      driveMode = fileEXIF.DriveMode # OMDS only, not in Lumix
      # DriveMode       : Focus Bracketing, Shot 8; Electronic shutter
-      
-     driveModeFb = driveMode.split(',')[0]
-     # puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
-     fBmark = ""
-     if driveModeFb.to_s == "Focus Bracketing"
-       # fBmark = "_fB" 
-       bracketing = true
-     else
-       bracketing = false
-     end
-
+    fBmark = "" # is this still needed?
+    if !driveMode.nil? # doesn't exist in some cases
+       driveModeFb = driveMode.split(',')[0]
+       # puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
+       
+       if driveModeFb.to_s == "Focus Bracketing"
+         # fBmark = "_fB" 
+         bracketing = true
+       else
+         bracketing = false
+       end
+    end
       # Not using specialMode now, but as an option
       # specialMode = fileEXIF.SpecialMode
 
@@ -678,8 +680,10 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       # Add check for bracketing and treat as needed, then onBack and treat as needed.
       stackedImageTrue = false
       # stackedImageTrue = true if stackedImage[0..12].to_s == "Focus-stacked" # will this work? 
-      if stackedImage[0..12].to_s == "Focus-stacked"
-       stackedImageTrue = true
+      unless stackedImage.nil?
+        if stackedImage[0..12].to_s == "Focus-stacked"
+         stackedImageTrue = true
+        end
       end
       # puts "#{__LINE__} stackedImage[0..12]: #{stackedImage[0..12]}. stackedImageTrue: #{stackedImageTrue}" #  stackedImage[0..12]: Focus-stacked. stackedImageTrue: false
       if bracketing or stackedImageTrue
@@ -903,11 +907,11 @@ end
 
  begin
   Dir.each_child(mylioStaging) {|x| puts "#{__LINE__}. File #{x} already in #{mylioStaging}. Tells which files need to be removed?" } # Task “Custom Task” exited with a non-zero exit status: 1., but runs from command line
- rescue => e
-   logger.error("An error occurred: #{e.message}")
-   logger.error(e.backtrace.join("\n"))
- ensure
-   logger.close
+ # rescue => e
+ #   logger.error("An error occurred: #{e.message}")
+ #   logger.error(e.backtrace.join("\n"))
+ # ensure
+ #   logger.close
  end
 
  # puts "#{__LINE__}. Temporary for error checking. Dir.entries(mylioStaging): #{Dir.entries(mylioStaging)}" # Task “Custom Task” exited with a non-zero exit status: 1. and from terminal: No such file or directory @ dir_initialize - mylioStaging (Errno::ENOENT)
@@ -1029,7 +1033,7 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
   puts "\n#{__LINE__}. srcSDfolder: #{srcSDfolder}.  srcSDsuffix: #{srcSDsuffix}" # srcSDfolder: /Volumes/OM SYSTEM/DCIM/.  srcSDsuffix: OMSYS
   begin
     if srcSDsuffix == "OMSYS"
-      srcSD = "/Volumes/OM SYSTEM/DCIM/100OMSYS"
+      srcSD = "/Volumes/OM SYSTEM/DCIM/101OMSYS"
     else # LUMIX
       srcSD = srcSDfolder + lastPhotoFilename.chop.slice(1,3) + srcSDsuffix
     end
