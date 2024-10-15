@@ -1,4 +1,8 @@
 #!/usr/bin/env ruby
+
+# /Volumes/OM SYSTEM/lastPhotoRead.txt
+# /Volumes/Macintosh HD/Users/gscar/Library/Mobile Documents/com~apple~CloudDocs/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb
+
 # Set the PATH to include the Homebrew bin directory. 4/3/2024 problems with locating exiftool and this fixed it. Tried to do in .zshrc, but maybe needs a reboot? Doesn't help running in Nova
 # ENV['PATH'] = '/opt/homebrew/bin:' + ENV['PATH'] Now working in 3.3.0
 # Folder names use Mylio and the ones for temporary use are fine. It's just the final location that matters. And I'm trying to move them to a folder that Photos.app will watch.
@@ -52,6 +56,7 @@ require_relative 'lib/Photo_Naming_Pashua–HD2'
 require_relative 'lib/renamePashua' # Dialog for renaming without moving
 require_relative 'lib/SDorHD'
 # require_relative 'lib/gpsAddLocationPashua' # Dialog for adding location information based GPS coordinates in file EXIF without moving. No longer supported
+
 # The following lines and require 'logger' create a log file 
 # logger = Logger.new('logfile.log') # ChatGPT to find problems
 # logger.level = Logger::DEBUG
@@ -809,7 +814,7 @@ def exiftoolAddCoordinates(photoFolder, folderGPX, tzoLoc)
   # exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "-overwrite_original -if not $gpslatitude") # Invalid TAG name: "overwrite_original -if not $gpslatitude" as expected
   # exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "-overwrite_original", " -if 'not $gpslatitude'") # No matching file found for -geotag option
   # exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "-overwrite_original -if " , "'not $gpslatitude'") #Invalid TAG name: "overwrite_original -if " / No matching file found for -geotag option
-  puts "\n#{__LINE__}. Any existing geotags will be overwritten until I can figure out how to add -if 'not $gpslatitude')"
+  puts "\n#{__LINE__}. Any existing geotags will be overwritten until I can figure out how to add -if 'not $gpslatitude' gpxLogs: #{gpxLogs}. photoFolder; #{photoFolder})"
   exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "-overwrite_original") # will overwrite existing tags
   puts "#{__LINE__}. exiftool geotag finished #{Time.now.strftime("%I:%M:%S %p")}"
   puts "\n#{__LINE__}======== End of exiftool geotag ==========  #{Time.now.strftime("%I:%M:%S %p")}\n"
@@ -917,10 +922,10 @@ end
  # puts "#{__LINE__}. Temporary for error checking. Dir.entries(mylioStaging): #{Dir.entries(mylioStaging)}" # Task “Custom Task” exited with a non-zero exit status: 1. and from terminal: No such file or directory @ dir_initialize - mylioStaging (Errno::ENOENT)
  # puts "#{__LINE__}. Temporary for error checking. mylioStaging: #{mylioStaging}. Dir.entries(mylioStaging).count: #{Dir.entries(mylioStaging).count}"
 # Check if photos are already in Latest Download folder. A problem because they get reprocessed by gps coordinate adding.
-puts "#{__LINE__}. Got to here. mylioStaging: #{mylioStaging}"
-puts "#{__LINE__}. Got to here. Dir.exist?(mylioStaging) : #{Dir.exist?(mylioStaging)}"
-puts "#{__LINE__}. Breaks on next step if run from Nova. OK from command line. Both in ruby-3.3.4"
-puts "#{__LINE__}. Got to here. Dir.entries(mylioStaging) : #{Dir.entries(mylioStaging)}" #919. Got to here. Dir.entries(mylioStaging) : [".", "..", ".DS_Store"]
+# puts "#{__LINE__}. Got to here. mylioStaging: #{mylioStaging}"
+# puts "#{__LINE__}. Got to here. Dir.exist?(mylioStaging) : #{Dir.exist?(mylioStaging)}"
+# puts "#{__LINE__}. Breaks on next step if run from Nova. OK from command line. Both in ruby-3.3.4"
+# puts "#{__LINE__}. Got to here. Dir.entries(mylioStaging) : #{Dir.entries(mylioStaging)}" #919. Got to here. Dir.entries(mylioStaging) : [".", "..", ".DS_Store"]
 folderPhotoCount = Dir.entries(mylioStaging).count - 3 # -3 is a crude way to take care of ., .., .. Crude is probably OK since this isn't critical. If one real photo is there, not a big problem
 # puts "#{__LINE__}. Temporary for error checking. folderPhotoCount: #{folderPhotoCount}"
 if folderPhotoCount > 0
@@ -932,16 +937,20 @@ else
   puts "If script stops here, check Pashua, not going back"
 end
 
-# Ask whether working with photo files from SD card or HD
+# Ask whether working with photo files from SD card or HD. 
 # fromWhere are the photos?
-fromWhere = whichLoc(sdCard) # This is pulling in first Pashua window (1. ), SDorHD.rb which has been required # 
-# puts "#{__LINE__}. fromWhere: #{fromWhere}" #{"rename"=>"1", "whichDrive"=>"SD card to be selected in the next window", "gpsLocation"=>"0", "gpsCoords"=>"0", "cb"=>"0"}
-# puts "\n#{__LINE__}. fromWhere[\"rename\"]: #{fromWhere["rename"]}"
-# puts "#{__LINE__}. fromWhere[\"gpsCoords\"]: #{fromWhere["gpsCoords"]}"
+fromWhere = whichLoc(sdCard) # This is pulling in first Pashua window (1. ), lib/SDorHD.rb which has been required. def whichLoc(sdCard) defines that file # 
+puts "#{__LINE__}. fromWhere: #{fromWhere}" 
+#{"rename"=>"1", "whichDrive"=>"SD card to be selected in the next window", "gpsLocation"=>"0", "gpsCoords"=>"0", "cb"=>"0"}
+# fromWhere: {"rename"=>"0", "whichDrive"=>"SD card to be selected in the next window.", "gpsCoords"=>"0", "cb"=>"0"}
+puts "\n#{__LINE__}. fromWhere[\"rename\"]: #{fromWhere["rename"]}"
+puts "#{__LINE__}. fromWhere[\"whichDrive\"]: #{fromWhere["whichDrive"]}"
+puts "#{__LINE__}. fromWhere[\"gpsCoords\"]: #{fromWhere["gpsCoords"]}"
 # puts "#{__LINE__}. fromWhere[\"gpsLocation\"]: #{fromWhere["gpsLocation"]}"
-whichDrive = fromWhere["whichDrive"][0].chr # only using the first character
-# A: already downloaded. S: SD card. 
-# puts "\n#{__LINE__}.. whichDrive: #{whichDrive}. (A: already downloaded. S: SD card.)" #\nWill convert to SD or HD
+# puts "#{__LINE__}. fromWhere[0]: #{fromWhere[0]}" # Always blank now
+whichDrive = fromWhere["whichDrive"].chr # only using the first character
+# A: already downloaded. S: SD card, R: for rename ?. 
+puts "\n#{__LINE__}.. whichDrive: #{whichDrive}. (A: already downloaded. S: SD card.)" #\nWill convert to SD or HD
 # Set the return into a more friendly variable and set the src of the photos to be processed
 whichOne = whichOne(whichDrive) # parsing result to get HD or SD
 # puts "#{__LINE__}. fromWherefromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}" # fromWhere not defined
@@ -962,7 +971,6 @@ if fromWhere["rename"] == "1" # Renaming only or could use if whichOne == "Renam
   # abort # break gives compile error
   abort if (whichDrive == "R") # break doesn't work, but abort seems to
 end
-
 # Option for adding GPS coordinates while not moving photos
 if fromWhere["gpsCoords"] == "1"
   # srcGpsAdd folder with photos to add gps coordinates
@@ -981,12 +989,11 @@ if fromWhere["gpsCoords"] == "1"
     fn = src + item # long file name
     fileEXIF = MiniExiftool.new(fn) # used several times
     fileDateTimeOriginal = fileEXIF.dateTimeOriginal
-    break # stop once get to first file in folder.
+    break # stop once get to first file in folder. Only need the above three values from one file to determine for whole folder?
   end
   tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile)
-  # puts "#{__LINE__} Debugging.\n srcGpsAdd: #{srcGpsAdd} \n folderGPX: #{folderGPX}  \n gpsPhotoPerl: #{gpsPhotoPerl}  \n tzoLoc: #{tzoLoc}"
-  # perlOutput = addCoordinates(srcGpsAdd, folderGPX, gpsPhotoPerl, tzoLoc)
-  addGpsCoordinates = exiftoolAddCoordinates(mylioStaging, folderGPX, tzoLoc) # not using addGpsCoordinates = 
+  puts "#{__LINE__} Debugging.\n srcGpsAdd: #{srcGpsAdd} \n folderGPX: #{folderGPX} \n tzoLoc: #{tzoLoc}"
+  addGpsCoordinates = exiftoolAddCoordinates(srcGpsAdd, folderGPX, tzoLoc) # not using addGpsCoordinates = 
   puts "#{__LINE__}. Added coordinates to photos in #{srcGpsAdd}" # \nMultiline perlOutput follows:\n#{perlOutput}" # doing this in the addCoordinates()
   abort # break gives compile error
   # abort if (whichDrive == "R") # break doesn't work, but abort seems to
