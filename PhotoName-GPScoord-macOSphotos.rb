@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+# issue with path for iCloud documents
 # /Volumes/OM SYSTEM/lastPhotoRead.txt
 # /Volumes/Macintosh HD/Users/gscar/Library/Mobile Documents/com~apple~CloudDocs/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb
 
@@ -17,6 +18,8 @@
 # 2023 Clock Set is Setting camera to local time which will show as FileModifyDate, DateTimeOriginal, CreateDate, SubSecCreateDate…
 # TimeStamp will be offset according to camera setting for World Time which should be UTC if the zone matches the Clock Set
 # This may be wrong if those settings aren't updated or even worse if one is right and the other wrong
+
+# Formerly used a Perl script gpsPhoto.pl which has not been available for years, but I had a copy which I used. Changed to using an ExifTool command. I think I did this when I got the OM-1
 puts "#{RUBY_DESCRIPTION} per var RUBY_DESCRIPTION. Ruby version seems to come from .irbrc if run in Nova"
 puts "#{__LINE__}. Top of script. Setting variables and defining methods, and \nat about line no. 860 enter processing. \nSearch for `## The \"PROGRAM\"` to find that point"
 
@@ -122,6 +125,7 @@ photosRenamedTo       = thisScript + "currentData/photosRenamedTo.txt" #  Had it
 downloadsFolders = "/Volumes/Daguerre/_Download folder/"
 # Maybe should start with what computer I'm on then make decisions about what's plugged in. Also consider the 10GB as a primary?
 # Process in MtnBikerSSD or Daguerre if plugged in, otherwise the computer in use which is decided later?
+# puts "#{__LINE__}. downloadsFolders: #{downloadsFolders}." 
 if File.exist?(downloadsFolders)
   puts "#{__LINE__}. Daguerre is mounted"
 else
@@ -144,10 +148,9 @@ srcAddLocation  = downloadsFolders + "Latest Processed photos-Import to Mylio/" 
 # timeZonesFile = HOME + "Dropbox/scriptsEtc/Greg camera time zones.yml"
 timeZonesFile = thisScript + "currentData/Greg camera time zones.yml"
 # timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with. Only use once, so this just confused things
-# gpsPhotoPerl = thisScript + "lib/gpsPhoto.pl" # Not using anymore 4/5/2024
 
 # GPS log files. Will this work from laptop
-folderGPX = HOME + "Documents/GPS-Maps-docs/  GPX daily logs/2024 GPX logs/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't. This isn't used by perl script
+folderGPX = HOME + "Documents/GPS-Maps-docs/  GPX daily logs/2024 GPX logs/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't.
 folderGPX = "/Users/gscar/Library/Mobile Documents/com~apple~CloudDocs/Documents/GPS-Maps-docs/  GPX daily logs/2024 GPX logs"
 puts "#{__LINE__}. Must manually set folderGPX for GPX file folders. Particularly important at start of new year AND if working on photos not in current year.\n       Using: #{folderGPX}\n"
 
@@ -736,15 +739,13 @@ end # rename ing photo files in the downloads folder and writing in original tim
 
 
 def exiftoolAddCoordinates(photoFolder, folderGPX, tzoLoc)
-  # Remember writing a command line command
+  # Remember writing a command line command which uses exiftool
   # --timeoffset seconds     Camera time + seconds = GMT. No default.  
   # maxTimeDiff = 50000 # seconds, default 120, but I changed it 2011.07.26 to allow for pictures taken at night but GPS off. Distance still has to be reasonable, that is the GPS had to be at the same place in the morning as the night before as set by the variable below
   # This works, put in because having problems with file locations
-  # perlOutput = `perl \"#{gpsPhotoPerl.shellescape}\" --dir #{photoFolder.shellescape} --gpsdir #{folderGPX.shellescape} --timeoffset 0 --maxtimediff 50000 2>&1`
-  
+    
   # photoFolder is where the photos are that are going to have gps coordinates added. A temporary location. Usually called mylioStaging is the overall script
   # folderGPX is where the gpx tracks are
-  # gpsPhotoPerl is where gpsPhoto.pl is
   # tzoLoc is the time zone from Greg camera time zones.yml file. Since GPS records UTM. Camera time zone setting varies. Camera only records the time it is set for, but doesn't accurately report the zone. Currently exiftool is saying the zone is the zone of the computer running the script. tzoLoc value can be changed in this module. tzoLoc is hours and gets changed to seconds as timeOffset for use by gpsPhoto.pl
   # <--timeoffset seconds> A positive value means that the camera is behind in time, a negative value means that the camera is ahead in time.
   
@@ -788,7 +789,7 @@ def exiftoolAddCoordinates(photoFolder, folderGPX, tzoLoc)
     #     # What does utc_offset do for the above. dateTimeOriginal is just a time, e.g., 2018:12:31 21:38:32, which is the time the camera thinks it is. Camera doesn't know about zone. Camera may, but from dateTimeOriginal, can't tell the time zone.
     #     puts "#{__LINE__}. timeOffset: #{timeOffset} for DMC-TS5 photos stamped in local time."
     #   else # GX7 time is UTC. iPhone ends up here too
-    #     timeOffset = 0 # camelCase, but perl variable is lowercase
+    #     timeOffset = 0
     #     puts "#{__LINE__}. timeOffset: #{timeOffset} sec (#{tzoLoc} hours) with photos stamped in GMT"
       end # if camModel
       # puts "#{__LINE__} timeOffset: #{timeOffset} triple checking"
@@ -816,11 +817,12 @@ def exiftoolAddCoordinates(photoFolder, folderGPX, tzoLoc)
   # exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "-overwrite_original -if " , "'not $gpslatitude'") #Invalid TAG name: "overwrite_original -if " / No matching file found for -geotag option
   puts "\n#{__LINE__}. Any existing geotags will be overwritten until I can figure out how to add -if 'not $gpslatitude' gpxLogs: #{gpxLogs}. photoFolder; #{photoFolder})"
   exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "-overwrite_original") # will overwrite existing tags
-  puts "#{__LINE__}. exiftool geotag finished #{Time.now.strftime("%I:%M:%S %p")}"
-  puts "\n#{__LINE__}======== End of exiftool geotag ==========  #{Time.now.strftime("%I:%M:%S %p")}\n"
+  puts "\n#{__LINE__}. exiftool report above #{Time.now.strftime("%I:%M:%S %p")}"
+  # puts "\n#{__LINE__}======== End of exiftool geotag ==========  #{Time.now.strftime("%I:%M:%S %p")}\n"
   # return exiftoolGps # return is true unless want to get the notes, but they show in script results
 end # exiftoolAddCoordinates
 
+# Not being used
 def writeTimeDiff(perlOutput)
   perlOutput.each_line do |line|
     if line =~ /timediff=/
@@ -935,22 +937,23 @@ if folderPhotoCount > 0
 else
   puts "\n#{__LINE__}. 'Processed photos to be imported to Mylio/' folder is empty and script will continue."
   puts "If script stops here, check Pashua, not going back"
+  # puts "#{__LINE__}. sdCard: #{sdCard}. since choking on this sometimes" 
 end
 
 # Ask whether working with photo files from SD card or HD. 
 # fromWhere are the photos?
-fromWhere = whichLoc(sdCard) # This is pulling in first Pashua window (1. ), lib/SDorHD.rb which has been required. def whichLoc(sdCard) defines that file # 
+fromWhere = whichLoc(sdCard) # This is pulling in first Pashua window (1. ), lib/SDorHD.rb which has been required. def whichLoc(sdCard) defines that file
 puts "#{__LINE__}. fromWhere: #{fromWhere}" 
 #{"rename"=>"1", "whichDrive"=>"SD card to be selected in the next window", "gpsLocation"=>"0", "gpsCoords"=>"0", "cb"=>"0"}
 # fromWhere: {"rename"=>"0", "whichDrive"=>"SD card to be selected in the next window.", "gpsCoords"=>"0", "cb"=>"0"}
-puts "\n#{__LINE__}. fromWhere[\"rename\"]: #{fromWhere["rename"]}"
-puts "#{__LINE__}. fromWhere[\"whichDrive\"]: #{fromWhere["whichDrive"]}"
-puts "#{__LINE__}. fromWhere[\"gpsCoords\"]: #{fromWhere["gpsCoords"]}"
+# puts "\n#{__LINE__}. fromWhere[\"rename\"]: #{fromWhere["rename"]}"
+# puts "#{__LINE__}. fromWhere[\"whichDrive\"]: #{fromWhere["whichDrive"]}"
+# puts "#{__LINE__}. fromWhere[\"gpsCoords\"]: #{fromWhere["gpsCoords"]}"
 # puts "#{__LINE__}. fromWhere[\"gpsLocation\"]: #{fromWhere["gpsLocation"]}"
 # puts "#{__LINE__}. fromWhere[0]: #{fromWhere[0]}" # Always blank now
 whichDrive = fromWhere["whichDrive"].chr # only using the first character
 # A: already downloaded. S: SD card, R: for rename ?. 
-puts "\n#{__LINE__}.. whichDrive: #{whichDrive}. (A: already downloaded. S: SD card.)" #\nWill convert to SD or HD
+# puts "\n#{__LINE__}.. whichDrive: #{whichDrive}. (A: already downloaded. S: SD card.)" #\nWill convert to SD or HD
 # Set the return into a more friendly variable and set the src of the photos to be processed
 whichOne = whichOne(whichDrive) # parsing result to get HD or SD
 # puts "#{__LINE__}. fromWherefromWhere: #{fromWhere}. whichDrive: #{whichDrive}. whichOne: #{whichOne}" # fromWhere not defined
@@ -992,9 +995,9 @@ if fromWhere["gpsCoords"] == "1"
     break # stop once get to first file in folder. Only need the above three values from one file to determine for whole folder?
   end
   tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile)
-  puts "#{__LINE__} Debugging.\n srcGpsAdd: #{srcGpsAdd} \n folderGPX: #{folderGPX} \n tzoLoc: #{tzoLoc}"
+  # puts "#{__LINE__} Debugging.\n srcGpsAdd: #{srcGpsAdd} \n folderGPX: #{folderGPX} \n tzoLoc: #{tzoLoc}"
   addGpsCoordinates = exiftoolAddCoordinates(srcGpsAdd, folderGPX, tzoLoc) # not using addGpsCoordinates = 
-  puts "#{__LINE__}. Added coordinates to photos in #{srcGpsAdd}" # \nMultiline perlOutput follows:\n#{perlOutput}" # doing this in the addCoordinates()
+  puts "#{__LINE__}. Added coordinates to photos in #{srcGpsAdd}"
   abort # break gives compile error
   # abort if (whichDrive == "R") # break doesn't work, but abort seems to
 end
@@ -1149,7 +1152,6 @@ puts "\n#{__LINE__}. Using exiftool to add gps coordinates. Will take a while as
 
 # puts "\n#{__LINE__} tzoLoc: #{tzoLoc}. Because GX8 and some other cameras use local time and not GMT as this script was originally written for. All photos must be in same time zone."
 # Add GPS coordinates.
-# perlOutput = addCoordinates(mylioStaging, folderGPX, gpsPhotoPerl, tzoLoc)
 addGpsCoordinates = exiftoolAddCoordinates(mylioStaging, folderGPX, tzoLoc) # not using `addGpsCoordinates = `
 
 timeNowWas = timeStamp(timeNowWas, lineNum)
@@ -1159,7 +1161,6 @@ timeNowWas = timeStamp(timeNowWas, lineNum)
 # writeTimeDiff(addGpsCoordinates)
 
 # timeNowWas = timeStamp(timeNowWas, lineNum)
-# Parce perlOutput and add maxTimeDiff info to photo files
 
 puts "\n#{__LINE__}.Finished adding coordinates. Now move files. Note that \"Adding location information to photo files\" is commented out, i.e., geographic descriptions not being added, because Mylio finds this info."
 

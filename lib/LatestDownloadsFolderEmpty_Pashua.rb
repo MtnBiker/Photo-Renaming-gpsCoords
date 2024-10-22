@@ -47,21 +47,21 @@ icon  = File.dirname($0) << "/.icon.png";
 bgimg = File.dirname($0) << "/.demo.png";
 
 if File::exist?(icon)
-	# Display Pashua's icon
-	Config << "img.type = image
-	img.x = 530
-	img.y = 255
-	img.path = #{icon}
-	"
+  # Display Pashua's icon
+  Config << "img.type = image
+  img.x = 530
+  img.y = 255
+  img.path = #{icon}
+  "
 end
 
 if File::exist?(bgimg)
-	# Display Pashua's icon
-	Config << "bg.type = image
-	bg.x = 30
-	bg.y = 2
-	bg.path = #{bgimg}
-	"
+  # Display Pashua's icon
+  Config << "bg.type = image
+  bg.x = 30
+  bg.y = 2
+  bg.path = #{bgimg}
+  "
 end
 
 res = pashua_run(config, 'utf8')
