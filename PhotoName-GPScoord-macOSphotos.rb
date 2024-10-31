@@ -220,7 +220,7 @@ def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, th
       cardCount += 1
       # puts src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript
       # break These two lines some for error checking, bu break didn't stop the script
-      print(".") # crude activity bar. This doesn't happen
+      # print(".") # crude activity bar. This doesn't happen
       # put cardCount # another try at activity bar
       # puts "#{__LINE__}.. src/item: #{src}#{item}."
       fn = src + "/" + item # 2019.05.08 added /. Hadn't had it before. Maybe the problem is with src
@@ -483,12 +483,12 @@ def timeZone(fileDateTimeOriginal, timeZonesFile )
   # puts "#{__LINE__}. #{i}. fileDateTimeOriginal: #{fileDateTimeOriginal} fileDateTimeOriginal.class: #{fileDateTimeOriginal.class}. theTimeZone: #{theTimeZone}. "  return theTimeZone
 end # timeZone
 
-def bracketed(fn, fileDate, driveMode, stackedImageTrue, shot_no)
+def bracketed(fn, fileDate, driveMode, stackedImageBoolean, shot_no)
   # fB for Focus Bracket. Bkt for bracket. The logic isn't the greatest to show whats going on. Assumed bracketed unless stacked
   # stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "_Bkt" _fB
   stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "bkt" # trying to tighten name compared to above
   # _FS for Focus Stacked. _Stk for stacked. Do I need to diffential different stacking modes
-  stackBracket = "_STK" if stackedImageTrue # _FS. All caps to stand out from Bkt
+  stackBracket = "_STK" if stackedImageBoolean # _FS. All caps to stand out from Bkt
   fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + stackBracket + userCamCode(fn) # only 'fileBaseName = ' to remind me how this is used
 end
 
@@ -540,12 +540,15 @@ def oneBackTrue(src, fn, fnp, fnpPrev, subSecExists, subSec, subSecPrev, fileDat
     # puts "#{__LINE__}. driveMode: #{driveMode}. driveMode.class: #{driveMode.class} for . " # error if?
     if driveMode.class == "NilClass"
       fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s + userCamCode(fn)
+      puts "#{__LINE__} #{fileBaseName} has dupCount" # debug 
     elsif driveMode.length > 0
       match = driveMode.match(/Shot (\d{1,3})/)
       if match
-        shot_no = match[1].to_i 
+        shot_no = match[1].to_i
+        puts "#{__LINE__} #{fileBaseName} is shot that contributed to a Focus Stacked image" # debug 
       else 
         shot_no = "FS" # for an in camera Focus Stacked image FIXME. This should not be in oneBackTrue
+        puts "#{__LINE__} #{fileBaseName} an in camera Focus Stacked image and the contibuting images should not be sent to Mylio." # debug
       end
       fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s + "(" + shot_no + ")" + userCamCode(fn)
       
@@ -589,6 +592,9 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
     # fileEXIF = Exif::Data.new(fn) # see if can just make this change, probably break something. 2017.01.13 doesn't work with Raw, but developer is working it.
     camModel = fileEXIF.model # this will in general be the same for each file and the returned value will be for the last file
     stackedImage = fileEXIF.StackedImage
+    driveMode = fileEXIF.DriveMode
+    afPointDetails = fileEXIF.AFPointDetails
+    # >> No. Tripod high resolution.  Hand-held high resolution.
     # puts "#{__LINE__}. stackedImage #{stackedImage}"
     # To add display for Mylio. Don't think this is needed anymore
     # Generally jpgs are not added to Mylio, but if there is a filter effect want the jpg.
@@ -597,10 +603,32 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
     filtered = ""
     filterEffect = ""
     filterEffect = fileEXIF.FilterEffect
+    imageDescription = ""
+    
+    # Only put in if value is present
+    if stackedImage != "No" # Always a value. Don't need to see No
+      imageDescription = stackedImage + " [StackedImage]. "
+    end
+    # puts "#{__LINE__}. driveMode: #{driveMode}.  driveMode.present?: #{driveMode.present?}."
+    if !driveMode.nil? # .present? didn't work
+      imageDescription << driveMode + " [DriveMode]. "
+    end
+    if !filterEffect.nil?
+      imageDescription << filterEffect + " [FilterEffect]. "
+    end
+    if !afPointDetails.nil?
+      imageDescription << afPointDetails + " [AFPointDetails]"
+    end
     # puts "#{__LINE__}. filterEffect: #{filterEffect}" # For Lumix, doesn't exist on OMDS. Was I using this to screen out certain Lumix files?
     # if File.extname(item).downcase == ".jpg" && filterEffect != "Expressive" && camModel != "OM-1MarkII" # Expressive is default, so not much of an effect, but may need to change this. OM-1 photos get caught up and they should not      filtered = "_display"
     # end
-
+    # fileEXIF.caption = "caption field. StackedImage: #{stackedImage}. FilterEffect: #{filterEffect}" # ---- XMP-acdsee ---- caption in OM. Don't see it readily in Mylio
+    # fileEXIF.description = "StackedImage: #{stackedImage}. DriveMode: #{driveMode}. FilterEffect: #{filterEffect}" # Maps to Caption in Mylio
+    # Same as above with different styling
+    # fileEXIF.description = "#{stackedImage} [StackedImage]. #{driveMode} [DriveMode]. #{filterEffect} [FilterEffect]. #{afPointDetails} [AFPointDetails]" # Maps to Caption in Mylio
+    fileEXIF.description = imageDescription
+    # fileEXIF.title = "title field. #{fileEXIF.title}." # Maps to Title field in Mylio and as taken the title field is blank.
+       
     # puts "#{__LINE__}.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
     if File.file?(fn) # why is this needed. Do a check above
       # Determine the time and time zone where the photo was taken
@@ -644,7 +672,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
         fileEXIF.OffsetTimeOriginal = "GMT"
         puts "#{__LINE__}.. fileDateTimeOriginal #{fileDateTimeOriginal}. timeChange: #{timeChange} for #{camModel}" if count == 1 # just once is enough
       end # if camModel
-      fileEXIF.save # only set OffsetTimeOriginal, but did do some reading.
+      fileEXIF.save # only set OffsetTimeOriginal, but did do some reading. And if debugging line 607 on then caption and description
       
       fileDate = fileDateTimeOriginal + timeChange.to_i # date in local time photo was taken. No idea why have to change this to i, but was nil class even though zero  
       fileDateTimeOriginalstr = fileDateTimeOriginal.to_s[0..-6]
@@ -654,7 +682,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       #  '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'. This exists for OM-1 for at least some sequence shooting. Also: `SpecialMode                     : Fast, Sequence: 9, Panorama: (none)`
       # SpecialMode may be more useful since zero if not a sequence : Normal, Sequence: 0, Panorama: (none)
       # But DriveMode can tell what kind of sequence, although not sure that's needed in this script
-     driveMode = fileEXIF.DriveMode # OMDS only, not in Lumix
+     # driveMode = fileEXIF.DriveMode # OMDS only, not in Lumix. Moved definition up as need earlier
      # DriveMode       : Focus Bracketing, Shot 8; Electronic shutter
     fBmark = "" # is this still needed?
     if !driveMode.nil? # doesn't exist in some cases
@@ -686,16 +714,27 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       end
       # puts "#{__LINE__}. oneBack: #{oneBack}. match: #{match}. DEBUG"
       # Add check for bracketing and treat as needed, then onBack and treat as needed.
-      stackedImageTrue = false
-      # stackedImageTrue = true if stackedImage[0..12].to_s == "Focus-stacked" # will this work? 
-      unless stackedImage.nil?
+      stackedImageBoolean = false
+      hiResTripodBoolean = false
+      hiResHandheldBoolean = false
+      # stackedImageBoolean = true if stackedImage[0..12].to_s == "Focus-stacked" # will this work? 
+      unless stackedImage.nil? # OM has No, so probably never nill for OM, except maybe videos
+      # FIXME to a case ?
         if stackedImage[0..12].to_s == "Focus-stacked"
-         stackedImageTrue = true
+         stackedImageBoolean = true
+        end
+        if stackedImage[0..5].to_s == "Tripod" #  Tripod high resolution
+          hiResTripodBoolean = true
+          fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "HiResTripod" + userCamCode(fn)
+        end
+        if stackedImage[0..24].to_s == "Hand-held high resolution" #  Tripod high resolution
+          hiResHandheldBoolean = true
+          fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "HiResHand" + userCamCode(fn)
         end
       end
-      # puts "#{__LINE__} stackedImage[0..12]: #{stackedImage[0..12]}. stackedImageTrue: #{stackedImageTrue}" #  stackedImage[0..12]: Focus-stacked. stackedImageTrue: false
-      if bracketing or stackedImageTrue
-        fileBaseName = bracketed(fn, fileDate, driveMode, stackedImageTrue, shot_no)
+      # puts "#{__LINE__} stackedImage[0..12]: #{stackedImage[0..12]}. stackedImageBoolean: #{stackedImageBoolean}" #  stackedImage[0..12]: Focus-stacked. stackedImageBoolean: false
+      if bracketing or stackedImageBoolean
+        fileBaseName = bracketed(fn, fileDate, driveMode, stackedImageBoolean, shot_no)
       elsif oneBack # || match # Two photos in same second? 
         puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match}. DEBUG"
         fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, subSecExists, subSec, subSecPrev, fileDate, driveMode, dupCount, camModel)
@@ -1162,7 +1201,7 @@ timeNowWas = timeStamp(timeNowWas, lineNum)
 
 # timeNowWas = timeStamp(timeNowWas, lineNum)
 
-puts "\n#{__LINE__}.Finished adding coordinates. Now move files. Note that \"Adding location information to photo files\" is commented out, i.e., geographic descriptions not being added, because Mylio finds this info."
+puts "\n#{__LINE__}.Finished adding coordinates. Now move files to the Mylio folder shown on next line:" # Note that \"Adding location information to photo files\" is commented out, i.e., geographic descriptions not being added, because Mylio finds this info."
 
 # Move to Mylio folder (can't process in this folder or Mylio might import before changes are made)
 # mylioFolder = watchedFolderForImport # Used with Photos app
@@ -1172,6 +1211,7 @@ unless Dir.exist?(mylioFolder) # unless is negative of if
   # If main vault not mounted use 
   mylioFolder = HOME + "Mylio/Mylio Main Library Folder/2020s/2024/"
 end
+puts mylioFolder
 # Can live without this 
 # case camModel
 # when  "OM-1MarkII"

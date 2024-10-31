@@ -12,11 +12,13 @@ Setup to work with cameras I use or have used. Canon, Panasonic, OMDS
 
 The GPS info adding is tricky. All GPS devices (AFAIK) use UTM. Most cameras can be set to any time (zone). I used to just set my camera to UTM, but then one of the more recent one allowed viewing the photos or downloading to an iPhone; but doing so set the time to local time.
 
+I am currently (2024) using the GaiaGPS iOS app to create my gpx track. That means I have the app running all the time (can be detrimental to battery life). And downloading the track is a multi-step process. And to save the script from processing all my tracks I have to move the older tracks to another folder.
+
 ## Dependencies
 
 mini_exiftools, a Ruby script, to connect with the Perl script ExifTool by Phil Harvey, http://www.sno.phy.queensu.ca/~phil/exiftool/, but has a Windows executable and a Mac OS X package installer available. This is a fantastic, well-maintained package to manipulate photo file EXIF data.
 
-Requires the app Pashua for some of the GUI. However the script is initiated from the command line (or equivalent. I run from TextMate and Nova or the command line).
+Requires the app Pashua for some of the GUI. However the script is initiated from the command line (or equivalent. I run from TextMate and Nova or the command line). Pashua 0.11 was released on 04/14/2018 and the developer says he is no longer supporting it, but it still works. At some point I need to use a more modern approach. https://www.bluem.net/pashua-docs-latest.html Thank you Carsten Blüm, https://www.bluem.net/ and Apple for a system that keeps apps working for a long time.
 
 ### Notes
 
