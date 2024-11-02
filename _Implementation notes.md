@@ -104,3 +104,7 @@ sudo chmod a+rw "/Volumes/OM SYSTEM/lastPhotoRead.txt" # suggested as a fix and 
 May be working in Nova for OM. Need to confirm Lumix
 
 If manually type last photo doesn't work. 183 globStart = lastPhotoFilename.slice(0)+"\*" # Selected first letter of last file name
+
+2024.10.12 All except one of the files in in /lib were blank. Copied from an old backup since little change IIRC. Ultimately a problem with Apple iCloud. I'm pushing to have Git and iCloud on same files
+
+For focus stacked images, I don't want to put the images that contribute be put in Mylio. OK to save to archive. Maybe a note about that. Added some fields. Write to caption since can only put so much info in the name and Special Instructions is easily missed.

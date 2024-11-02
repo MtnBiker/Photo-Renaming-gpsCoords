@@ -1,19 +1,21 @@
 #!/usr/bin/env ruby
 
+# Except for some prelinary checking on whether card is mounted, PROGRAM starts on ~line 906. Search for PROGRAM
+
 # issue with path for iCloud documents
 # /Volumes/OM SYSTEM/lastPhotoRead.txt
 # /Volumes/Macintosh HD/Users/gscar/Library/Mobile Documents/com~apple~CloudDocs/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb
 
 # Set the PATH to include the Homebrew bin directory. 4/3/2024 problems with locating exiftool and this fixed it. Tried to do in .zshrc, but maybe needs a reboot? Doesn't help running in Nova
-# ENV['PATH'] = '/opt/homebrew/bin:' + ENV['PATH'] Now working in 3.3.0
+# ENV['PATH'] = '/opt/homebrew/bin:' + ENV['PATH'] Now working in 3.3.4
 # Folder names use Mylio and the ones for temporary use are fine. It's just the final location that matters. And I'm trying to move them to a folder that Photos.app will watch.
 # TODO camera time zones file is hard to maintain. Would a simple table or CSV be easier? Harder to setup for this Ruby script, but that's once
 
 # Problem with File::exist in the Pashua .rb files So commented them out, see how that goes. No idea where I got the syntax from but no longer working 
-# Won't run in Nova but does from command line: 
+# Didn't run in Nova (now does) but does from command line: 
 # ruby "/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb"
 
-# mini_exiftool couldn't be found. Was a problem with  TM_RUBY, GEM_PATH, AND GEM_HOME not matching the what TextMate is using. TM dOes not use .ruby_version
+# mini_exiftool couldn't be found. Was a problem with  TM_RUBY, GEM_PATH, AND GEM_HOME not matching the what TextMate is using. TM does not use .ruby_version
 
 # 2023 Clock Set is Setting camera to local time which will show as FileModifyDate, DateTimeOriginal, CreateDate, SubSecCreateDate…
 # TimeStamp will be offset according to camera setting for World Time which should be UTC if the zone matches the Clock Set
@@ -359,7 +361,7 @@ end # mylioStageAndArchive: copy to the final destination where the renaming wil
 #   card  = "\"" + card + "\""
 #   disk =  `diskutil list |grep #{card} 2>&1`
 #   puts "\n#{__LINE__}. disk: #{disk}"
-#   # Getting confused because grabbing the last 7 twice. And naming sucks (mjy fault)
+#   # Getting confused because grabbing the last 7 twice. And naming sucks (my fault)
 #   driveID = disk[-8, 7] # not sure this syntax is precise, but it's working.
 #   puts "#{__LINE__} Unmount #{card}. May have to code this better. See if card name is already a variable. This is hard coded for a specific length of card name"
 #   puts "#{__LINE__}. driveID: #{driveID}. card: #{card}"
@@ -367,7 +369,7 @@ end # mylioStageAndArchive: copy to the final destination where the renaming wil
 #   puts "cmd: #{cmd}"
 #   unmountResult = `diskutil unmount #{driveID} 2>&1`
 #   puts "\n#{__LINE__}. SD card, #{unmountResult}, unmounted."
-# end #unm
+# end #unmount
 
 def userCamCode(fn)
   fileEXIF = MiniExiftool.new(fn)
@@ -616,7 +618,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
     if !filterEffect.nil?
       imageDescription << filterEffect + " [FilterEffect]. "
     end
-    if !afPointDetails.nil?
+    unless afPointDetails.nil?
       imageDescription << afPointDetails + " [AFPointDetails]"
     end
     # puts "#{__LINE__}. filterEffect: #{filterEffect}" # For Lumix, doesn't exist on OMDS. Was I using this to screen out certain Lumix files?
@@ -667,9 +669,9 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
         # puts "#{__LINE__}. fileDateTimeOriginal #{fileDateTimeOriginal}. timeChange: #{timeChange} for #{camModel} meaning movies. DEBUG"
       elsif camModel == "iPhone X"  # DateTimeOriginal is in local time
         # timeChange = 0
-        fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
+        # fileEXIF.OffsetTimeOriginal = tzoLoc.to_s # redefined below.
         timeChange = (3600*tzoLoc) # previously had error capture on this. Maybe for general cases which I'm not longer covering
-        fileEXIF.OffsetTimeOriginal = "GMT"
+        fileEXIF.OffsetTimeOriginal = "GMT" # say what?
         puts "#{__LINE__}.. fileDateTimeOriginal #{fileDateTimeOriginal}. timeChange: #{timeChange} for #{camModel}" if count == 1 # just once is enough
       end # if camModel
       fileEXIF.save # only set OffsetTimeOriginal, but did do some reading. And if debugging line 607 on then caption and description
@@ -682,20 +684,19 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       #  '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'. This exists for OM-1 for at least some sequence shooting. Also: `SpecialMode                     : Fast, Sequence: 9, Panorama: (none)`
       # SpecialMode may be more useful since zero if not a sequence : Normal, Sequence: 0, Panorama: (none)
       # But DriveMode can tell what kind of sequence, although not sure that's needed in this script
-     # driveMode = fileEXIF.DriveMode # OMDS only, not in Lumix. Moved definition up as need earlier
-     # DriveMode       : Focus Bracketing, Shot 8; Electronic shutter
-    fBmark = "" # is this still needed?
-    if !driveMode.nil? # doesn't exist in some cases
-       driveModeFb = driveMode.split(',')[0]
-       # puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
-       
-       if driveModeFb.to_s == "Focus Bracketing"
-         # fBmark = "_fB" 
-         bracketing = true
-       else
-         bracketing = false
-       end
-    end
+      # driveMode = fileEXIF.DriveMode # OMDS only, not in Lumix. Moved definition up as need earlier
+      # DriveMode       : Focus Bracketing, Shot 8; Electronic shutter
+      # fBmark = "" # is this still needed?
+      if !driveMode.nil? # doesn't exist in some cases
+         driveModeFb = driveMode.split(',')[0]
+         # puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
+         if driveModeFb.to_s == "Focus Bracketing"
+           # fBmark = "_fB" 
+           bracketing = true
+         else
+           bracketing = false
+         end
+      end
       # Not using specialMode now, but as an option
       # specialMode = fileEXIF.SpecialMode
 
@@ -718,7 +719,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       hiResTripodBoolean = false
       hiResHandheldBoolean = false
       # stackedImageBoolean = true if stackedImage[0..12].to_s == "Focus-stacked" # will this work? 
-      unless stackedImage.nil? # OM has No, so probably never nill for OM, except maybe videos
+      unless stackedImage.nil? # OM has No, so probably never nil for OM, except maybe videos
       # FIXME to a case ?
         if stackedImage[0..12].to_s == "Focus-stacked"
          stackedImageBoolean = true
@@ -741,7 +742,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       else # normal condition that this photo is at a different time than previous photo
         puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match} for item: #{item}. DEBUG"
         dupCount = 0 # resets dupCount after having a group of photos in the same second
-        fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + fBmark + userCamCode(fn) + filtered
+        fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + userCamCode(fn) + filtered # + fBmark 
         # puts "#{__LINE__}. item: #{item} is at different time as previous.    fileBaseName: #{fileBaseName}"
       end # if oneBack
       # end # if subSecExists
@@ -775,7 +776,6 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
    # tzoLoc the time zone the picture was taken in,
   {tzoLoc: tzoLoc, camModel: camModel} #return
 end # rename ing photo files in the downloads folder and writing in original time.
-
 
 def exiftoolAddCoordinates(photoFolder, folderGPX, tzoLoc)
   # Remember writing a command line command which uses exiftool
@@ -948,20 +948,20 @@ end
  # puts "# Won't run in Nova but does from command line: See line ~10 for command"
  # puts "#{__LINE__}. Temporary for error checking. mylioStaging: #{mylioStaging}.  File.exist?(mylioStaging): #{File.exist?(mylioStaging)}" 
  # puts "\n#{__LINE__}. Crashing at next line in Nova, can run script TextMate or from command line:\n ruby \"/Users/gscar/Documents/Ruby/Photo handling/PhotoName-GPScoord-macOSphotos.rb\""
- puts "#{__LINE__}. Logging errors for the offending command in NOVA.
-  File is logfile.log in  #{__FILE__}\n"
+puts "#{__LINE__}. Logging errors for the offending command in NOVA.
+File is logfile.log in  #{__FILE__}\n"
 
- begin
+begin
   Dir.each_child(mylioStaging) {|x| puts "#{__LINE__}. File #{x} already in #{mylioStaging}. Tells which files need to be removed?" } # Task “Custom Task” exited with a non-zero exit status: 1., but runs from command line
- # rescue => e
- #   logger.error("An error occurred: #{e.message}")
- #   logger.error(e.backtrace.join("\n"))
- # ensure
- #   logger.close
- end
+  # rescue => e
+  #   logger.error("An error occurred: #{e.message}")
+  #   logger.error(e.backtrace.join("\n"))
+  # ensure
+  #   logger.close
+end
 
- # puts "#{__LINE__}. Temporary for error checking. Dir.entries(mylioStaging): #{Dir.entries(mylioStaging)}" # Task “Custom Task” exited with a non-zero exit status: 1. and from terminal: No such file or directory @ dir_initialize - mylioStaging (Errno::ENOENT)
- # puts "#{__LINE__}. Temporary for error checking. mylioStaging: #{mylioStaging}. Dir.entries(mylioStaging).count: #{Dir.entries(mylioStaging).count}"
+# puts "#{__LINE__}. Temporary for error checking. Dir.entries(mylioStaging): #{Dir.entries(mylioStaging)}" # Task “Custom Task” exited with a non-zero exit status: 1. and from terminal: No such file or directory @ dir_initialize - mylioStaging (Errno::ENOENT)
+# puts "#{__LINE__}. Temporary for error checking. mylioStaging: #{mylioStaging}. Dir.entries(mylioStaging).count: #{Dir.entries(mylioStaging).count}"
 # Check if photos are already in Latest Download folder. A problem because they get reprocessed by gps coordinate adding.
 # puts "#{__LINE__}. Got to here. mylioStaging: #{mylioStaging}"
 # puts "#{__LINE__}. Got to here. Dir.exist?(mylioStaging) : #{Dir.exist?(mylioStaging)}"
