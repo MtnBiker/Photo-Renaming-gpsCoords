@@ -1,0 +1,37 @@
+Nov 2024
+Test files
+HiRes (should be three) Mouse + orf. jpg, ori
+Focus Stacking in camera-so files I don't want to put into Mylio. Mouse 15 images + Focus-stacked \_STK
+Focus Bracketing - not stacked in camera. Process in another app. 14 images xxbkt
+
+905 Check if processing folders are empty
+985 Pashua: SD or folder
+1018 GPS coordinates only
+1059 last file read from SD card
+1151 Copy from SD card, archive a copy, copy to processing folder (mylioStaging)
+1177 renamePhotoFiles() returns tzoLoc, camModel
+  Dir.each
+  611ff read shooting mode parameters and write to Caption/description
+  bracketing: if driveMode == "Focus Bracketing"
+  shot no. from driveMode `Continuous Shooting, Shot 12; Electronic shutter`
+  721 stackedImage: Focus-stacked or Tripod or Hand-held high resolution
+  737 filename for bracketed or stacked
+  739 filename for oneBack
+  740 filename for others
+  752 fileAnnotate()
+  instructions: shooting mode information (similar to what writing to Caption/description because seen in EXIF in Mylio, but harder to find)
+  *** should these two be the same or do they serve different purposes. If the same should be in a module or just reused as in the loop
+  
+  - - Yes the same since Caption might be erased or maybe not written if too annoying
+    TimeZoneOffset, PreservedFileName
+    returns tzoLoc, camModel of the last photo
+  767 File.rename(fn,fnp) original and new name
+  770 file_prepend last photo copied to
+  798 If an in camera stacked file, move the shots comprising that photo to unneededBracketed
+1185 renamePhotoFiles() # Rename the jpgs and then move to Latest Download. Second call to rename, first is for raw?
+1193 Move jpgs to mylioStaging
+1202 exiftoolAddCoordinates( to all photos in mylioStaging (note if move bracket photos, will have to repeat for them ##*#
+    Need to figure out where to park focus bracketing photos and inputs to Focus stacked photos
+
+
+FS: In camera focus stacked

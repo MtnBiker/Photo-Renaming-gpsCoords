@@ -10,15 +10,15 @@ ENV['PATH'] = '/opt/homebrew/bin:' + ENV['PATH'] # Doesn't work in TM on macMini
 # src = "/Users/gscar/Pictures/Epson V600 scans/" # Keeping as a frequently used folder
 # src = "/Users/gscar/Mylio/2012/New Folder With Items/"
 # src = "/Users/gscar/Doc iMac only/City Directories/1910-19 Los Angeles City Directories/1918 Los Angeles City Directory/"
-src = "/Users/gscar/Pictures/2024.08-waiting for Mylio/New Folder With Items/" # Save this one as will be used. Make year into the future. Maybe 203
+src = "/Volumes/Mylio 4TB/Mylio_87103a/Mylio Main Library Folder/2020s/2024/Mongolia 2024/Eagle Festival Pass.jpeg" # Save this one as will be used. Make year into the future. Maybe 203
 # src = "/Users/gscar/Mylio/Mylio Main Library Folder/2024/Las Piletas Team Photo One.jpg"
 
 # Making it easier (less error prone) to change the date
-year = "1918" # 1898
-month =  "08" # 01
-day =    "27" # 01
-hour =   "08" # "00"
-minute = "02" # "00"
+year = "2024" # 1898
+month =  "09" # 01
+day =    "31" # 01
+hour =   "10" # "00"
+minute = "00" # "00"
 second = "00" # "00"
 
 date_partial = "#{year}:#{month}:#{day} 00:00:00" # Time set is UTC relative to here, slightly better if could make midnight UTC FIXME

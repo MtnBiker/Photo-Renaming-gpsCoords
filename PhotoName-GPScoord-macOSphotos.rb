@@ -125,6 +125,7 @@ photosRenamedTo       = thisScript + "currentData/photosRenamedTo.txt" #  Had it
 
 # Folders on portable drive: Daguerre. This is the normal location with Daguerre plugged into iMac
 downloadsFolders = "/Volumes/Daguerre/_Download folder/"
+unneededBracketed = downloadsFolders + "Unneeded brackets/"
 # Maybe should start with what computer I'm on then make decisions about what's plugged in. Also consider the 10GB as a primary?
 # Process in MtnBikerSSD or Daguerre if plugged in, otherwise the computer in use which is decided later?
 # puts "#{__LINE__}. downloadsFolders: #{downloadsFolders}." 
@@ -436,6 +437,7 @@ def fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc, camModel)
     unless stackedImage == "No" # Stacked Image : No or Focus-stacked
       instructions = stackedImage + ". " + shootingMode
     end
+    # write  fileEXIF.instructions here or at 637
     fileEXIF.instructions = "#{instructions}. #{File.basename(fn,".*")}" # Maybe drop basename (original file name) to make it shorter. Is available in PreservedFileName
     # puts "#{__LINE__}. camModel: #{camModel}. fileEXIF.instructions: #{instructions} DEBUG"
   else
@@ -565,7 +567,7 @@ def oneBackTrue(src, fn, fnp, fnpPrev, subSecExists, subSec, subSecPrev, fileDat
   return fileBaseName
 end # oneBackTrue
 
-def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
+def renamePhotoFiles(src, timeZonesFile, timeNowWas, photosRenamedTo, unneededBracketed)
   # src is mylioStaging folder
   # timeZonesFile is my log of which time zones I was in when
   # timeNowWas used for timing various parts of the script.
@@ -581,6 +583,8 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
   tzoLoc = ""
   camModel = ""
   seqLetter = %w(a b c d e f h i j k l m n o p q r s t u v w x y z aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt uu vv ww xx yy zz) # used when subsec doesn't exist, but failing for large sequences possible on OM-1, so maybe use sequential numbers, i.e., dupCount?. Yes
+  # Array to store processed files
+  unneededBracketedFiles = [] # ~line 781
   # puts "#{__LINE__}. Entered rename and ready to enter foreach. src: #{src}"
   Dir.each_child(src) do |item| # for each photo file
     next if filesToIgnore(item) == true # skipping file when true, i.e., not a file, with each_child, this is probably redundant.
@@ -605,6 +609,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
     filtered = ""
     filterEffect = ""
     filterEffect = fileEXIF.FilterEffect
+    focusBracketStepSize = fileEXIF.FocusBracketStepSize
     imageDescription = ""
     
     # Only put in if value is present
@@ -621,6 +626,9 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
     unless afPointDetails.nil?
       imageDescription << afPointDetails + " [AFPointDetails]"
     end
+    unless focusBracketStepSize.nil?
+      imageDescription << " ." + focusBracketStepSize.to_s + " [FocusBracketStepSize]"
+    end
     # puts "#{__LINE__}. filterEffect: #{filterEffect}" # For Lumix, doesn't exist on OMDS. Was I using this to screen out certain Lumix files?
     # if File.extname(item).downcase == ".jpg" && filterEffect != "Expressive" && camModel != "OM-1MarkII" # Expressive is default, so not much of an effect, but may need to change this. OM-1 photos get caught up and they should not      filtered = "_display"
     # end
@@ -628,7 +636,14 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
     # fileEXIF.description = "StackedImage: #{stackedImage}. DriveMode: #{driveMode}. FilterEffect: #{filterEffect}" # Maps to Caption in Mylio
     # Same as above with different styling
     # fileEXIF.description = "#{stackedImage} [StackedImage]. #{driveMode} [DriveMode]. #{filterEffect} [FilterEffect]. #{afPointDetails} [AFPointDetails]" # Maps to Caption in Mylio
+    
+    # The following is Caption and may be annoying, so can comment it out since will also write to Instructions which can be read in Mylio
     fileEXIF.description = imageDescription
+    # fileEXIF.instructions = imageDescription  # or at 440 Here is better since this one is better formatted, but leave for bit
+    
+    # Changing one field So Preview and some other Apple apps can open the files.
+    fileEXIF.CameraType2 = "OM-1" #  CameraType2 was 'Unknown (S0121)'
+    
     # fileEXIF.title = "title field. #{fileEXIF.title}." # Maps to Title field in Mylio and as taken the title field is blank.
        
     # puts "#{__LINE__}.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
@@ -686,12 +701,11 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       # But DriveMode can tell what kind of sequence, although not sure that's needed in this script
       # driveMode = fileEXIF.DriveMode # OMDS only, not in Lumix. Moved definition up as need earlier
       # DriveMode       : Focus Bracketing, Shot 8; Electronic shutter
-      # fBmark = "" # is this still needed?
-      if !driveMode.nil? # doesn't exist in some cases
+      # DriveMode shows "Focus Bracketing" for the shots comprising the focus STACKED result
+      unless driveMode.nil? # doesn't exist in some cases
          driveModeFb = driveMode.split(',')[0]
          # puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
          if driveModeFb.to_s == "Focus Bracketing"
-           # fBmark = "_fB" 
            bracketing = true
          else
            bracketing = false
@@ -723,6 +737,10 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       # FIXME to a case ?
         if stackedImage[0..12].to_s == "Focus-stacked"
          stackedImageBoolean = true
+         tempTitle =  "\n#{__LINE__}. #{fn} is a successfully stacked images and (parse StackedImage to get the number of files) preceding files need to be set aside. Do this after renaming. ~line 781"
+         puts tempTitle
+         # fileEXIF.title = tempTitle # doing nothing, guess file not opened at this ppomt
+         
         end
         if stackedImage[0..5].to_s == "Tripod" #  Tripod high resolution
           hiResTripodBoolean = true
@@ -749,7 +767,8 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       fileDatePrev = fileDate
       fileExtPrev = fileExt
       # fileBaseNamePrev = fileBaseName
-    
+      
+      # write to Instructions which can be seen in Mylio and doesn't interfere with Title or Caption
       fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc, camModel) # was passing fileEXIF, but saving wasn't happening, so reopen in the module?
 
       fnp = fnpPrev = src + fileBaseName + File.extname(fn).downcase # unless #Why was the unless here?
@@ -758,12 +777,29 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
       subSecPrev = subSec.to_s
       File.rename(fn,fnp)
       photoRenamed = "#{__LINE__}. photosRenamedTo: #{photosRenamedTo}. #{File.basename(fn)} was renamed to #{File.basename(fnp)}"
+      # Add the processed file to the array so can move unneeded bracket files below
+      unneededBracketedFiles << fnp
+
       begin
         file_prepend(photosRenamedTo, photoRenamed)
         # puts "#{__LINE__}. #{Time.now} #{photoRenamed}"
       rescue IOError => e
         puts "#{__LINE__}. Something went wrong. Could not write last photo renamed (#{photoRenamed}) to #{photosRenamedTo}"
       end # begin
+      
+      # Set aside bracketed images that were successfully stacked. Activated when the stacked image is encountered
+      if stackedImageBoolean
+        numBracketed = stackedImage[15..16] # Focus-stacked (15 images) 
+        puts "\n#{__LINE__}. Going to set aside #{numBracketed} bracketed images that were successfully stacked for #{fnp}. "
+          numBracketed.to_i.times do 
+           bracketedToMove = unneededBracketedFiles.shift
+           # puts "\n#{__LINE__}. bracketedToMove: #{bracketedToMove} "
+           puts "\n#{__LINE__}. bracketedToMove: #{bracketedToMove} is going to be moved to #{unneededBracketed}."
+           # Don't want to delete but move out of Mylio
+           FileUtils.move(bracketedToMove, unneededBracketed) if File.exist?(bracketedToMove)
+           # puts "Bracketed photo moved: #{bracketedToMove}"
+          end      
+        end
       
       count += 1
      else
@@ -775,7 +811,7 @@ def rename(src, timeZonesFile, timeNowWas, photosRenamedTo)
   # puts "#{__LINE__}.  A log of photo file renaming is at #{photoRenamed}. For debugging uncomment the line about 3 lines below to get the list in the running log."
    # tzoLoc the time zone the picture was taken in,
   {tzoLoc: tzoLoc, camModel: camModel} #return
-end # rename ing photo files in the downloads folder and writing in original time.
+end # rename  photo files in the downloads folder and writing in original time.
 
 def exiftoolAddCoordinates(photoFolder, folderGPX, tzoLoc)
   # Remember writing a command line command which uses exiftool
@@ -1009,7 +1045,7 @@ if fromWhere["rename"] == "1" # Renaming only or could use if whichOne == "Renam
   renameFolder = renameGUI(srcRename) 
   srcRename = renameFolder["srcSelect"].to_s  + "/" # Name in dialog box which may be different than default
   puts "\n#{__LINE__}. Photos in #{srcRename} will be renamed using date and time."
-  rename(srcRename, timeZonesFile, timeNowWas, photosRenamedTo)
+  renamePhotoFiles(srcRename, timeZonesFile, timeNowWas, photosRenamedTo, unneededBracketed)
   # abort # break gives compile error
   abort if (whichDrive == "R") # break doesn't work, but abort seems to
 end
@@ -1161,12 +1197,12 @@ File.write(photoArrayFile, photosArray) # A list of all the files processed. Sav
 
 puts "\n#{__LINE__}. Photos will now be renamed. #{timeNowWas = timeStamp(timeNowWas, lineNum)}"
 
-puts "\n#{__LINE__}. Rename [tzoLoc = rename(…)] the photo files with date and an ID for the camera or photographer (except for the paired jpgs in #{tempJpg}). #{timeNowWas}\n"
+puts "\n#{__LINE__}. Rename [tzoLoc = renamePhotoFiles(…)] the photo files with date and an ID for the camera or photographer (except for the paired jpgs in #{tempJpg}). #{timeNowWas}\n"
 # tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # Second time this variable name is used, other is in a method
 # RENAME Raw
-puts "#{__LINE__}. mylioStaging: #{mylioStaging}. Renaming photo files with date-time. Failing with this call to rename()\n\n" # debugging
+puts "#{__LINE__}. mylioStaging: #{mylioStaging}. Renaming photo files with date-time. Failing with this call to renamePhotoFiles()\n\n" # debugging
 
-renameReturn = rename(mylioStaging, timeZonesFile, timeNowWas, photosRenamedTo) # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
+renameReturn = renamePhotoFiles(mylioStaging, timeZonesFile, timeNowWas, photosRenamedTo, unneededBracketed) # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
 
 # tzoLoc, = means the first value in the array returned
 tzoLoc  = -renameReturn[:tzoLoc].to_i
@@ -1174,7 +1210,7 @@ camModel = renameReturn[:camModel]
 timeNowWas = timeStamp(timeNowWas, lineNum)
 #Rename the jpgs and then move to Latest Download
 puts "\n#{__LINE__}. Rename the jpgs in #{tempJpg} and then move to #{mylioStaging}. #{timeNowWas}"
-rename(tempJpg, timeZonesFile, timeNowWas, photosRenamedTo)
+renamePhotoFiles(tempJpg, timeZonesFile, timeNowWas, photosRenamedTo, unneededBracketed)
 #  Move the jpgs to mylioStaging (Latest Download)
 jpgsMovedCount = 0 # Initializing for debugging puts
 Dir.each_child(tempJpg) do |item|

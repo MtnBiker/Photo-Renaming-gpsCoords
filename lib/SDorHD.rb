@@ -26,7 +26,7 @@ config = <<end_of_string
 # Introductory text
 txt1.type = text
 txt1.width = 500
-txt1.default = Select whether to copy photos from SD card or use the files already copied to the a folder on the computer.[return[In the next window you'll select the exact location of the photos.[return]Other options below the thin line
+txt1.default = Select whether to copy photos from SD card or use the files already copied to the a folder on the computer.[return]In the next window you'll select the exact location of the photos.[return]Other options below the thin line
 
 # Moving photos. I think the first letter is used later to select the option. So first letter must be unique
 whichDrive.type = radiobutton
