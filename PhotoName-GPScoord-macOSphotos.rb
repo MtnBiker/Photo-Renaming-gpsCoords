@@ -552,7 +552,7 @@ def oneBackTrue(src, fn, fnp, fnpPrev, subSecExists, subSec, subSecPrev, fileDat
         puts "#{__LINE__} #{fileBaseName} is shot that contributed to a Focus Stacked image" # debug 
       else 
         shot_no = "FS" # for an in camera Focus Stacked image FIXME. This should not be in oneBackTrue
-        puts "#{__LINE__} #{fileBaseName} an in camera Focus Stacked image and the contibuting images should not be sent to Mylio." # debug
+        # puts "#{__LINE__} #{fileBaseName} an in camera Focus Stacked image and the contibuting images should not be sent to Mylio." # debug
       end
       fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s + "(" + shot_no + ")" + userCamCode(fn)
       
@@ -641,7 +641,7 @@ def renamePhotoFiles(src, timeZonesFile, timeNowWas, photosRenamedTo, unneededBr
     fileEXIF.description = imageDescription
     # fileEXIF.instructions = imageDescription  # or at 440 Here is better since this one is better formatted, but leave for bit
     
-    # Changing one field So Preview and some other Apple apps can open the files.
+    # Changing one field So Preview and some other Apple apps can open the files. If and when Apple adds OM-1 Mark II, can remove this line.
     fileEXIF.CameraType2 = "OM-1" #  CameraType2 was 'Unknown (S0121)'
     
     # fileEXIF.title = "title field. #{fileEXIF.title}." # Maps to Title field in Mylio and as taken the title field is blank.
@@ -658,6 +658,12 @@ def renamePhotoFiles(src, timeZonesFile, timeNowWas, photosRenamedTo, unneededBr
       else 
         fileDateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
       end
+      
+      # Change OM .ori to .ori.orf so Apple apps and others can see them. Is this a good place to do this.
+      if fileExt = "ori"
+        fn = fn + ".orf"
+      end
+      
       # puts "#{__LINE__}. fileDateTimeOriginal = fileEXIF.dateTimeOriginal: #{fileDateTimeOriginal} of class: #{fileDateTimeOriginal.class}"
       fileSubSecTimeOriginal = fileEXIF.SubSecTimeOriginal # no error if doesn't exist and it does not in OM
       subSec = "." + fileSubSecTimeOriginal.to_s[0..1] #Truncating to 2 figs (could round but would need to make a float, divide by 10 and round or something. This should be close enough)
@@ -738,7 +744,7 @@ def renamePhotoFiles(src, timeZonesFile, timeNowWas, photosRenamedTo, unneededBr
         if stackedImage[0..12].to_s == "Focus-stacked"
          stackedImageBoolean = true
          tempTitle =  "\n#{__LINE__}. #{fn} is a successfully stacked images and (parse StackedImage to get the number of files) preceding files need to be set aside. Do this after renaming. ~line 781"
-         puts tempTitle
+         # puts tempTitle
          # fileEXIF.title = tempTitle # doing nothing, guess file not opened at this ppomt
          
         end
@@ -803,7 +809,7 @@ def renamePhotoFiles(src, timeZonesFile, timeNowWas, photosRenamedTo, unneededBr
       
       count += 1
      else
-      puts "#{__LINE__}. CHECKING why `if File.file?(fn)` is needed. File.file?(fn): #{File.file?(fn)} for fn: #{fn}"
+      # puts "#{__LINE__}. CHECKING why `if File.file?(fn)` is needed. File.file?(fn): #{File.file?(fn)} for fn: #{fn}"
     end # 3. if File.file?(fn)
     # puts "#{__LINE__}. Got to here. tzoLoc: #{tzoLoc}"
     
@@ -1230,6 +1236,7 @@ puts "\n#{__LINE__}. Using exiftool to add gps coordinates. Will take a while as
 addGpsCoordinates = exiftoolAddCoordinates(mylioStaging, folderGPX, tzoLoc) # not using `addGpsCoordinates = `
 
 timeNowWas = timeStamp(timeNowWas, lineNum)
+puts "#{__LINE__}. Time to add coordinates: #{timeNowWas}"
 
 # Write timeDiff to the photo files
 # puts "\n#{__LINE__}. Write timeDiff to the photo files NOT. Don't know if exiftool does this or do in exiftoolAddCoordinates"

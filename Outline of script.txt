@@ -9,11 +9,12 @@ Focus Bracketing - not stacked in camera. Process in another app. 14 images xxbk
 1018 GPS coordinates only
 1059 last file read from SD card
 1151 Copy from SD card, archive a copy, copy to processing folder (mylioStaging)
-1177 renamePhotoFiles() returns tzoLoc, camModel
+1205 renamePhotoFiles() returns tzoLoc, camModel
   Dir.each
   611ff read shooting mode parameters and write to Caption/description
   bracketing: if driveMode == "Focus Bracketing"
   shot no. from driveMode `Continuous Shooting, Shot 12; Electronic shutter`
+  662 append .orf to .ori files so Apple apps can handle them as orf which they are. .ori is just the first shot of a composite file such as a hi-res
   721 stackedImage: Focus-stacked or Tripod or Hand-held high resolution
   737 filename for bracketed or stacked
   739 filename for oneBack

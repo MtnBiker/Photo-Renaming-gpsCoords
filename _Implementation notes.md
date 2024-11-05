@@ -108,3 +108,5 @@ If manually type last photo doesn't work. 183 globStart = lastPhotoFilename.slic
 2024.10.12 All except one of the files in in /lib were blank. Copied from an old backup since little change IIRC. Ultimately a problem with Apple iCloud. I'm pushing to have Git and iCloud on same files
 
 For focus stacked images, I don't want to put the images that contribute be put in Mylio. OK to save to archive. Maybe a note about that. Added some fields. Write to caption since can only put so much info in the name and Special Instructions is easily missed.
+
+Change .ori to .ori.orf so Mac can open. And fileEXIF.CameraType2 = "OM-1" on .orf

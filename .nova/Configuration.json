@@ -1,6 +1,7 @@
 {
   "tommasonegri.solargraph.commandPath" : "\/Users\/gscar\/.rubies\/ruby-3.3.0\/bin\/ruby",
   "tommasonegri.solargraph.internals.server.error" : true,
+  "tommasonegri.solargraph.workspace.enabled" : false,
   "workspace.color" : 0,
   "workspace.name" : "Photo handling"
 }
