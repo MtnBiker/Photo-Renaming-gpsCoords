@@ -316,6 +316,7 @@ def mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArra
     fileEXIF = MiniExiftool.new(fn)
     fileDateTimeOriginal = fileEXIF.dateTimeOriginal 
     filterEffect = fileEXIF.FilterEffect
+    # Adding .jpg with an .orf to Mylio since Apple doesn't support OM-1 II .orf files, but I created a workaround, so can forget it.
     if itemExt.downcase == ".jpg" && filterEffect != "Expressive" # Expressive is default, so not much of an effect, but may need to change this
       fnt = tempJpg + item
       FileUtils.copy(fn, fnt)
@@ -552,7 +553,7 @@ def oneBackTrue(src, fn, fnp, fnpPrev, subSecExists, subSec, subSecPrev, fileDat
         puts "#{__LINE__} #{fileBaseName} is shot that contributed to a Focus Stacked image" # debug 
       else 
         shot_no = "FS" # for an in camera Focus Stacked image FIXME. This should not be in oneBackTrue
-        # puts "#{__LINE__} #{fileBaseName} an in camera Focus Stacked image and the contibuting images should not be sent to Mylio." # debug
+        # puts "#{__LINE__} #{fileBaseName} an in camera Focus Stacked image and the contributing images should not be sent to Mylio." # debug
       end
       fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s + "(" + shot_no + ")" + userCamCode(fn)
       
@@ -612,6 +613,8 @@ def renamePhotoFiles(src, timeZonesFile, timeNowWas, photosRenamedTo, unneededBr
     focusBracketStepSize = fileEXIF.FocusBracketStepSize
     imageDescription = ""
     
+    # puts "#{__LINE__}. fn: #{fn}. stackedImage: #{stackedImage}." #  stackedImage.present?: #{stackedImage.present?}." not in Ruby?
+ 
     # Only put in if value is present
     if stackedImage != "No" # Always a value. Don't need to see No
       imageDescription = stackedImage + " [StackedImage]. "
@@ -659,12 +662,23 @@ def renamePhotoFiles(src, timeZonesFile, timeNowWas, photosRenamedTo, unneededBr
         fileDateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
       end
       
-      # Change OM .ori to .ori.orf so Apple apps and others can see them. Is this a good place to do this.
-      if fileExt = "ori"
-        fn = fn + ".orf"
-      end
-      
-      # puts "#{__LINE__}. fileDateTimeOriginal = fileEXIF.dateTimeOriginal: #{fileDateTimeOriginal} of class: #{fileDateTimeOriginal.class}"
+      # Change OM .ORI to .ORI.ORF so Apple apps and others can see them. Is this a good place to do this.
+      # puts "\n#{__LINE__}. fileExt: #{fileExt}. Next line is fileExt == \"ori\""  
+      # if fileExt == "ori"
+      #   fn_orig = fn
+      #   # fn_orig = File.new(fn) # changes it to an object
+      #   # new_file_path = "#{original_file_path}.ORF"
+      #   fn = "#{fn_orig}.ORF" # fn = File.new(fn_orig + ".ORF") # No 
+      #   # fn = File.new(fn)
+      #   puts "#{__LINE__}. #{fn_orig} (fn_orig)to\n#{fn} (fn)about to happen NOT" # 673. #<File:0x000000012c3106f0> (fn_orig)to
+      #   #<File:0x000000012c3106f0>.ORF (fn)about to happen
+      #   File.rename("fn_orig", "fn") # No such file or directory @ rb_file_s_rename - (fn_orig, fn) 
+      #   # `mv fn_orig fn`
+      #   puts "#{__LINE__}. #{fn_orig} renamed to #{fn} "
+      # else
+      #   puts "#{__LINE__}. else for #{fn}  and nothing is changed"
+      # end
+        # puts "#{__LINE__}. fileDateTimeOriginal = fileEXIF.dateTimeOriginal: #{fileDateTimeOriginal} of class: #{fileDateTimeOriginal.class}"
       fileSubSecTimeOriginal = fileEXIF.SubSecTimeOriginal # no error if doesn't exist and it does not in OM
       subSec = "." + fileSubSecTimeOriginal.to_s[0..1] #Truncating to 2 figs (could round but would need to make a float, divide by 10 and round or something. This should be close enough)
       subSecExists = fileEXIF.SubSecTimeOriginal.to_s.length > 2 #
@@ -697,6 +711,19 @@ def renamePhotoFiles(src, timeZonesFile, timeNowWas, photosRenamedTo, unneededBr
       end # if camModel
       fileEXIF.save # only set OffsetTimeOriginal, but did do some reading. And if debugging line 607 on then caption and description
       
+      # Change OM .ORI to .ORI.ORF so Apple apps and others can see them. Can't do before fileEXIF.save because fn is "redfined". Hi-Res creates an .ORI
+      # Focus stacked first image gets renamed somewhere else and loses the .ori at line 555?
+      # But it does get the .ORI.ORF but then gets changed.
+      if fileExt == "ori"
+        f_rename = fn + ".ORF"
+        fn_orig = File.new(fn)
+        # puts "fn.class: #{fn.class}"
+        # puts "\n#{__LINE__}. #{fn_orig} (fn_orig)to\n#{f_rename} (fn)about to happen"
+        File.rename(fn_orig, f_rename)
+        fn = f_rename # since reuse fn
+        # puts "#{__LINE__}. Rename happened and now fn is #{fn}." 
+      end 
+
       fileDate = fileDateTimeOriginal + timeChange.to_i # date in local time photo was taken. No idea why have to change this to i, but was nil class even though zero  
       fileDateTimeOriginalstr = fileDateTimeOriginal.to_s[0..-6]
 
@@ -941,8 +968,8 @@ def moveToMylio(mylioStaging, mylioFolder, timeNowWas)
     next if filesToIgnore(item) == true # skipping file when . or ..
     FileUtils.move(fn, fnp)
   end
-  puts "Photos moved to Mylio folder, #{mylioFolder}, where they will automagically be imported into Mylio."
-  puts "All done! #{timeNowWas}\n\n"
+  puts "#{__LINE__}. Photos have been moved to Mylio folder, #{mylioFolder}, where they will automagically be imported into Mylio."
+  # puts "All done! #{timeNowWas}\n\n" # Better outside the method
 end
 
 ## The "PROGRAM" ############ ##################### ###################### ##################### ##########################
@@ -1113,7 +1140,8 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
     # lastPhotoFilename is 8 characters long (P plus 7 digits) - starts with ) for OM (at least I try to remember to set it to that. Default is P (which I liked to think was Panasonic, but maybe it means photo)).
     # Adding date to this line, so will take first 12 characters (would be cleaner if made the write an array or json and worked with that, but this is the quick and dirty)
     lastPhotoFilename = lastPhotoFilename[0..7]
-    puts "\n#{__LINE__}. lastPhotoFilename: #{lastPhotoFilename}. Value can be changed by user, so this may not be the value used. #{timeNowWas = timeStamp(timeNowWas, lineNum)}" # was #lastPhotoFilename.chop
+    lastPhotoDateTime = lastPhotoFilename[47..72] # OB035296 was the last file read from SD card. 2024-11-03 08:46:19 -0800
+    puts "\n#{__LINE__}. lastPhotoFilename: #{lastPhotoFilename}. at #{lastPhotoDateTime}.  Value can be changed by user, so this may not be the value used. #{timeNowWas = timeStamp(timeNowWas, lineNum)}" # was #lastPhotoFilename.chop
     file.close
   rescue => err
     puts "Exception: #{err}. Not critical as value can be entered manually by user, but needs FIXME. Doesn't work when run from Nova. `Exception: Operation not permitted @ rb_sysopen`.\n"
@@ -1206,7 +1234,7 @@ puts "\n#{__LINE__}. Photos will now be renamed. #{timeNowWas = timeStamp(timeNo
 puts "\n#{__LINE__}. Rename [tzoLoc = renamePhotoFiles(…)] the photo files with date and an ID for the camera or photographer (except for the paired jpgs in #{tempJpg}). #{timeNowWas}\n"
 # tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # Second time this variable name is used, other is in a method
 # RENAME Raw
-puts "#{__LINE__}. mylioStaging: #{mylioStaging}. Renaming photo files with date-time. Failing with this call to renamePhotoFiles()\n\n" # debugging
+# puts "#{__LINE__}. mylioStaging: #{mylioStaging}. Renaming photo files with date-time. Failing with this call to renamePhotoFiles()\n\n" # debugging
 
 renameReturn = renamePhotoFiles(mylioStaging, timeZonesFile, timeNowWas, photosRenamedTo, unneededBracketed) # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
 
@@ -1265,4 +1293,4 @@ puts mylioFolder
 moveToMylio(mylioStaging, mylioFolder, timeNowWas)
 
 # timeNowWas = timeStamp(timeNowWas, lineNum)
-# puts "\n#{__LINE__}.-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - All done"
+puts "\n#{__LINE__}.-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - All done" # why did I think this should be inside the above call?
