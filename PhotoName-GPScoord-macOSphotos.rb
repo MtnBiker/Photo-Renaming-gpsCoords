@@ -822,7 +822,8 @@ def renamePhotoFiles(src, timeZonesFile, timeNowWas, photosRenamedTo, unneededBr
       
       # Set aside bracketed images that were successfully stacked. Activated when the stacked image is encountered
       if stackedImageBoolean
-        numBracketed = stackedImage[15..16] # Focus-stacked (15 images) 
+        numBracketed = stackedImage[15..16] # Focus-stacked (15 images)
+        puts "\n#{__LINE__}. unneededBracketedFiles: #{unneededBracketedFiles}. "
         puts "\n#{__LINE__}. Going to set aside #{numBracketed} bracketed images that were successfully stacked for #{fnp}. "
           numBracketed.to_i.times do 
            bracketedToMove = unneededBracketedFiles.shift
@@ -1293,4 +1294,4 @@ puts mylioFolder
 moveToMylio(mylioStaging, mylioFolder, timeNowWas)
 
 # timeNowWas = timeStamp(timeNowWas, lineNum)
-puts "\n#{__LINE__}.-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - All done" # why did I think this should be inside the above call?
+puts "\n#{__LINE__}.-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - All done/n" # why did I think this should be inside the above call?
