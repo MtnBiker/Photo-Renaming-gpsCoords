@@ -316,8 +316,10 @@ def mylioStageAndArchive(srcHD, mylioStaging, tempJpg, archiveFolder, photosArra
     fileEXIF = MiniExiftool.new(fn)
     fileDateTimeOriginal = fileEXIF.dateTimeOriginal 
     filterEffect = fileEXIF.FilterEffect
+    
     # Adding .jpg with an .orf to Mylio since Apple doesn't support OM-1 II .orf files, but I created a workaround, so can forget it.
-    if itemExt.downcase == ".jpg" && filterEffect != "Expressive" # Expressive is default, so not much of an effect, but may need to change this
+    if filterEffect === "Expressive" # .orf now supported, probably Sequoia 16
+    # if itemExt.downcase == ".jpg" && filterEffect != "Expressive" # Expressive is default, so not much of an effect, but may need to change this
       fnt = tempJpg + item
       FileUtils.copy(fn, fnt)
       puts "#{__LINE__}. #{File.basename(fn)} staged since filterEffect is #{filterEffect} or OM-1 without support for orf yet."
@@ -825,6 +827,7 @@ def renamePhotoFiles(src, timeZonesFile, timeNowWas, photosRenamedTo, unneededBr
         numBracketed = stackedImage[15..16] # Focus-stacked (15 images)
         puts "\n#{__LINE__}. unneededBracketedFiles: #{unneededBracketedFiles}. "
         puts "\n#{__LINE__}. Going to set aside #{numBracketed} bracketed images that were successfully stacked for #{fnp}. "
+        bracketedToMove = "" # gets reused
           numBracketed.to_i.times do 
            bracketedToMove = unneededBracketedFiles.shift
            # puts "\n#{__LINE__}. bracketedToMove: #{bracketedToMove} "
@@ -879,10 +882,11 @@ def exiftoolAddCoordinates(photoFolder, folderGPX, tzoLoc)
         # CreateDate is local time with time zone noted, e.g.,  2024:03:03 15:56:50-08:00 3:15 pm in tz -8
         # Date Time UTC                   : 2024:03:03 23:56:50
         # Offset Time                     : -08:00 # so can get directly from photo
-        timeOffset = -fileEXIF.OffsetTime(0..2).to_i # so how much GMT is ahead of local. So opposite time zone
-        puts "#{__LINE__} timeOffset: #{timeOffset} for #{camModel}. Sign is opposite tz. -fileEXIF.OffsetTime(0..2).to_i"
+        # timeOffset = -fileEXIF.OffsetTime(0..2).to_i # so how much GMT is ahead of local. So opposite time zone
+        # puts "#{__LINE__} timeOffset: #{timeOffset} for #{camModel}. Sign is opposite tz. -fileEXIF.OffsetTime(0..2).to_i"
       elsif camModel == "DMC-GX8" # Assumes GX8 always on local time. And TimeZone is set
         # timeOffset = tzoLoc * 3600 # old way which may be fine, but the following seems more direct. May not account for camera not being in the zone it's set for, but I don't think that matters. It matters for time labeling, but this is only GPS coords
+        puts "#{__LINE__}. timeOffset is not being using anymore"
         timeOffset =  (fileEXIF.TimeStamp -  fileEXIF.CreateDate) # seconds, so how much GMT is ahead of local. So opposite time zone
         puts "#{__LINE__} timeOffset: #{timeOffset} = (fileEXIF.TimeStamp: #{fileEXIF.TimeStamp} -  fileEXIF.CreateDate:#{fileEXIF.CreateDate}) for for #{camModel}. "
         puts "#{__LINE__}. timeOffset: #{timeOffset} seconds (#{timeOffset/3600} hours) with GX-8 photos stamped in local time. FYI: tzoLoc: #{tzoLoc} per zones file which isn't being used for coordinates but seems like it could with hrs to secs change."
@@ -907,10 +911,10 @@ def exiftoolAddCoordinates(photoFolder, folderGPX, tzoLoc)
     end # if File.file
     break if count == 1 # once have a real photo file, can get out of this. Only check this once
   end # Dir.foreach
-  puts "#{__LINE__}. timeOffset: #{timeOffset}. camModel: #{camModel}. All photos must be same camera and time zone or photos may be mislabeled and geo-located."
+  puts "#{__LINE__}. camModel: #{camModel}. All photos must be same camera and time zone or photos may be mislabeled and geo-located." # timeOffset: #{timeOffset}. 
    
-  puts "\n#{__LINE__}. Variables input to exiftool for GPS annotating for DEBUGing:"
-  puts "photoFolder: #{photoFolder}\nfolderGPX: #{folderGPX}\ntimeoffset: #{timeOffset}"
+  # puts "\n#{__LINE__}. Variables input to exiftool for GPS annotating for DEBUGing:"
+  # puts "photoFolder: #{photoFolder}\nfolderGPX: #{folderGPX}\ntimeoffset: #{timeOffset}"
   puts "\n#{__LINE__}. Finding all gps points from all the gpx files using exiftool and adding GPS info to each photo file. This may take a while.\n"
   puts "#{__LINE__}.========= Beginning of  exiftool geotag ==========  #{Time.now.strftime("%I:%M:%S %p")}\n"
   gpxLogs = folderGPX + "/*.gpx" # to get multiple files in the folder
@@ -959,6 +963,7 @@ def file_prepend(file, str)
     fd.write(new_contents)
   end
 end
+
 # puts "#{__LINE__}. mylioStaging: #{mylioStaging}" # debugging
 def moveToMylio(mylioStaging, mylioFolder, timeNowWas)
   puts "\n#{__LINE__}. Moving processed photos from #{mylioStaging} to Mylio folder #{mylioFolder}"
@@ -1104,10 +1109,10 @@ if fromWhere["gpsCoords"] == "1"
     break # stop once get to first file in folder. Only need the above three values from one file to determine for whole folder?
   end
   tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile)
-  # puts "#{__LINE__} Debugging.\n srcGpsAdd: #{srcGpsAdd} \n folderGPX: #{folderGPX} \n tzoLoc: #{tzoLoc}"
+  # puts "#{__LINE__} Debugging for only adding coordinates.\n srcGpsAdd: #{srcGpsAdd} \n folderGPX: #{folderGPX}" # \n tzoLoc: #{tzoLoc}
   addGpsCoordinates = exiftoolAddCoordinates(srcGpsAdd, folderGPX, tzoLoc) # not using addGpsCoordinates = 
   puts "#{__LINE__}. Added coordinates to photos in #{srcGpsAdd}"
-  abort # break gives compile error
+  abort # break gives compile error since only adding coordinates
   # abort if (whichDrive == "R") # break doesn't work, but abort seems to
 end
 
@@ -1272,17 +1277,18 @@ puts "#{__LINE__}. Time to add coordinates: #{timeNowWas}"
 # writeTimeDiff(addGpsCoordinates)
 
 # timeNowWas = timeStamp(timeNowWas, lineNum)
-
-puts "\n#{__LINE__}.Finished adding coordinates. Now move files to the Mylio folder shown on next line:" # Note that \"Adding location information to photo files\" is commented out, i.e., geographic descriptions not being added, because Mylio finds this info."
+ puts "\n#{__LINE__}.Finished adding coordinates. Now move files to the Mylio folder shown on next line:" # Note that \"Adding location information to photo files\" is commented out, i.e., geographic descriptions not being added, because Mylio finds this info."
 
 # Move to Mylio folder (can't process in this folder or Mylio might import before changes are made)
 # mylioFolder = watchedFolderForImport # Used with Photos app
 # Set for OM, can I check for options depending on camera?
-mylioFolder = "/Volumes/Mylio 4TB/Mylio_87103a/Mylio Main Library Folder/2024/" # Main Vault
+mylioFolder = tmp = "/Volumes/Mylio 4TB/Mylio_87103a/Mylio Main Library Folder/2020s/2024/" # Main Vault
 unless Dir.exist?(mylioFolder) # unless is negative of if
   # If main vault not mounted use 
   mylioFolder = HOME + "Mylio/Mylio Main Library Folder/2020s/2024/"
+  puts "#{__LINE__}. "#{tmp} isn't available so files will be moved to #{mylioFolder}. . 
 end
+
 puts mylioFolder
 # Can live without this 
 # case camModel
@@ -1294,4 +1300,5 @@ puts mylioFolder
 moveToMylio(mylioStaging, mylioFolder, timeNowWas)
 
 # timeNowWas = timeStamp(timeNowWas, lineNum)
-puts "\n#{__LINE__}.-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - All done/n" # why did I think this should be inside the above call?
+puts "\n#{__LINE__}.-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - All done\n" # why did I think this should be inside the above call?
+puts "" # new line above not respected. 
