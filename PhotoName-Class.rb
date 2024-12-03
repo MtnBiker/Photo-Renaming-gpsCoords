@@ -37,6 +37,52 @@ class Photo
 		@offsetTimeOriginal = offsetTimeOriginal
 		@preservedFileName = preservedFileName
   end
+	
+	def id
+		@id
+	end
+	
+	def fn
+		@fn
+	end
+	
+	def camModel
+		@camModel
+	end
+  
+	def stackedImage
+		@stackedImage
+	end	
+	
+  def driveMode
+		@driveMode
+	end
+	 
+	def afPointDetails
+		@afPointDetails
+	end
+	
+	def focusBracketStepSize
+		@focusBracketStepSize
+	end
+	
+	def subjectTrackingMode
+		@subjectTrackingMode
+	end
+	
+	def createDate
+		@createDate
+	end
+	
+	def offsetTimeOriginal
+		@offsetTimeOriginal
+	end 
+	
+	def preservedFileName
+		@preservedFileName
+	end
+
+	
 	# if focusBracketStepSize.nil?
 	#   instructions = "STM: " + subjectTrackingModeOne + ". SM:" + shootingMode
 	# else
@@ -57,7 +103,7 @@ end # class photo
 
 # Instantiate each photo
 src = "testingClass/incomingTestPhotos"
-src = "testingClass/singleTestPhoto"
+# src = "testingClass/singleTestPhoto"
 id = 0
 lastPhotoFilename = "OB305994" # use later as starting point
 Dir.each_child(src) do |fn|
@@ -83,32 +129,32 @@ Dir.each_child(src) do |fn|
 	instructions = fileEXIF.instructions 
 	timeZoneOffset = fileEXIF.TimeZoneOffset
 	# Feedback on what's being read. id, fn, camModel, fileType, stackedImage, driveMode, afPointDetails, focusBracketStepSize, subjectTrackingMode, createDate, offsetTimeOriginal, preservedFileName
-	puts "Line no. #{__LINE__}
-	id: #{id}
-	  fn: #{fn}
-		camModel: #{camModel}
-	  fileType: #{fileType}
-	  stackedImage: #{stackedImage}
-	  driveMode: #{driveMode}
-	  afPointDetails: #{afPointDetails}
-	  focusBracketStepSize: #{focusBracketStepSize}
-	  subjectTrackingMode: #{subjectTrackingMode}
-	  createDate: #{createDate}
-	  offsetTimeOriginal: #{offsetTimeOriginal}
-	  preservedFileName: #{preservedFileName}
-		The following aren't being used at present, some will be calculated and written to the photo
-    timeStamp: #{timeStamp}
-	  filterEffect: #{filterEffect}
-	  fileSubSecTimeOriginal: #{fileSubSecTimeOriginal}
-	  instructions: #{instructions} . should be blank for unprocessed photo
-	  timeZoneOffset: #{timeZoneOffset} . should be blank for unprocessed photo
-  " 
+	# puts "Line no. #{__LINE__}
+	# id: #{id}
+	#   fn: #{fn}
+	# 	camModel: #{camModel}
+	#   fileType: #{fileType}
+	#   stackedImage: #{stackedImage}
+	#   driveMode: #{driveMode}
+	#   afPointDetails: #{afPointDetails}
+	#   focusBracketStepSize: #{focusBracketStepSize}
+	#   subjectTrackingMode: #{subjectTrackingMode}
+	#   createDate: #{createDate}
+	#   offsetTimeOriginal: #{offsetTimeOriginal}
+	#   preservedFileName: #{preservedFileName}
+	# 	The following aren't being used at present, some will be calculated and written to the photo
+  #   timeStamp: #{timeStamp}
+	#   filterEffect: #{filterEffect}
+	#   fileSubSecTimeOriginal: #{fileSubSecTimeOriginal}
+	#   instructions: #{instructions} . should be blank for unprocessed photo
+	#   timeZoneOffset: #{timeZoneOffset} . should be blank for unprocessed photo
+  # " 
 	photo_id = id.to_s
 	photo_id =	Photo.new(id, fn, camModel, fileType, stackedImage, driveMode, afPointDetails, focusBracketStepSize, subjectTrackingMode, createDate, offsetTimeOriginal, preservedFileName)
-	p photo_id
+	# p photo_id
 	# puts "photo_id: #{photo_id}"
-	p photo_id.preservedFileName
-	# instantiatePhotos(src, lastPhotoFilename)
+	puts "id: #{photo_id}. preservedFileName: #{photo_id.preservedFileName}"
+	
 end
 
 # puts Photo.count
