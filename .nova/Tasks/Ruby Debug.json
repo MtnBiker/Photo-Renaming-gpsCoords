@@ -1,0 +1,11 @@
+{
+  "extension" : {
+    "identifier" : "com.tommasonegri.rdbg",
+    "name" : "Ruby Debug"
+  },
+  "extensionTemplate" : "rubyDebug",
+  "extensionValues" : {
+    "ruby.debug.script" : "PhotoName-Class.rb"
+  },
+  "openLogOnRun" : "start"
+}
