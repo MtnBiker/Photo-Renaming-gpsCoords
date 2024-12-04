@@ -29,10 +29,54 @@ Focus Bracketing - not stacked in camera. Process in another app. 14 images xxbk
   767 File.rename(fn,fnp) original and new name
   770 file_prepend last photo copied to
   798 If an in camera stacked file, move the shots comprising that photo to unneededBracketed
-1185 renamePhotoFiles() # Rename the jpgs and then move to Latest Download. Second call to rename, first is for raw?
+1245 and 1253—this is screwed up, since not in a ifelse calls 573 renamePhotoFiles() # Rename the jpgs and then move to Latest Download. Second call to rename, first is for raw?
 1193 Move jpgs to mylioStaging
 1202 exiftoolAddCoordinates( to all photos in mylioStaging (note if move bracket photos, will have to repeat for them ##*#
     Need to figure out where to park focus bracketing photos and inputs to Focus stacked photos
 
 
 FS: In camera focus stacked
+
+### PhotoName-Class plan
+
+12/3/2024 Basic class established
+0. Copy from card to staging and a copy to archive which is probably what I'm doing. If it is then go to 1——this can be done later and will need Glimmer DSL for LibUI
+
+1. Write preservedFileName
+√ probably can do that in the existing read loop
+√ Anything else to write. Probably line 621 establishes imageDescription
+renaming needs stacking information which should benefit from Array.photos
+if stacked image exists put contributing images aside
+2. Rename in place 
+ori to ORF (noted in preservedFileName if need to find it
+3. add gps coordinates. Can do this before or after renaming, but before moving
+
+4 Then can sort by where to go: jpg if raw exists, unneeded files for stack, unneeded files from hi res
+
+$$$$$$$$$$$$ Easier to read this in Notes app. Examples saved 
+Examples of Hi-Res shots saved. 3 saved with same file basename, but different extension
+Stacked Image: `Tripod high resolution`. shotNo: 00. driveMode: Single Shot; Electronic shutter.   preservedFileName: OB035290.JPG
+Stacked Image: `Tripod high resolution`. shotNo: 00. driveMode: Single Shot; Electronic shutter. preservedFileName: OB035290.ORF
+Stacked Image: `No`. shotNo: 00. driveMode: Single Shot; Electronic shutter.   preservedFileName: OB035290.ORI
+
+Stacked Image: `Hand-held high resolution (11 12)`. shotNo: 00. driveMode: Single Shot; Electronic shutter.  preservedFileName: OB175720.JPG
+Stacked Image: `Hand-held high resolution (11 12)`. shotNo: 00. driveMode: Single Shot; Electronic shutter.  fpreservedFileName: OB175720.ORF
+Stacked Image: `No`. shotNo: 00. driveMode: Single Shot; Electronic shutter. preservedFileName: OB175720.ORI
+
+If the Hand-held high resolution (11 12).orf exists put the preceding jpg and succeeding .ori aside
+
+
+Stacking, focus, etc
+Stacked Image : No or Focus-stacked. None in O8[2024.08]-OM/.
+Does EXIF tell if bracketed images have been successfully stacked?
+No. The images comprising a successfully stacked image have the same EXIF as one from a bracketed or unsuccessfully stacking
+Both have: Focus Bracketing, Shot xx as part of DriveMode
+   # DriveMode       : Focus Bracketing, Shot 8; Electronic shutter
+   # DriveMode shows "Focus Bracketing" for the shots comprising the focus STACKED result
+
+Stacked Image: `No`. shotNo: 01. driveMode: Focus Bracketing, Shot 1; Electronic shutter.  f1.  preservedFileName: OB035274.JPG
+…02–14
+Stacked Image: `No`. shotNo: 15. driveMode: Focus Bracketing, Shot 15; Electronic shutter.  1.  preservedFileName: OB035288.JPG
+Stacked Image: `Focus-stacked (15 images)`. shotNo: 00. driveMode: Single Shot; Electronic shutter.  preservedFileName: OB035289.JPG
+
+If Focus-stacked (15 images), set aside 15 preceding items with a shotNo. file basenames are in logical order
