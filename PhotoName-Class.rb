@@ -11,19 +11,21 @@ require 'mini_exiftool' # `gem install mini_exiftool` have to update for
 class Photo
 	
 	@@count = 0
-	  
+	
+	attr_accessor :id, :fn, :camModel, :fileType, :stackedImage, :driveMode, :afPointDetails, :focusBracketStepSize, :subjectTrackingMode, :createDate, :offsetTimeOriginal, :preservedFileName
 	# order by need for sorting and dealing with
   def initialize(id, fn, camModel, fileType, stackedImage, driveMode, afPointDetails, focusBracketStepSize, subjectTrackingMode, createDate, offsetTimeOriginal, preservedFileName)
 		
+# The counting needs some work, where did I get it from
 		# Every time a Photo (or a subclass of Photo) is instantiated,
 		# we increment the @@count class variable to keep track of how
 		# many photos have been created.
 		# self.class.increment_count # Invoke the method.
 	
-		def self.increment_count
-			@@count += 1
-		end
-		
+		# def self.increment_count
+		# 	@@count += 1
+		# end
+		# 
 		@id = id
 		@fn = fn
 		@camModel = camModel
@@ -38,49 +40,7 @@ class Photo
 		@preservedFileName = preservedFileName
   end
 	
-	def id
-		@id
-	end
 	
-	def fn
-		@fn
-	end
-	
-	def camModel
-		@camModel
-	end
-  
-	def stackedImage
-		@stackedImage
-	end	
-	
-  def driveMode
-		@driveMode
-	end
-	 
-	def afPointDetails
-		@afPointDetails
-	end
-	
-	def focusBracketStepSize
-		@focusBracketStepSize
-	end
-	
-	def subjectTrackingMode
-		@subjectTrackingMode
-	end
-	
-	def createDate
-		@createDate
-	end
-	
-	def offsetTimeOriginal
-		@offsetTimeOriginal
-	end 
-	
-	def preservedFileName
-		@preservedFileName
-	end
 
 	
 	# if focusBracketStepSize.nil?
@@ -101,10 +61,11 @@ end # class photo
 # srcHD       = downloadsFolders + " Drag Photos HERE/" # 
 # srcHD = "testingClass/incomingTestPhotos"
 
-# Instantiate each photo
+# Adding each file to Array photos
 src = "testingClass/incomingTestPhotos"
 # src = "testingClass/singleTestPhoto"
 id = 0
+photos = []
 lastPhotoFilename = "OB305994" # use later as starting point
 Dir.each_child(src) do |fn|
 	id += 1
@@ -149,14 +110,16 @@ Dir.each_child(src) do |fn|
 	#   instructions: #{instructions} . should be blank for unprocessed photo
 	#   timeZoneOffset: #{timeZoneOffset} . should be blank for unprocessed photo
   # " 
-	photo_id = id.to_s
-	photo_id =	Photo.new(id, fn, camModel, fileType, stackedImage, driveMode, afPointDetails, focusBracketStepSize, subjectTrackingMode, createDate, offsetTimeOriginal, preservedFileName)
+	photo_id = "photo-" + id.to_s
+	photos <<	Photo.new(photo_id, fn, camModel, fileType, stackedImage, driveMode, afPointDetails, focusBracketStepSize, subjectTrackingMode, createDate, offsetTimeOriginal, preservedFileName)
 	# p photo_id
 	# puts "photo_id: #{photo_id}"
-	puts "id: #{photo_id}. preservedFileName: #{photo_id.preservedFileName}"
+	# puts "id: #{photo_id}. preservedFileName: #{photo_id.preservedFileName}"
 	
 end
-
+# Accessing camModel for photo-10
+photo_10 = photos.find { |photo| photo.id == "photo-10" }
+puts "#{__LINE__}. photo_id: photo-10.  Preserved File Name: #{photo_10.preservedFileName if photo_10}. createDate: #{photo_10.createDate}. "
 # puts Photo.count
 # puts photo_id
 # Before made a list of files and copied. Will change with objects

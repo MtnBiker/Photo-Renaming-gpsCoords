@@ -38,3 +38,10 @@ TODO.md
 
 # unless supporting rvm < 1.11.0 or doing something fancy, ignore this:
 .rvmrc
+
+# Files used for development
+/testingClass
+
+# Files that are essentially tmp
+/currentData/photoArray.txt
+/currentData/photosRenamedTo.txt
