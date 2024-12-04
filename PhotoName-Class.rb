@@ -38,20 +38,7 @@ class Photo
 		@offsetTimeOriginal = offsetTimeOriginal
 		@preservedFileName = preservedFileName
   end
-	
-	
-	# if focusBracketStepSize.nil?
-	#   instructions = "STM: " + subjectTrackingModeOne + ". SM:" + shootingMode
-	# else
-	#   instructions = "STM: " + subjectTrackingModeOne + ". SM:" + shootingMode + ". FocusBrkStep " + focusBracketStepSize.to_s + " "
-	# end
-	# 
-	# unless stackedImage == "No" # Stacked Image : No or Focus-stacked
-	#   instructions = stackedImage + ". " + shootingMode
-	# end
-	# # write  fileEXIF.instructions here or at 637
-	# fileEXIF.instructions = "#{instructions}. #{File.basename(fn,".*")}" # Maybe drop basename 
-	
+		
 end # class photo
 
 
@@ -64,6 +51,287 @@ src = "/Users/gscar/Documents/Ruby/Photo handling/testingClass/incomingTestPhoto
 # src = "/Volumes/Daguerre/_Download folder/_imported-archive/OM-1/OB[2024.11]-OM/" # 308 photos
 # src = "/Volumes/Daguerre/_Download folder/_imported-archive/OM-1/OA[2024.10]-OM/" # 476 photos
 # src = "testingClass/singleTestPhoto"
+
+def renamePhotoFiles(src, timeZonesFile, timeNowWas, photosRenamedTo, unneededBracketed)
+	# src is mylioStaging folder
+	# timeZonesFile is my log of which time zones I was in when
+	# timeNowWas used for timing various parts of the script.
+	# puts ("#{__LINE__}. in rename. src: #{src}. timeZonesFile #{timeZonesFile}. timeNowWas: #{timeNowWas}")
+	# Until 2017, this assumed camera on UTC, but doesn't work well for cameras with a GPS or set to local time
+	# So have to ascertain what time zone the camera is set to by other means in this script, none of them foolproof
+	# 60 minutes for ~1000 photos to rename TODO ie, very slow
+	fn = fnp = fnpPrev = "" # must declare variable or they won't be available everywhere in the module
+	subSecPrev = subSec = ""
+	fileDatePrev = ""
+	dupCount = 0
+	count    = 1
+	tzoLoc = ""
+	camModel = ""
+	seqLetter = %w(a b c d e f h i j k l m n o p q r s t u v w x y z aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt uu vv ww xx yy zz) # used when subsec doesn't exist, but failing for large sequences possible on OM-1, so maybe use sequential numbers, i.e., dupCount?. Yes
+	# Array to store processed files
+	unneededBracketedFiles = [] # ~line 781
+	# puts "#{__LINE__}. Entered rename and ready to enter foreach. src: #{src}"
+	Dir.each_child(src) do |item| # for each photo file
+		next if filesToIgnore(item) == true # skipping file when true, i.e., not a file, with each_child, this is probably redundant.
+		# puts "#{__LINE__}. File skipped because already renamed, i.e., the filename starts with 20xx #{item.start_with?("20")}"
+		next if item.start_with?("20") # Skipping files that have already been renamed.
+		# next if item.end_with?("xmp") # Skipping .xmp files in Mylio and elsewhere. The files may become orphans. In filesToIgnore
+		# puts "#{__LINE__}. #{src} " # #{timeNowWas = timeStamp(timeNowWas)}
+		# puts "#{__LINE__}. #{item} will be renamed. " # #{timeNowWas = timeStamp(timeNowWas)}
+		fn = src + item # long file name
+		fileEXIF = MiniExiftool.new(fn) # used several times  ## unless put this in array before get to here
+		# fileEXIF = Exif::Data.new(fn) # see if can just make this change, probably break something. 2017.01.13 doesn't work with Raw, but developer is working it.
+		camModel = fileEXIF.model # this will in general be the same for each file and the returned value will be for the last file
+		stackedImage = fileEXIF.StackedImage
+		driveMode = fileEXIF.DriveMode
+		afPointDetails = fileEXIF.AFPointDetails
+		# >> No. Tripod high resolution.  Hand-held high resolution.
+		# puts "#{__LINE__}. stackedImage #{stackedImage}"
+		# To add display for Mylio. Don't think this is needed anymore
+		# Generally jpgs are not added to Mylio, but if there is a filter effect want the jpg.
+		# May need to change the terminology for OM-1
+		# ArtFilter: Off; 0; 0; 0 may be the screen. This is used in two places
+		filtered = ""
+		filterEffect = ""
+		filterEffect = fileEXIF.FilterEffect
+		focusBracketStepSize = fileEXIF.FocusBracketStepSize
+		imageDescription = ""
+		
+		# puts "#{__LINE__}. fn: #{fn}. stackedImage: #{stackedImage}." #  stackedImage.present?: #{stackedImage.present?}." not in Ruby?
+ 
+		# Only put in if value is present
+		if stackedImage != "No" # Always a value. Don't need to see No
+			imageDescription = stackedImage + " [StackedImage]. "
+		end
+		# puts "#{__LINE__}. driveMode: #{driveMode}.  driveMode.present?: #{driveMode.present?}."
+		if !driveMode.nil? # .present? didn't work
+			imageDescription << driveMode + " [DriveMode]. "
+		end
+		if !filterEffect.nil?
+			imageDescription << filterEffect + " [FilterEffect]. "
+		end
+		unless afPointDetails.nil?
+			imageDescription << afPointDetails + " [AFPointDetails]"
+		end
+		unless focusBracketStepSize.nil?
+			imageDescription << " ." + focusBracketStepSize.to_s + " [FocusBracketStepSize]"
+		end
+		# puts "#{__LINE__}. filterEffect: #{filterEffect}" # For Lumix, doesn't exist on OMDS. Was I using this to screen out certain Lumix files?
+		# if File.extname(item).downcase == ".jpg" && filterEffect != "Expressive" && camModel != "OM-1MarkII" # Expressive is default, so not much of an effect, but may need to change this. OM-1 photos get caught up and they should not      filtered = "_display"
+		# end
+		# fileEXIF.caption = "caption field. StackedImage: #{stackedImage}. FilterEffect: #{filterEffect}" # ---- XMP-acdsee ---- caption in OM. Don't see it readily in Mylio
+		# fileEXIF.description = "StackedImage: #{stackedImage}. DriveMode: #{driveMode}. FilterEffect: #{filterEffect}" # Maps to Caption in Mylio
+		# Same as above with different styling
+		# fileEXIF.description = "#{stackedImage} [StackedImage]. #{driveMode} [DriveMode]. #{filterEffect} [FilterEffect]. #{afPointDetails} [AFPointDetails]" # Maps to Caption in Mylio
+		
+		# The following is Caption and may be annoying, so can comment it out since will also write to Instructions which can be read in Mylio
+		fileEXIF.description = imageDescription
+		# fileEXIF.instructions = imageDescription  # or at 440 Here is better since this one is better formatted, but leave for bit
+		
+		# Changing one field So Preview and some other Apple apps can open the files. If and when Apple adds OM-1 Mark II, can remove this line.
+		fileEXIF.CameraType2 = "OM-1" #  CameraType2 was 'Unknown (S0121)'
+		
+		# fileEXIF.title = "title field. #{fileEXIF.title}." # Maps to Title field in Mylio and as taken the title field is blank.
+			 
+		# puts "#{__LINE__}.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
+		if File.file?(fn) # why is this needed. Do a check above
+			# Determine the time and time zone where the photo was taken
+			# puts "#{__LINE__}.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}." #  #{timeNowWas = timeStamp(timeNowWas)}
+			fileExt = File.extname(fn).tr(".","").downcase  # needed later for determining if dups at same time. Will be lowercase jpg or rw2 or whatever
+			fileExtPrev = ""
+			case 
+			when fileExt == "mov" # OMDS movie
+				fileDateTimeOriginal = fileEXIF.CreateDate
+			else 
+				fileDateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
+			end
+			
+			# Change OM .ORI to .ORI.ORF so Apple apps and others can see them. Is this a good place to do this.
+			# puts "\n#{__LINE__}. fileExt: #{fileExt}. Next line is fileExt == \"ori\""  
+			# if fileExt == "ori"
+			#   fn_orig = fn
+			#   # fn_orig = File.new(fn) # changes it to an object
+			#   # new_file_path = "#{original_file_path}.ORF"
+			#   fn = "#{fn_orig}.ORF" # fn = File.new(fn_orig + ".ORF") # No 
+			#   # fn = File.new(fn)
+			#   puts "#{__LINE__}. #{fn_orig} (fn_orig)to\n#{fn} (fn)about to happen NOT" # 673. #<File:0x000000012c3106f0> (fn_orig)to
+			#   #<File:0x000000012c3106f0>.ORF (fn)about to happen
+			#   File.rename("fn_orig", "fn") # No such file or directory @ rb_file_s_rename - (fn_orig, fn) 
+			#   # `mv fn_orig fn`
+			#   puts "#{__LINE__}. #{fn_orig} renamed to #{fn} "
+			# else
+			#   puts "#{__LINE__}. else for #{fn}  and nothing is changed"
+			# end
+				# puts "#{__LINE__}. fileDateTimeOriginal = fileEXIF.dateTimeOriginal: #{fileDateTimeOriginal} of class: #{fileDateTimeOriginal.class}"
+			fileSubSecTimeOriginal = fileEXIF.SubSecTimeOriginal # no error if doesn't exist and it does not in OM
+			subSec = "." + fileSubSecTimeOriginal.to_s[0..1] #Truncating to 2 figs (could round but would need to make a float, divide by 10 and round or something. This should be close enough)
+			subSecExists = fileEXIF.SubSecTimeOriginal.to_s.length > 2 #
+			# if fileDateTimeOriginal == nil 
+			#   # TODO This probably could be cleaned up, but then normally not used, movie files don't have this field
+			#   fileDateTimeOriginal = fileEXIF.DateCreated  # PNG don't have dateTimeOriginal
+			#   camModel ="MISC" # Dummy value for test below
+			#   fileDateTimeOriginal == nil ? fileDateTimeOriginal = fileEXIF.CreationDate : "" # now fixing .mov files
+			#   fileDateTimeOriginal == nil ? fileDateTimeOriginal = fileEXIF.MediaCreateDate : "" # now fixing .mp4 files. Has other dates, but at least for iPhone mp4s the gps info exists
+			# end # if fileDateTimeOriginal == nil
+			tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # the time zone the picture was taken in, doesn't say anything about what times are recorded in the photo's EXIF. I'm doing this slightly wrong, because it's using the photo's recorded date which could be either GMT or local time. But only wrong if the photo was taken too close to the time when camera changed time zones
+			# puts "#{__LINE__}. #{count}. tzoLoc: #{tzoLoc} from timeZonesFile"
+			
+			# count == 1 | 1*100 ?  :  puts "."  Just to show one value, otherwise without if prints for each file; now prints every 100 time since this call seemed to create some line breaks and added periods.
+			# Also determine Time Zone TODO and write to file OffsetTimeOriginal	(time zone for DateTimeOriginal). Either GMT or use tzoLoc if recorded in local time as determined below
+			# puts "#{__LINE__}.. camModel: #{camModel}. #{tzoLoc} is the time zone where photo was taken. Script assumes GX8 on local time "
+			# Could set timeChange = 0 here and remove from below except of course where it is set to something else
+			timeChange =  0 # 3600 *  # setting it outside the loops below and get reset each time through. But can get changed
+			# puts "#{__LINE__}. camModel: #{camModel}. fileEXIF.OffsetTimeOriginal: #{fileEXIF.OffsetTimeOriginal}"
+			if camModel ==  "MISC" # MISC is for photos without fileDateTimeOriginal, e.g., movies
+				# timeChange = 0
+				fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
+				# puts "#{__LINE__}. fileDateTimeOriginal #{fileDateTimeOriginal}. timeChange: #{timeChange} for #{camModel} meaning movies. DEBUG"
+			elsif camModel == "iPhone X"  # DateTimeOriginal is in local time
+				# timeChange = 0
+				# fileEXIF.OffsetTimeOriginal = tzoLoc.to_s # redefined below.
+				timeChange = (3600*tzoLoc) # previously had error capture on this. Maybe for general cases which I'm not longer covering
+				fileEXIF.OffsetTimeOriginal = "GMT" # say what?
+				puts "#{__LINE__}.. fileDateTimeOriginal #{fileDateTimeOriginal}. timeChange: #{timeChange} for #{camModel}" if count == 1 # just once is enough
+			end # if camModel
+			fileEXIF.save # only set OffsetTimeOriginal, but did do some reading. And if debugging line 607 on then caption and description
+			
+			# Change OM .ORI to .ORI.ORF so Apple apps and others can see them. Can't do before fileEXIF.save because fn is "redfined". Hi-Res creates an .ORI
+			# Focus stacked first image gets renamed somewhere else and loses the .ori at line 555?
+			# But it does get the .ORI.ORF but then gets changed.
+			if fileExt == "ori"
+				f_rename = fn + ".ORF"
+				fn_orig = File.new(fn)
+				# puts "fn.class: #{fn.class}"
+				# puts "\n#{__LINE__}. #{fn_orig} (fn_orig)to\n#{f_rename} (fn)about to happen"
+				File.rename(fn_orig, f_rename)
+				fn = f_rename # since reuse fn
+				# puts "#{__LINE__}. Rename happened and now fn is #{fn}." 
+			end 
+
+			fileDate = fileDateTimeOriginal + timeChange.to_i # date in local time photo was taken. No idea why have to change this to i, but was nil class even though zero  
+			fileDateTimeOriginalstr = fileDateTimeOriginal.to_s[0..-6]
+
+			oneBack = fileDate == fileDatePrev && fileExt != fileExtPrev # at the moment this is meaningless because all of one type?
+			
+			#  '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'. This exists for OM-1 for at least some sequence shooting. Also: `SpecialMode                     : Fast, Sequence: 9, Panorama: (none)`
+			# SpecialMode may be more useful since zero if not a sequence : Normal, Sequence: 0, Panorama: (none)
+			# But DriveMode can tell what kind of sequence, although not sure that's needed in this script
+			# driveMode = fileEXIF.DriveMode # OMDS only, not in Lumix. Moved definition up as need earlier
+			# DriveMode       : Focus Bracketing, Shot 8; Electronic shutter
+			# DriveMode shows "Focus Bracketing" for the shots comprising the focus STACKED result
+			unless driveMode.nil? # doesn't exist in some cases
+				 driveModeFb = driveMode.split(',')[0]
+				 # puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
+				 if driveModeFb.to_s == "Focus Bracketing"
+					 bracketing = true
+				 else
+					 bracketing = false
+				 end
+			end
+			# Not using specialMode now, but as an option
+			# specialMode = fileEXIF.SpecialMode
+
+			match, shot_no = ""
+
+			# puts "#{__LINE__}. fn: #{fn}. driveMode: #{driveMode}.\nspecialMode: #{specialMode} oneBack: #{oneBack} = true is two photos in same second. If true, oneBackTrue will be called."
+			# Maybe should enter if there is a shot no.
+			unless driveMode.nil? || driveMode.empty? # opposite of if, therefore if driveMode is not empty
+				match = driveMode.match(/(\d{1,3})/) # Getting shot no. from `Continuous Shooting, Shot 12; Electronic shutter`
+				shot_no = match[1].to_i if match
+				# First photo in a sequence won't get -1 in oneBackTrue.
+				if shot_no.to_i == 1
+					fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no.to_s.rjust(2, '0') + userCamCode(fn) #  fBmark +
+					# puts "#{__LINE__}. Because this was the first in a sequence a `1` was added to the filename for #{fileBaseName}. DEBUG" # Working for OM
+				end
+			end
+			# puts "#{__LINE__}. oneBack: #{oneBack}. match: #{match}. DEBUG"
+			# Add check for bracketing and treat as needed, then onBack and treat as needed.
+			stackedImageBoolean = false
+			hiResTripodBoolean = false
+			hiResHandheldBoolean = false
+			# stackedImageBoolean = true if stackedImage[0..12].to_s == "Focus-stacked" # will this work? 
+			unless stackedImage.nil? # OM has No, so probably never nil for OM, except maybe videos
+			# FIXME to a case ?
+				if stackedImage[0..12].to_s == "Focus-stacked"
+				 stackedImageBoolean = true
+				 tempTitle =  "\n#{__LINE__}. #{fn} is a successfully stacked images and (parse StackedImage to get the number of files) preceding files need to be set aside. Do this after renaming. ~line 781"
+				 # puts tempTitle
+				 # fileEXIF.title = tempTitle # doing nothing, guess file not opened at this ppomt
+				 
+				end
+				if stackedImage[0..5].to_s == "Tripod" #  Tripod high resolution
+					hiResTripodBoolean = true
+					fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "HiResTripod" + userCamCode(fn)
+				end
+				if stackedImage[0..24].to_s == "Hand-held high resolution" #  Tripod high resolution
+					hiResHandheldBoolean = true
+					fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "HiResHand" + userCamCode(fn)
+				end
+			end
+			# puts "#{__LINE__} stackedImage[0..12]: #{stackedImage[0..12]}. stackedImageBoolean: #{stackedImageBoolean}" #  stackedImage[0..12]: Focus-stacked. stackedImageBoolean: false
+			if bracketing or stackedImageBoolean
+				fileBaseName = bracketed(fn, fileDate, driveMode, stackedImageBoolean, shot_no)
+			elsif oneBack # || match # Two photos in same second? 
+				puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match}. DEBUG"
+				fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, subSecExists, subSec, subSecPrev, fileDate, driveMode, dupCount, camModel)
+			else # normal condition that this photo is at a different time than previous photo
+				puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match} for item: #{item}. DEBUG"
+				dupCount = 0 # resets dupCount after having a group of photos in the same second
+				fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + userCamCode(fn) + filtered # + fBmark 
+				# puts "#{__LINE__}. item: #{item} is at different time as previous.    fileBaseName: #{fileBaseName}"
+			end # if oneBack
+			# end # if subSecExists
+			fileDatePrev = fileDate
+			fileExtPrev = fileExt
+			# fileBaseNamePrev = fileBaseName
+			
+			# write to Instructions which can be seen in Mylio and doesn't interfere with Title or Caption
+			fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc, camModel) # was passing fileEXIF, but saving wasn't happening, so reopen in the module?
+
+			fnp = fnpPrev = src + fileBaseName + File.extname(fn).downcase # unless #Why was the unless here?
+			# puts "Place holder to make the script work. where did the unless come from"
+#       puts "#{__LINE__}. fn: #{fn}. fnp (fnpPrev): #{fnp}. subSec: #{subSec}"
+			subSecPrev = subSec.to_s
+			File.rename(fn,fnp)
+			photoRenamed = "#{__LINE__}. photosRenamedTo: #{photosRenamedTo}. #{File.basename(fn)} was renamed to #{File.basename(fnp)}"
+			# Add the processed file to the array so can move unneeded bracket files below
+			unneededBracketedFiles << fnp
+
+			begin
+				file_prepend(photosRenamedTo, photoRenamed)
+				# puts "#{__LINE__}. #{Time.now} #{photoRenamed}"
+			rescue IOError => e
+				puts "#{__LINE__}. Something went wrong. Could not write last photo renamed (#{photoRenamed}) to #{photosRenamedTo}"
+			end # begin
+			
+			# Set aside bracketed images that were successfully stacked. Activated when the stacked image is encountered
+			if stackedImageBoolean
+				numBracketed = stackedImage[15..16] # Focus-stacked (15 images)
+				puts "\n#{__LINE__}. unneededBracketedFiles: #{unneededBracketedFiles}. "
+				puts "\n#{__LINE__}. Going to set aside #{numBracketed} bracketed images that were successfully stacked for #{fnp}. "
+				bracketedToMove = "" # gets reused
+					numBracketed.to_i.times do 
+					 bracketedToMove = unneededBracketedFiles.shift
+					 # puts "\n#{__LINE__}. bracketedToMove: #{bracketedToMove} "
+					 puts "\n#{__LINE__}. bracketedToMove: #{bracketedToMove} is going to be moved to #{unneededBracketed}."
+					 # Don't want to delete but move out of Mylio
+					 FileUtils.move(bracketedToMove, unneededBracketed) if File.exist?(bracketedToMove)
+					 # puts "Bracketed photo moved: #{bracketedToMove}"
+					end      
+				end
+			
+			count += 1
+		 else
+			# puts "#{__LINE__}. CHECKING why `if File.file?(fn)` is needed. File.file?(fn): #{File.file?(fn)} for fn: #{fn}"
+		end # 3. if File.file?(fn)
+		# puts "#{__LINE__}. Got to here. tzoLoc: #{tzoLoc}"
+		
+	end # 2. Dir.each_child(src)
+	# puts "#{__LINE__}.  A log of photo file renaming is at #{photoRenamed}. For debugging uncomment the line about 3 lines below to get the list in the running log."
+	 # tzoLoc the time zone the picture was taken in,
+	{tzoLoc: tzoLoc, camModel: camModel} #return
+end # rename  photo files in the downloads folder and writing in original time.
+
 id = 0
 photos = []
 lastPhotoFilename = "OB305994" # use later as starting point
@@ -133,9 +401,24 @@ Dir.each_child(src).sort.each do |fn|
 	# unless focusBracketStepSize.nil?
 	# 	imageDescription << " ." + focusBracketStepSize.to_s + " [FocusBracketStepSize]"
 	# end
-	fileEXIF.description = imageDescription
+	# In geeneral don't want to write this, but maybe during evaluating shooting techniques, so add to GUI on whether to do it.
+	writeCaption = true # Decide this is GUI later
+	fileEXIF.description = imageDescription if writeCaption == true
 	# end imageDescription
-	fileEXIF.save # only change so far is imageDescription
+	
+	# Instruction, similar to description except description is Caption and in general don't want to use it. Instructions is visible in Mylio, so not as convenient, but is available
+	if focusBracketStepSize.nil?
+	  instructions = "STM: " + subjectTrackingModeOne + ". SM:" + shootingMode
+	else
+	  instructions = "STM: " + subjectTrackingModeOne + ". SM:" + shootingMode + ". FocusBrkStep " + focusBracketStepSize.to_s + " "
+	end
+	
+	unless stackedImage == "No" # Stacked Image : No or Focus-stacked
+	  instructions = stackedImage + ". " + shootingMode
+	end
+	fileEXIF.instructions = "#{instructions}. #{File.basename(fn,".*")}" # Maybe drop basename 
+
+	fileEXIF.save # only change so far is imageDescription and instructions
 	
 	photo_id = "photo-" + id.to_s
 	photos <<	Photo.new(photo_id, fn, camModel, fileType, stackedImage, driveMode, afPointDetails, subjectTrackingMode, createDate, offsetTimeOriginal, preservedFileName)
@@ -143,7 +426,7 @@ Dir.each_child(src).sort.each do |fn|
 	# puts "photo_id: #{photo_id}"
 	# puts "id: #{photo_id}. preservedFileName: #{photo_id.preservedFileName}"
 	# Checking what is stored in stacked image
-	puts "#{id}. Stacked Image: `#{stackedImage}`. shotNo: #{shotNo}. driveMode: #{driveMode}.  preservedFileName: #{preservedFileName}"
+	puts "#{id}. Stacked Image: `#{stackedImage}`. shotNo: #{shotNo}. driveMode: #{driveMode}.  Original FileName: #{preservedFileName}"
 end
 
 puts "\n#{__LINE__}.  Demo of retrieving info from array"

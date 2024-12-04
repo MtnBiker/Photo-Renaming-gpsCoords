@@ -42,9 +42,9 @@ FS: In camera focus stacked
 12/3/2024 Basic class established
 0. Copy from card to staging and a copy to archive which is probably what I'm doing. If it is then go to 1——this can be done later and will need Glimmer DSL for LibUI
 
-1. Write preservedFileName
+1. Write preservedFileName, etc
 √ probably can do that in the existing read loop
-√ Anything else to write. Probably line 621 establishes imageDescription
+√ Anything else to write. Probably line 621 establishes imageDescription and 
 renaming needs stacking information which should benefit from Array.photos
 if stacked image exists put contributing images aside
 2. Rename in place 
@@ -52,6 +52,9 @@ ori to ORF (noted in preservedFileName if need to find it
 3. add gps coordinates. Can do this before or after renaming, but before moving
 
 4 Then can sort by where to go: jpg if raw exists, unneeded files for stack, unneeded files from hi res
+
+GUI
+writeCaption = true # Decide this is GUI later
 
 $$$$$$$$$$$$ Easier to read this in Notes app. Examples saved 
 Examples of Hi-Res shots saved. 3 saved with same file basename, but different extension

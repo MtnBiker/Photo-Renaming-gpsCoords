@@ -1,4 +1,13 @@
-.ruby_version # not used by TextMate anyway
+To reset if files accidentally added. After correcting this file
+
+# # rm all files
+# git rm -r --cached .
+# # add all files as per new .gitignore
+# git add .
+# # now, commit for new .gitignore to apply
+# git commit -m ".gitignore is now working"
+
+.ruby_version # not used by TextMate anyway, but is it used by Nova and does it need to be tracked
 # "Ruby- to backup alias"
 # "Ruby-old stuff to backup alias"
 # Icon\r # error if doesn't exist when commit
