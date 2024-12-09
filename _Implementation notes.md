@@ -1,5 +1,7 @@
 #### Implementation notes
 
+For PhotoName-GPScoord-macOSphotos, not later version.
+
 Earlier version of this is at /Users/gscar/Documents/Ruby/Photo handling-Lumix/
 Too much cruft and very slow now. So will get rid of known cruft and anything not related to OM
 "Special use Ruby files" files will be deleted from this original project so not duped in new version
@@ -110,3 +112,7 @@ If manually type last photo doesn't work. 183 globStart = lastPhotoFilename.slic
 For focus stacked images, I don't want to put the images that contribute be put in Mylio. OK to save to archive. Maybe a note about that. Added some fields. Write to caption since can only put so much info in the name and Special Instructions is easily missed. Works but thought I saw a mess up.
 
 Change .ori to .ori.orf so Mac can open. And fileEXIF.CameraType2 = "OM-1" on .orf
+
+Should have been here anyway, but checked and added some Nova extension, so
+gem install solargraph
+➜ solargraph download-core # The `download-core` command is deprecated. # was on Extension page?

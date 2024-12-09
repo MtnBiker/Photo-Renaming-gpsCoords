@@ -1,5 +1,9 @@
 #!/usr/bin/env ruby
 # ruby "/Volumes/Macintosh HD/Users/gscar/Documents/Ruby/Photo handling/PhotoName-Class.rb"
+
+# Written for OM-1. Copied and modified from PhotoName-GPScoord-macOSphotos.rb: #{rb}. 
+# See Outline of script.txt for implemntation
+
 require 'fileutils'
 include FileUtils
 require 'find'
@@ -14,9 +18,10 @@ class Photo
 	
 	attr_accessor :id, :fn, :camModel, :fileType, :stackedImage, :driveMode, :afPointDetails, :subjectTrackingMode, :createDate, :offsetTimeOriginal, :preservedFileName
 	# order by need for sorting and dealing with
+
   def initialize(id, fn, camModel, fileType, stackedImage, driveMode, afPointDetails, subjectTrackingMode, createDate, offsetTimeOriginal, preservedFileName)
 		
-# The counting needs some work, where did I get it from
+# The counting needs work if I need it, where did I get it from
 		# Every time a Photo (or a subclass of Photo) is instantiated,
 		# we increment the @@count class variable to keep track of how
 		# many photos have been created.
@@ -41,18 +46,41 @@ class Photo
 		
 end # class photo
 
+HOME = "/Users/gscar/"
+thisScript = "#{File.dirname(__FILE__}/" # needed because the Pashua script calling a file seemed to need the directory. 
+
+# unneededBracketed = downloadsFolders + "Unneeded brackets/" # on Daguerre
+unneededStacksFolder = thisScript + "/testingClass/unneededStacksFolder" # DEV
 
 # srcHD       = downloadsFolders + " Drag Photos HERE/" # 
 # srcHD = "testingClass/incomingTestPhotos"
 
 # Adding each file to Array photos
 # temp src until determine using. Full path needed to run from arbitrary place in iTerm. Relative works in Nova
-src = "/Users/gscar/Documents/Ruby/Photo handling/testingClass/incomingTestPhotos/" # Stacked w/ and w/o a stacked image, HHHR, THR, 
+src = thisScript + "/testingClass/incomingTestPhotos/" # Stacked w/ and w/o a stacked image, HHHR, THR, 
 # src = "/Volumes/Daguerre/_Download folder/_imported-archive/OM-1/OB[2024.11]-OM/" # 308 photos
 # src = "/Volumes/Daguerre/_Download folder/_imported-archive/OM-1/OA[2024.10]-OM/" # 476 photos
 # src = "testingClass/singleTestPhoto"
 
-def renamePhotoFiles(src, timeZonesFile, timeNowWas, photosRenamedTo, unneededBracketed)
+# mylioStaging = downloadsFolders + "Latest Processed photos-Import to Mylio/" #  These are relabeled and GPSed files. Will be moved to Mylio after processing.
+mylioStaging =thisScript + "/testingClass/staging" # DEV
+
+timeZonesFile = thisScript + "currentData/Greg camera time zones.yml"
+
+def timeStamp(timeNowWas, fromWhere)  
+	seconds = Time.now-timeNowWas
+	minutes = seconds/60
+	if minutes < 2
+		report = "#{seconds.to_i} seconds"
+	else
+		report = "#{minutes.to_i} minutes"
+	end   
+	puts "\n#{fromWhere} -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -   #{report}. #{Time.now.strftime("%I:%M:%S %p")}   -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  "
+	Time.now
+end
+
+# Add original file name, rename with coding
+def renamePhotoFiles(src, photos, timeZonesFile, timeNowWas, unneededStacksFolder)
 	# src is mylioStaging folder
 	# timeZonesFile is my log of which time zones I was in when
 	# timeNowWas used for timing various parts of the script.
@@ -116,15 +144,9 @@ def renamePhotoFiles(src, timeZonesFile, timeNowWas, photosRenamedTo, unneededBr
 		unless focusBracketStepSize.nil?
 			imageDescription << " ." + focusBracketStepSize.to_s + " [FocusBracketStepSize]"
 		end
-		# puts "#{__LINE__}. filterEffect: #{filterEffect}" # For Lumix, doesn't exist on OMDS. Was I using this to screen out certain Lumix files?
-		# if File.extname(item).downcase == ".jpg" && filterEffect != "Expressive" && camModel != "OM-1MarkII" # Expressive is default, so not much of an effect, but may need to change this. OM-1 photos get caught up and they should not      filtered = "_display"
-		# end
-		# fileEXIF.caption = "caption field. StackedImage: #{stackedImage}. FilterEffect: #{filterEffect}" # ---- XMP-acdsee ---- caption in OM. Don't see it readily in Mylio
-		# fileEXIF.description = "StackedImage: #{stackedImage}. DriveMode: #{driveMode}. FilterEffect: #{filterEffect}" # Maps to Caption in Mylio
-		# Same as above with different styling
-		# fileEXIF.description = "#{stackedImage} [StackedImage]. #{driveMode} [DriveMode]. #{filterEffect} [FilterEffect]. #{afPointDetails} [AFPointDetails]" # Maps to Caption in Mylio
-		
-		# The following is Caption and may be annoying, so can comment it out since will also write to Instructions which can be read in Mylio
+			
+		# The following is Caption and may be annoying in Mylio, so can comment it out since will also write to Instructions which can be read in Mylio
+		# Apparently can create a `caption` field in an OM file, but Mylio don't readily see in Mylio
 		fileEXIF.description = imageDescription
 		# fileEXIF.instructions = imageDescription  # or at 440 Here is better since this one is better formatted, but leave for bit
 		
@@ -133,7 +155,7 @@ def renamePhotoFiles(src, timeZonesFile, timeNowWas, photosRenamedTo, unneededBr
 		
 		# fileEXIF.title = "title field. #{fileEXIF.title}." # Maps to Title field in Mylio and as taken the title field is blank.
 			 
-		# puts "#{__LINE__}.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}"
+		# puts "#{__LINE__}.. File.file?(fn): #{File.file?(fn)}. fn: #{fn}" FIXME
 		if File.file?(fn) # why is this needed. Do a check above
 			# Determine the time and time zone where the photo was taken
 			# puts "#{__LINE__}.. fn: #{fn}. File.ftype(fn): #{File.ftype(fn)}." #  #{timeNowWas = timeStamp(timeNowWas)}
@@ -146,22 +168,6 @@ def renamePhotoFiles(src, timeZonesFile, timeNowWas, photosRenamedTo, unneededBr
 				fileDateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
 			end
 			
-			# Change OM .ORI to .ORI.ORF so Apple apps and others can see them. Is this a good place to do this.
-			# puts "\n#{__LINE__}. fileExt: #{fileExt}. Next line is fileExt == \"ori\""  
-			# if fileExt == "ori"
-			#   fn_orig = fn
-			#   # fn_orig = File.new(fn) # changes it to an object
-			#   # new_file_path = "#{original_file_path}.ORF"
-			#   fn = "#{fn_orig}.ORF" # fn = File.new(fn_orig + ".ORF") # No 
-			#   # fn = File.new(fn)
-			#   puts "#{__LINE__}. #{fn_orig} (fn_orig)to\n#{fn} (fn)about to happen NOT" # 673. #<File:0x000000012c3106f0> (fn_orig)to
-			#   #<File:0x000000012c3106f0>.ORF (fn)about to happen
-			#   File.rename("fn_orig", "fn") # No such file or directory @ rb_file_s_rename - (fn_orig, fn) 
-			#   # `mv fn_orig fn`
-			#   puts "#{__LINE__}. #{fn_orig} renamed to #{fn} "
-			# else
-			#   puts "#{__LINE__}. else for #{fn}  and nothing is changed"
-			# end
 				# puts "#{__LINE__}. fileDateTimeOriginal = fileEXIF.dateTimeOriginal: #{fileDateTimeOriginal} of class: #{fileDateTimeOriginal.class}"
 			fileSubSecTimeOriginal = fileEXIF.SubSecTimeOriginal # no error if doesn't exist and it does not in OM
 			subSec = "." + fileSubSecTimeOriginal.to_s[0..1] #Truncating to 2 figs (could round but would need to make a float, divide by 10 and round or something. This should be close enough)
@@ -280,7 +286,7 @@ def renamePhotoFiles(src, timeZonesFile, timeNowWas, photosRenamedTo, unneededBr
 				fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + userCamCode(fn) + filtered # + fBmark 
 				# puts "#{__LINE__}. item: #{item} is at different time as previous.    fileBaseName: #{fileBaseName}"
 			end # if oneBack
-			# end # if subSecExists
+			
 			fileDatePrev = fileDate
 			fileExtPrev = fileExt
 			# fileBaseNamePrev = fileBaseName
@@ -293,32 +299,9 @@ def renamePhotoFiles(src, timeZonesFile, timeNowWas, photosRenamedTo, unneededBr
 #       puts "#{__LINE__}. fn: #{fn}. fnp (fnpPrev): #{fnp}. subSec: #{subSec}"
 			subSecPrev = subSec.to_s
 			File.rename(fn,fnp)
-			photoRenamed = "#{__LINE__}. photosRenamedTo: #{photosRenamedTo}. #{File.basename(fn)} was renamed to #{File.basename(fnp)}"
 			# Add the processed file to the array so can move unneeded bracket files below
 			unneededBracketedFiles << fnp
 
-			begin
-				file_prepend(photosRenamedTo, photoRenamed)
-				# puts "#{__LINE__}. #{Time.now} #{photoRenamed}"
-			rescue IOError => e
-				puts "#{__LINE__}. Something went wrong. Could not write last photo renamed (#{photoRenamed}) to #{photosRenamedTo}"
-			end # begin
-			
-			# Set aside bracketed images that were successfully stacked. Activated when the stacked image is encountered
-			if stackedImageBoolean
-				numBracketed = stackedImage[15..16] # Focus-stacked (15 images)
-				puts "\n#{__LINE__}. unneededBracketedFiles: #{unneededBracketedFiles}. "
-				puts "\n#{__LINE__}. Going to set aside #{numBracketed} bracketed images that were successfully stacked for #{fnp}. "
-				bracketedToMove = "" # gets reused
-					numBracketed.to_i.times do 
-					 bracketedToMove = unneededBracketedFiles.shift
-					 # puts "\n#{__LINE__}. bracketedToMove: #{bracketedToMove} "
-					 puts "\n#{__LINE__}. bracketedToMove: #{bracketedToMove} is going to be moved to #{unneededBracketed}."
-					 # Don't want to delete but move out of Mylio
-					 FileUtils.move(bracketedToMove, unneededBracketed) if File.exist?(bracketedToMove)
-					 # puts "Bracketed photo moved: #{bracketedToMove}"
-					end      
-				end
 			
 			count += 1
 		 else
@@ -332,9 +315,18 @@ def renamePhotoFiles(src, timeZonesFile, timeNowWas, photosRenamedTo, unneededBr
 	{tzoLoc: tzoLoc, camModel: camModel} #return
 end # rename  photo files in the downloads folder and writing in original time.
 
+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+
+###### Beginning of actions ###############
+# 1. Estabish Array.photos
+# 2. Rename which may need Array.photos
+# 3. Sort and move
+
+lineNum = #{__LINE__}
+timeNowWas = timeStamp(Time.now, lineNum)
 id = 0
 photos = []
 lastPhotoFilename = "OB305994" # use later as starting point
+
 # Dir.each_child(src) do |fn| # can be random order
 Dir.each_child(src).sort.each do |fn|
 	next if fn == '.DS_Store' # each_child knows about . and .. but not 
@@ -381,8 +373,7 @@ Dir.each_child(src).sort.each do |fn|
 	#   instructions: #{instructions} . should be blank for unprocessed photo
 	#   timeZoneOffset: #{timeZoneOffset} . should be blank for unprocessed photo
   # " 
-	
-	# 
+	# Creating expressive Caption for evaluating shooting techniques. Can toggle on and off below and will establish selecting the option in the GUI
 	imageDescription = "" # so not carried over from previous photo
 	# Only put in if value is present
 	if stackedImage != "No" # Always a value. Don't need to see No
@@ -429,6 +420,12 @@ Dir.each_child(src).sort.each do |fn|
 	puts "#{id}. Stacked Image: `#{stackedImage}`. shotNo: #{shotNo}. driveMode: #{driveMode}.  Original FileName: #{preservedFileName}"
 end
 
+# Renaming. Look at original, not sure what is going on exactly Line 1253
+puts "\n#{__LINE__}. Rename [tzoLoc = renamePhotoFiles(…)] the photo files with date and an ID for the camera or photographer (except for the paired jpgs in #{tempJpg}). #{timeNowWas}\n"
+# tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # Second time this variable name is used, other is in a method
+renameReturn = renamePhotoFiles(mylioStaging, photos, timeZonesFile, timeNowWas, photosRenamedTo, unneededStacksFolder) # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
+
+
 puts "\n#{__LINE__}.  Demo of retrieving info from array"
 photo_10 = photos.find { |photo| photo.id == "photo-10" }
 puts "#{__LINE__}. photo_id: photo-10.  Stacked Image: #{photo_10.stackedImage if photo_10}. photo_10.preservedFileName: #{photo_10.preservedFileName}. "
@@ -465,7 +462,7 @@ puts "#{__LINE__}. photo_id: photo-10.  Stacked Image: #{photo_10.stackedImage i
 # end # if camModel
 #   
 
-# Instaniate each file on card
+# Instantiate each file on card
 # 
 # For now assume know where coming from
 # src = "/Volumes/Macintosh HD/Users/gscar/Library/Mobile Documents/com~apple~CloudDocs/Documents/Ruby/Photo handling/testingClass/incomingTestPhotos"

@@ -619,7 +619,8 @@ def renamePhotoFiles(src, timeZonesFile, timeNowWas, photosRenamedTo, unneededBr
  
     # Only put in if value is present
     if stackedImage != "No" # Always a value. Don't need to see No
-      imageDescription = stackedImage + " [StackedImage]. "
+      # imageDescription = stackedImage + " [StackedImage]. " Gave an error because stackedImage was nil
+      imageDescription = "#{stackedImage} [StackedImage]."
     end
     # puts "#{__LINE__}. driveMode: #{driveMode}.  driveMode.present?: #{driveMode.present?}."
     if !driveMode.nil? # .present? didn't work

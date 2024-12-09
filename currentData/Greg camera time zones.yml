@@ -1,3 +1,8 @@
+"616":
+  Description: "PST. California Standard Time. Camera now set to PT"
+  timeGMT: 2024-11-03T10-00-00Z
+  zone: -8
+  comments: "DST to PST"
 "617":
   Description: "PDT. California Daylight Time. Camera now set to PT"
   timeGMT: 2024-10-01T00-00-00Z
