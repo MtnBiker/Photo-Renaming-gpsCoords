@@ -84,11 +84,12 @@ def timeStamp(timeNowWas, fromWhere)
 end
 
 # Add original file name, rename with coding
-def renamePhotoFiles(src, photo_array, timeZonesFile, timeNowWas, photosRenamedTo, unneededStacksFolder)
+def renamePhotoFiles(photo_array, mylioStaging, timeZonesFile, timeNowWas, photosRenamedTo, unneededStacksFolder)
+	
 	# src is mylioStaging folder
 	# timeZonesFile is my log of which time zones I was in when
 	# timeNowWas used for timing various parts of the script.
-	puts ("#{__LINE__}. in renamePhotoFiles. src: #{src}. timeZonesFile #{timeZonesFile}. timeNowWas: #{timeNowWas}")
+	puts "\n#{__LINE__}. in renamePhotoFiles. timeZonesFile #{timeZonesFile}. timeNowWas: #{timeNowWas}\n" #  src: #{src}. an object? 
 	# Until 2017, this assumed camera on UTC, but doesn't work well for cameras with a GPS or set to local time
 	# So have to ascertain what time zone the camera is set to by other means in this script, none of them foolproof
 	# 60 minutes for ~1000 photos to rename TODO ie, very slow
@@ -105,6 +106,8 @@ def renamePhotoFiles(src, photo_array, timeZonesFile, timeNowWas, photosRenamedT
 	# puts "#{__LINE__}. Entered rename and ready to enter foreach. src: #{src}"
 	# Dir.each_child(src) do |item| # for each photo file
 	# photo_array.each_with_index do |photo, index| if need index number
+	puts "#{__LINE__}. photo_array.class: #{photo_array.class}. Changing from array to string as passed into method" #  Line 108
+
 	photo_array.each do |photo|
 		puts "#{__LINE__}. photo #{photo}"
 			
@@ -396,7 +399,6 @@ Dir.each_child(src).sort.each do |fn|
 	# Checking what is stored in stacked image
 	puts "#{id}. Stacked Image: `#{stackedImage}`. shotNo: #{shotNo}. driveMode: #{driveMode}.  Original FileName: #{preservedFileName}"
 end # Dir.each_child(src).sort.each do |fn|
-	
 puts "\n#{__LINE__}. Finished adding EXIF info and establishing photo array."
 # puts photo_array.inspect
 # puts "#{__LINE__}. ######## End of Array ##########"
@@ -404,6 +406,7 @@ puts "\n#{__LINE__}. Finished adding EXIF info and establishing photo array."
 # puts "\n{__LINE__}. Rename [tzoLoc = renamePhotoFiles(…)] the photo files with date and an ID for the camera or photographer (except for the paired jpgs in #{tempJpg}). #{timeNowWas}\n"
 puts "\n#{__LINE__}. Rename [tzoLoc = renamePhotoFiles(…)] the photo files with date and an ID for the camera or photographer (except for the paired jpgs FIXME. #{timeNowWas}\n"
 # tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # Second time this variable name is used, other is in a method
+puts "#{__LINE__}. photo_array.class: #{photo_array.class}" # array
 renameReturn = renamePhotoFiles(photo_array, mylioStaging, timeZonesFile, timeNowWas, photosRenamedTo, unneededStacksFolder) # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
 
 
