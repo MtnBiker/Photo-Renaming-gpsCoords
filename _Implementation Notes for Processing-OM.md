@@ -64,6 +64,8 @@ photosRenamedTo left in as it might be useful for dubugging. But I wasn't using 
 GUI
 writeCaption = true # Decide this is GUI later
 
+fileDateTimeOriginal review what this is for FIXME
+
 #### test images
 virginOMcopy folder
 OA184727–OA184742 Two sets of Continuous shooting (heavy finger on shutter or)

@@ -264,14 +264,24 @@ Dir.each_child(src).sort.each do |fn|
 	timeStamp = fileEXIF.TimeStamp
 	offsetTimeOriginal = fileEXIF.OffsetTimeOriginal
 	# model = fileEXIF.model
+	
+	fileExt = File.extname(fn).tr(".","").downcase 
+	case 
+	when fileExt == "mov" # OMDS movie
+		fileDateTimeOriginal = fileEXIF.CreateDate
+	else 
+		fileDateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
+	end
+
 	driveMode = fileEXIF.DriveMode 
-	puts "\n#{__LINE__} fileType: #{fileType}. driveMode: #{driveMode}. driveMode.class: #{driveMode.class}. fileType.class: #{fileType.class}."
 	if fileType == "MOV" # driveMode == "" # nil doesn't work, niether does blank
 		shootingMode = "MOV"
 		shotNo = ""
+		ileDateTimeOriginal = fileEXIF.CreateDate
 	else
 		shootingMode = driveMode.split(',')[0] # Focus Bracketing or whatever is before the first comma
 		shotNo = driveMode.match(/(\d{1,3})/).to_s.rjust(2, '0')
+		fileDateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
 	end
 	subjectTrackingMode = fileEXIF.AISubjectTrackingMode
 	stackedImage = fileEXIF.StackedImage
@@ -281,7 +291,18 @@ Dir.each_child(src).sort.each do |fn|
 	fileSubSecTimeOriginal = fileEXIF.SubSecTimeOriginal # no error if doesn't exist and it does not puts in OM
 	instructions = fileEXIF.instructions 
 	timeZoneOffset = fileEXIF.TimeZoneOffset
-		
+	
+	# Intermediate values and .mov has to be handled differently
+	if fileType == "MOV" # driveMode == "" # nil doesn't work, niether does blank
+		shootingMode = "MOV"
+		shotNo = ""
+		fileDateTimeOriginal = fileEXIF.CreateDate
+	else
+		shootingMode = driveMode.split(',')[0] # Focus Bracketing or whatever is before the first comma
+		shotNo = driveMode.match(/(\d{1,3})/).to_s.rjust(2, '0')
+		fileDateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
+	end
+	
 	# Changing one field So Preview and some other Apple apps can open the files. If and when Apple adds OM-1 Mark II, can remove this line. 15.2 Still can't open
 	fileEXIF.CameraType2 = "OM-1" #  CameraType2 was 'Unknown (S0121)'
 
@@ -310,8 +331,9 @@ Dir.each_child(src).sort.each do |fn|
 	# Creating expressive Caption for evaluating shooting techniques. Can toggle on and off below and will establish selecting the option in the GUI
 	imageDescription = "" # so not carried over from previous photo
 	# Only put in if value is present
-	if stackedImage != "No" # Always a value. Don't need to see No
+	unless stackedImage.nil? # Note unless here and if ! next. Always a value except for .mov. Don't need to see No
 		imageDescription = stackedImage + " [StackedImage]. "
+		instructions = stackedImage + ". " + shootingMode
 	end
 	# puts "#{__LINE__}. driveMode: #{driveMode}.  driveMode.present?: #{driveMode.present?}."
 	if !driveMode.nil? # .present? didn't work
@@ -338,18 +360,8 @@ Dir.each_child(src).sort.each do |fn|
 	#   instructions = "STM: " + subjectTrackingModeOne + ". SM:" + shootingMode + ". FocusBrkStep " + focusBracketStepSize.to_s + " "
 	# end
 	
-	unless stackedImage == "No" # Stacked Image : No or Focus-stacked
-	  instructions = stackedImage + ". " + shootingMode
-	end
 	fileEXIF.instructions = "#{instructions}. #{File.basename(fn,".*")}" # Maybe drop basename
 	
-	fileExt = File.extname(fn).tr(".","").downcase 
-	case 
-	when fileExt == "mov" # OMDS movie
-		fileDateTimeOriginal = fileEXIF.CreateDate
-	else 
-		fileDateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
-	end
 	
 	# FIXME What are the next ~20 lines about?
 	# tzoLoc = timeZone(fileDateTimeOriginal, timeZonesFile) # the time zone the picture was taken in, doesn't say anything about what times are recorded in the photo's EXIF. I'm doing this slightly wrong, because it's using the photo's recorded date which could be either GMT or local time. But only wrong if the photo was taken too close to the time when camera changed time zones
