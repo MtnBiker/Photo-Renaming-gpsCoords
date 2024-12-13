@@ -58,8 +58,24 @@ GUI for keying into GUI options etc
 
 4 Then can sort by where to go: jpg if raw exists, unneeded files for stack, unneeded files from hi res
 
+### Changes
+photosRenamedTo left in as it might be useful for dubugging. But I wasn't using it and maybe it should go into photos.array. Action not implemented, ie, file not written to.
+
 GUI
 writeCaption = true # Decide this is GUI later
+
+#### test images
+virginOMcopy folder
+OA184727–OA184742 Two sets of Continuous shooting (heavy finger on shutter or)
+OA184805–OA184819 Focus stacking and result
+OB035290–OB035292 Three sets of HiRes (3 images each)
+OB035300 and OB045343 Two single shot jpg
+OB045344 another HiRes (3 images)
+OB115647 jpg preceding a focus stack
+OB115648–OB115662 Focus stack and result (16 total)
+OB115663 following jpg
+OC076017 orf jpg pair
+
 
 $$
 Easier to read this in Notes app. Examples saved
