@@ -2,7 +2,7 @@
 # ruby "/Volumes/Macintosh HD/Users/gscar/Documents/Ruby/Photo handling/PhotoName-Class.rb"
 
 # Written for OM-1. Copied and modified from PhotoName-GPScoord-macOSphotos.rb: #{rb}. 
-# See Outline of script.txt for implemntation
+# See Outline of script.txt for implementation
 
 require 'fileutils'
 include FileUtils
@@ -64,11 +64,11 @@ unneededStacksFolder = thisScript + "/testingClass/unneededStacksFolder" # DEV
 src = thisScript + "/testingClass/incomingTestPhotos/" # Stacked w/ and w/o a stacked image, HHHR, THR, 
 # src = "/Volumes/Daguerre/_Download folder/_imported-archive/OM-1/OB[2024.11]-OM/" # 308 photos
 # src = "/Volumes/Daguerre/_Download folder/_imported-archive/OM-1/OA[2024.10]-OM/" # 476 photos
-# src = "testingClass/singleTestPhoto"
+# src = thisScript + "/testingClass/singleTestPhoto"
 
 # mylioStaging = downloadsFolders + "Latest Processed photos-Import to Mylio/" #  These are relabeled and GPSed files. Will be moved to Mylio after processing.
-mylioStaging =thisScript + "/testingClass/staging" # DEV
-
+mylioStaging = thisScript + "/testingClass/staging" # DEV
+# Not planning to use initially or at all
 timeZonesFile = thisScript + "currentData/Greg camera time zones.yml"
 
 def timeStamp(timeNowWas, fromWhere)  
@@ -100,6 +100,7 @@ def renamePhotoFiles(photo_array, mylioStaging, timeZonesFile, timeNowWas, photo
 	count    = 1
 	tzoLoc = ""
 	camModel = ""
+	userCamCode = ".gs.O" # go back to older version of this if want to determine it
 	seqLetter = %w(a b c d e f h i j k l m n o p q r s t u v w x y z aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt uu vv ww xx yy zz) # used when subsec doesn't exist, but failing for large sequences possible on OM-1, so maybe use sequential numbers, i.e., dupCount?. Yes
 	# Array to store processed files
 	unneededBracketedFiles = [] # ~line 781
@@ -109,12 +110,11 @@ def renamePhotoFiles(photo_array, mylioStaging, timeZonesFile, timeNowWas, photo
 	# puts "\n#{__LINE__}. photo_array: #{photo_array}\n"
 	photo_array.each do |photo|
 		# fn = photo[:fn] # Is this needed? In any case why doesn't it work????
-	fn = photo.fn
-	# puts "\n#{__LINE__}. fn: #{fn}\n"
-	fileExt = photo.fileExt
-	fileExtPrev = ""
-		
-		# 
+		fn = photo.fn
+		# puts "\n#{__LINE__}. fn: #{fn}\n"
+		fileExt = photo.fileExt
+		fileExtPrev = ""
+			
 		# Change OM .ORI to .ORI.ORF so Apple apps and others can see them. Can't do before fileEXIF.save because fn is "redefined". Hi-Res creates an .ORI
 		# Focus stacked first image gets renamed somewhere else and loses the .ori at line 555?
 		# But it does get the .ORI.ORF but then gets changed.
@@ -127,10 +127,12 @@ def renamePhotoFiles(photo_array, mylioStaging, timeZonesFile, timeNowWas, photo
 			fn = f_rename # since reuse fn
 			# puts "#{__LINE__}. Rename happened and now fn is #{fn}." 
 		end 
+		
 		fileDateTimeOriginal = photo.fileDateTimeOriginal
-		fileDate = fileDateTimeOriginal + timeChange.to_i # date in local time photo was taken. No idea why have to change this to i, but was nil class even though zero  
+		# puts "\n#{__LINE__}. preservedFileName: #{photo.preservedFileName}.	fileDateTimeOriginal: #{fileDateTimeOriginal}. " # sorting out what I was trying to do
+		fileDate = fileDateTimeOriginal # + timeChange.to_i # date in local time photo was taken. No idea why have to change this to i, but was nil class even though zero  
 		fileDateTimeOriginalstr = fileDateTimeOriginal.to_s[0..-6]
-	
+		
 		oneBack = fileDate == fileDatePrev && fileExt != fileExtPrev # at the moment this is meaningless because all of one type?
 		
 		#  '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'. This exists for OM-1 for at least some sequence shooting. Also: `SpecialMode                     : Fast, Sequence: 9, Panorama: (none)`
@@ -139,6 +141,7 @@ def renamePhotoFiles(photo_array, mylioStaging, timeZonesFile, timeNowWas, photo
 		# driveMode = fileEXIF.DriveMode # OMDS only, not in Lumix. Moved definition up as need earlier
 		# DriveMode       : Focus Bracketing, Shot 8; Electronic shutter
 		# DriveMode shows "Focus Bracketing" for the shots comprising the focus STACKED result
+		driveMode = photo.driveMode
 		unless driveMode.nil? # doesn't exist in some cases
 			driveModeFb = driveMode.split(',')[0]
 			# puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
@@ -148,11 +151,11 @@ def renamePhotoFiles(photo_array, mylioStaging, timeZonesFile, timeNowWas, photo
 				bracketing = false
 			end
 		end
-			# Not using specialMode now, but as an option
+		# Not using specialMode now, but as an option
 		# specialMode = fileEXIF.SpecialMode
-	
+		
 		match, shot_no = ""
-	
+		
 		# puts "#{__LINE__}. fn: #{fn}. driveMode: #{driveMode}.\nspecialMode: #{specialMode} oneBack: #{oneBack} = true is two photos in same second. If true, oneBackTrue will be called."
 		# Maybe should enter if there is a shot no.
 		unless driveMode.nil? || driveMode.empty? # opposite of if, therefore if driveMode is not empty
@@ -160,7 +163,9 @@ def renamePhotoFiles(photo_array, mylioStaging, timeZonesFile, timeNowWas, photo
 			shot_no = match[1].to_i if match
 			# First photo in a sequence won't get -1 in oneBackTrue.
 			if shot_no.to_i == 1
-				fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no.to_s.rjust(2, '0') + userCamCode(fn) #  fBmark +
+				# puts "\n#{__LINE__}. fileDate: #{fileDate}.	of class: #{fileDate.class}. fileDate.to_s: #{fileDate.to_s}.	" 
+				t = Time.parse(fileDate.to_s) # to get instance of an arrary to be readable by .strftime
+				fileBaseName = t.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no.to_s.rjust(2, '0') + userCamCode #  fBmark +
 				# puts "#{__LINE__}. Because this was the first in a sequence a `1` was added to the filename for #{fileBaseName}. DEBUG" # Working for OM
 			end
 		
@@ -179,16 +184,16 @@ def renamePhotoFiles(photo_array, mylioStaging, timeZonesFile, timeNowWas, photo
 			# puts tempTitle
 			# fileEXIF.title = tempTitle # doing nothing, guess file not opened at this ppomt
 			
-			end
-			if stackedImage[0..5].to_s == "Tripod" #  Tripod high resolution
-				hiResTripodBoolean = true
-				fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "HiResTripod" + userCamCode(fn)
-			end
-			if stackedImage[0..24].to_s == "Hand-held high resolution" #  Tripod high resolution
-				hiResHandheldBoolean = true
-				fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "HiResHand" + userCamCode(fn)
-			end
 		end
+		if stackedImage[0..5].to_s == "Tripod" #  Tripod high resolution
+			hiResTripodBoolean = true
+			fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "HiResTripod" + userCamCode
+		end
+		if stackedImage[0..24].to_s == "Hand-held high resolution" #  Tripod high resolution
+			hiResHandheldBoolean = true
+			fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "HiResHand" + userCamCode
+		end
+	end
 			# puts "#{__LINE__} stackedImage[0..12]: #{stackedImage[0..12]}. stackedImageBoolean: #{stackedImageBoolean}" #  stackedImage[0..12]: Focus-stacked. stackedImageBoolean: false
 			if bracketing or stackedImageBoolean
 				fileBaseName = bracketed(fn, fileDate, driveMode, stackedImageBoolean, shot_no)
@@ -198,7 +203,7 @@ def renamePhotoFiles(photo_array, mylioStaging, timeZonesFile, timeNowWas, photo
 			else # normal condition that this photo is at a different time than previous photo
 				puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match} for item: #{item}. DEBUG"
 				dupCount = 0 # resets dupCount after having a group of photos in the same second
-				fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + userCamCode(fn) + filtered # + fBmark 
+				fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + userCamCode + filtered # + fBmark 
 				# puts "#{__LINE__}. item: #{item} is at different time as previous.    fileBaseName: #{fileBaseName}"
 			end # if oneBack
 			
@@ -209,7 +214,7 @@ def renamePhotoFiles(photo_array, mylioStaging, timeZonesFile, timeNowWas, photo
 			# write to Instructions which can be seen in Mylio and doesn't interfere with Title or Caption
 			fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc, camModel) # was passing fileEXIF, but saving wasn't happening, so reopen in the module?
 	
-			fnp = fnpPrev = src + fileBaseName + File.extname(fn).downcase # unless #Why was the unless here?
+			fnp = fnpPrev = src + fileBaseName + File.extname(fn).downcase
 			# puts "Place holder to make the script work. where did the unless come from"
 	#       puts "#{__LINE__}. fn: #{fn}. fnp (fnpPrev): #{fnp}. subSec: #{subSec}"
 			subSecPrev = subSec.to_s

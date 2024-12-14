@@ -65,6 +65,7 @@ GUI
 writeCaption = true # Decide this is GUI later
 
 fileDateTimeOriginal review what this is for FIXME
+DateTimeUTC and DateTimeOriginal and OffsetTime to check that camera was set correctly. These are what the camera thinks is right. Maybe check against the time zones.yml, but ignore for now
 
 #### test images
 virginOMcopy folder
