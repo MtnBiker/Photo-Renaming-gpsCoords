@@ -83,8 +83,58 @@ def timeStamp(timeNowWas, fromWhere)
 	Time.now
 end
 
+def oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
+	# Some of these fields may not be needed, I was fighting the wrong problem and may have added some that aren't needed
+	# puts "\n#{__LINE__}. fn: #{fn}. fnp: #{fnp}. subSecExists: #{subSecExists}. fileDate: #{fileDate}. driveMode: #{driveMode}.  dupCount: #{dupCount}. in oneBackTrue(). DEBUG"
+	dupCount += 1
+	# Getting sequence no./shot no. for OM-1. DriveMode is "Single Shot; Electronic shutter" for normal photos
+	unless driveMode.nil? || driveMode.empty? # opposite of if, therefore if driveMode is not empty
+		match = driveMode.match(/Shot (\d{1,3})/)
+		shot_no = match[1].to_i if match
+		shootingMode = driveMode.split(',')[0]
+		# puts "#{__LINE__}. fn: #{fn}. driveMode: #{driveMode}. shot_no: #{shot_no}. shootingMode: #{shootingMode}. subSecExists: #{subSecExists}. fileDateStr: #{fileDateStr}. DEBUG"
+	end
+	if shot_no.to_i > 0 # photos without subsecs. OM-1 but with shot number.
+		# Getting sequence no. for OM-1. DriveMode is "Single Shot; Electronic shutter" for normal photos
+			 # puts shot_no
+		# End getting seqence no
+		fileBaseName = fileDateStr.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no.to_s + userCamCode
+		# puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileBaseName: #{fileBaseName}. fileDateStr: #{fileDateStr}. shot_no: #{shot_no}. userCamCode(fn): #{userCamCode(fn)}. DEBUG" # .  filtered: #{filtered}
+	else # photos without subsecs, pre GX8 and other OM-1 in same second
+		# puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileDateStr: #{fileDateStr}. dupCount: #{dupCount}. userCamCode(fn): #{userCamCode(fn)}. debug"
+		# fileBaseName = fileDateStr.strftime("%Y.%m.%d-%H.%M.%S") +  seqLetter[dupCount] + userCamCode(fn) + filtered
+		# Giving up on seqLetter because too many, use dupCount, but also add shot no. 
+		
+		# FIXME. I think the next 12 or so lines are not being used.
+		# driveMode = fileEXIF.DriveMode # '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'
+		# puts "#{__LINE__}. driveMode: #{driveMode}. driveMode.class: #{driveMode.class} for . " # error if?
+		if driveMode.class == "NilClass"
+			fileBaseName = fileDateStr.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s + userCamCode
+			puts "#{__LINE__} #{fileBaseName} has dupCount" # debug 
+		elsif driveMode.length > 0
+			match = driveMode.match(/Shot (\d{1,3})/)
+			if match
+				shot_no = match[1].to_i
+				puts "#{__LINE__} #{fileBaseName} is shot that contributed to a Focus Stacked image" # debug 
+			else 
+				shot_no = "FS" # for an in camera Focus Stacked image FIXME. This should not be in oneBackTrue
+				# puts "#{__LINE__} #{fileBaseName} an in camera Focus Stacked image and the contributing images should not be sent to Mylio." # debug
+			end
+			fileBaseName = fileDateStr.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s + "(" + shot_no + ")" + userCamCode
+			
+			# fileBaseName = fileDateStr.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s + ".FS" + userCamCode(fn) # for an in camera Focus Stacked image
+		else
+			puts "#{__LINE__}. driveMode: #{driveMode}. driveMode.class: #{driveMode.class}." 
+			fileBaseName = fileDateStr.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s  + userCamCode
+		end
+		
+		puts "#{__LINE__}. fn: #{fn} in 'if oneBack'.     fileBaseName: #{fileBaseName}."
+	end # subSecExists
+	return fileBaseName
+end # oneBackTrue
+
 # Add original file name, rename with coding
-def renamePhotoFiles(photo_array, mylioStaging, timeZonesFile, timeNowWas, photosRenamedTo, unneededStacksFolder)
+def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedTo, unneededStacksFolder)
 	
 	# src is mylioStaging folder ??
 	# timeZonesFile is my log of which time zones I was in when
@@ -94,7 +144,7 @@ def renamePhotoFiles(photo_array, mylioStaging, timeZonesFile, timeNowWas, photo
 	# So have to ascertain what time zone the camera is set to by other means in this script, none of them foolproof
 	# 60 minutes for ~1000 photos to rename TODO ie, very slow
 	fn = fnp = fnpPrev = "" # must declare variable or they won't be available everywhere in the module
-	subSecPrev = subSec = ""
+	# subSecPrev = subSec = ""
 	fileDatePrev = ""
 	dupCount = 0
 	count    = 1
@@ -130,7 +180,8 @@ def renamePhotoFiles(photo_array, mylioStaging, timeZonesFile, timeNowWas, photo
 		
 		fileDateTimeOriginal = photo.fileDateTimeOriginal
 		# puts "\n#{__LINE__}. preservedFileName: #{photo.preservedFileName}.	fileDateTimeOriginal: #{fileDateTimeOriginal}. " # sorting out what I was trying to do
-		fileDate = fileDateTimeOriginal # + timeChange.to_i # date in local time photo was taken. No idea why have to change this to i, but was nil class even though zero  
+		fileDate = fileDateTimeOriginal # + timeChange.to_i # date in local time photo was taken. No idea why have to change this to i, but was nil class even though zero
+		fileDateStr = Time.parse(fileDate.to_s) # to get instance of an arrary to be readable by .strftime
 		fileDateTimeOriginalstr = fileDateTimeOriginal.to_s[0..-6]
 		
 		oneBack = fileDate == fileDatePrev && fileExt != fileExtPrev # at the moment this is meaningless because all of one type?
@@ -164,14 +215,13 @@ def renamePhotoFiles(photo_array, mylioStaging, timeZonesFile, timeNowWas, photo
 			# First photo in a sequence won't get -1 in oneBackTrue.
 			if shot_no.to_i == 1
 				# puts "\n#{__LINE__}. fileDate: #{fileDate}.	of class: #{fileDate.class}. fileDate.to_s: #{fileDate.to_s}.	" 
-				t = Time.parse(fileDate.to_s) # to get instance of an arrary to be readable by .strftime
-				fileBaseName = t.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no.to_s.rjust(2, '0') + userCamCode #  fBmark +
+				fileBaseName = fileDateStr.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no.to_s.rjust(2, '0') + userCamCode #  fBmark +
 				# puts "#{__LINE__}. Because this was the first in a sequence a `1` was added to the filename for #{fileBaseName}. DEBUG" # Working for OM
 			end
 		
-		
 		# puts "#{__LINE__}. oneBack: #{oneBack}. match: #{match}. DEBUG"
 		# Add check for bracketing and treat as needed, then onBack and treat as needed.
+		stackedImage = photo.stackedImage
 		stackedImageBoolean = false
 		hiResTripodBoolean = false
 		hiResHandheldBoolean = false
@@ -183,7 +233,6 @@ def renamePhotoFiles(photo_array, mylioStaging, timeZonesFile, timeNowWas, photo
 			tempTitle =  "\n#{__LINE__}. #{fn} is a successfully stacked images and (parse StackedImage to get the number of files) preceding files need to be set aside. Do this after renaming. ~line 781"
 			# puts tempTitle
 			# fileEXIF.title = tempTitle # doing nothing, guess file not opened at this ppomt
-			
 		end
 		if stackedImage[0..5].to_s == "Tripod" #  Tripod high resolution
 			hiResTripodBoolean = true
@@ -199,11 +248,11 @@ def renamePhotoFiles(photo_array, mylioStaging, timeZonesFile, timeNowWas, photo
 				fileBaseName = bracketed(fn, fileDate, driveMode, stackedImageBoolean, shot_no)
 			elsif oneBack # || match # Two photos in same second? 
 				puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match}. DEBUG"
-				fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, subSecExists, subSec, subSecPrev, fileDate, driveMode, dupCount, camModel)
+				fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
 			else # normal condition that this photo is at a different time than previous photo
-				puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match} for item: #{item}. DEBUG"
+				# puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match} for item: #{item}. DEBUG"
 				dupCount = 0 # resets dupCount after having a group of photos in the same second
-				fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + userCamCode + filtered # + fBmark 
+				fileBaseName = fileDateStr.strftime("%Y.%m.%d-%H.%M.%S") + userCamCode #  + filtered + fBmark 
 				# puts "#{__LINE__}. item: #{item} is at different time as previous.    fileBaseName: #{fileBaseName}"
 			end # if oneBack
 			
@@ -212,12 +261,13 @@ def renamePhotoFiles(photo_array, mylioStaging, timeZonesFile, timeNowWas, photo
 			# fileBaseNamePrev = fileBaseName
 			
 			# write to Instructions which can be seen in Mylio and doesn't interfere with Title or Caption
-			fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc, camModel) # was passing fileEXIF, but saving wasn't happening, so reopen in the module?
+			# Seems like this is done elsewhere
+			# fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc, camModel) # was passing fileEXIF, but saving wasn't happening, so reopen in the module?
 	
-			fnp = fnpPrev = src + fileBaseName + File.extname(fn).downcase
+			fnp = fnpPrev = src + fileBaseName + fileExt.downcase
 			# puts "Place holder to make the script work. where did the unless come from"
 	#       puts "#{__LINE__}. fn: #{fn}. fnp (fnpPrev): #{fnp}. subSec: #{subSec}"
-			subSecPrev = subSec.to_s
+			# subSecPrev = subSec.to_s
 			File.rename(fn,fnp)
 			# Add the processed file to the array so can move unneeded bracket files below
 			unneededBracketedFiles << fnp
