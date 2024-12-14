@@ -83,7 +83,7 @@ def timeStamp(timeNowWas, fromWhere)
 	Time.now
 end
 
-def oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
+def oneBackTrue(src, fn, fnp, fnpPrev, fileDateStrFmt, driveMode, dupCount, camModel, userCamCode)
 	# Some of these fields may not be needed, I was fighting the wrong problem and may have added some that aren't needed
 	# puts "\n#{__LINE__}. fn: #{fn}. fnp: #{fnp}. subSecExists: #{subSecExists}. fileDate: #{fileDate}. driveMode: #{driveMode}.  dupCount: #{dupCount}. in oneBackTrue(). DEBUG"
 	dupCount += 1
@@ -98,18 +98,18 @@ def oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camMode
 		# Getting sequence no. for OM-1. DriveMode is "Single Shot; Electronic shutter" for normal photos
 			 # puts shot_no
 		# End getting seqence no
-		fileBaseName = fileDateStr.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no.to_s + userCamCode
+		fileBaseName = fileDateStrFmt + "-" + shot_no.to_s + userCamCode
 		# puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileBaseName: #{fileBaseName}. fileDateStr: #{fileDateStr}. shot_no: #{shot_no}. userCamCode(fn): #{userCamCode(fn)}. DEBUG" # .  filtered: #{filtered}
 	else # photos without subsecs, pre GX8 and other OM-1 in same second
 		# puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileDateStr: #{fileDateStr}. dupCount: #{dupCount}. userCamCode(fn): #{userCamCode(fn)}. debug"
-		# fileBaseName = fileDateStr.strftime("%Y.%m.%d-%H.%M.%S") +  seqLetter[dupCount] + userCamCode(fn) + filtered
+		# fileBaseName = fileDateStrFmt +  seqLetter[dupCount] + userCamCode(fn) + filtered
 		# Giving up on seqLetter because too many, use dupCount, but also add shot no. 
 		
 		# FIXME. I think the next 12 or so lines are not being used.
 		# driveMode = fileEXIF.DriveMode # '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'
 		# puts "#{__LINE__}. driveMode: #{driveMode}. driveMode.class: #{driveMode.class} for . " # error if?
 		if driveMode.class == "NilClass"
-			fileBaseName = fileDateStr.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s + userCamCode
+			fileBaseName = fileDateStrFmt + "-" + dupCount.to_s + userCamCode
 			puts "#{__LINE__} #{fileBaseName} has dupCount" # debug 
 		elsif driveMode.length > 0
 			match = driveMode.match(/Shot (\d{1,3})/)
@@ -120,12 +120,12 @@ def oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camMode
 				shot_no = "FS" # for an in camera Focus Stacked image FIXME. This should not be in oneBackTrue
 				# puts "#{__LINE__} #{fileBaseName} an in camera Focus Stacked image and the contributing images should not be sent to Mylio." # debug
 			end
-			fileBaseName = fileDateStr.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s + "(" + shot_no + ")" + userCamCode
+			fileBaseName = fileDateStrFmt + "-" + dupCount.to_s + "(" + shot_no + ")" + userCamCode
 			
-			# fileBaseName = fileDateStr.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s + ".FS" + userCamCode(fn) # for an in camera Focus Stacked image
+			# fileBaseName = fileDateStrFmt + "-" + dupCount.to_s + ".FS" + userCamCode(fn) # for an in camera Focus Stacked image
 		else
 			puts "#{__LINE__}. driveMode: #{driveMode}. driveMode.class: #{driveMode.class}." 
-			fileBaseName = fileDateStr.strftime("%Y.%m.%d-%H.%M.%S") + "-" + dupCount.to_s  + userCamCode
+			fileBaseName = fileDateStrFmt + "-" + dupCount.to_s  + userCamCode
 		end
 		
 		puts "#{__LINE__}. fn: #{fn} in 'if oneBack'.     fileBaseName: #{fileBaseName}."
@@ -182,6 +182,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		# puts "\n#{__LINE__}. preservedFileName: #{photo.preservedFileName}.	fileDateTimeOriginal: #{fileDateTimeOriginal}. " # sorting out what I was trying to do
 		fileDate = fileDateTimeOriginal # + timeChange.to_i # date in local time photo was taken. No idea why have to change this to i, but was nil class even though zero
 		fileDateStr = Time.parse(fileDate.to_s) # to get instance of an arrary to be readable by .strftime
+		fileDateStrFmt = fileDateStr.strftime("%Y.%m.%d-%H.%M.%S")
 		fileDateTimeOriginalstr = fileDateTimeOriginal.to_s[0..-6]
 		
 		oneBack = fileDate == fileDatePrev && fileExt != fileExtPrev # at the moment this is meaningless because all of one type?
@@ -215,7 +216,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 			# First photo in a sequence won't get -1 in oneBackTrue.
 			if shot_no.to_i == 1
 				# puts "\n#{__LINE__}. fileDate: #{fileDate}.	of class: #{fileDate.class}. fileDate.to_s: #{fileDate.to_s}.	" 
-				fileBaseName = fileDateStr.strftime("%Y.%m.%d-%H.%M.%S") + "-" + shot_no.to_s.rjust(2, '0') + userCamCode #  fBmark +
+				fileBaseName = fileDateStrFmt + "-" + shot_no.to_s.rjust(2, '0') + userCamCode #  fBmark +
 				# puts "#{__LINE__}. Because this was the first in a sequence a `1` was added to the filename for #{fileBaseName}. DEBUG" # Working for OM
 			end
 		
@@ -236,23 +237,28 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		end
 		if stackedImage[0..5].to_s == "Tripod" #  Tripod high resolution
 			hiResTripodBoolean = true
-			fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "HiResTripod" + userCamCode
+			fileBaseName = fileDateStrFmt + "HiResTripod" + userCamCode
 		end
 		if stackedImage[0..24].to_s == "Hand-held high resolution" #  Tripod high resolution
 			hiResHandheldBoolean = true
-			fileBaseName = fileDate.strftime("%Y.%m.%d-%H.%M.%S") + "HiResHand" + userCamCode
+			fileBaseName = fileDateStrFmt + "HiResHand" + userCamCode
 		end
 	end
 			# puts "#{__LINE__} stackedImage[0..12]: #{stackedImage[0..12]}. stackedImageBoolean: #{stackedImageBoolean}" #  stackedImage[0..12]: Focus-stacked. stackedImageBoolean: false
 			if bracketing or stackedImageBoolean
-				fileBaseName = bracketed(fn, fileDate, driveMode, stackedImageBoolean, shot_no)
+				# fB for Focus Bracket. Bkt for bracket. The logic isn't the greatest to show whats going on. Assumed bracketed unless stacked
+				# stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "_Bkt" _fB
+				stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "bkt" # trying to tighten name compared to above
+				# _FS for Focus Stacked. _Stk for stacked. Do I need to diffential different stacking modes
+				stackBracket = "_STK" if stackedImageBoolean # _FS. All caps to stand out from Bkt
+				fileBaseName = fileDateStrFmt + stackBracket + userCamCode
 			elsif oneBack # || match # Two photos in same second? 
 				puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match}. DEBUG"
-				fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
+				fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, fileDateStrFmt, driveMode, dupCount, camModel, userCamCode)
 			else # normal condition that this photo is at a different time than previous photo
 				# puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match} for item: #{item}. DEBUG"
 				dupCount = 0 # resets dupCount after having a group of photos in the same second
-				fileBaseName = fileDateStr.strftime("%Y.%m.%d-%H.%M.%S") + userCamCode #  + filtered + fBmark 
+				fileBaseName = fileDateStrFmt + userCamCode #  + filtered + fBmark 
 				# puts "#{__LINE__}. item: #{item} is at different time as previous.    fileBaseName: #{fileBaseName}"
 			end # if oneBack
 			
@@ -264,7 +270,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 			# Seems like this is done elsewhere
 			# fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc, camModel) # was passing fileEXIF, but saving wasn't happening, so reopen in the module?
 	
-			fnp = fnpPrev = src + fileBaseName + fileExt.downcase
+			fnp = fnpPrev = src + "/" + fileBaseName + fileExt.downcase
 			# puts "Place holder to make the script work. where did the unless come from"
 	#       puts "#{__LINE__}. fn: #{fn}. fnp (fnpPrev): #{fnp}. subSec: #{subSec}"
 			# subSecPrev = subSec.to_s
@@ -305,7 +311,7 @@ lastPhotoFilename = "OB305994" # use later as starting point
 
 puts "#{__LINE__}. Start of photo processing. First read exif info and write to instructions and optionally to caption for viewing in Mylio
 Also for later use in naming photos and putting aside sequence (bracketed) shots contributing to stacked image
-Will take a bit of time"
+Will take a bit of time. FIXME: add some progress bar"
 # Dir.each_child(src) do |fn| # can be random order
 Dir.each_child(src).sort.each do |fn|
 	next if fn == '.DS_Store' # each_child knows about . and .. but not 
