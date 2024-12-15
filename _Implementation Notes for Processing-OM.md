@@ -69,14 +69,18 @@ DateTimeUTC and DateTimeOriginal and OffsetTime to check that camera was set cor
 
 #### test images
 virginOMcopy folder
-OA184727–OA184742 Two sets of Continuous shooting (heavy finger on shutter or)
-OA184805–OA184819 Focus stacking and result
-OB035290–OB035292 Three sets of HiRes (3 images each)
+OA184727–OA184736 10 photos  "Continuous Shooting Shot xx; Electronic shutter",
+OA184737 "Single Shot; Electronic shutter",
+OA184738–OA184742 5 photos "Continuous Shooting, Shot x; Electronic shutter",
+OA184805–OA184819 Focus stacking and result.
+OB035290–OB035292 Three sets of HiRes (3 images each)  The ori image does not specify it's a part of the Hi-Res
 OB035300 and OB045343 Two single shot jpg
-OB045344 another HiRes (3 images)
+OB045344 another HiRes (3 images),   #### Tripod Hi-Res 3 images. ori image does not specify it's a part of the Hi-Res
 OB115647 jpg preceding a focus stack
 OB115648–OB115662 Focus stack and result (16 total)
 OB115663 following jpg
+OB115666.MOV 
+OB115667.JPG
 OC076017 orf jpg pair
 
 
