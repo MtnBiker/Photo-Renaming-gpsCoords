@@ -58,6 +58,8 @@ GUI for keying into GUI options etc
 
 4 Then can sort by where to go: jpg if raw exists, unneeded files for stack, unneeded files from hi res
 
+Prevent redownloading from the two cards
+
 ### Changes
 photosRenamedTo left in as it might be useful for dubugging. But I wasn't using it and maybe it should go into photos.array. Action not implemented, ie, file not written to.
 
@@ -82,7 +84,12 @@ OB115663 following jpg
 OB115666.MOV 
 OB115667.JPG
 OC076017 orf jpg pair
+OC076017–OC146048 Bracketed (no stack) with none-Pro lens
+OC146065–OC146079 Focus stacked with jpg/orf pairs with final 
+OC146080 Final jpg stacked
 
+Note EXIF
+FileName : OB035290.ORF # just the name and extension
 
 $$
 Easier to read this in Notes app. Examples saved

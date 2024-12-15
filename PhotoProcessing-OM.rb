@@ -16,10 +16,10 @@ class Photo
 	
 	@@count = 0
 	
-	attr_accessor :id, :fn, :fileExt, :camModel, :fileType, :stackedImage, :driveMode, :afPointDetails, :subjectTrackingMode, :createDate, :dateTimeOriginal, :offsetTimeOriginal, :preservedFileName
+	attr_accessor :id, :fn, :fileName, :fileExt, :camModel, :fileType, :stackedImage, :driveMode, :specialMode, :afPointDetails, :subjectTrackingMode, :createDate, :dateTimeOriginal, :offsetTimeOriginal, :preservedFileName
 	# order by need for sorting and dealing with
 
-  def initialize(id, fn, fileExt, camModel, fileType, stackedImage, driveMode, afPointDetails, subjectTrackingMode, createDate, dateTimeOriginal, offsetTimeOriginal, preservedFileName)
+  def initialize(id, fn, fileName, fileExt, camModel, fileType, stackedImage, driveMode, specialMode, afPointDetails, subjectTrackingMode, createDate, dateTimeOriginal, offsetTimeOriginal, preservedFileName)
 		
 # The counting needs work if I need it, where did I get it from
 		# Every time a Photo (or a subclass of Photo) is instantiated,
@@ -33,11 +33,13 @@ class Photo
 		# 
 		@id = id
 		@fn = fn
+		@fileName = fileName # same as preservedFileName, but fileName is not viewable in Mylio
 		@camModel = camModel
 		@fileExt = fileExt
 		@fileType = fileType
 		@stackedImage = stackedImage
 		@driveMode = driveMode
+		@specialMode = specialMode
 		@afPointDetails = afPointDetails
 		@subjectTrackingMode = subjectTrackingMode
 		@createDate = createDate
@@ -54,20 +56,20 @@ thisScript = "#{File.dirname(__FILE__)}/" # needed because the Pashua script cal
 photosRenamedTo = thisScript + "currentData/photosRenamedTo.txt" 
 
 # unneededBracketed = downloadsFolders + "Unneeded brackets/" # on Daguerre
-unneededStacksFolder = thisScript + "/testingClass/unneededStacksFolder" # DEV
+unneededStacksFolder = thisScript + "/testingDev/unneededStacksFolder" # DEV
 
 # srcHD       = downloadsFolders + " Drag Photos HERE/" # 
-# srcHD = "testingClass/incomingTestPhotos"
+# srcHD = "testingDev/incomingTestPhotos"
 
 # Adding each file to Array photos
 # temp src until determine using. Full path needed to run from arbitrary place in iTerm. Relative works in Nova
-src = thisScript + "/testingClass/incomingTestPhotos/" # Stacked w/ and w/o a stacked image, HHHR, THR, 
+src = thisScript + "/testingDev/incomingTestPhotos/" # Stacked w/ and w/o a stacked image, HHHR, THR, 
 # src = "/Volumes/Daguerre/_Download folder/_imported-archive/OM-1/OB[2024.11]-OM/" # 308 photos
 # src = "/Volumes/Daguerre/_Download folder/_imported-archive/OM-1/OA[2024.10]-OM/" # 476 photos
-# src = thisScript + "/testingClass/singleTestPhoto"
+# src = thisScript + "/testingDev/singleTestPhoto"
 
 # mylioStaging = downloadsFolders + "Latest Processed photos-Import to Mylio/" #  These are relabeled and GPSed files. Will be moved to Mylio after processing.
-mylioStaging = thisScript + "/testingClass/staging" # DEV
+mylioStaging = thisScript + "/testingDev/staging" # DEV
 # Not planning to use initially or at all
 timeZonesFile = thisScript + "currentData/Greg camera time zones.yml"
 
@@ -183,7 +185,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		fileDate = dateTimeOriginal # + timeChange.to_i # date in local time photo was taken. No idea why have to change this to i, but was nil class even though zero
 		fileDateStr = Time.parse(fileDate.to_s) # to get instance of an array to be readable by .strftime
 		fileDateStrFmt = fileDateStr.strftime("%Y.%m.%d-%H.%M.%S")
-		fileDateTimeOriginalstr = dateTimeOriginal.to_s[0..-6]
+		dateTimeOriginalstr = dateTimeOriginal.to_s[0..-6]
 		
 		oneBack = fileDate == fileDatePrev && fileExt != fileExtPrev # at the moment this is meaningless because all of one type?
 		
@@ -193,6 +195,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		# driveMode = fileEXIF.DriveMode # OMDS only, not in Lumix. Moved definition up as need earlier
 		# DriveMode       : Focus Bracketing, Shot 8; Electronic shutter
 		# DriveMode shows "Focus Bracketing" for the shots comprising the focus STACKED result
+		specialMode = photo.specialMode
 		driveMode = photo.driveMode
 		unless driveMode.nil? # doesn't exist in some cases
 			driveModeFb = driveMode.split(',')[0]
@@ -268,7 +271,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 			
 			# write to Instructions which can be seen in Mylio and doesn't interfere with Title or Caption
 			# Seems like this is done elsewhere
-			# fileAnnotate(fn, fileDateTimeOriginalstr, tzoLoc, camModel) # was passing fileEXIF, but saving wasn't happening, so reopen in the module?
+			# fileAnnotate(fn, dateTimeOriginalstr, tzoLoc, camModel) # was passing fileEXIF, but saving wasn't happening, so reopen in the module?
 	
 			fnp = fnpPrev = src + "/" + fileBaseName + fileExt.downcase
 			# puts "Place holder to make the script work. where did the unless come from"
@@ -297,11 +300,12 @@ end # rename  photo files in the downloads folder and writing in original time.
 # 2. Rename which may need Array.photos
 # 3. Sort and move
 
-puts "\n#{__LINE__}. Copy 'virgin' photos to simulated incoming folder. Adding EXIF in place  so need virgin to start DEV\n"
-testPhotos = 'testingClass/incomingTestPhotos'
-FileUtils.rm_rf(testPhotos)
+puts "\n#{__LINE__}. Copy 'virgin' photos to simulated incoming folder. Adding EXIF in place so need virgin to start. Delete /testPhotos and /incomingTestPhotos so folders empty to start DEV\n"
+testPhotos = 'testingDev/incomingTestPhotos'
+FileUtils.rm_rf(testPhotos) # clear out incoming in case some left DEV
+FileUtils.rm_rf(mylioStaging) # clear out photos from previous run DEV
 # puts value.x # created an error here so script would stop and I could check that folder was deleted and it was
-FileUtils.cp_r('testingClass/virginOMcopy2incoming', testPhotos, preserve: true, remove_destination: true ) # preserve to keep timestamp (may not be necesary). cp_r is for directory
+FileUtils.cp_r('testingDev/virginOMcopy2incoming', testPhotos, preserve: true, remove_destination: true ) # preserve to keep timestamp (may not be necesary). cp_r is for directory
 
 lineNum = "#{__LINE__}"
 timeNowWas = timeStamp(Time.now, lineNum)
@@ -321,6 +325,7 @@ Dir.each_child(src).sort.each do |fn|
   fn  = src + "/" + fn
 	fileEXIF = MiniExiftool.new(fn)
 	camModel = fileEXIF.model
+	fileName = fileEXIF.fileName
 	fileType = fileEXIF.fileType
 	createDate = fileEXIF.CreateDate
 	timeStamp = fileEXIF.TimeStamp
@@ -339,7 +344,7 @@ Dir.each_child(src).sort.each do |fn|
 	if fileType == "MOV" # driveMode == "" # nil doesn't work, niether does blank
 		shootingMode = "MOV"
 		shotNo = ""
-		ileDateTimeOriginal = fileEXIF.CreateDate
+		dateTimeOriginal = fileEXIF.CreateDate # FIXME do I need both createDate and dateTimeOriginal? mov has no dateTimeOriginal.
 	else
 		shootingMode = driveMode.split(',')[0] # Focus Bracketing or whatever is before the first comma
 		shotNo = driveMode.match(/(\d{1,3})/).to_s.rjust(2, '0')
@@ -353,6 +358,7 @@ Dir.each_child(src).sort.each do |fn|
 	fileSubSecTimeOriginal = fileEXIF.SubSecTimeOriginal # no error if doesn't exist and it does not puts in OM
 	instructions = fileEXIF.instructions 
 	timeZoneOffset = fileEXIF.TimeZoneOffset
+	specialMode = fileEXIF.specialMode # Not sure what's in here, but is OM specific and maybe useful?
 	
 	# Intermediate values and .mov has to be handled differently
 	if fileType == "MOV" # driveMode == "" # nil doesn't work, niether does blank
@@ -429,12 +435,12 @@ Dir.each_child(src).sort.each do |fn|
 	fileEXIF.save # only change so far is imageDescription and instructions
 	
 	photo_id = "photo-" + id.to_s
-	photo_array <<	Photo.new(photo_id, fn, fileExt, camModel, fileType, stackedImage, driveMode, afPointDetails, subjectTrackingMode, createDate, dateTimeOriginal, offsetTimeOriginal, preservedFileName)
+	photo_array <<	Photo.new(photo_id, fn, fileName, fileExt, camModel, fileType, stackedImage, driveMode, specialMode, afPointDetails, subjectTrackingMode, createDate, dateTimeOriginal, offsetTimeOriginal, preservedFileName)
 	# Checking what is stored in stacked image
 	# puts "#{id}. Stacked Image: `#{stackedImage}`. shotNo: #{shotNo}. driveMode: #{driveMode}.  Original FileName: #{preservedFileName}" # DEV
 end # Dir.each_child(src).sort.each do |fn|
 puts "\n#{__LINE__}. Finished adding EXIF info and establishing photo array. If want to see some data for each photo, uncomment two lines above."
-# puts photo_array.inspect
+puts photo_array.inspect
 # puts "#{__LINE__}. ######## End of Array ##########"
 # Renaming. Look at original, not sure what is going on exactly Line 1253
 # puts "\n{__LINE__}. Rename [tzoLoc = renamePhotoFiles(…)] the photo files with date and an ID for the camera or photographer (except for the paired jpgs in #{tempJpg}). #{timeNowWas}\n"
@@ -483,7 +489,7 @@ puts "   #{__LINE__}. photo_id: photo-10.  Stacked Image: #{photo_10.stackedImag
 # Instantiate each file on card
 # 
 # For now assume know where coming from
-# src = "/Volumes/Macintosh HD/Users/gscar/Library/Mobile Documents/com~apple~CloudDocs/Documents/Ruby/Photo handling/testingClass/incomingTestPhotos"
+# src = "/Volumes/Macintosh HD/Users/gscar/Library/Mobile Documents/com~apple~CloudDocs/Documents/Ruby/Photo handling/testingDev/incomingTestPhotos"
 # lastPhotoFilename = "OB305994"
 
 
