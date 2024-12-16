@@ -52,13 +52,17 @@ GUI for keying into GUI options etc
    √ Anything else to write. Probably line 621 establishes imageDescription and
    renaming needs stacking information which should benefit from Array.photos
 
-2. Rename in place
+2. Rename in place in renamePhotoFiles
+   Do in reverse so know if a stacked image
    ori to ORF (noted in preservedFileName if need to find it
+   1. If "Focused-stacked" (stackedImage), get count and confirm next x are Focus Bracketing and set aside and mark as brackets
 3. add gps coordinates. Can do this before or after renaming, but before moving
 
 4 Then can sort by where to go: jpg if raw exists, unneeded files for stack, unneeded files from hi res
 
+## ToDo
 Prevent redownloading from the two cards
+dateTimeOriginal replace with createDate. .mov doesn't have dateTimeOriginal
 
 ### Changes
 photosRenamedTo left in as it might be useful for dubugging. But I wasn't using it and maybe it should go into photos.array. Action not implemented, ie, file not written to.
@@ -69,17 +73,17 @@ writeCaption = true # Decide this is GUI later
 fileDateTimeOriginal review what this is for FIXME
 DateTimeUTC and DateTimeOriginal and OffsetTime to check that camera was set correctly. These are what the camera thinks is right. Maybe check against the time zones.yml, but ignore for now
 
-#### test images
+#### test images. See OM EXIF for different shooting modes.numbers
 virginOMcopy folder
 OA184727–OA184736 10 photos  "Continuous Shooting Shot xx; Electronic shutter",
 OA184737 "Single Shot; Electronic shutter",
 OA184738–OA184742 5 photos "Continuous Shooting, Shot x; Electronic shutter",
 OA184805–OA184819 Focus stacking and result.
-OB035290–OB035292 Three sets of HiRes (3 images each)  The ori image does not specify it's a part of the Hi-Res
+OB035290–OB035291 Two sets of HiRes (3 images each)  The ori image does not specify it's a part of the Hi-Res
 OB035300 and OB045343 Two single shot jpg
 OB045344 another HiRes (3 images),   #### Tripod Hi-Res 3 images. ori image does not specify it's a part of the Hi-Res
 OB115647 jpg preceding a focus stack
-OB115648–OB115662 Focus stack and result (16 total)
+OB115648–OB115662 Focus bracketing and result (16 total)
 OB115663 following jpg
 OB115666.MOV 
 OB115667.JPG
