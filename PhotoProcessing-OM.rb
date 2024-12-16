@@ -141,7 +141,7 @@ end # oneBackTrue
 # Add original file name, rename with coding
 def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedTo, unneededStacksFolder)
 		# Use photo_array of all the photos bringing in. Read fields needed to process photos
-	# 1. If focused-stacked (stackedImage), get count and confirm next x are Focus Bracketing and set aside and mark as brackets
+	# 1. If focused-stacked (stackedImage), get count and confirm next x are Focus Bracketing and set aside and mark as brackets. ~Line 208
 	# 2. 
 	
 	# src is mylioStaging folder ??
@@ -162,6 +162,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 	seqLetter = %w(a b c d e f h i j k l m n o p q r s t u v w x y z aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt uu vv ww xx yy zz) # used when subsec doesn't exist, but failing for large sequences possible on OM-1, so maybe use sequential numbers, i.e., dupCount?. Yes
 # Have to re-establish the field names and class since the array doesn't carry the class (a db might have been better)
 	unneededBracketedFiles = [] # ~line 781
+	stackedImageBoolean = false # Needed for first time through the array.each
 	# photo_array.each_with_index do |photo, index| if need index number
 	# puts "\n#{__LINE__}. photo_array: #{photo_array}\n"
 	puts "\n#{__LINE__}. Entering	`photo_array.reverse.each do |photo|` in renamePhotoFiles(\n" 
@@ -171,11 +172,13 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		dateTimeOriginal = photo.dateTimeOriginal
 		# puts "\n#{__LINE__}. preservedFileName: #{photo.preservedFileName}.	dateTimeOriginal: #{dateTimeOriginal}. " # sorting out what I was trying to do
 		fileDate = dateTimeOriginal
-		fileDateStr = Time.parse(fileDate.to_s) # to get instance of an array to be readable by .strftime
-		puts "\n#{__LINE__}. fileDateStr: #{fileDateStr}."
+		puts "\n#{__LINE__}. fileDate: #{fileDate}. fileDate.class: #{fileDate.class}." #  fileDate: [2024-10-18 10:52:30 -0700, "-07:00"]. fileDate.class: Array.
+		fileDateStr = Time.parse(fileDate.to_s).to_s[0..-7].gsub(/-/, '.').gsub(' ', '-').gsub(/:/, '.') # to_s twice? then chop off time_zone, then change spaces, dashes, and colons to what I want
+		# puts "\n#{__LINE__}. fileDateStr: #{fileDateStr}. But want to look like this `2024.10.30-16.28.54`"
+			
+		dateTimeOriginalstr = dateTimeOriginal.to_s[0..-10]
 		
-		dateTimeOriginalstr = dateTimeOriginal.to_s[0..-6]
-		puts "#{__LINE__}. dateTimeOriginalstr: #{dateTimeOriginalstr}.\n Do I need both of these" 
+		puts "#{__LINE__}. dateTimeOriginalstr: #{dateTimeOriginalstr}.  dateTimeOriginal: #{dateTimeOriginal}. \n Do I need both of these FIXME" 
 				# puts "\n#{__LINE__}. fn: #{fn}\n"
 				
 		# For photos in same second, but not bracketing (can check by shot no.)
@@ -197,18 +200,43 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 
 		# Add  1. If focused-stacked (stackedImage), get count and confirm next x are Focus Bracketing and set aside and mark as brackets
 		stackedImage = photo.stackedImage
-		stackedImageBoolean = false
+		driveMode = photo.driveMode # how long does this take? If don't need at highest level check later
+		# stackedImageBoolean = false # declared below and would be wrong here
 		
 		# High resolution can either be Tripod or Hand Held
 		hiResTripodBoolean = false
 		hiResHandheldBoolean = false
-		# stackedImageBoolean = true if stackedImage[0..12].to_s == "Focus-stacked" # will this work? 
-		unless stackedImage.nil? # nil for .mov
 		
+		# Looking for bracketed images if a stackedImage exists
+		# stackedImageBoolean = true if previous image (remember going backwards) is a StackedImage
+	 # if stackedImage[0..12].to_s == "Focus-stacked" # will this work?
+		# if `Focus Bracketing` (and Shot no >1 and <100 could be added if needed to make sure) rename as bracket and set aside
+		# check stackedImageBoolean = true which will exclude most. Maybe make a method
+		if stackedImageBoolean
+			# Now check to make sure image is a bracketed image
+			driveModeFb = driveMode.split(',')[0]
+			# puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
+			if driveModeFb.to_s == "Focus Bracketing"
+				match = driveMode.match(/(\d{1,3})/) # Getting shot no. from `Focus Bracketing,  Shot _`
+				# shot_no = match[1].to_i # if match # has to be a match in this loop, so maybe don't need the if
+				shot_no = match[1]
+				# 2024.10.30-16.28.54_08bkt.gs.O.jpg
+				# stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "bkt" # trying to tighten name compared to above
+				fileBaseName = "#{fileDateStr}#{shot_no}bkt#{userCamCode}"
+				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which a stack exists" 
+			else
+				stackedImageBoolean = false # worked through the images and move onto the next check
+				puts "Worked through the bracketed #{shot_no} images"
+			end # if driveModeFB
+		end # if stackedImageBoolean
+		
+		unless stackedImage.nil? # nil for .mov
+	
 			if stackedImage[0..12].to_s == "Focus-stacked"
-				stackedImageBoolean = true
-				bracketCount = stackedImage[14..16] # there is a space after the final digit, so either 1 or 2 digits.
+				bracketCount = stackedImage[15..16] # there is a space after the final digit, so either 1 or 2 digits.
 				puts "\n#{__LINE__}. #{fn} is a successfully stacked images with #{bracketCount} brackets.\n Now put aside next #{bracketCount} images and rename as brackets"
+				fileBaseName = "#{fileDateStr}(FS)#{userCamCode}" # Inconsistent naming FIXME? could be _STK_
+				stackedImageBoolean = true
 			end
 			
 			if stackedImage[0..5].to_s == "Tripod" #  Tripod high resolution
@@ -231,17 +259,17 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		# DriveMode       : Focus Bracketing, Shot 8; Electronic shutter
 		# DriveMode shows "Focus Bracketing" for the shots comprising the focus STACKED result
 		specialMode = photo.specialMode # Initially no use for specialMode, but will carry for a while FIXME
-		driveMode = photo.driveMode
-		unless driveMode.nil? # doesn't exist in some cases: only .mov AFAIK
-			driveModeFb = driveMode.split(',')[0]
-			# puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
-			# Focus Bracketing is the only driveMode I'v seen so far. Single Shot being the 'default'
-			if driveModeFb.to_s == "Focus Bracketing"
-				bracketing = true
-			else
-				bracketing = false
-			end
-		end
+		# driveMode = photo.driveMode
+		# unless driveMode.nil? # doesn't exist in some cases: only .mov AFAIK
+		# 	driveModeFb = driveMode.split(',')[0]
+		# 	# puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
+		# 	# Focus Bracketing is the only driveMode I'v seen so far. Single Shot being the 'default'
+		# 	if driveModeFb.to_s == "Focus Bracketing"
+		# 		bracketing = true
+		# 	else
+		# 		bracketing = false
+		# 	end
+		# end
 	
 		match, shot_no = ""
 		
@@ -255,28 +283,28 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 				# puts "\n#{__LINE__}. fileDate: #{fileDate}.	of class: #{fileDate.class}. fileDate.to_s: #{fileDate.to_s}.	" 
 				# fileBaseName = fileDateStr + "-" + shot_no.to_s.rjust(2, '0') + userCamCode #  fBmark +
 				fileBaseName = "#{fileDateStr}-#{shot_no.to_s.rjust(2, '0')}#{userCamCode}"
-				# puts "#{__LINE__}. Because this was the first in a sequence a `1` was added to the filename for #{fileBaseName}. DEBUG" # Working for OM
+				puts "#{__LINE__}. Because this was the first in a sequence a `1` was added to the filename for #{fileBaseName}. DEBUG" # Working for OM
 			end
 		
 		# puts "#{__LINE__}. oneBack: #{oneBack}. match: #{match}. DEBUG"
 
 			# puts "#{__LINE__} stackedImage[0..12]: #{stackedImage[0..12]}. stackedImageBoolean: #{stackedImageBoolean}" #  stackedImage[0..12]: Focus-stacked. stackedImageBoolean: false
-			if bracketing or stackedImageBoolean
-				# fB for Focus Bracket. Bkt for bracket. The logic isn't the greatest to show whats going on. Assumed bracketed unless stacked
-				# stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "_Bkt" _fB
-				stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "bkt" # trying to tighten name compared to above
-				# _FS for Focus Stacked. _Stk for stacked. Do I need to diffential different stacking modes
-				stackBracket = "_STK" if stackedImageBoolean # _FS. All caps to stand out from Bkt
-				fileBaseName = "#{fileDateStr}#{stackBracket}#{userCamCode}"
-			elsif oneBack # || match # Two photos in same second? 
-				puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match}. DEBUG"
-				fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
-			else # normal condition that this photo is at a different time than previous photo
-				# puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match} for item: #{item}. DEBUG"
-				dupCount = 0 # resets dupCount after having a group of photos in the same second
-				fileBaseName = "#{fileDateStr}#{userCamCode}" #  + filtered + fBmark 
-				# puts "#{__LINE__}. item: #{item} is at different time as previous.    fileBaseName: #{fileBaseName}"
-			end # if oneBack
+			# if bracketing or stackedImageBoolean
+			# 	# fB for Focus Bracket. Bkt for bracket. The logic isn't the greatest to show whats going on. Assumed bracketed unless stacked
+			# 	# stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "_Bkt" _fB
+			# 	stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "bkt" # trying to tighten name compared to above
+			# 	# _FS for Focus Stacked. _Stk for stacked. Do I need to diffential different stacking modes
+			# 	stackBracket = "_STK" if stackedImageBoolean # _FS. All caps to stand out from Bkt
+			# 	fileBaseName = "#{fileDateStr}#{stackBracket}#{userCamCode}"
+			# elsif oneBack # || match # Two photos in same second? 
+			# 	puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match}. DEBUG"
+			# 	fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
+			# else # normal condition that this photo is at a different time than previous photo
+			# 	# puts "#{__LINE__} if oneBack || match. oneBack: #{oneBack}. match: #{match} for item: #{item}. DEBUG"
+			# 	dupCount = 0 # resets dupCount after having a group of photos in the same second
+			# 	fileBaseName = "#{fileDateStr}#{userCamCode}" #  + filtered + fBmark 
+			# 	# puts "#{__LINE__}. item: #{item} is at different time as previous.    fileBaseName: #{fileBaseName}"
+			# end # if oneBack
 			puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. not sure where we are here DEV" 
 			fileDatePrev = fileDate
 			fileExtPrev = fileExt
