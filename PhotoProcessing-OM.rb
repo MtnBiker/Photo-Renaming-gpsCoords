@@ -207,28 +207,28 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		hiResTripodBoolean = false
 		hiResHandheldBoolean = false
 		
-		# Looking for bracketed images if a stackedImage exists
-		# stackedImageBoolean = true if previous image (remember going backwards) is a StackedImage
-	 # if stackedImage[0..12].to_s == "Focus-stacked" # will this work?
-		# if `Focus Bracketing` (and Shot no >1 and <100 could be added if needed to make sure) rename as bracket and set aside
-		# check stackedImageBoolean = true which will exclude most. Maybe make a method
-		if stackedImageBoolean
-			# Now check to make sure image is a bracketed image
-			driveModeFb = driveMode.split(',')[0]
-			# puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
-			if driveModeFb.to_s == "Focus Bracketing"
-				match = driveMode.match(/(\d{1,3})/) # Getting shot no. from `Focus Bracketing,  Shot _`
-				# shot_no = match[1].to_i # if match # has to be a match in this loop, so maybe don't need the if
-				shot_no = match[1]
-				# 2024.10.30-16.28.54_08bkt.gs.O.jpg
-				# stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "bkt" # trying to tighten name compared to above
+		# Name bracketed images whether or not there is a stack
+		driveModeFb = driveMode.split(',')[0]
+		# puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
+		if driveModeFb.to_s == "Focus Bracketing"
+			match = driveMode.match(/(\d{1,3})/) # Getting shot no. from `Focus Bracketing,  Shot _`
+			# shot_no = match[1].to_i # if match # has to be a match in this loop, so maybe don't need the if
+			shot_no = match[1]
+			# 2024.10.30-16.28.54_08bkt.gs.O.jpg
+			# stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "bkt" # trying to tighten name compared to above
+			# Label differently if there is a stacked image
+			if stackedImageBoolean
 				fileBaseName = "#{fileDateStr}_#{shot_no}bkt#{userCamCode}" # could be dash instead of underscore
-				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which a stack exists" 
+				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which a stack exists"
 			else
-				stackedImageBoolean = false # worked through the images and move onto the next check
-				puts "Worked through the bracketed #{shot_no} images"
-			end # if driveModeFB
-		end # if stackedImageBoolean
+				fileBaseName = "#{fileDateStr}_#{shot_no}bkt-noStack#{userCamCode}" # could be dash instead of underscore
+				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which NO stack exists"
+			end
+		else
+			stackedImageBoolean = false # worked through the images and move onto the next check
+			puts "Worked through the bracketed #{shot_no} images"
+		end # if driveModeFB
+		
 		
 		unless stackedImage.nil? # nil for .mov
 	

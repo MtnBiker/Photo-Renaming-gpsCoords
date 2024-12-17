@@ -58,7 +58,8 @@ GUI for keying into GUI options etc
    1. If "Focused-stacked" (stackedImage), get count and confirm next x are Focus Bracketing and set aside and mark as brackets
    `2024.11.13-09.02.57(FS).gs.O.orf` # is this a good convention for Focus-Stacked? ~Line 212
    Bracketed shots @driveMode="Focus Bracketing, Shot 15; Electronic shutter",
-   Maybe if `Focus Bracketing` and Shot no >1 and <100 rename as bracket and set aside. In line or as a method?. Set a flag that FS has happened stackedImageBoolean
+   √ Maybe if `Focus Bracketing` and Shot no >1 and <100 rename as bracket and set aside. In line or as a method?. Set a flag that FS has happened stackedImageBoolean
+   Focus-bracketing with no stack
    
 3. add gps coordinates. Can do this before or after renaming, but before moving
 
