@@ -222,7 +222,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 				shot_no = match[1]
 				# 2024.10.30-16.28.54_08bkt.gs.O.jpg
 				# stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "bkt" # trying to tighten name compared to above
-				fileBaseName = "#{fileDateStr}-#{shot_no}bkt#{userCamCode}"
+				fileBaseName = "#{fileDateStr}_#{shot_no}bkt#{userCamCode}" # could be dash instead of underscore
 				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which a stack exists" 
 			else
 				stackedImageBoolean = false # worked through the images and move onto the next check
@@ -279,12 +279,13 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 			match = driveMode.match(/(\d{1,3})/) # Getting shot no. from `Continuous Shooting, Shot 12; Electronic shutter`
 			shot_no = match[1].to_i if match
 			# First photo in a sequence won't get -1 in oneBackTrue.
-			if shot_no.to_i == 1
-				# puts "\n#{__LINE__}. fileDate: #{fileDate}.	of class: #{fileDate.class}. fileDate.to_s: #{fileDate.to_s}.	" 
-				# fileBaseName = fileDateStr + "-" + shot_no.to_s.rjust(2, '0') + userCamCode #  fBmark +
-				fileBaseName = "#{fileDateStr}-#{shot_no.to_s.rjust(2, '0')}#{userCamCode}"
-				puts "#{__LINE__}. Because this was the first in a sequence a `1` was added to the filename for #{fileBaseName}. DEBUG" # Working for OM
-			end
+			# The following was messing up bkt images from above DEV
+			# if shot_no.to_i == 1
+			# 	# puts "\n#{__LINE__}. fileDate: #{fileDate}.	of class: #{fileDate.class}. fileDate.to_s: #{fileDate.to_s}.	" 
+			# 	# fileBaseName = fileDateStr + "-" + shot_no.to_s.rjust(2, '0') + userCamCode #  fBmark +
+			# 	fileBaseName = "#{fileDateStr}-#{shot_no.to_s.rjust(2, '0')}#{userCamCode}"
+			# 	puts "#{__LINE__}. Because this was the first in a sequence a `1` was added to the filename for #{fileBaseName}. DEBUG" # Working for OM
+			# end
 		
 		# puts "#{__LINE__}. oneBack: #{oneBack}. match: #{match}. DEBUG"
 
@@ -321,7 +322,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 			# fnp = "Placeholder for DEV"
 			# puts "Place holder to make the script work. where did the unless come from"
       puts "\n#{__LINE__}. fn: #{fn}. fn.class: #{fn.class}\nfnp (fnpPrev): #{fnp}"
-			puts "\n#{__LINE__}. fn exists: #{File.file?(fn)}. fnp exists: #{File.file?(fnp)} of course not yet."
+			# puts "\n#{__LINE__}. fn exists: #{File.file?(fn)}. fnp exists: #{File.file?(fnp)} of course not yet." # DEV
 			
 			# Ensure destination directory exists DEV, because wiping this out in DEV
 			destination_dir = File.dirname(fnp)
