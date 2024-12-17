@@ -202,6 +202,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		# Add  1. If focused-stacked (stackedImage), get count and confirm next x are Focus Bracketing and set aside and mark as brackets
 		stackedImage = photo.stackedImage
 		driveMode = photo.driveMode # how long does this take? If don't need at highest level check later
+		driveModeFirst = driveMode.split(';')[0] if !driveMode.nil? #  Change driveModeFb to this. nil needed or errors
 		# stackedImageBoolean = false # declared below and would be wrong here
 		
 		# High resolution can either be Tripod or Hand Held. I doubt these are being used anymore since started using `case` below FIXME
@@ -215,7 +216,9 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		# puts "\n#{__LINE__}. oneBack: #{oneBack}.  fileDate: #{fileDate}.  fileDatePrev: #{fileDatePrev}."
 		
 		# Name bracketed images whether or not there is a stack
-		driveModeFb = driveMode.split(',')[0] if !driveMode.nil?
+		driveModeFb = driveMode.split(',')[0] if !driveMode.nil? # change to driveModeFirst as is more general
+		# driveModeFirst = driveMode.split(';')[0] if !driveMode.nil? # better name, FIXME. Change driveModeFb to this. is nil needed
+		puts "#{__LINE__}. driveModeFirst: #{driveModeFirst}."
 		# puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
 		# if driveModeFb.to_s == "Focus Bracketing" && !driveMode.nil?
 		# 	match = driveMode.match(/(\d{1,3})/) # Getting shot no. from `Focus Bracketing,  Shot _`
@@ -285,14 +288,15 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which NO stack exists"
 				end
 				
-			when driveModeFb.to_s == "Single Shot"
+			when driveModeFirst == "Single Shot" # driveMode: Single Shot, not being picked up
 				fileBaseName = "#{fileDateStr}SS#{userCamCode}" # DEV SS until sort out what all the cases are
+				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Single Shot"
 
 			else
 				fileBaseName = "#{fileDateStr}#{userCamCode}"
 				countDev += 1
-				puts "#{__LINE__}.  countDev: #{countDev}. NOT handled by any special cases.  fileName: #{fileName}. fileExt: #{fileExt}. stackedImage: #{stackedImage}.  driveMode: #{driveMode} "
-# 290. NOT handled by any special cases, Single Shot?.  fileName: OA184742.JPG. fileExt: jpg. stackedImage: No.  driveMode: Continuous Shooting, Shot 5; Electronic shutter TWO example
+				puts "#{__LINE__}.  countDev: #{countDev}. NOT handled by any cases above.  fileName: #{fileName}. fileExt: #{fileExt}. stackedImage: #{stackedImage}.  driveMode: #{driveMode} "
+# 295.  countDev: 3. NOT handled by any cases above.  fileName: OA184727.JPG. fileExt: jpg. stackedImage: No.  driveMode: Continuous Shooting, Shot 1; Electronic shutter  Three  examples. Should be picked up by oneBack or similar
 
 			end # case
 				
