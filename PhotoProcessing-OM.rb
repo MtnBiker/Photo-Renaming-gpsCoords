@@ -85,9 +85,9 @@ def timeStamp(timeNowWas, fromWhere)
 	Time.now
 end
 
-def oneBackTrue(src, fn, fnp, fnpPrev, fileDate, driveMode, dupCount, camModel, userCamCode)
+def oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
 	# Some of these fields may not be needed, I was fighting the wrong problem and may have added some that aren't needed
-	puts "\n#{__LINE__}. fn: #{fn}. fnp: #{fnp}. fileDate: #{fileDate}. driveMode: #{driveMode}.  dupCount: #{dupCount}. in oneBackTrue(). DEBUG"
+	puts "\n#{__LINE__}. fn: #{fn}. fnp: #{fnp}. fileDateStr: #{fileDateStr}. driveMode: #{driveMode}.  dupCount: #{dupCount}. in oneBackTrue(). DEBUG"
 	dupCount += 1
 	# Getting sequence no./shot no. for OM-1. DriveMode is "Single Shot; Electronic shutter" for normal photos
 	unless driveMode.nil? || driveMode.empty? # opposite of if, therefore if driveMode is not empty
@@ -169,6 +169,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 	puts "\n#{__LINE__}. Entering	`photo_array.reverse.each do |photo|` in renamePhotoFiles(\n" 
 	photo_array.reverse.each do |photo|
 		fn = photo.fn # file_name
+		fileName = photo.fileName # nil Say What
 		# puts "\n#{__LINE__}. fn: #{fn}." 
 		dateTimeOriginal = photo.dateTimeOriginal
 		# puts "\n#{__LINE__}. preservedFileName: #{photo.preservedFileName}.	dateTimeOriginal: #{dateTimeOriginal}. " # sorting out what I was trying to do
@@ -207,10 +208,16 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		hiResTripodBoolean = false
 		hiResHandheldBoolean = false
 		
+		puts "\n#{__LINE__}. About to start choices for #{fn}."
+		puts "#{__LINE__}. fileName: #{fileName}.  stackedImage: #{stackedImage}.  driveMode: #{driveMode}."
+		
+		oneBack = fileDate == fileDatePrev && fileExt != fileExtPrev # at the moment this is meaningless because all of one type?
+		puts "\n#{__LINE__}. oneBack: #{oneBack}.  fileDate: #{fileDate}.  fileDatePrev: #{fileDatePrev}."
+		
 		# Name bracketed images whether or not there is a stack
-		driveModeFb = driveMode.split(',')[0]
+		driveModeFb = driveMode.split(',')[0] if !driveMode.nil?
 		# puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
-		if driveModeFb.to_s == "Focus Bracketing"
+		if driveModeFb.to_s == "Focus Bracketing" && !driveMode.nil?
 			match = driveMode.match(/(\d{1,3})/) # Getting shot no. from `Focus Bracketing,  Shot _`
 			# shot_no = match[1].to_i # if match # has to be a match in this loop, so maybe don't need the if
 			shot_no = match[1]
@@ -233,27 +240,42 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		
 		
 		unless stackedImage.nil? # nil for .mov
-	
-			if stackedImage[0..12].to_s == "Focus-stacked"
+		
+		# FIXME should be case
+			case
+			when stackedImage[0..12].to_s == "Focus-stacked"
 				# there is a space after the final digit, so either 1 or 2 digits.
-				puts "\n#{__LINE__}. #{fn} is a successfully stacked images with #{stackedImage[15..16]} brackets.\n Now put aside next #{bracketCount} images and rename as brackets"
+				bracketCount = stackedImage[15..16] 
+				puts "\n#{__LINE__}. #{fn} is a successfully stacked images with #{bracketCount} brackets.\n Now put aside next #{bracketCount} images and rename as brackets"
 				fileBaseName = "#{fileDateStr}(FS)#{userCamCode}" # Inconsistent naming FIXME? could be _STK_
 				stackedImageBoolean = true
-			end
 			
-			if stackedImage[0..5].to_s == "Tripod" #  Tripod high resolution
+			when stackedImage[0..5].to_s == "Tripod" #  Tripod high resolution
 				hiResTripodBoolean = true
-				fileBaseName = "#{fileDateStr}.HiResTripod.#{userCamCode}" # period or -
-			end
+				fileBaseName = "#{fileDateStr}.HiResTripod#{userCamCode}" # period or -
 			
-			if stackedImage[0..24].to_s == "Hand-held high resolution" # Hand-held high resolution
+			
+			when stackedImage[0..24].to_s == "Hand-held high resolution" # Hand-held high resolution
 				hiResHandheldBoolean = true
 				fileBaseName = "#{fileDateStr}HiResHand#{userCamCode}"
-			end
+			
+			
+			# The above are OK if in the same second since will get shot-no or the three immediately above, they won't be in same second since takes too long
+			# But must check for photos in same second
+			when oneBack
+				fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
+			else
+				fileBaseName = "#{fileDateStr}#{userCamCode}"
+			end # case
+				
+				# I think this will be handled
+				# if stackedImage == "No" && driveMode[0..5] == "Single" # Shot
+				# 	fileBaseName = "#{fileDateStr}#{userCamCode}"
+				# end
+			
 		end	# unless
 		
-		oneBack = fileDate == fileDatePrev && fileExt != fileExtPrev # at the moment this is meaningless because all of one type?
-		
+	
 		#  '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'. This exists for OM-1 for at least some sequence shooting. Also: `SpecialMode                     : Fast, Sequence: 9, Panorama: (none)`
 		# SpecialMode may be more useful since zero if not a sequence : Normal, Sequence: 0, Panorama: (none)
 		# But DriveMode can tell what kind of sequence, although not sure that's needed in this script
@@ -382,14 +404,15 @@ Dir.each_child(src).sort.each do |fn|
   fn  = src + "/" + fn
 	fileEXIF = MiniExiftool.new(fn)
 	camModel = fileEXIF.model
-	fileName = fileEXIF.fileName
+	fileName = fileEXIF.FileName # shows up in exiftool, but not here 
 	fileType = fileEXIF.fileType
 	createDate = fileEXIF.CreateDate
 	timeStamp = fileEXIF.TimeStamp
 	offsetTimeOriginal = fileEXIF.OffsetTimeOriginal
 	# model = fileEXIF.model
 	
-	fileExt = File.extname(fn).tr(".","").downcase 
+	# fileExt = File.extname(fn).tr(".","").downcase 
+	fileExt = fileEXIF.FileTypeExtension # Why using above
 	case 
 	when fileExt == "mov" # OMDS movie
 		dateTimeOriginal = fileEXIF.CreateDate
@@ -497,7 +520,7 @@ Dir.each_child(src).sort.each do |fn|
 	# puts "#{id}. Stacked Image: `#{stackedImage}`. shotNo: #{shotNo}. driveMode: #{driveMode}.  Original FileName: #{preservedFileName}" # DEV
 end # Dir.each_child(src).sort.each do |fn|
 puts "\n#{__LINE__}. Finished adding EXIF info and establishing photo array. If want to see some data for each photo, uncomment two lines above."
-# puts photo_array.inspect # DEV
+puts photo_array.inspect # DEV
 # puts "#{__LINE__}. ######## End of Array ##########"
 # Renaming. Look at original, not sure what is going on exactly Line 1253
 # puts "\n{__LINE__}. Rename [tzoLoc = renamePhotoFiles(…)] the photo files with date and an ID for the camera or photographer (except for the paired jpgs in #{tempJpg}). #{timeNowWas}\n"
