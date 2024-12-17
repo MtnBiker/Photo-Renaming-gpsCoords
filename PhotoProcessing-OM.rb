@@ -163,6 +163,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 # Have to re-establish the field names and class since the array doesn't carry the class (a db might have been better)
 	unneededBracketedFiles = [] # ~line 781
 	stackedImageBoolean = false # Needed for first time through the array.each
+
 	# photo_array.each_with_index do |photo, index| if need index number
 	# puts "\n#{__LINE__}. photo_array: #{photo_array}\n"
 	puts "\n#{__LINE__}. Entering	`photo_array.reverse.each do |photo|` in renamePhotoFiles(\n" 
@@ -172,13 +173,12 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		dateTimeOriginal = photo.dateTimeOriginal
 		# puts "\n#{__LINE__}. preservedFileName: #{photo.preservedFileName}.	dateTimeOriginal: #{dateTimeOriginal}. " # sorting out what I was trying to do
 		fileDate = dateTimeOriginal
-		puts "\n#{__LINE__}. fileDate: #{fileDate}. fileDate.class: #{fileDate.class}." #  fileDate: [2024-10-18 10:52:30 -0700, "-07:00"]. fileDate.class: Array.
-		fileDateStr = Time.parse(fileDate.to_s).to_s[0..-7].gsub(/-/, '.').gsub(' ', '-').gsub(/:/, '.') # to_s twice? then chop off time_zone, then change spaces, dashes, and colons to what I want
+		# puts "\n#{__LINE__}. fileDate: #{fileDate}. fileDate.class: #{fileDate.class}." #  fileDate: [2024-10-18 10:52:30 -0700, "-07:00"]. fileDate.class: Array. DEV
+		fileDateStr = Time.parse(fileDate.to_s).to_s[0..-7].gsub(/-/, '.').gsub(' ', '-').gsub(/:/, '.') # to_s twice? FIXME then chop off time_zone, then change spaces, dashes, and colons to what I want
 		# puts "\n#{__LINE__}. fileDateStr: #{fileDateStr}. But want to look like this `2024.10.30-16.28.54`"
 			
-		dateTimeOriginalstr = dateTimeOriginal.to_s[0..-10]
-		
-		puts "#{__LINE__}. dateTimeOriginalstr: #{dateTimeOriginalstr}.  dateTimeOriginal: #{dateTimeOriginal}. \n Do I need both of these FIXME" 
+		# dateTimeOriginalstr = dateTimeOriginal.to_s[0..-10]		
+		# puts "#{__LINE__}. dateTimeOriginalstr: #{dateTimeOriginalstr}.  dateTimeOriginal: #{dateTimeOriginal}. \n Do I need both of these FIXME" 
 				# puts "\n#{__LINE__}. fn: #{fn}\n"
 				
 		# For photos in same second, but not bracketing (can check by shot no.)
@@ -305,7 +305,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 			# 	fileBaseName = "#{fileDateStr}#{userCamCode}" #  + filtered + fBmark 
 			# 	# puts "#{__LINE__}. item: #{item} is at different time as previous.    fileBaseName: #{fileBaseName}"
 			# end # if oneBack
-			puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. not sure where we are here DEV" 
+			# puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. not sure where we are here DEV" 
 			fileDatePrev = fileDate
 			fileExtPrev = fileExt
 			# fileBaseNamePrev = fileBaseName
@@ -315,15 +315,21 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 			# fileAnnotate(fn, dateTimeOriginalstr, tzoLoc, camModel) # was passing fileEXIF, but saving wasn't happening, so reopen in the module?
 	
 			# fnp = fnpPrev = src + "/" + fileBaseName + fileExt.downcase
-			fnp = fnpPrev = "#{src}\/#{fileBaseName}#{fileExt.downcase}"
-			fnp = "Placeholder for DEV"
-			puts "Place holder to make the script work. where did the unless come from"
-      puts "#{__LINE__}. fn: #{fn}. fnp (fnpPrev): #{fnp}."
-			# subSecPrev = subSec.to_s
+			
+			fnp = fnpPrev  = "#{src}\/#{fileBaseName}#{fileExt.downcase}"
+			# puts "\n#{__LINE__}. fnp: #{fnp}." 
+			# fnp = "Placeholder for DEV"
+			# puts "Place holder to make the script work. where did the unless come from"
+      puts "\n#{__LINE__}. fn: #{fn}. fn.class: #{fn.class}\nfnp (fnpPrev): #{fnp}"
+			puts "\n#{__LINE__}. fn exists: #{File.file?(fn)}. fnp exists: #{File.file?(fnp)} of course not yet."
+			
+			# Ensure destination directory exists DEV, because wiping this out in DEV
+			destination_dir = File.dirname(fnp)
+			FileUtils.mkdir_p(destination_dir)
 		
-			# File.rename(fn,fnp) ## 
+			File.rename(fn,fnp) ## 
 			# Add the processed file to the array so can move unneeded bracket files below
-			unneededBracketedFiles << fnp
+			# unneededBracketedFiles << fnp
 	
 			count += 1
 		else
@@ -339,7 +345,7 @@ end # rename  photo files in the downloads folder and writing in original time.
 
 #+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+
 ###### Beginning of actions ###############
-# 1. Estabish Array.photos
+# 1. Establish Array.photos
 # 2. Rename which may need Array.photos
 # 3. Sort and move
 
@@ -348,7 +354,11 @@ testPhotos = 'testingDev/incomingTestPhotos'
 FileUtils.rm_rf(testPhotos) # clear out incoming in case some left DEV
 FileUtils.rm_rf(mylioStaging) # clear out photos from previous run DEV
 # puts value.x # created an error here so script would stop and I could check that folder was deleted and it was
-FileUtils.cp_r('testingDev/virginOMcopy2incoming', testPhotos, preserve: true, remove_destination: true ) # preserve to keep timestamp (may not be necesary). cp_r is for directory
+
+# For DEV to have sample files to test with. Only one selected below
+# FileUtils.cp_r('testingDev/virginOMcopy2incoming', testPhotos, preserve: true, remove_destination: true ) # preserve to keep timestamp (may not be necesary). cp_r is for directory. This directory has a currated batch of photos
+puts "\n#{__LINE__}. Not using full test stack of photos" 
+FileUtils.cp_r('testingDev/bracketStackTestPhotos', testPhotos, preserve: true, remove_destination: true ) # just a stack for DEV test
 
 lineNum = "#{__LINE__}"
 timeNowWas = timeStamp(Time.now, lineNum)
