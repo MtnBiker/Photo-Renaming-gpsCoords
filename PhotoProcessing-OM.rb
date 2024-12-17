@@ -156,6 +156,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 	fileDatePrev = ""
 	dupCount = 0
 	count    = 1
+	countDev = 0
 	tzoLoc = ""
 	camModel = ""
 	userCamCode = ".gs.O." # go back to older version of this if want to determine it
@@ -216,26 +217,26 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		# Name bracketed images whether or not there is a stack
 		driveModeFb = driveMode.split(',')[0] if !driveMode.nil?
 		# puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
-		if driveModeFb.to_s == "Focus Bracketing" && !driveMode.nil?
-			match = driveMode.match(/(\d{1,3})/) # Getting shot no. from `Focus Bracketing,  Shot _`
-			# shot_no = match[1].to_i # if match # has to be a match in this loop, so maybe don't need the if
-			shot_no = match[1]
-			# 2024.10.30-16.28.54_08bkt.gs.O.jpg
-			# stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "bkt" # trying to tighten name compared to above
-			# Label differently if there is a stacked image
-			if stackedImageBoolean
-				fileBaseName = "#{fileDateStr}_#{shot_no}bkt#{userCamCode}" # could be dash instead of underscore
-				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which a stack exists"
-				stackedImageBoolean = false if shot_no == "1" # reset after last stacked image
-			else
-				fileBaseName = "#{fileDateStr}_#{shot_no}bkt-noStack#{userCamCode}" # could be dash instead of underscore
-				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which NO stack exists"
-			end
-		# else
-		# 	stackedImageBoolean = false # worked through the images and move onto the next check
-		# 	puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Worked through the bracketed #{shot_no} images"
-		# 	puts "#{__LINE__}. driveModeFb: #{driveModeFb}."
-		end # if driveModeFB
+		# if driveModeFb.to_s == "Focus Bracketing" && !driveMode.nil?
+		# 	match = driveMode.match(/(\d{1,3})/) # Getting shot no. from `Focus Bracketing,  Shot _`
+		# 	# shot_no = match[1].to_i # if match # has to be a match in this loop, so maybe don't need the if
+		# 	shot_no = match[1]
+		# 	# 2024.10.30-16.28.54_08bkt.gs.O.jpg
+		# 	# stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "bkt" # trying to tighten name compared to above
+		# 	# Label differently if there is a stacked image
+		# 	if stackedImageBoolean
+		# 		fileBaseName = "#{fileDateStr}_#{shot_no}bkt#{userCamCode}" # could be dash instead of underscore
+		# 		puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which a stack exists"
+		# 		stackedImageBoolean = false if shot_no == "1" # reset after last stacked image
+		# 	else
+		# 		fileBaseName = "#{fileDateStr}_#{shot_no}bkt-noStack#{userCamCode}" # could be dash instead of underscore
+		# 		puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which NO stack exists"
+		# 	end
+		# # else
+		# # 	stackedImageBoolean = false # worked through the images and move onto the next check
+		# # 	puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Worked through the bracketed #{shot_no} images"
+		# # 	puts "#{__LINE__}. driveModeFb: #{driveModeFb}."
+		# end # if driveModeFB
 		
 		# puts "\n#{__LINE__}. fileExt: #{fileExt}." # DEV
 		# Maybe handle .mov as special case outside of everything else and handle everything else below
@@ -248,7 +249,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		
 			case
 			when stackedImage[0..12].to_s == "Focus-stacked"
-				# there is a space after the final digit, so either 1 or 2 digits.
+				# `Focus-stacked (15 images)`. there is a space after the final digit, so either 1 or 2 digits.
 				bracketCount = stackedImage[15..16] 
 				puts "\n#{__LINE__}. #{fn} is a successfully stacked images with #{bracketCount} brackets.\n Now put aside next #{bracketCount} images and rename as brackets"
 				fileBaseName = "#{fileDateStr}(FS)#{userCamCode}" # Inconsistent naming FIXME? could be _STK_
@@ -262,16 +263,36 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 			when stackedImage[0..24].to_s == "Hand-held high resolution" # Hand-held high resolution
 				hiResHandheldBoolean = true
 				fileBaseName = "#{fileDateStr}HiResHand#{userCamCode}"
-			
-			
+					
 			# The above are OK if in the same second since will get shot-no or the three immediately above, they won't be in same second since takes too long
 			# But must check for photos in same second
 			when oneBack
 				fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
+				
+			when driveModeFb.to_s == "Focus Bracketing" # && !driveMode.nil? redundant
+				match = driveMode.match(/(\d{1,3})/) # Getting shot no. from `Focus Bracketing,  Shot _`
+				# shot_no = match[1].to_i # if match # has to be a match in this loop, so maybe don't need the if
+				shot_no = match[1]
+				# 2024.10.30-16.28.54_08bkt.gs.O.jpg
+				# stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "bkt" # trying to tighten name compared to above
+				# Label differently if there is a stacked image
+				if stackedImageBoolean
+					fileBaseName = "#{fileDateStr}_#{shot_no}bkt#{userCamCode}" # could be dash instead of underscore
+					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which a stack exists"
+					stackedImageBoolean = false if shot_no == "1" # reset after last stacked image
+				else
+					fileBaseName = "#{fileDateStr}_#{shot_no}bkt-noStack#{userCamCode}" # could be dash instead of underscore
+					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which NO stack exists"
+				end
+				
+			when driveModeFb.to_s == "Single Shot"
+				fileBaseName = "#{fileDateStr}SS#{userCamCode}" # DEV SS until sort out what all the cases are
 
 			else
 				fileBaseName = "#{fileDateStr}#{userCamCode}"
-				puts "#{__LINE__}. Not handled by any special cases.  fn: #{fn}."
+				countDev += 1
+				puts "#{__LINE__}.  countDev: #{countDev}. NOT handled by any special cases.  fileName: #{fileName}. fileExt: #{fileExt}. stackedImage: #{stackedImage}.  driveMode: #{driveMode} "
+# 290. NOT handled by any special cases, Single Shot?.  fileName: OA184742.JPG. fileExt: jpg. stackedImage: No.  driveMode: Continuous Shooting, Shot 5; Electronic shutter TWO example
 
 			end # case
 				
@@ -342,10 +363,10 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 			# 	# puts "#{__LINE__}. item: #{item} is at different time as previous.    fileBaseName: #{fileBaseName}"
 			# end # if oneBack
 			# puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. not sure where we are here DEV" 
+		end # unless
 			fileDatePrev = fileDate
 			fileExtPrev = fileExt
 			# fileBaseNamePrev = fileBaseName
-		end # unless
 			# write to Instructions which can be seen in Mylio and doesn't interfere with Title or Caption
 			# Seems like this is done elsewhere
 			# fileAnnotate(fn, dateTimeOriginalstr, tzoLoc, camModel) # was passing fileEXIF, but saving wasn't happening, so reopen in the module?

@@ -61,7 +61,8 @@ GUI for keying into GUI options etc
    √ Maybe if `Focus Bracketing` and Shot no >1 and <100 rename as bracket and set aside. In line or as a method?. Set a flag that FS has happened stackedImageBoolean
    Focus-bracketing with no stack
    2. Later realized that using case was the best way to handle the various situations (cases! obviously)
-   102 files in virgin…, 99 in staging, mov not processed. 2 others not processed. Yes, .mov does not advance counter
+   102 files in virgin…, 100 in staging 2 not processed.
+   oneBack numbering is missing the first one still
    
 3. add gps coordinates. Can do this before or after renaming, but before moving
 
