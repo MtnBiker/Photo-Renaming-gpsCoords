@@ -60,6 +60,8 @@ GUI for keying into GUI options etc
    Bracketed shots @driveMode="Focus Bracketing, Shot 15; Electronic shutter",
    √ Maybe if `Focus Bracketing` and Shot no >1 and <100 rename as bracket and set aside. In line or as a method?. Set a flag that FS has happened stackedImageBoolean
    Focus-bracketing with no stack
+   2. Later realized that using case was the best way to handle the various situations (cases! obviously)
+   102 files in virgin…, 99 in staging, mov not processed. 2 others not processed. Yes, .mov does not advance counter
    
 3. add gps coordinates. Can do this before or after renaming, but before moving
 

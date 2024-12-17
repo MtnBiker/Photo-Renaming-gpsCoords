@@ -12,6 +12,8 @@ require "time"
 require 'irb' # binding.irb where error checking is desired
 require 'mini_exiftool' # `gem install mini_exiftool` have to update for 
 
+putsArray = false # `true` to print the array in the console
+
 class Photo
 	
 	@@count = 0
@@ -208,11 +210,11 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		hiResTripodBoolean = false
 		hiResHandheldBoolean = false
 		
-		puts "\n#{__LINE__}. About to start choices for #{fn}."
-		puts "#{__LINE__}. fileName: #{fileName}.  stackedImage: #{stackedImage}.  driveMode: #{driveMode}."
+		puts "\n#{count}. About to start choices for #{fn}."
+		puts "#{__LINE__}. fileName: #{fileName}. fileExt: #{fileExt}. stackedImage: #{stackedImage}.  driveMode: #{driveMode}."
 		
 		oneBack = fileDate == fileDatePrev && fileExt != fileExtPrev # at the moment this is meaningless because all of one type?
-		puts "\n#{__LINE__}. oneBack: #{oneBack}.  fileDate: #{fileDate}.  fileDatePrev: #{fileDatePrev}."
+		# puts "\n#{__LINE__}. oneBack: #{oneBack}.  fileDate: #{fileDate}.  fileDatePrev: #{fileDatePrev}."
 		
 		# Name bracketed images whether or not there is a stack
 		driveModeFb = driveMode.split(',')[0] if !driveMode.nil?
@@ -239,9 +241,8 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		end # if driveModeFB
 		
 		
-		unless stackedImage.nil? # nil for .mov
+		unless stackedImage.nil? # nil for .mov which is covered by the else. But this is a bit ugly. RIXME
 		
-		# FIXME should be case
 			case
 			when stackedImage[0..12].to_s == "Focus-stacked"
 				# there is a space after the final digit, so either 1 or 2 digits.
@@ -264,15 +265,22 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 			# But must check for photos in same second
 			when oneBack
 				fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
+
 			else
 				fileBaseName = "#{fileDateStr}#{userCamCode}"
+				puts "#{__LINE__}. Not handled by any special cases.  fn: #{fn}."
+
 			end # case
 				
 				# I think this will be handled
 				# if stackedImage == "No" && driveMode[0..5] == "Single" # Shot
 				# 	fileBaseName = "#{fileDateStr}#{userCamCode}"
 				# end
-			
+				
+		else # unless .mov. stackedImage.nil?
+		  fileBaseName = "#{fileDateStr}#{userCamCode}"
+		  puts "#{__LINE__}. mov and anything else with driveMode, stackedImage nil. Maybe should check that is mov. fn: #{fn}. "
+
 		end	# unless
 		
 	
@@ -402,17 +410,20 @@ Dir.each_child(src).sort.each do |fn|
   preservedFileName = fn
 	# redefine fn
   fn  = src + "/" + fn
-	fileEXIF = MiniExiftool.new(fn)
+	# Request FileName explicitly. FileName is a system tag, not in EXIF. 
+	fileEXIF = MiniExiftool.new(fn, options: ['-G1', '-FileName', '-Directory'])
 	camModel = fileEXIF.model
 	fileName = fileEXIF.FileName # shows up in exiftool, but not here 
-	fileType = fileEXIF.fileType
+	puts "\n#{__LINE__}. camModel: #{camModel} fileName: #{fileName}." # DEBUG
+	puts fileName.nil? ? "No files found" : fileName
+	fileType = fileEXIF.fileType # FileType : JPEG. FileTypeExtension yields three letter lower case.
+	fileExt = fileEXIF.FileTypeExtension
 	createDate = fileEXIF.CreateDate
 	timeStamp = fileEXIF.TimeStamp
 	offsetTimeOriginal = fileEXIF.OffsetTimeOriginal
 	# model = fileEXIF.model
-	
-	# fileExt = File.extname(fn).tr(".","").downcase 
-	fileExt = fileEXIF.FileTypeExtension # Why using above
+	# fileExt = File.extname(fn).tr(".","").downcase # used this before found FileTypeExtension, now defined above
+
 	case 
 	when fileExt == "mov" # OMDS movie
 		dateTimeOriginal = fileEXIF.CreateDate
@@ -520,7 +531,7 @@ Dir.each_child(src).sort.each do |fn|
 	# puts "#{id}. Stacked Image: `#{stackedImage}`. shotNo: #{shotNo}. driveMode: #{driveMode}.  Original FileName: #{preservedFileName}" # DEV
 end # Dir.each_child(src).sort.each do |fn|
 puts "\n#{__LINE__}. Finished adding EXIF info and establishing photo array. If want to see some data for each photo, uncomment two lines above."
-puts photo_array.inspect # DEV
+puts photo_array.inspect if putsArray # DEV set ib kube 15
 # puts "#{__LINE__}. ######## End of Array ##########"
 # Renaming. Look at original, not sure what is going on exactly Line 1253
 # puts "\n{__LINE__}. Rename [tzoLoc = renamePhotoFiles(…)] the photo files with date and an ID for the camera or photographer (except for the paired jpgs in #{tempJpg}). #{timeNowWas}\n"
@@ -571,7 +582,6 @@ puts "   #{__LINE__}. photo_id: photo-10.  Stacked Image: #{photo_10.stackedImag
 # For now assume know where coming from
 # src = "/Volumes/Macintosh HD/Users/gscar/Library/Mobile Documents/com~apple~CloudDocs/Documents/Ruby/Photo handling/testingDev/incomingTestPhotos"
 # lastPhotoFilename = "OB305994"
-
 
 # Before made a list of files and copied. Will change with objects
 # copySD(srcSD, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
