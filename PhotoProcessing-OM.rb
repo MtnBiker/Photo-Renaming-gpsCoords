@@ -222,7 +222,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 				shot_no = match[1]
 				# 2024.10.30-16.28.54_08bkt.gs.O.jpg
 				# stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "bkt" # trying to tighten name compared to above
-				fileBaseName = "#{fileDateStr}#{shot_no}bkt#{userCamCode}"
+				fileBaseName = "#{fileDateStr}-#{shot_no}bkt#{userCamCode}"
 				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which a stack exists" 
 			else
 				stackedImageBoolean = false # worked through the images and move onto the next check
