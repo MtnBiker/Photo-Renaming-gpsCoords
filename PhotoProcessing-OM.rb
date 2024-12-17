@@ -107,9 +107,7 @@ def oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camMode
 		# puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileBaseName: #{fileBaseName}. fileDateStr: #{fileDateStr}. shot_no: #{shot_no}. userCamCode(fn): #{userCamCode(fn)}. DEBUG" # .  filtered: #{filtered}
 	else # photos without subsecs, pre GX8 and other OM-1 in same second
 		# puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileDateStr: #{fileDateStr}. dupCount: #{dupCount}. userCamCode(fn): #{userCamCode(fn)}. debug"
-		# fileBaseName = fileDateStr +  seqLetter[dupCount] + userCamCode(fn) + filtered
-		# Giving up on seqLetter because too many, use dupCount, but also add shot no. 
-		
+			
 		# FIXME. I think the next 12 or so lines are not being used.
 		# driveMode = fileEXIF.DriveMode # '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'
 		# puts "#{__LINE__}. driveMode: #{driveMode}. driveMode.class: #{driveMode.class} for . " # error if?
@@ -161,8 +159,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 	tzoLoc = ""
 	camModel = ""
 	userCamCode = ".gs.O." # go back to older version of this if want to determine it
-	seqLetter = %w(a b c d e f h i j k l m n o p q r s t u v w x y z aa bb cc dd ee ff gg hh ii jj kk ll mm nn oo pp qq rr ss tt uu vv ww xx yy zz) # used when subsec doesn't exist, but failing for large sequences possible on OM-1, so maybe use sequential numbers, i.e., dupCount?. Yes
-# Have to re-establish the field names and class since the array doesn't carry the class (a db might have been better)
+	# Have to re-establish the field names and class since the array doesn't carry the class (a db might have been better)
 	unneededBracketedFiles = [] # ~line 781
 	stackedImageBoolean = false # Needed for first time through the array.each
 
@@ -171,11 +168,11 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 	puts "\n#{__LINE__}. Entering	`photo_array.reverse.each do |photo|` in renamePhotoFiles(\n" 
 	photo_array.reverse.each do |photo|
 		fn = photo.fn # file_name
-		fileName = photo.fileName # nil Say What
+		fileName = photo.fileName # this fileName is Ruby basename FIXME
 		# puts "\n#{__LINE__}. fn: #{fn}." 
 		dateTimeOriginal = photo.dateTimeOriginal
 		# puts "\n#{__LINE__}. preservedFileName: #{photo.preservedFileName}.	dateTimeOriginal: #{dateTimeOriginal}. " # sorting out what I was trying to do
-		fileDate = dateTimeOriginal
+		fileDate = dateTimeOriginal # why not createDate? mov?
 		# puts "\n#{__LINE__}. fileDate: #{fileDate}. fileDate.class: #{fileDate.class}." #  fileDate: [2024-10-18 10:52:30 -0700, "-07:00"]. fileDate.class: Array. DEV
 		fileDateStr = Time.parse(fileDate.to_s).to_s[0..-7].gsub(/-/, '.').gsub(' ', '-').gsub(/:/, '.') # to_s twice? FIXME then chop off time_zone, then change spaces, dashes, and colons to what I want
 		# puts "\n#{__LINE__}. fileDateStr: #{fileDateStr}. But want to look like this `2024.10.30-16.28.54`"
@@ -206,7 +203,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		driveMode = photo.driveMode # how long does this take? If don't need at highest level check later
 		# stackedImageBoolean = false # declared below and would be wrong here
 		
-		# High resolution can either be Tripod or Hand Held
+		# High resolution can either be Tripod or Hand Held. I doubt these are being used anymore since started using `case` below FIXME
 		hiResTripodBoolean = false
 		hiResHandheldBoolean = false
 		
@@ -240,8 +237,14 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		# 	puts "#{__LINE__}. driveModeFb: #{driveModeFb}."
 		end # if driveModeFB
 		
+		# puts "\n#{__LINE__}. fileExt: #{fileExt}." # DEV
+		# Maybe handle .mov as special case outside of everything else and handle everything else below
+		if fileExt == "mov"
+			fileBaseName = "#{fileDateStr}#{userCamCode}." # extra period JIC Debug
+			puts "\n#{__LINE__}. fileExt: #{fileExt}.  fileBaseName: #{fileBaseName}. Supposedly handling .mov outside of `case` below. But at the moment not getting renamed and moved. count doesn't advance" #
+		end
 		
-		unless stackedImage.nil? # nil for .mov which is covered by the else. But this is a bit ugly. RIXME
+		unless stackedImage.nil? # nil for .mov which is covered above. Everything else is supposed to be covered here
 		
 			case
 			when stackedImage[0..12].to_s == "Focus-stacked"
@@ -277,9 +280,9 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 				# 	fileBaseName = "#{fileDateStr}#{userCamCode}"
 				# end
 				
-		else # unless .mov. stackedImage.nil?
-		  fileBaseName = "#{fileDateStr}#{userCamCode}"
-		  puts "#{__LINE__}. mov and anything else with driveMode, stackedImage nil. Maybe should check that is mov. fn: #{fn}. "
+		# else # unless .mov. stackedImage.nil? # moved .mov above case
+		#   fileBaseName = "#{fileDateStr}#{userCamCode}"
+		#   puts "#{__LINE__}. mov and anything else with driveMode, stackedImage nil. Maybe should check that is mov. fn: #{fn}. "
 
 		end	# unless
 		
@@ -342,7 +345,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 			fileDatePrev = fileDate
 			fileExtPrev = fileExt
 			# fileBaseNamePrev = fileBaseName
-			
+		end # unless
 			# write to Instructions which can be seen in Mylio and doesn't interfere with Title or Caption
 			# Seems like this is done elsewhere
 			# fileAnnotate(fn, dateTimeOriginalstr, tzoLoc, camModel) # was passing fileEXIF, but saving wasn't happening, so reopen in the module?
@@ -365,9 +368,9 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 			# unneededBracketedFiles << fnp
 	
 			count += 1
-		else
-			# puts "#{__LINE__}. CHECKING why `if File.file?(fn)` is needed. File.file?(fn): #{File.file?(fn)} for fn: #{fn}"
-		end # 3. if File.file?(fn)
+		# else
+		# 	# puts "#{__LINE__}. CHECKING why `if File.file?(fn)` is needed. File.file?(fn): #{File.file?(fn)} for fn: #{fn}"
+		# end # 3. if File.file?(fn)
 		# puts "#{__LINE__}. Got to here. tzoLoc: #{tzoLoc}"
 		
 	end # 2. Dir.each_child(src)
@@ -407,15 +410,13 @@ Will take a bit of time. FIXME: add some progress bar"
 Dir.each_child(src).sort.each do |fn|
 	next if fn == '.DS_Store' # each_child knows about . and .. but not 
 	id += 1
-  preservedFileName = fn
+  preservedFileName = fileName = fn # FIXME or maybe I should go with Ruby syntax of basename
 	# redefine fn
   fn  = src + "/" + fn
 	# Request FileName explicitly. FileName is a system tag, not in EXIF. 
-	fileEXIF = MiniExiftool.new(fn, options: ['-G1', '-FileName', '-Directory'])
+	fileEXIF = MiniExiftool.new(fn)
 	camModel = fileEXIF.model
-	fileName = fileEXIF.FileName # shows up in exiftool, but not here 
-	puts "\n#{__LINE__}. camModel: #{camModel} fileName: #{fileName}." # DEBUG
-	puts fileName.nil? ? "No files found" : fileName
+	# fileName = fileEXIF.FileName # shows up in exiftool, but not here and can't seem to be forced, but see above:
 	fileType = fileEXIF.fileType # FileType : JPEG. FileTypeExtension yields three letter lower case.
 	fileExt = fileEXIF.FileTypeExtension
 	createDate = fileEXIF.CreateDate

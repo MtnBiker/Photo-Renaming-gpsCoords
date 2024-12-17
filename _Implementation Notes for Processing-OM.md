@@ -70,6 +70,7 @@ GUI for keying into GUI options etc
 ## ToDo
 Prevent redownloading from the two cards
 dateTimeOriginal replace with createDate. .mov doesn't have dateTimeOriginal
+Look at EXIF filename vs Ruby basename for consistency, but be aware of my `fileBaseName`
 
 ### Changes
 photosRenamedTo left in as it might be useful for dubugging. But I wasn't using it and maybe it should go into photos.array. Action not implemented, ie, file not written to.
