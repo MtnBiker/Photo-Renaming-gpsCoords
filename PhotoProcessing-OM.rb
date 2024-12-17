@@ -85,9 +85,9 @@ def timeStamp(timeNowWas, fromWhere)
 	Time.now
 end
 
-def oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
+def oneBackTrue(src, fn, fnp, fnpPrev, fileDate, driveMode, dupCount, camModel, userCamCode)
 	# Some of these fields may not be needed, I was fighting the wrong problem and may have added some that aren't needed
-	# puts "\n#{__LINE__}. fn: #{fn}. fnp: #{fnp}. subSecExists: #{subSecExists}. fileDate: #{fileDate}. driveMode: #{driveMode}.  dupCount: #{dupCount}. in oneBackTrue(). DEBUG"
+	puts "\n#{__LINE__}. fn: #{fn}. fnp: #{fnp}. fileDate: #{fileDate}. driveMode: #{driveMode}.  dupCount: #{dupCount}. in oneBackTrue(). DEBUG"
 	dupCount += 1
 	# Getting sequence no./shot no. for OM-1. DriveMode is "Single Shot; Electronic shutter" for normal photos
 	unless driveMode.nil? || driveMode.empty? # opposite of if, therefore if driveMode is not empty
@@ -220,21 +220,23 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 			if stackedImageBoolean
 				fileBaseName = "#{fileDateStr}_#{shot_no}bkt#{userCamCode}" # could be dash instead of underscore
 				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which a stack exists"
+				stackedImageBoolean = false if shot_no == "1" # reset after last stacked image
 			else
 				fileBaseName = "#{fileDateStr}_#{shot_no}bkt-noStack#{userCamCode}" # could be dash instead of underscore
 				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which NO stack exists"
 			end
-		else
-			stackedImageBoolean = false # worked through the images and move onto the next check
-			puts "Worked through the bracketed #{shot_no} images"
+		# else
+		# 	stackedImageBoolean = false # worked through the images and move onto the next check
+		# 	puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Worked through the bracketed #{shot_no} images"
+		# 	puts "#{__LINE__}. driveModeFb: #{driveModeFb}."
 		end # if driveModeFB
 		
 		
 		unless stackedImage.nil? # nil for .mov
 	
 			if stackedImage[0..12].to_s == "Focus-stacked"
-				bracketCount = stackedImage[15..16] # there is a space after the final digit, so either 1 or 2 digits.
-				puts "\n#{__LINE__}. #{fn} is a successfully stacked images with #{bracketCount} brackets.\n Now put aside next #{bracketCount} images and rename as brackets"
+				# there is a space after the final digit, so either 1 or 2 digits.
+				puts "\n#{__LINE__}. #{fn} is a successfully stacked images with #{stackedImage[15..16]} brackets.\n Now put aside next #{bracketCount} images and rename as brackets"
 				fileBaseName = "#{fileDateStr}(FS)#{userCamCode}" # Inconsistent naming FIXME? could be _STK_
 				stackedImageBoolean = true
 			end
@@ -321,7 +323,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 			# puts "\n#{__LINE__}. fnp: #{fnp}." 
 			# fnp = "Placeholder for DEV"
 			# puts "Place holder to make the script work. where did the unless come from"
-      puts "\n#{__LINE__}. fn: #{fn}. fn.class: #{fn.class}\nfnp (fnpPrev): #{fnp}"
+      puts "\n#{__LINE__}. fn: #{fn}.\nfnp (fnpPrev): #{fnp}" #  fn.class: #{fn.class} DEV
 			# puts "\n#{__LINE__}. fn exists: #{File.file?(fn)}. fnp exists: #{File.file?(fnp)} of course not yet." # DEV
 			
 			# Ensure destination directory exists DEV, because wiping this out in DEV
@@ -357,9 +359,9 @@ FileUtils.rm_rf(mylioStaging) # clear out photos from previous run DEV
 # puts value.x # created an error here so script would stop and I could check that folder was deleted and it was
 
 # For DEV to have sample files to test with. Only one selected below
-# FileUtils.cp_r('testingDev/virginOMcopy2incoming', testPhotos, preserve: true, remove_destination: true ) # preserve to keep timestamp (may not be necesary). cp_r is for directory. This directory has a currated batch of photos
-puts "\n#{__LINE__}. Not using full test stack of photos" 
-FileUtils.cp_r('testingDev/bracketStackTestPhotos', testPhotos, preserve: true, remove_destination: true ) # just a stack for DEV test
+FileUtils.cp_r('testingDev/virginOMcopy2incoming', testPhotos, preserve: true, remove_destination: true ) # preserve to keep timestamp (may not be necesary). cp_r is for directory. This directory has a currated batch of photos
+# puts "\n#{__LINE__}. Not using full test stack of photos" 
+# FileUtils.cp_r('testingDev/bracketStackTestPhotos', testPhotos, preserve: true, remove_destination: true ) # just a stack for DEV test
 
 lineNum = "#{__LINE__}"
 timeNowWas = timeStamp(Time.now, lineNum)
