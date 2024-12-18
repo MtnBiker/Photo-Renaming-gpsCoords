@@ -181,7 +181,8 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		# puts "\n#{__LINE__}. fileDate: #{fileDate}. fileDate.class: #{fileDate.class}." #  fileDate: [2024-10-18 10:52:30 -0700, "-07:00"]. fileDate.class: Array. DEV
 		fileDateStr = Time.parse(fileDate.to_s).to_s[0..-7].gsub(/-/, '.').gsub(' ', '-').gsub(/:/, '.') # to_s twice? FIXME then chop off time_zone, then change spaces, dashes, and colons to what I want
 		# puts "\n#{__LINE__}. fileDateStr: #{fileDateStr}. But want to look like this `2024.10.30-16.28.54`"
-		# fileDateStr = "#{count}.#{fileDateStr}" # trying to figure out which files are disappearing
+		fileDateStr = "#{count}.#{fileDateStr}" # trying to figure out which files are disappearing DEV
+		fileDateStr = "#{photo.preservedFileName}.#{fileDateStr}" # trying to figure out which files are disappearing DEV
 			
 		# dateTimeOriginalstr = dateTimeOriginal.to_s[0..-10]		
 		# puts "#{__LINE__}. dateTimeOriginalstr: #{dateTimeOriginalstr}.  dateTimeOriginal: #{dateTimeOriginal}. \n Do I need both of these FIXME" 
@@ -207,9 +208,9 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		# Add  1. If focused-stacked (stackedImage), get count and confirm next x are Focus Bracketing and set aside and mark as brackets
 		stackedImage = photo.stackedImage
 		driveMode = photo.driveMode # how long does this take? If don't need at highest level check later
-		driveModeFirst = driveMode.split(';')[0] if !driveMode.nil? #  Change driveModeFb to this. nil needed or errors
+		driveModeFirst = driveModeSemiColon = driveMode.split(';')[0] if !driveMode.nil? #  Change driveModeFb to this. nil needed or errors
 		# stackedImageBoolean = false # declared below and would be wrong here
-		driveModeFb = driveMode.split(',')[0] if !driveMode.nil? # driveModeFirst separates on semi-colon, so different results.
+		driveModeFb = driveModeComma = driveMode.split(',')[0] if !driveMode.nil? # driveModeFirst separates on semi-colon, so different results.
 		# puts "#{__LINE__}. driveModeFirst: #{driveModeFirst}. fileName: #{fileName}. " # Continuous Shooting, Shot 1. But some have a semi-colon separator
 		# puts "#{__LINE__}. driveModeFb:    #{driveModeFb}." # Continuous Shooting.
 
@@ -223,7 +224,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		puts "#{__LINE__}. fileName: #{fileName}. fileExt: #{fileExt}. stackedImage: #{stackedImage}.  driveMode: #{driveMode}."
 		
 		oneBack = fileDate == fileDatePrev && fileExt != fileExtPrev # at the moment this is meaningless because all of one type?
-		# puts "\n#{__LINE__}. oneBack: #{oneBack}.  fileDate: #{fileDate}.  fileDatePrev: #{fileDatePrev}."
+		puts "\n#{__LINE__}. oneBack: #{oneBack}.  fileDate: #{fileDate}.  fileDatePrev: #{fileDatePrev}."
 		
 		# Name bracketed images whether or not there is a stack
 				# puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
@@ -261,7 +262,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 			when stackedImage[0..12].to_s == "Focus-stacked"
 				# `Focus-stacked (15 images)`. there is a space after the final digit, so either 1 or 2 digits.
 				bracketCount = stackedImage[15..16] 
-				puts "\n#{__LINE__}. #{fn} is a successfully stacked images with #{bracketCount} brackets.\n Now put aside next #{bracketCount} images and rename as brackets"
+				# puts "\n#{__LINE__}. #{fn} is a successfully stacked images with #{bracketCount} brackets.\n Now put aside next #{bracketCount} images and rename as brackets"
 				fileBaseName = "#{fileDateStr}.FS#{userCamCode}" # Inconsistent naming FIXME? could be _STK_
 				stackedImageBoolean = true
 			
@@ -275,6 +276,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 				fileBaseName = "#{fileDateStr}HiResHand#{userCamCode}"
 				
 			when driveModeFb.to_s == "Focus Bracketing" # && !driveMode.nil? redundant driveModeFirst doesn't work
+			# FIXME get rid of match as for Continuous Shooting
 				match = driveMode.match(/(\d{1,3})/) # Getting shot no. from `Focus Bracketing,  Shot _`
 				# shot_no = match[1].to_i # if match # has to be a match in this loop, so maybe don't need the if
 				shot_no = match[1]
@@ -283,22 +285,26 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 				# Label differently if there is a stacked image
 				if stackedImageBoolean
 					fileBaseName = "#{fileDateStr}_#{shot_no}bkt#{userCamCode}" # could be dash instead of underscore
-					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which a stack exists"
+					# puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which a stack exists"
 					stackedImageBoolean = false if shot_no == "1" # reset after last stacked image
 				else
 					fileBaseName = "#{fileDateStr}_#{shot_no}bkt-noStack#{userCamCode}" # could be dash instead of underscore
-					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which NO stack exists"
+					# puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which NO stack exists"
 				end
 				
 			when driveModeFirst == "Single Shot" # driveMode: Single Shot, not being picked up
 				fileBaseName = "#{fileDateStr}.SS#{userCamCode}" # DEV SS until sort out what all the cases are
-				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Single Shot"
+				# puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Single Shot"
 				
+			# Continuous shooting which may be a proxy for ProCapture. `Drive Mode: Continuous Shooting, Shot 7; Electronic shutter`
+			when driveModeComma == "Continuous Shooting"
+				shot_no = driveMode.match(/(\d{1,3})/)[1]
+				fileBaseName = "#{fileDateStr}.ProCap-#{shot_no}#{userCamCode}" # putting shot_no after which
 			# The above are OK if in the same second since will get shot-no or the three immediately above, they won't be in same second since takes too long
 			# But must check for photos in same second
 			when oneBack
 				fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
-
+				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Entered case oneBack"
 			else
 				fileBaseName = "#{fileDateStr}#{userCamCode}"
 				countDev += 1

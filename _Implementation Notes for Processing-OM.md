@@ -62,7 +62,8 @@ GUI for keying into GUI options etc
    Focus-bracketing with no stack
    2. Later realized that using case was the best way to handle the various situations (cases! obviously)
    102 files in virgin…, 100 in staging 2 not processed.
-   oneBack numbering is missing the first one still
+   oneBack numbering is missing the first one still. Something wrong with oneBackTrue module? Should I handle Continuous Shooting? What is it?. Is is a ProCapture? So far yes
+   fileBaseName = "#{fileDateStr}.ProCap#{shot_no}.#{userCamCode}" put shot_no after to separate from date. See if that's better
    
 3. add gps coordinates. Can do this before or after renaming, but before moving
 
@@ -82,7 +83,7 @@ writeCaption = true # Decide this is GUI later
 fileDateTimeOriginal review what this is for FIXME
 DateTimeUTC and DateTimeOriginal and OffsetTime to check that camera was set correctly. These are what the camera thinks is right. Maybe check against the time zones.yml, but ignore for now
 
-#### test images. See OM EXIF for different shooting modes.numbers
+#### test images. See file: OM EXIF for different shooting modes.numbers
 virginOMcopy folder
 OA184727–OA184736 10 photos  "Continuous Shooting Shot xx; Electronic shutter",
 OA184737 "Single Shot; Electronic shutter",
