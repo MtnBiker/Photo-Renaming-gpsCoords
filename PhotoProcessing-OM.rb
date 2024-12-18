@@ -91,20 +91,23 @@ def oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camMode
 	# Some of these fields may not be needed, I was fighting the wrong problem and may have added some that aren't needed
 	puts "\n#{__LINE__}. fn: #{fn}. fnp: #{fnp}. fileDateStr: #{fileDateStr}. driveMode: #{driveMode}.  dupCount: #{dupCount}. in oneBackTrue(). DEBUG"
 	dupCount += 1
+	
+	# This should be screened out before here now.
 	# Getting sequence no./shot no. for OM-1. DriveMode is "Single Shot; Electronic shutter" for normal photos
 	unless driveMode.nil? || driveMode.empty? # opposite of if, therefore if driveMode is not empty
 		match = driveMode.match(/Shot (\d{1,3})/)
 		shot_no = match[1].to_i if match
 		shootingMode = driveMode.split(',')[0]
-		# puts "#{__LINE__}. fn: #{fn}. driveMode: #{driveMode}. shot_no: #{shot_no}. shootingMode: #{shootingMode}. subSecExists: #{subSecExists}. fileDateStr: #{fileDateStr}. DEBUG"
+		puts "\n#{__LINE__}. fn: #{fn}. driveMode: #{driveMode}. shot_no: #{shot_no}. shootingMode: #{shootingMode}. fileDateStr: #{fileDateStr}. DEBUG"
 	end
+	
 	if shot_no.to_i > 0 # photos without subsecs. OM-1 but with shot number.
 		# Getting sequence no. for OM-1. DriveMode is "Single Shot; Electronic shutter" for normal photos
 			 # puts shot_no
 		# End getting seqence no
 		# fileBaseName = fileDateStr + "-" + shot_no.to_s + userCamCode
 		fileBaseName = "#{fileDateStr}-#{shot_no.to_s}#{userCamCode}"
-		# puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileBaseName: #{fileBaseName}. fileDateStr: #{fileDateStr}. shot_no: #{shot_no}. userCamCode(fn): #{userCamCode(fn)}. DEBUG" # .  filtered: #{filtered}
+		puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileBaseName: #{fileBaseName}. fileDateStr: #{fileDateStr}. shot_no: #{shot_no}. userCamCode(fn): #{userCamCode}. DEBUG" 
 	else # photos without subsecs, pre GX8 and other OM-1 in same second
 		# puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileDateStr: #{fileDateStr}. dupCount: #{dupCount}. userCamCode(fn): #{userCamCode(fn)}. debug"
 			
@@ -122,7 +125,8 @@ def oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camMode
 				puts "#{__LINE__} #{fileDateStr} is shot that contributed to a Focus Stacked image" # debug 
 			else 
 				shot_no = "FS" # for an in camera Focus Stacked image FIXME. This should not be in oneBackTrue
-				puts "\n#{__LINE__} #{fileDateStr} an in camera Focus Stacked image and the contributing images should not be sent to Mylio." # debug
+				puts "\n#{__LINE__} #{fileDateStr} an in camera Focus Stacked image and the contributing images should not be sent to Mylio. Currently picking up images in the same second" # debug
+				# 125 2024.12.15-16.03.29 an in camera Focus Stacked image and the contributing images should not be sent to Mylio. Currently picking up images in the same second
 			end
 			fileBaseName = "#{fileDateStr}-#{dupCount.to_s}(#{shot_no})#{userCamCode}"
 			
@@ -177,6 +181,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		# puts "\n#{__LINE__}. fileDate: #{fileDate}. fileDate.class: #{fileDate.class}." #  fileDate: [2024-10-18 10:52:30 -0700, "-07:00"]. fileDate.class: Array. DEV
 		fileDateStr = Time.parse(fileDate.to_s).to_s[0..-7].gsub(/-/, '.').gsub(' ', '-').gsub(/:/, '.') # to_s twice? FIXME then chop off time_zone, then change spaces, dashes, and colons to what I want
 		# puts "\n#{__LINE__}. fileDateStr: #{fileDateStr}. But want to look like this `2024.10.30-16.28.54`"
+		# fileDateStr = "#{count}.#{fileDateStr}" # trying to figure out which files are disappearing
 			
 		# dateTimeOriginalstr = dateTimeOriginal.to_s[0..-10]		
 		# puts "#{__LINE__}. dateTimeOriginalstr: #{dateTimeOriginalstr}.  dateTimeOriginal: #{dateTimeOriginal}. \n Do I need both of these FIXME" 
@@ -204,11 +209,16 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		driveMode = photo.driveMode # how long does this take? If don't need at highest level check later
 		driveModeFirst = driveMode.split(';')[0] if !driveMode.nil? #  Change driveModeFb to this. nil needed or errors
 		# stackedImageBoolean = false # declared below and would be wrong here
+		driveModeFb = driveMode.split(',')[0] if !driveMode.nil? # driveModeFirst separates on semi-colon, so different results.
+		# puts "#{__LINE__}. driveModeFirst: #{driveModeFirst}. fileName: #{fileName}. " # Continuous Shooting, Shot 1. But some have a semi-colon separator
+		# puts "#{__LINE__}. driveModeFb:    #{driveModeFb}." # Continuous Shooting.
+
 		
 		# High resolution can either be Tripod or Hand Held. I doubt these are being used anymore since started using `case` below FIXME
 		hiResTripodBoolean = false
 		hiResHandheldBoolean = false
 		
+		puts "#######################################"
 		puts "\n#{count}. About to start choices for #{fn}."
 		puts "#{__LINE__}. fileName: #{fileName}. fileExt: #{fileExt}. stackedImage: #{stackedImage}.  driveMode: #{driveMode}."
 		
@@ -216,10 +226,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		# puts "\n#{__LINE__}. oneBack: #{oneBack}.  fileDate: #{fileDate}.  fileDatePrev: #{fileDatePrev}."
 		
 		# Name bracketed images whether or not there is a stack
-		driveModeFb = driveMode.split(',')[0] if !driveMode.nil? # change to driveModeFirst as is more general
-		# driveModeFirst = driveMode.split(';')[0] if !driveMode.nil? # better name, FIXME. Change driveModeFb to this. is nil needed
-		puts "#{__LINE__}. driveModeFirst: #{driveModeFirst}."
-		# puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
+				# puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
 		# if driveModeFb.to_s == "Focus Bracketing" && !driveMode.nil?
 		# 	match = driveMode.match(/(\d{1,3})/) # Getting shot no. from `Focus Bracketing,  Shot _`
 		# 	# shot_no = match[1].to_i # if match # has to be a match in this loop, so maybe don't need the if
@@ -255,7 +262,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 				# `Focus-stacked (15 images)`. there is a space after the final digit, so either 1 or 2 digits.
 				bracketCount = stackedImage[15..16] 
 				puts "\n#{__LINE__}. #{fn} is a successfully stacked images with #{bracketCount} brackets.\n Now put aside next #{bracketCount} images and rename as brackets"
-				fileBaseName = "#{fileDateStr}(FS)#{userCamCode}" # Inconsistent naming FIXME? could be _STK_
+				fileBaseName = "#{fileDateStr}.FS#{userCamCode}" # Inconsistent naming FIXME? could be _STK_
 				stackedImageBoolean = true
 			
 			when stackedImage[0..5].to_s == "Tripod" #  Tripod high resolution
@@ -266,13 +273,8 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 			when stackedImage[0..24].to_s == "Hand-held high resolution" # Hand-held high resolution
 				hiResHandheldBoolean = true
 				fileBaseName = "#{fileDateStr}HiResHand#{userCamCode}"
-					
-			# The above are OK if in the same second since will get shot-no or the three immediately above, they won't be in same second since takes too long
-			# But must check for photos in same second
-			when oneBack
-				fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
 				
-			when driveModeFb.to_s == "Focus Bracketing" # && !driveMode.nil? redundant
+			when driveModeFb.to_s == "Focus Bracketing" # && !driveMode.nil? redundant driveModeFirst doesn't work
 				match = driveMode.match(/(\d{1,3})/) # Getting shot no. from `Focus Bracketing,  Shot _`
 				# shot_no = match[1].to_i # if match # has to be a match in this loop, so maybe don't need the if
 				shot_no = match[1]
@@ -289,8 +291,13 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 				end
 				
 			when driveModeFirst == "Single Shot" # driveMode: Single Shot, not being picked up
-				fileBaseName = "#{fileDateStr}SS#{userCamCode}" # DEV SS until sort out what all the cases are
+				fileBaseName = "#{fileDateStr}.SS#{userCamCode}" # DEV SS until sort out what all the cases are
 				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Single Shot"
+				
+			# The above are OK if in the same second since will get shot-no or the three immediately above, they won't be in same second since takes too long
+			# But must check for photos in same second
+			when oneBack
+				fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
 
 			else
 				fileBaseName = "#{fileDateStr}#{userCamCode}"
