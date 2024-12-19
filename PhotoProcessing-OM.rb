@@ -12,16 +12,16 @@ require "time"
 require 'irb' # binding.irb where error checking is desired
 require 'mini_exiftool' # `gem install mini_exiftool` have to update for 
 
-putsArray = false # `true` to print the array in the console
+putsArray = true # `true` to print the array in the console
 
 class Photo
 	
 	@@count = 0
 	
-	attr_accessor :id, :fn, :fileName, :fileExt, :camModel, :fileType, :stackedImage, :driveMode, :specialMode, :afPointDetails, :subjectTrackingMode, :createDate, :dateTimeOriginal, :offsetTimeOriginal, :preservedFileName
+	attr_accessor :id, :fn, :fileName, :fileExt, :camModel, :fileType, :stackedImage, :driveMode, :specialMode, :afPointDetails, :subjectTrackingMode, :createDate, :sameSecond, :dateTimeOriginal, :offsetTimeOriginal, :preservedFileName
 	# order by need for sorting and dealing with
 
-  def initialize(id, fn, fileName, fileExt, camModel, fileType, stackedImage, driveMode, specialMode, afPointDetails, subjectTrackingMode, createDate, dateTimeOriginal, offsetTimeOriginal, preservedFileName)
+  def initialize(id, fn, fileName, fileExt, camModel, fileType, stackedImage, driveMode, specialMode, afPointDetails, subjectTrackingMode, createDate, sameSecond, dateTimeOriginal, offsetTimeOriginal, preservedFileName)
 		
 # The counting needs work if I need it, where did I get it from
 		# Every time a Photo (or a subclass of Photo) is instantiated,
@@ -45,6 +45,7 @@ class Photo
 		@afPointDetails = afPointDetails
 		@subjectTrackingMode = subjectTrackingMode
 		@createDate = createDate
+		@sameSecond = sameSecond
 		@dateTimeOriginal = dateTimeOriginal,
 		@offsetTimeOriginal = offsetTimeOriginal
 		@preservedFileName = preservedFileName
@@ -283,7 +284,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Entered case oneBack in Single Shot"
 				else
 					fileBaseName = "#{fileDateStr}.SS#{userCamCode}" # DEV SS until sort out what all the cases are
-					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Single Shot"
+					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Single Shot."
 				end
 			# Continuous shooting which may (assuming it is for now) be a proxy for ProCapture. `Drive Mode: Continuous Shooting, Shot 7; Electronic shutter`
 			when driveModeComma == "Continuous Shooting"
@@ -422,6 +423,8 @@ timeNowWas = timeStamp(Time.now, lineNum)
 id = 0
 photo_array = []
 lastPhotoFilename = "OB305994" # use later as starting point
+createDatePrev = Time.now # impossible that first photo processes will in comflict, but need an intial value
+photo_id_prev = "" # so defined for first round
 
 puts "#{__LINE__}. Start of photo processing. First read EXIF info and write to instructions and optionally to caption for viewing in Mylio
 Also for later use in naming photos and putting aside sequence (bracketed) shots contributing to stacked image
@@ -522,8 +525,19 @@ Dir.each_child(src).sort.each do |fn|
 
 	fileEXIF.save # only change so far is imageDescription and instructions
 	
-	photo_id = "photo-" + id.to_s
-	photo_array <<	Photo.new(photo_id, fn, fileName, fileExt, camModel, fileType, stackedImage, driveMode, specialMode, afPointDetails, subjectTrackingMode, createDate, dateTimeOriginal, offsetTimeOriginal, preservedFileName)
+	# Mark photos in same second	
+	if id > 1 && createDate == createDatePrev # comparison not possible with Prev and will revise sameSecond in next round if needed
+		sameSecond = true
+		# and write same second true for previous photo		
+		photo = photo_array.find { |p| p.id == photo_id_prev }
+		photo.sameSecond = true
+	else
+		sameSecond = false
+	end
+	createDatePrev = createDate
+	
+	photo_id = photo_id_prev = "photo-" + id.to_s
+	photo_array <<	Photo.new(photo_id, fn, fileName, fileExt, camModel, fileType, stackedImage, driveMode, specialMode, afPointDetails, subjectTrackingMode, createDate, sameSecond, dateTimeOriginal, offsetTimeOriginal, preservedFileName)
 	# Checking what is stored in stacked image
 	# puts "#{id}. Stacked Image: `#{stackedImage}`. shotNo: #{shotNo}. driveMode: #{driveMode}.  Original FileName: #{preservedFileName}" # DEV
 end # Dir.each_child(src).sort.each do |fn|
