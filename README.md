@@ -14,13 +14,21 @@ The GPS info adding is tricky. All GPS devices (AFAIK) use UTM. Most cameras can
 
 I am currently (2024) using the GaiaGPS iOS app to create my gpx track. That means I have the app running all the time (can be detrimental to battery life). And downloading the track is a multi-step process. And to save the script from processing all my tracks I have to move the older tracks to another folder.
 
-## Dependencies
+## Dependencies and Requirements
 
-mini_exiftools, a Ruby script, to connect with the Perl script ExifTool by Phil Harvey, http://www.sno.phy.queensu.ca/~phil/exiftool/, but has a Windows executable and a Mac OS X package installer available. This is a fantastic, well-maintained package to manipulate photo file EXIF data.
+OM-1 Mark II camera. Originally wrote for several other of my cameras, but OMDS added features and EXIF, so I dropped the other cameras, although pieces of that support may linger in the script
 
+macOS. Sequoia currently, but shouldn't change with versions, but you never know
+Ruby 3.4.0. Not leveraging new sophistications, so should work with other versions
+
+mini_exiftools, a Ruby script, to connect with the Perl script ExifTool by Phil Harvey, http://www.sno.phy.queensu.ca/~phil/exiftool/, but has a Windows executable and a Mac OS X package installer available. This is a fantastic, well-maintained package to manipulate photo file EXIF data. One caveat is that ExifTool adds some OS information which mini_exiftools may not support.
+
+Soon to be an app
 Requires the app Pashua for some of the GUI. However the script is initiated from the command line (or equivalent. I run from TextMate and Nova or the command line). Pashua 0.11 was released on 04/14/2018 and the developer says he is no longer supporting it, but it still works. At some point I need to use a more modern approach. https://www.bluem.net/pashua-docs-latest.html Thank you Carsten Blüm, https://www.bluem.net/ and Apple for a system that keeps apps working for a long time.
 
 ### Notes
+
+Handy to check on what's going on with a photo `exiftool -FileName -DateTimeOriginal -OffsetTime -StackedImage -DriveMode -AFPointDetails filename `
 
 I'm very much an neophyte Ruby script writer, so at best use this as a guideline. Use at your own risk. I pretty much learned Ruby to write this script. I started this six years ago and am still a rank amateur.
 

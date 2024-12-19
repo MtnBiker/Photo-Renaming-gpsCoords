@@ -65,6 +65,8 @@ GUI for keying into GUI options etc
    oneBack numbering is missing the first one still. Something wrong with oneBackTrue module? Should I handle Continuous Shooting? What is it?. Is is a ProCapture? So far yes
    fileBaseName = "#{fileDateStr}.ProCap#{shot_no}.#{userCamCode}" put shot_no after to separate from date. See if that's better
    
+   How to make oneBack work even if have better ways to handle them. Photos manually shot in same second aren't tagged. Handle as special case within "Single Shot"
+   
 3. add gps coordinates. Can do this before or after renaming, but before moving
 
 4 Then can sort by where to go: jpg if raw exists, unneeded files for stack, unneeded files from hi res

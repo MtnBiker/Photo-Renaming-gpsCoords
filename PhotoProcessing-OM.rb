@@ -12,7 +12,34 @@ require "time"
 require 'irb' # binding.irb where error checking is desired
 require 'mini_exiftool' # `gem install mini_exiftool` have to update for 
 
+# Some toggles for testing and development, will 
 putsArray = false # `true` to print the array in the console
+production = false # false uses /testingDev files
+
+HOME = "/Users/gscar/"
+thisScript = "#{File.dirname(__FILE__)}/" # needed because the Pashua script calling a file seemed to need the directory. 
+# thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory.
+photosRenamedTo = thisScript + "currentData/photosRenamedTo.txt"
+
+if production # set above
+	unneededBracketed = downloadsFolders + "Unneeded brackets/" # on Daguerre
+	srcHD       = downloadsFolders + " Drag Photos HERE/" # 
+	srcHD = "testingDev/incomingTestPhotos"
+	mylioStaging = downloadsFolders + "Latest Processed photos-Import to Mylio/" #  These are relabeled and GPSed files. Will be moved to Mylio after processing.		
+else # development or testing	
+	unneededStacksFolder = thisScript + "/testingDev/unneededStacksFolder" # DEV rename to unneededBrackets, but is this the right name
+	# temp src until determine using. Full path needed to run from arbitrary place in iTerm. Relative works in Nova
+	# Need to change to srcHD
+	src = thisScript + "/testingDev/incomingTestPhotos/" # Stacked w/ and w/o a stacked image, HHHR, THR, 
+	# src = "/Volumes/Daguerre/_Download folder/_imported-archive/OM-1/OB[2024.11]-OM/" # 308 photos
+	# src = "/Volumes/Daguerre/_Download folder/_imported-archive/OM-1/OA[2024.10]-OM/" # 476 photos
+	# src = thisScript + "/testingDev/singleTestPhoto"	
+	mylioStaging = thisScript + "/testingDev/staging" # DEV
+end
+
+# Not planning to use initially or at all
+timeZonesFile = thisScript + "currentData/Greg camera time zones.yml"
+
 
 class Photo
 	
@@ -53,29 +80,6 @@ class Photo
 		
 end # class photo
 
-HOME = "/Users/gscar/"
-thisScript = "#{File.dirname(__FILE__)}/" # needed because the Pashua script calling a file seemed to need the directory. 
-# thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory.
-photosRenamedTo = thisScript + "currentData/photosRenamedTo.txt" 
-
-# unneededBracketed = downloadsFolders + "Unneeded brackets/" # on Daguerre
-unneededStacksFolder = thisScript + "/testingDev/unneededStacksFolder" # DEV
-
-# srcHD       = downloadsFolders + " Drag Photos HERE/" # 
-# srcHD = "testingDev/incomingTestPhotos"
-
-# Adding each file to Array photos
-# temp src until determine using. Full path needed to run from arbitrary place in iTerm. Relative works in Nova
-src = thisScript + "/testingDev/incomingTestPhotos/" # Stacked w/ and w/o a stacked image, HHHR, THR, 
-# src = "/Volumes/Daguerre/_Download folder/_imported-archive/OM-1/OB[2024.11]-OM/" # 308 photos
-# src = "/Volumes/Daguerre/_Download folder/_imported-archive/OM-1/OA[2024.10]-OM/" # 476 photos
-# src = thisScript + "/testingDev/singleTestPhoto"
-
-# mylioStaging = downloadsFolders + "Latest Processed photos-Import to Mylio/" #  These are relabeled and GPSed files. Will be moved to Mylio after processing.
-mylioStaging = thisScript + "/testingDev/staging" # DEV
-# Not planning to use initially or at all
-timeZonesFile = thisScript + "currentData/Greg camera time zones.yml"
-
 def timeStamp(timeNowWas, fromWhere)  
 	seconds = Time.now-timeNowWas
 	minutes = seconds/60
@@ -88,6 +92,7 @@ def timeStamp(timeNowWas, fromWhere)
 	Time.now
 end
 
+# change name to something like sameSeconds
 def oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
 	# Some of these fields may not be needed, I was fighting the wrong problem and may have added some that aren't needed
 	puts "\n#{__LINE__}. fn: #{fn}. fnp: #{fnp}. fileDateStr: #{fileDateStr}. driveMode: #{driveMode}.  dupCount: #{dupCount}. in oneBackTrue(). DEBUG"
@@ -280,7 +285,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 				end # if stackedImageBoolean in 
 				
 			when driveModeFirst == "Single Shot" # Can be manual images in same second
-				if sameSecond
+				if sameSecond # the photo is in the same second as the next or preceding photo and needs to be named accordingly by indexing dupCount
 					dupCount += 1
 					fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
 					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Entered case sameSecond in Single Shot"
