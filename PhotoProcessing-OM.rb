@@ -208,7 +208,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		# Add  1. If focused-stacked (stackedImage), get count and confirm next x are Focus Bracketing and set aside and mark as brackets
 		stackedImage = photo.stackedImage
 		driveMode = photo.driveMode # how long does this take? If don't need at highest level check later
-		driveModeFirst = driveModeSemiColon = driveMode.split(';')[0] if !driveMode.nil? #  Change driveModeFb to this. nil needed or errors
+		driveModeFirst = driveModeSemiColon = shootingMode = driveMode.split(';')[0] if !driveMode.nil? #  Change driveModeFb to this. nil needed or errors
 		# stackedImageBoolean = false # declared below and would be wrong here
 		driveModeFb = driveModeComma = driveMode.split(',')[0] if !driveMode.nil? # driveModeFirst separates on semi-colon, so different results.
 		# puts "#{__LINE__}. driveModeFirst: #{driveModeFirst}. fileName: #{fileName}. " # Continuous Shooting, Shot 1. But some have a semi-colon separator
@@ -224,32 +224,12 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		puts "#{__LINE__}. fileName: #{fileName}. fileExt: #{fileExt}. stackedImage: #{stackedImage}.  driveMode: #{driveMode}."
 		
 		oneBack = fileDate == fileDatePrev && fileExt != fileExtPrev # at the moment this is meaningless because all of one type?
-		puts "\n#{__LINE__}. oneBack: #{oneBack}.  fileDate: #{fileDate}.  fileDatePrev: #{fileDatePrev}."
-		
-		# Name bracketed images whether or not there is a stack
-				# puts "#{__LINE__}. driveModeFb: #{driveModeFb}."  #Focus Bracketing
-		# if driveModeFb.to_s == "Focus Bracketing" && !driveMode.nil?
-		# 	match = driveMode.match(/(\d{1,3})/) # Getting shot no. from `Focus Bracketing,  Shot _`
-		# 	# shot_no = match[1].to_i # if match # has to be a match in this loop, so maybe don't need the if
-		# 	shot_no = match[1]
-		# 	# 2024.10.30-16.28.54_08bkt.gs.O.jpg
-		# 	# stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "bkt" # trying to tighten name compared to above
-		# 	# Label differently if there is a stacked image
-		# 	if stackedImageBoolean
-		# 		fileBaseName = "#{fileDateStr}_#{shot_no}bkt#{userCamCode}" # could be dash instead of underscore
-		# 		puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which a stack exists"
-		# 		stackedImageBoolean = false if shot_no == "1" # reset after last stacked image
-		# 	else
-		# 		fileBaseName = "#{fileDateStr}_#{shot_no}bkt-noStack#{userCamCode}" # could be dash instead of underscore
-		# 		puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which NO stack exists"
-		# 	end
-		# # else
-		# # 	stackedImageBoolean = false # worked through the images and move onto the next check
-		# # 	puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Worked through the bracketed #{shot_no} images"
-		# # 	puts "#{__LINE__}. driveModeFb: #{driveModeFb}."
-		# end # if driveModeFB
-		
-		# puts "\n#{__LINE__}. fileExt: #{fileExt}." # DEV
+		# puts "\n#{__LINE__}. oneBack: #{oneBack}.  fileDate: #{fileDate}.  fileDatePrev: #{fileDatePrev}." DEV to see if test is working
+		if oneBack
+			puts "\n#{__LINE__}. fileName: #{fileName}. oneBack: #{oneBack}. driveModeFirst: #{driveModeFirst}."
+			puts "fileDate: #{fileDate}.  fileDatePrev: #{fileDatePrev}. fnpPrev: #{fnpPrev}."
+		end
+
 		# Maybe handle .mov as special case outside of everything else and handle everything else below
 		if fileExt == "mov"
 			fileBaseName = "#{fileDateStr}#{userCamCode}." # extra period JIC Debug
@@ -265,15 +245,17 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 				# puts "\n#{__LINE__}. #{fn} is a successfully stacked images with #{bracketCount} brackets.\n Now put aside next #{bracketCount} images and rename as brackets"
 				fileBaseName = "#{fileDateStr}.FS#{userCamCode}" # Inconsistent naming FIXME? could be _STK_
 				stackedImageBoolean = true
+				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Focus-stacked"
 			
 			when stackedImage[0..5].to_s == "Tripod" #  Tripod high resolution
 				hiResTripodBoolean = true
 				fileBaseName = "#{fileDateStr}.HiResTripod#{userCamCode}" # period or -
-			
-			
+				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Tripod"
+						
 			when stackedImage[0..24].to_s == "Hand-held high resolution" # Hand-held high resolution
 				hiResHandheldBoolean = true
 				fileBaseName = "#{fileDateStr}HiResHand#{userCamCode}"
+				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}.Hand-held high resolution"
 				
 			when driveModeFb.to_s == "Focus Bracketing" # && !driveMode.nil? redundant driveModeFirst doesn't work
 			# FIXME get rid of match as for Continuous Shooting done?
@@ -289,20 +271,27 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 					fileBaseName = "#{fileDateStr}.Bkt-#{shot_no}#{userCamCode}" # yet another format
 					# puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which a stack exists"
 					stackedImageBoolean = false if shot_no == "1" # reset after last stacked image
+					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Focus Bracketing"
 				else
 					fileBaseName = "#{fileDateStr}.Bkt-noStack-#{shot_no}#{userCamCode}" # could be dash instead of underscore
-					# puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which NO stack exists"
+					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which NO stack exists"
+				end # if stackedImageBoolean in 
+				
+			when driveModeFirst == "Single Shot" # Can be manual images in same second
+				if oneBack
+					fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
+					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Entered case oneBack in Single Shot"
+				else
+					fileBaseName = "#{fileDateStr}.SS#{userCamCode}" # DEV SS until sort out what all the cases are
+					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Single Shot"
 				end
-				
-			when driveModeFirst == "Single Shot" # driveMode: Single Shot, not being picked up
-				fileBaseName = "#{fileDateStr}.SS#{userCamCode}" # DEV SS until sort out what all the cases are
-				# puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Single Shot"
-				
 			# Continuous shooting which may (assuming it is for now) be a proxy for ProCapture. `Drive Mode: Continuous Shooting, Shot 7; Electronic shutter`
 			when driveModeComma == "Continuous Shooting"
 				shot_no = driveMode.match(/(\d{1,3})/)[1]
 				fileBaseName = "#{fileDateStr}.ProCap-#{shot_no}#{userCamCode}" # putting shot_no after which
 			# The above are OK if in the same second since will get shot-no or the three immediately above, they won't be in same second since takes too long
+				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Continuous Shooting"
+				
 			# But must check for photos in same second
 			when oneBack
 				fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
@@ -315,16 +304,6 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 # 295.  countDev: 3. NOT handled by any cases above.  fileName: OA184727.JPG. fileExt: jpg. stackedImage: No.  driveMode: Continuous Shooting, Shot 1; Electronic shutter  Three  examples. Should be picked up by oneBack or similar
 
 			end # case
-				
-				# I think this will be handled
-				# if stackedImage == "No" && driveMode[0..5] == "Single" # Shot
-				# 	fileBaseName = "#{fileDateStr}#{userCamCode}"
-				# end
-				
-		# else # unless .mov. stackedImage.nil? # moved .mov above case
-		#   fileBaseName = "#{fileDateStr}#{userCamCode}"
-		#   puts "#{__LINE__}. mov and anything else with driveMode, stackedImage nil. Maybe should check that is mov. fn: #{fn}. "
-
 		end	# unless
 		
 	
@@ -449,6 +428,9 @@ Also for later use in naming photos and putting aside sequence (bracketed) shots
 Creating an array with some EXIF and other info for use later with renaming
 Will take a bit of time. FIXME: add some progress bar"
 # Dir.each_child(src) do |fn| # can be random order
+
+# Go through each photo and write a few things to the files and establish photo_array for processing each photo in rename
+# This is a slow process, so eliminate any fields not needed in renamePhotoFiles FIXME
 Dir.each_child(src).sort.each do |fn|
 	next if fn == '.DS_Store' # each_child knows about . and .. but not 
 	id += 1
@@ -460,50 +442,46 @@ Dir.each_child(src).sort.each do |fn|
 	camModel = fileEXIF.model
 	# fileName = fileEXIF.FileName # shows up in exiftool, but not here and can't seem to be forced, but see above:
 	fileType = fileEXIF.fileType # FileType : JPEG. FileTypeExtension yields three letter lower case.
-	fileExt = fileEXIF.FileTypeExtension
+	fileExt = fileEXIF.FileTypeExtension # three character extension
 	createDate = fileEXIF.CreateDate
-	timeStamp = fileEXIF.TimeStamp
-	offsetTimeOriginal = fileEXIF.OffsetTimeOriginal
+	# timeStamp = fileEXIF.TimeStamp  # doesn't exist? and not using
+	offsetTimeOriginal = fileEXIF.OffsetTimeOriginal # ~ time zone
 	# model = fileEXIF.model
 	# fileExt = File.extname(fn).tr(".","").downcase # used this before found FileTypeExtension, now defined above
+	driveMode = fileEXIF.DriveMode 
 
 	case 
 	when fileExt == "mov" # OMDS movie
 		dateTimeOriginal = fileEXIF.CreateDate
-	else 
-		dateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
-	end
-
-	driveMode = fileEXIF.DriveMode 
-	if fileType == "MOV" # driveMode == "" # nil doesn't work, neither does blank
+		# Are these needed. Maybe to prevent errors
 		shootingMode = "MOV"
 		shotNo = ""
-		dateTimeOriginal = fileEXIF.CreateDate # FIXME do I need both createDate and dateTimeOriginal? mov has no dateTimeOriginal.
-	else
+	else 
+		dateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
 		shootingMode = driveMode.split(',')[0] # Focus Bracketing or whatever is before the first comma
 		shotNo = driveMode.match(/(\d{1,3})/).to_s.rjust(2, '0')
-		dateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
 	end
+
 	subjectTrackingMode = fileEXIF.AISubjectTrackingMode
 	stackedImage = fileEXIF.StackedImage
 	afPointDetails = fileEXIF.AFPointDetails
-	filterEffect = fileEXIF.FilterEffect
+	# filterEffect = fileEXIF.FilterEffect Exist for OM
 	# focusBracketStepSize = fileEXIF.FocusBracketStepSize # removed as didn't see any use
 	fileSubSecTimeOriginal = fileEXIF.SubSecTimeOriginal # no error if doesn't exist and it does not puts in OM
 	instructions = fileEXIF.instructions 
 	timeZoneOffset = fileEXIF.TimeZoneOffset
 	specialMode = fileEXIF.specialMode # Not sure what's in here, but is OM specific and maybe useful?
 	
-	# Intermediate values and .mov has to be handled differently
-	if fileType == "MOV" # driveMode == "" # nil doesn't work, niether does blank
-		shootingMode = "MOV" 
-		shotNo = ""
-		dateTimeOriginal = fileEXIF.CreateDate # Not necessary since OM mov has a createDate and dateTimeOriginal
-	else
-		shootingMode = driveMode.split(',')[0] # Focus Bracketing or whatever is before the first comma
-		shotNo = driveMode.match(/(\d{1,3})/).to_s.rjust(2, '0')
-		dateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
-	end
+	# Intermediate values and .mov has to be handled differently. I think this is handled above
+	# if fileType == "MOV" # driveMode == "" # nil doesn't work, niether does blank
+	# 	shootingMode = "MOV" 
+	# 	shotNo = ""
+	# 	dateTimeOriginal = fileEXIF.CreateDate # Not necessary since OM mov has a createDate and dateTimeOriginal
+	# else
+	# 	shootingMode = driveMode.split(',')[0] # Focus Bracketing or whatever is before the first comma
+	# 	shotNo = driveMode.match(/(\d{1,3})/).to_s.rjust(2, '0')
+	# 	dateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
+	# end
 	
 	# Changing one field So Preview and some other Apple apps can open the files. If and when Apple adds OM-1 Mark II, can remove this line. 15.2 Still can't open
 	fileEXIF.CameraType2 = "OM-1" #  CameraType2 was 'Unknown (S0121)'
@@ -519,9 +497,9 @@ Dir.each_child(src).sort.each do |fn|
 	if !driveMode.nil? # .present? didn't work
 		imageDescription << driveMode + " [DriveMode]. "
 	end
-	if !filterEffect.nil?
-		imageDescription << filterEffect + " [FilterEffect]. "
-	end
+	# if !filterEffect.nil?
+	# 	imageDescription << filterEffect + " [FilterEffect]. "
+	# end
 	unless afPointDetails.nil?
 		imageDescription << afPointDetails + " [AFPointDetails]"
 	end
@@ -541,30 +519,6 @@ Dir.each_child(src).sort.each do |fn|
 	# end
 	
 	fileEXIF.instructions = "#{instructions}. #{File.basename(fn,".*")}" # Maybe drop basename
-	
-	
-	# FIXME What are the next ~20 lines about?
-	# tzoLoc = timeZone(dateTimeOriginal, timeZonesFile) # the time zone the picture was taken in, doesn't say anything about what times are recorded in the photo's EXIF. I'm doing this slightly wrong, because it's using the photo's recorded date which could be either GMT or local time. But only wrong if the photo was taken too close to the time when camera changed time zones
-	# # puts "#{__LINE__}. #{count}. tzoLoc: #{tzoLoc} from timeZonesFile"
-	# 
-	# # count == 1 | 1*100 ?  :  puts "."  Just to show one value, otherwise without if prints for each file; now prints every 100 time since this call seemed to create some line breaks and added periods.
-	# # Also determine Time Zone TODO and write to file OffsetTimeOriginal	(time zone for DateTimeOriginal). Either GMT or use tzoLoc if recorded in local time as determined below
-	# # puts "#{__LINE__}.. camModel: #{camModel}. #{tzoLoc} is the time zone where photo was taken. Script assumes GX8 on local time "
-	# # Could set timeChange = 0 here and remove from below except of course where it is set to something else
-	# timeChange =  0 # 3600 *  # setting it outside the loops below and get reset each time through. But can get changed
-	# # puts "#{__LINE__}. camModel: #{camModel}. fileEXIF.OffsetTimeOriginal: #{fileEXIF.OffsetTimeOriginal}"
-	# if camModel ==  "MISC" # MISC is for photos without dateTimeOriginal, e.g., movies
-	# 	# timeChange = 0
-	# 	fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
-	# 	# puts "#{__LINE__}. dateTimeOriginal #{dateTimeOriginal}. timeChange: #{timeChange} for #{camModel} meaning movies. DEBUG"
-	# elsif camModel == "iPhone X"  # DateTimeOriginal is in local time
-	# 	# timeChange = 0
-	# 	# fileEXIF.OffsetTimeOriginal = tzoLoc.to_s # redefined below.
-	# 	timeChange = (3600*tzoLoc) # previously had error capture on this. Maybe for general cases which I'm not longer covering
-	# 	fileEXIF.OffsetTimeOriginal = "GMT" # say what?
-	# 	# puts "#{__LINE__}.. dateTimeOriginal #{dateTimeOriginal}. timeChange: #{timeChange} for #{camModel}" if count == 1 # just once is enough
-	# end # if camModel
-
 
 	fileEXIF.save # only change so far is imageDescription and instructions
 	
