@@ -12,7 +12,7 @@ require "time"
 require 'irb' # binding.irb where error checking is desired
 require 'mini_exiftool' # `gem install mini_exiftool` have to update for 
 
-putsArray = true # `true` to print the array in the console
+putsArray = false # `true` to print the array in the console
 
 class Photo
 	
@@ -91,7 +91,7 @@ end
 def oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
 	# Some of these fields may not be needed, I was fighting the wrong problem and may have added some that aren't needed
 	puts "\n#{__LINE__}. fn: #{fn}. fnp: #{fnp}. fileDateStr: #{fileDateStr}. driveMode: #{driveMode}.  dupCount: #{dupCount}. in oneBackTrue(). DEBUG"
-	dupCount += 1
+	# dupCount += 1
 	
 	# This should be screened out before here now.
 	# Getting sequence no./shot no. for OM-1. DriveMode is "Single Shot; Electronic shutter" for normal photos
@@ -192,6 +192,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		# For photos in same second, but not bracketing (can check by shot no.)
 		fileExt = photo.fileExt
 		fileExtPrev = ""
+		sameSecond = photo.sameSecond
 			
 		# Change OM .ORI to .ORI.ORF so Apple apps and others can see them. Can't do before fileEXIF.save because fn is "redefined". Hi-Res creates an .ORI
 		# Focus stacked first image gets renamed somewhere else and loses the .ori at line 555?
@@ -279,7 +280,8 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 				end # if stackedImageBoolean in 
 				
 			when driveModeFirst == "Single Shot" # Can be manual images in same second
-				if oneBack
+				if sameSecond
+					dupCount += 1
 					fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
 					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Entered case oneBack in Single Shot"
 				else
@@ -294,7 +296,8 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Continuous Shooting"
 				
 			# But must check for photos in same second
-			when oneBack
+			when sameSecond
+				dupCount += 1
 				fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
 				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Entered case oneBack"
 			
@@ -525,7 +528,7 @@ Dir.each_child(src).sort.each do |fn|
 
 	fileEXIF.save # only change so far is imageDescription and instructions
 	
-	# Mark photos in same second	
+	# Mark photos in same second. Can I avoid checking for >1 since only needed for first round FIXME
 	if id > 1 && createDate == createDatePrev # comparison not possible with Prev and will revise sameSecond in next round if needed
 		sameSecond = true
 		# and write same second true for previous photo		
