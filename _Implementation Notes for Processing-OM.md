@@ -50,7 +50,7 @@ GUI for keying into GUI options etc
 1. Write preservedFileName, etc
    √ probably can do that in the existing read loop
    √ Anything else to write. Probably line 621 establishes imageDescription and
-   renaming needs stacking information which should benefit from Array.photos
+   renaming needs stacking information which should benefit from Array.photos. really a hash. Should I name it Hash.photos? FIXME
 
 2. Rename in place in renamePhotoFiles
    Do in reverse so know if a stacked image

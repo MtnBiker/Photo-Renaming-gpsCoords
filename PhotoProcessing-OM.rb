@@ -13,10 +13,10 @@ require 'irb' # binding.irb where error checking is desired
 require 'mini_exiftool' # `gem install mini_exiftool` have to update for 
 
 # Some toggles for testing and development, will 
-putsArray = false # `true` to print the array in the console
+putsArray = true # `true` to print the array in the console
 production = false # false uses /testingDev files. True is for real
-showPuts = false # true showing debugging puts. Search for `if showPuts ==`
-# Line ~300 or search with text below to put something in front of filename to make sure not overwrittten Good for other DEBUGGING
+showPuts = true # true showing debugging puts. Search for `if showPuts ==`
+addPreservedNameForDebugging = false # to put something in front of filename to make sure not overwrittten Good for other DEBUGGING
 # fileDateStr = "#{photo.preservedFileName}.#{fileDateStr}"
 
 
@@ -257,7 +257,7 @@ def sameSecondTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, sameSec, camMo
 end # sameSecondTrue
 
 # Add original file name, rename with coding
-def renamePhotoFiles(photo_array, src, timeNowWas, photosRenamedTo, unneededBrackets, showPuts)
+def renamePhotoFiles(photo_array, src, timeNowWas, photosRenamedTo, unneededBrackets, showPuts, addPreservedNameForDebugging)
 	# Uphoto_array of all the photos bringing in from folder. Read fields needed to process photos
 	
 	# src is mylioStaging folder ??
@@ -284,7 +284,7 @@ def renamePhotoFiles(photo_array, src, timeNowWas, photosRenamedTo, unneededBrac
 	# photo_array.each_with_index do |photo, index| if need index number
 	# puts "\n#{__LINE__}. photo_array: #{photo_array}\n"
 	puts "\n#{__LINE__}. Entering	`photo_array.reverse.each do |photo|` in renamePhotoFiles(\n" 
-	photo_array.reverse.each do |photo|
+	photo_array.reverse.each do |photo| # reverse so no about Stacked Images?
 		fn = photo.fn # file_name
 		fileName = photo.fileName # this fileName is Ruby basename FIXME
 		# puts "\n#{__LINE__}. fn: #{fn}." 
@@ -297,14 +297,14 @@ def renamePhotoFiles(photo_array, src, timeNowWas, photosRenamedTo, unneededBrac
 		# fileDateStr = "#{count}.#{fileDateStr}" # trying to figure out which files are disappearing DEV
 		
 		# Uncomment to add old basename to basename for output file. Great for DEBUGGING
-		fileDateStr = "#{photo.preservedFileName}.#{fileDateStr}" # trying to figure out which files are disappearing DEV
+		fileDateStr = "#{photo.preservedFileName}.#{fileDateStr}" if addPreservedNameForDebugging == true # if true, trying to figure out which files are disappearing or to make it easier to see preservedFileName DEV
 			
 		# dateTimeOriginalstr = dateTimeOriginal.to_s[0..-10]		
 		# puts "#{__LINE__}. dateTimeOriginalstr: #{dateTimeOriginalstr}.  dateTimeOriginal: #{dateTimeOriginal}. \n Do I need both of these FIXME" 
 				# puts "\n#{__LINE__}. fn: #{fn}\n"
 				
 		# For photos in same second, but not bracketing (can check by shot no.)
-		fileExt = photo.fileExt
+		fileExt = photo.fileExt # but established from macOS, not from OM EXIF
 		fileExtPrev = ""
 		sameSecond = photo.sameSecond
 			
@@ -373,9 +373,9 @@ def renamePhotoFiles(photo_array, src, timeNowWas, photosRenamedTo, unneededBrac
 			when stackedImage[0..24].to_s == "Hand-held high resolution" # Hand-held high resolution
 				hiResHandheldBoolean = true
 				fileBaseName = "#{fileDateStr}HiResHand#{userCamCode}"
-				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}.Hand-held high resolution"  if showPuts == true
+				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}.Hand-held high resolution" if showPuts == true
 				
-			when driveModeFb.to_s == "Focus Bracketing" # && !driveMode.nil? redundant driveModeFirst doesn't work
+			when driveModeComma.to_s == "Focus Bracketing" # && !driveMode.nil? redundant driveModeFirst doesn't work
 			# FIXME get rid of match as for Continuous Shooting done?
 				# match = driveMode.match(/(\d{1,3})/) # Getting shot no. from `Focus Bracketing,  Shot _`
 				# # shot_no = match[1].to_i # if match # has to be a match in this loop, so maybe don't need the if
@@ -384,11 +384,12 @@ def renamePhotoFiles(photo_array, src, timeNowWas, photosRenamedTo, unneededBrac
 				# 2024.10.30-16.28.54_08bkt.gs.O.jpg
 				# stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "bkt" # trying to tighten name compared to above
 				# Label differently if there is a stacked image
+				puts "\n#{__LINE__}. stackedImageBoolean = false: #{stackedImageBoolean = false}." if showPuts == true
 				if stackedImageBoolean
 					# fileBaseName = "#{fileDateStr}_#{shot_no}bkt#{userCamCode}" # could be dash instead of underscore
 					fileBaseName = "#{fileDateStr}.Bkt-#{shot_no}#{userCamCode}" # yet another format
 					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which a stack exists" if showPuts == true
-					stackedImageBoolean = false if shot_no == "1" # reset after last stacked image
+					stackedImageBoolean = false if shot_no == "1" && fileExt == fileExtPrev # reset after last stacked image, but need to check if a jpg orf pair, although this may not work
 					puts "\n{__LINE__}. fileBaseName: #{fileBaseName}. Focus Bracketing" if showPuts == true
 				else
 					fileBaseName = "#{fileDateStr}.Bkt-noStack-#{shot_no}#{userCamCode}" # could be dash instead of underscore
@@ -634,7 +635,7 @@ puts photo_array.inspect if putsArray # DEV set ib kube 15
 puts "\n#{__LINE__}. renamePhotoFiles(…)] the photo files with date and an ID for the camera or photographer. #{timeNowWas}\n"
 # tzoLoc = timeZone(dateTimeOriginal, timeZonesFile) # Second time this variable name is used, other is in a method
 # puts "\n#{__LINE__}. photo_array: #{photo_array}\n"
-renameReturn = renamePhotoFiles(photo_array, mylioStaging, timeNowWas, photosRenamedTo, unneededBrackets, showPuts) # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
+renameReturn = renamePhotoFiles(photo_array, mylioStaging, timeNowWas, photosRenamedTo, unneededBrackets, showPuts, addPreservedNameForDebugging) # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
 
 
 # puts "\n#{__LINE__}.  Demo of retrieving info from array:"
