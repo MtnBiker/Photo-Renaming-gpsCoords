@@ -70,7 +70,7 @@ GUI for keying into GUI options etc
    
    √ are being made different basenames 2024.12.07-14.10.59 OC076017 Fixed
    
-3. add gps coordinates. Can do this before or after renaming, but before moving
+3. √ add gps coordinates. Can do this before or after renaming, but before moving
 
 4 Then can sort by where to go: jpg if raw exists, unneeded files for stack, unneeded files from hi res
 
@@ -79,7 +79,8 @@ Prevent redownloading from the two cards
 dateTimeOriginal replace with createDate. .mov doesn't have dateTimeOriginal
 Look at EXIF filename vs Ruby basename for consistency, but be aware of my `fileBaseName`
 sameSecondTrue() probably not doing much, most of it is not being used
--2ss sequency for same second would be better off as a, b, c etc
+-2ss sequencing for same second would be better with a, b, c etc
+timeNow etc reports are a mess
 
 ### Changes
 photosRenamedTo left in as it might be useful for dubugging. But I wasn't using it and maybe it should go into photos.array. Action not implemented, ie, file not written to.

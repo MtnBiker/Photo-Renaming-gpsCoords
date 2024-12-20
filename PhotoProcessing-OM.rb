@@ -24,25 +24,42 @@ thisScript = "#{File.dirname(__FILE__)}/" # needed because the Pashua script cal
 # thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory.
 photosRenamedTo = thisScript + "currentData/photosRenamedTo.txt"
 
+# use to select file locations on Mini (Model Identifier: Mac14,12) and MBA
+model_identifier = `system_profiler SPHardwareDataType | grep "Model Identifier"`.split(':').last.strip
+# puts "Model Identifier: #{model_identifier}"
+
+
 if production # set above
-	unneededBracketed = downloadsFolders + "Unneeded brackets/" # on Daguerre
+	unneededBrackets = downloadsFolders + "Unneeded brackets/" # on Daguerre
 	srcHD       = downloadsFolders + " Drag Photos HERE/" # 
 	srcHD = "testingDev/incomingTestPhotos"
 	mylioStaging = downloadsFolders + "Latest Processed photos-Import to Mylio/" #  These are relabeled and GPSed files. Will be moved to Mylio after processing.		
 else # development or testing	
-	unneededStacksFolder = thisScript + "/testingDev/unneededStacksFolder" # DEV rename to unneededBrackets, but is this the right name
+	unneededBrackets = thisScript + "/testingDev/unneededBrackets" # DEV rename to unneededBrackets, but is this the right name
 	# temp src until determine using. Full path needed to run from arbitrary place in iTerm. Relative works in Nova
 	# Need to change to srcHD
 	src = thisScript + "/testingDev/incomingTestPhotos/" # Stacked w/ and w/o a stacked image, HHHR, THR, 
 	# src = "/Volumes/Daguerre/_Download folder/_imported-archive/OM-1/OB[2024.11]-OM/" # 308 photos
 	# src = "/Volumes/Daguerre/_Download folder/_imported-archive/OM-1/OA[2024.10]-OM/" # 476 photos
 	# src = thisScript + "/testingDev/singleTestPhoto"	
-	mylioStaging = thisScript + "/testingDev/staging" # DEV
+	mylioStaging = thisScript + "/testingDev/staging" # DEV	
 end
+puts "\n#{__LINE__}. mylioStaging: #{mylioStaging}."
 
 # Not planning to use initially or at all
-timeZonesFile = thisScript + "currentData/Greg camera time zones.yml"
+# timeZonesFile = thisScript + "currentData/Greg camera time zones.yml"
 
+# locations of folderGPX, 
+case model_identifier
+when "Mac14,12" # Mac mini M2 Pro
+	folderGPX = HOME + "Documents/GPS-Maps-docs/  GPX daily logs/2024 GPX logs/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't.
+when "MacBookAir10,1" # 2020 MBA M1 13"
+	folderGPX = "/Users/gscar/Library/Mobile Documents/com~apple~CloudDocs/Documents/GPS-Maps-docs/  GPX daily logs/2024 GPX logs"
+else
+	puts "#{__LINE__}. Something in the GUI to select the location of the GPX files"	
+end # case model_identifer
+
+puts "#{__LINE__}. Must manually set folderGPX for GPX file folders. Particularly important at start of new year AND if working on photos not in current year.\n       Using: #{folderGPX}\n"
 
 class Photo
 	
@@ -83,6 +100,11 @@ class Photo
 		
 end # class photo
 
+# MODULES
+def filesToIgnore(item) # invisible files or .xmp that shouldn't be processed
+	item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon ' or item.slice(0,7) == ".MYLock" or item.slice(-4,4) == ".xmp"
+end
+
 def timeStamp(timeNowWas, fromWhere)  
 	seconds = Time.now-timeNowWas
 	minutes = seconds/60
@@ -95,6 +117,36 @@ def timeStamp(timeNowWas, fromWhere)
 	Time.now
 end
 
+def exiftoolAddCoordinates(photoFolder, folderGPX)
+	# Remember writing a command line command which uses exiftool
+	# --timeoffset seconds     Camera time + seconds = GMT. No default.  
+	# maxTimeDiff = 50000 # seconds, default 120, but I changed it 2011.07.26 to allow for pictures taken at night but GPS off. Distance still has to be reasonable, that is the GPS had to be at the same place in the morning as the night before as set by the variable below
+		
+	# photoFolder is where the photos are that are going to have gps coordinates added. A temporary location. Usually called mylioStaging is the overall script
+	# folderGPX is where the gpx tracks are
+	
+	puts "#{__LINE__}.All photos must be same camera and time zone or photos may be mislabeled and geo-located." 
+	 
+	puts "\n#{__LINE__}. Finding all gps points from all the gpx files using exiftool and adding GPS info to each photo file. This may take a while.\n"
+	puts "#{__LINE__}.========= Beginning of  exiftool geotag ==========  #{Time.now.strftime("%I:%M:%S %p")}\n"
+	gpxLogs = folderGPX + "/*.gpx" # to get multiple files in the folder
+	
+	# puts "#{__LINE__}. Don't build a command line as a string. For example: system('exiftool', '-Camera:DriveMode', filename). Similar approaches work with Open3. If you do it like that then you won't launch a shell and you won't have to deal with the shell's quoting and escaping problems\n, if you give at least one argument besides the program name to the function, the shell is not invoked."
+	
+	# subcommands = "-overwrite_original -if 'not $gpslatitude'"
+	# Ignored superfluous tag name or invalid option: -overwrite_original -if 'not $gpslatitude'
+	# exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "-overwrite_original -if 'not $gpslatitude'") # returns true or?
+	# exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "#{subcommands}") # Invalid TAG name: "overwrite_original -if 'not $gpslatitude'" / Ignored superfluous tag name or invalid option: -overwrite_original -if 'not $gpslatitude'
+	# exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "-overwrite_original -if not $gpslatitude") # Invalid TAG name: "overwrite_original -if not $gpslatitude" as expected
+	# exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "-overwrite_original", " -if 'not $gpslatitude'") # No matching file found for -geotag option
+	# exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "-overwrite_original -if " , "'not $gpslatitude'") #Invalid TAG name: "overwrite_original -if " / No matching file found for -geotag option
+	puts "\n#{__LINE__}. Any existing geotags will be overwritten until I can figure out how to add -if 'not $gpslatitude' gpxLogs: #{gpxLogs}. photoFolder; #{photoFolder})"
+	exiftoolGps = system("exiftool", "-geotag",  "#{gpxLogs}", "#{photoFolder}", "-overwrite_original") # will overwrite existing tags
+	puts "\n#{__LINE__}. exiftool report above #{Time.now.strftime("%I:%M:%S %p")}"
+	# puts "\n#{__LINE__}======== End of exiftool geotag ==========  #{Time.now.strftime("%I:%M:%S %p")}\n"
+	# return exiftoolGps # return is true unless want to get the notes, but they show in script results
+end # exiftoolAddCoordinates
+	
 # change name to something like sameSeconds
 def sameSecondTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, sameSec, camModel, userCamCode)
 	# Some of these fields may not be needed, I was fighting the wrong problem and may have added some that aren't needed
@@ -152,7 +204,7 @@ def sameSecondTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, sameSec, camMo
 end # sameSecondTrue
 
 # Add original file name, rename with coding
-def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedTo, unneededStacksFolder, showPuts)
+def renamePhotoFiles(photo_array, src, timeNowWas, photosRenamedTo, unneededBrackets, showPuts)
 	# Uphoto_array of all the photos bringing in from folder. Read fields needed to process photos
 	
 	# src is mylioStaging folder ??
@@ -297,7 +349,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. sameSecond: #{sameSecond}. Entered case sameSecond in Single Shot"
 				else
 					fileBaseName = "#{fileDateStr}.SS#{userCamCode}" # DEV SS until sort out what all the cases are
-					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Single Shot."
+					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}, driveMode: #{driveMode}."
 				end
 
 			# Continuous shooting which may (assuming it is for now) be a proxy for ProCapture. `Drive Mode: Continuous Shooting, Shot 7; Electronic shutter`
@@ -320,15 +372,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 			end # case
 		end	# unless
 		
-	
-		#  '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'. This exists for OM-1 for at least some sequence shooting. Also: `SpecialMode                     : Fast, Sequence: 9, Panorama: (none)`
-		# SpecialMode may be more useful since zero if not a sequence : Normal, Sequence: 0, Panorama: (none)
-		# But DriveMode can tell what kind of sequence, although not sure that's needed in this script
-		# driveMode = fileEXIF.DriveMode # OMDS only, not in Lumix. Moved definition up as need earlier
-		# DriveMode       : Focus Bracketing, Shot 8; Electronic shutter
-		# DriveMode shows "Focus Bracketing" for the shots comprising the focus STACKED result
-		specialMode = photo.specialMode # Initially no use for specialMode, but will carry for a while FIXME
-		# driveMode = photo.driveMode
+		# specialMode = photo.specialMode # Initially no use for specialMode, but will carry for a while FIXME
 		
 		match, shot_no = "" # FIXME is this being used
 		
@@ -370,16 +414,22 @@ end # rename  photo files in the downloads folder and writing in original time.
 # 2. Rename which may need Array.photos
 # 3. Sort and move
 
-puts "\n#{__LINE__}. Copy 'virgin' photos to simulated incoming folder. Adding EXIF in place so need virgin to start. Delete /testPhotos and /incomingTestPhotos so folders empty to start DEV\n"
-testPhotos = 'testingDev/incomingTestPhotos'
-FileUtils.rm_rf(testPhotos) # clear out incoming in case some left DEV
-FileUtils.rm_rf(mylioStaging) # clear out photos from previous run DEV
-# puts value.x # created an error here so script would stop and I could check that folder was deleted and it was
-
-# For DEV to have sample files to test with. Only one selected below
-FileUtils.cp_r('testingDev/virginOMcopy2incoming', testPhotos, preserve: true, remove_destination: true ) # preserve to keep timestamp (may not be necesary). cp_r is for directory. This directory has a currated batch of photos
-# puts "\n#{__LINE__}. Not using full test stack of photos" 
-# FileUtils.cp_r('testingDev/bracketStackTestPhotos', testPhotos, preserve: true, remove_destination: true ) # just a stack for DEV test
+if production
+else # moving files around for testing
+	puts "\n#{__LINE__}. Copy 'virgin' photos to simulated incoming folder. Adding EXIF in place so need virgin to start. Delete /testPhotos and /incomingTestPhotos so folders empty to start DEV\n"	
+	testPhotos = 'testingDev/incomingTestPhotos' # equivalent to  Drag Photos HERE except wouldn't wipe that folder	
+	FileUtils.rm_rf(testPhotos) # clear out incoming in case some left DEV
+	FileUtils.rm_rf(mylioStaging) # clear out photos from previous run DEV
+	# puts value.x # created an error here so script would stop and I could check that folder was deleted and it was
+	
+	# For DEV to have sample files to test with. Only one selected below
+	# which folder for sample virgin photos
+	virgin_photos = "testingDev/virginOMcopy2incoming" # 122 photos
+	# virgin_photos = "testingDev/singleTestPhoto" # one photo 
+	FileUtils.cp_r(virgin_photos, testPhotos, preserve: true, remove_destination: true ) # preserve to keep timestamp (may not be neccessary). cp_r is for directory. This directory has a currated batch of photos
+	# puts "\n#{__LINE__}. Not using full test stack of photos" 
+	# FileUtils.cp_r('testingDev/bracketStackTestPhotos', testPhotos, preserve: true, remove_destination: true ) # just a stack for DEV test
+end # if production 
 
 lineNum = "#{__LINE__}"
 timeNowWas = timeStamp(Time.now, lineNum)
@@ -523,26 +573,27 @@ puts photo_array.inspect if putsArray # DEV set ib kube 15
 # puts "#{__LINE__}. ######## End of Array ##########"
 # Renaming. Look at original, not sure what is going on exactly Line 1253
 # puts "\n{__LINE__}. Rename [tzoLoc = renamePhotoFiles(…)] the photo files with date and an ID for the camera or photographer (except for the paired jpgs in #{tempJpg}). #{timeNowWas}\n"
-puts "\n#{__LINE__}. Rename [tzoLoc = renamePhotoFiles(…)] the photo files with date and an ID for the camera or photographer (except for the paired jpgs FIXME. #{timeNowWas}\n"
+puts "\n#{__LINE__}. renamePhotoFiles(…)] the photo files with date and an ID for the camera or photographer. #{timeNowWas}\n"
 # tzoLoc = timeZone(dateTimeOriginal, timeZonesFile) # Second time this variable name is used, other is in a method
 # puts "\n#{__LINE__}. photo_array: #{photo_array}\n"
-renameReturn = renamePhotoFiles(photo_array, mylioStaging, timeZonesFile, timeNowWas, photosRenamedTo, unneededStacksFolder, showPuts) # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
+renameReturn = renamePhotoFiles(photo_array, mylioStaging, timeNowWas, photosRenamedTo, unneededBrackets, showPuts) # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
 
 
-puts "\n#{__LINE__}.  Demo of retrieving info from array:"
-photo_10 = photo_array.find { |photo| photo.id == "photo-10" }
-puts "   #{__LINE__}. photo_id: photo-10.  Stacked Image: #{photo_10.stackedImage if photo_10}. photo_10.preservedFileName: #{photo_10.preservedFileName}. "
-# puts Photo.count
-# puts photo_id
+# puts "\n#{__LINE__}.  Demo of retrieving info from array:"
+# photo_10 = photo_array.find { |photo| photo.id == "photo-10" }
+# puts "   #{__LINE__}. photo_id: photo-10.  Stacked Image: #{photo_10.stackedImage if photo_10}. photo_10.preservedFileName: #{photo_10.preservedFileName}. "
 
-# Instantiate each file on card
-# 
-# For now assume know where coming from
-# src = "/Volumes/Macintosh HD/Users/gscar/Library/Mobile Documents/com~apple~CloudDocs/Documents/Ruby/Photo handling/testingDev/incomingTestPhotos"
-# lastPhotoFilename = "OB305994"
+timeNowWas = timeStamp(timeNowWas, lineNum)
+
+# Add GPS coordinates.
+puts "\n#{__LINE__}. Using exiftool to add gps coordinates. Will take a while as all the gps files for the year will be processed and then all the photos."
+exiftoolAddCoordinates(mylioStaging, folderGPX)
+
+timeNowWas = timeStamp(timeNowWas, lineNum)
+puts "#{__LINE__}. Time to add coordinates: #{timeNowWas}"
 
 # Before made a list of files and copied. Will change with objects
 # copySD(srcSD, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
-puts "\n#{__LINE__}. mylioStaging: #{mylioStaging}." #{Dir[mylioStaging].length} files in output folder: #{mylioStaging}. NOT WORKING"
+puts "\n#{__LINE__}. #{Dir[File.join(mylioStaging, '**', '*')].count { |file| File.file?(file) }} files in output folder: #{mylioStaging}." # NOT WORKING"
 # lineNum = "#{__LINE__} + 1" # What's this?
 timeNowWas = timeStamp(timeNowWas, lineNum)
