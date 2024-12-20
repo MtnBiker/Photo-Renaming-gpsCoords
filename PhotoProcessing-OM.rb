@@ -15,7 +15,7 @@ require 'mini_exiftool' # `gem install mini_exiftool` have to update for
 # Some toggles for testing and development, will 
 putsArray = true # `true` to print the array in the console
 production = false # false uses /testingDev files. True is for real
-showPuts = true # true showing debugging puts. Search for `if showPuts ==`
+showPuts = false # true showing debugging puts. Search for `if showPuts ==`
 addPreservedNameForDebugging = false # to put something in front of filename to make sure not overwrittten Good for other DEBUGGING
 # fileDateStr = "#{photo.preservedFileName}.#{fileDateStr}"
 
@@ -357,13 +357,13 @@ def renamePhotoFiles(photo_array, src, timeNowWas, photosRenamedTo, unneededBrac
 		unless stackedImage.nil? # nil for .mov which is covered above. Everything else is supposed to be covered here
 		
 			case
-			when stackedImage[0..12].to_s == "Focus-stacked"
+			when stackedImage[0..12].to_s == "Focus-stacked" # Focus-stacked (15 images)
 				# `Focus-stacked (15 images)`. there is a space after the final digit, so either 1 or 2 digits.
 				bracketCount = stackedImage[15..16] 
 				# puts "\n#{__LINE__}. #{fn} is a successfully stacked images with #{bracketCount} brackets.\n Now put aside next #{bracketCount} images and rename as brackets"
 				fileBaseName = "#{fileDateStr}.FS#{userCamCode}" # Inconsistent naming FIXME? could be _STK_
 				stackedImageBoolean = true
-				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Focus-stacked" if showPuts == true
+				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Focus-stacked . stackedImageBoolean: #{stackedImageBoolean}." if showPuts == true
 			
 			when stackedImage[0..5].to_s == "Tripod" #  Tripod high resolution
 				hiResTripodBoolean = true
@@ -384,7 +384,7 @@ def renamePhotoFiles(photo_array, src, timeNowWas, photosRenamedTo, unneededBrac
 				# 2024.10.30-16.28.54_08bkt.gs.O.jpg
 				# stackBracket = "_" + shot_no.to_s.rjust(2, '0') + "bkt" # trying to tighten name compared to above
 				# Label differently if there is a stacked image
-				puts "\n#{__LINE__}. stackedImageBoolean = false: #{stackedImageBoolean = false}." if showPuts == true
+				puts "\n#{__LINE__}. stackedImageBoolean: #{stackedImageBoolean}." if showPuts == true
 				if stackedImageBoolean
 					# fileBaseName = "#{fileDateStr}_#{shot_no}bkt#{userCamCode}" # could be dash instead of underscore
 					fileBaseName = "#{fileDateStr}.Bkt-#{shot_no}#{userCamCode}" # yet another format

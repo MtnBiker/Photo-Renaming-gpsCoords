@@ -92,8 +92,11 @@ Prevent redownloading from the two cards
 dateTimeOriginal replace with createDate. .mov doesn't have dateTimeOriginal
 Look at EXIF filename vs Ruby basename for consistency, but be aware of my `fileBaseName`
 sameSecondTrue() probably not doing much, most of it is not being used
--2ss sequencing for same second would be better with a, b, c etc
+Add to instructions or somewhere if a bracketed image has a stack
 timeNow etc reports are a mess
+
+## ToDone
+-2ss sequencing for same second would be better with a, b, c etc
 
 ### Changes
 photosRenamedTo left in as it might be useful for dubugging. But I wasn't using it and maybe it should go into photos.array. Action not implemented, ie, file not written to.
