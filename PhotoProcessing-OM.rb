@@ -389,6 +389,7 @@ lastPhotoFilename = "OB305994" # use later as starting point
 createDatePrev = Time.now # impossible that first photo processes will in comflict, but need an intial value
 photo_id_prev = "" # so defined for first round
 sameSecond = 1
+fileExtPrev = ""
 
 puts "#{__LINE__}. Start of photo processing. First read EXIF info and write to instructions and optionally to caption for viewing in Mylio
 Also for later use in naming photos and putting aside sequence (bracketed) shots contributing to stacked image
@@ -487,11 +488,12 @@ Dir.each_child(src).sort.each do |fn|
 	# end
 	
 	fileEXIF.instructions = "#{instructions}. #{File.basename(fn,".*")}" # Maybe drop basename
+	fileEXIF.preservedFileName = preservedFileName
 
 	fileEXIF.save # only change so far is imageDescription and instructions
 	
 	# Mark photos in same second. Can I avoid checking for >1 since only needed for first round FIXME
-	if createDate == createDatePrev # comparison not possible with Prev and will revise sameSecond in next round if needed
+	if createDate == createDatePrev && fileExtPrev == fileExt
 		puts "\n#{__LINE__}. #{id}.  sameSecond: #{sameSecond}. #{fileName}. #{createDate}." if showPuts == true
 	  if sameSecond >= 2 # now dealing with the third since sameSecond was set for the previous
 			sameSecond += 1
@@ -509,6 +511,7 @@ Dir.each_child(src).sort.each do |fn|
 		puts "#{__LINE__}. #{id}.  sameSecond: #{sameSecond}. #{fileName}. #{createDate}." if showPuts == true # error if photo_id
 	end # if createDate == createDatePrev
 	createDatePrev = createDate
+	fileExtPrev = fileExt
 	photo_id = photo_id_prev = "photo-" + id.to_s # FIXME. Get rid of `photo-`. was helpful in figuring it all out, but now not needed
 	# puts "#{__LINE__}. #{photo_id}.  sameSecond: #{sameSecond}. #{fileName}. #{createDate}." if showPuts == true
 	photo_array <<	Photo.new(photo_id, fn, fileName, fileExt, camModel, fileType, stackedImage, driveMode, specialMode, afPointDetails, subjectTrackingMode, createDate, sameSecond, dateTimeOriginal, offsetTimeOriginal, preservedFileName)

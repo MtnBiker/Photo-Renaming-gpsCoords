@@ -68,6 +68,8 @@ GUI for keying into GUI options etc
    sameSecondTrue() probably not doing much, most of it is not being used
    -2ss sequency for same second would be better off as a, b, c etc
    
+   √ are being made different basenames 2024.12.07-14.10.59 OC076017 Fixed
+   
 3. add gps coordinates. Can do this before or after renaming, but before moving
 
 4 Then can sort by where to go: jpg if raw exists, unneeded files for stack, unneeded files from hi res
