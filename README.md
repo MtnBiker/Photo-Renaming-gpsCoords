@@ -18,6 +18,8 @@ I am currently (2024) using the GaiaGPS iOS app to create my gpx track. That mea
 
 OM-1 Mark II camera. Originally wrote for several other of my cameras, but OMDS added features and EXIF, so I dropped the other cameras, although pieces of that support may linger in the script
 
+May require: copy_with_duplicate_handling.applescript (experiementing with this)
+
 macOS. Sequoia currently, but shouldn't change with versions, but you never know
 Ruby 3.4.0. Not leveraging new sophistications, so should work with other versions
 

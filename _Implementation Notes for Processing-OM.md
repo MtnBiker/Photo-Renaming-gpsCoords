@@ -72,6 +72,14 @@ GUI for keying into GUI options etc
    
 3. √ add gps coordinates. Can do this before or after renaming, but before moving
 
+HiResTripod contributing orf (OB035290) not being so identified: should maybe be bkt and would be set aside. 2024.10.18-10.53.10.SS.gs.O.orf or 2024.10.18-10.53.10b.gs.O.orf Have to find three in a row with the first two being HiResTripod and the third being stackedImage No, but it's an ORI, maybe leave it as such so can pick it out.
+
+or 2024.11.03-08.30.53-ss2.gs.O.orf or 
+
+2024.11.11-10.08.29.SS.gs.O.jpg is a single shot, but not special so .ss should go away it's this way without numbers_to_letters
+
+Added copy_with_mac_renaming(fn, fnp) from ChatGPT to prevent writing over files. Not fully tested. Works with no duplicates. 
+
 4 Then can sort by where to go: jpg if raw exists, unneeded files for stack, unneeded files from hi res
 
 ## ToDo

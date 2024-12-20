@@ -15,7 +15,7 @@ require 'mini_exiftool' # `gem install mini_exiftool` have to update for
 # Some toggles for testing and development, will 
 putsArray = false # `true` to print the array in the console
 production = false # false uses /testingDev files. True is for real
-showPuts = false # true showing debugging puts
+showPuts = false # true showing debugging puts. Search for `if showPuts ==`
 # Line ~189 to put something in front of filename to make sure not overwrittten
 
 
@@ -101,8 +101,51 @@ class Photo
 end # class photo
 
 # MODULES
+
+def copy_with_mac_renaming(fn, fnp)
+	# Using macOS to do the renaming, but so far not working, From ChatGPT
+	# Escape file paths for AppleScript
+	escaped_fn = fn.gsub("'", "\\'")
+	escaped_fnp = fnp.gsub("'", "\\'")
+
+	# AppleScript command
+	applescript = <<~APPLESCRIPT
+		on run argv
+				set sourceFilePath to POSIX file (item 1 of argv)
+				set destinationDirPath to POSIX file (item 2 of argv)
+
+				tell application "Finder"
+						duplicate file sourceFilePath to folder destinationDirPath
+				end tell
+		end run
+	APPLESCRIPT
+
+	# Execute the AppleScript with osascript
+	script_result = `osascript -e '#{applescript}' '#{escaped_fn}' '#{escaped_fnp}'`
+
+	# Check for errors
+	if $?.success?
+		puts "File copied successfully!"
+	else
+		puts "Error during file copy: #{script_result}"
+	end
+end # copy_with_mac_renaming
+
+#
 def filesToIgnore(item) # invisible files or .xmp that shouldn't be processed
 	item == '.' or item == '..' or item == '.DS_Store' or item == 'Icon ' or item.slice(0,7) == ".MYLock" or item.slice(-4,4) == ".xmp"
+end
+
+def number_to_letter(number)
+	# Since it's fairly easy to label photos in same seconds with numbers in the photo.array, but numbers are messier in the basename
+	# Ensure the number is within the range of 1 to 26
+	if number.between?(1, 26)
+		# Convert the number to the corresponding letter (1 = 'a', 2 = 'b', ..., 26 = 'z')
+		('a'.ord + number - 1).chr
+	else
+		# nil # Return nil for numbers outside the range
+		"." + number.to_s
+	end
 end
 
 def timeStamp(timeNowWas, fromWhere)  
@@ -155,51 +198,60 @@ def sameSecondTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, sameSec, camMo
 	
 	# This should be screened out before here now.
 	# Getting sequence no./shot no. for OM-1. DriveMode is "Single Shot; Electronic shutter" for normal photos
-	unless driveMode.nil? || driveMode.empty? # opposite of if, therefore if driveMode is not empty
-		match = driveMode.match(/Shot (\d{1,3})/)
-		shot_no = match[1].to_i if match
-		shootingMode = driveMode.split(',')[0]
-		puts "\n#{__LINE__}. fn: #{fn}. driveMode: #{driveMode}. shot_no: #{shot_no}. shootingMode: #{shootingMode}. fileDateStr: #{fileDateStr}. DEBUG"
-	end
 	
-	if shot_no.to_i > 0 # photos without subsecs. OM-1 but with shot number.
-		# Getting sequence no. for OM-1. DriveMode is "Single Shot; Electronic shutter" for normal photos
-			 # puts shot_no
-		# End getting seqence no
-		# fileBaseName = fileDateStr + "-" + shot_no.to_s + userCamCode
-		fileBaseName = "#{fileDateStr}-#{shot_no.to_s}#{userCamCode}"
-		puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileBaseName: #{fileBaseName}. fileDateStr: #{fileDateStr}. shot_no: #{shot_no}. userCamCode(fn): #{userCamCode}. NEVER GEY TO HERE" 
-	else # photos without subsecs, pre GX8 and other OM-1 in same second
+	# Commented out 14 lines below that don't seem to be doing anything needed FIXME delete
+	# unless driveMode.nil? || driveMode.empty? # opposite of if, therefore if driveMode is not empty
+	# 	match = driveMode.match(/Shot (\d{1,3})/)
+	# 	shot_no = match[1].to_i if match
+	# 	shootingMode = driveMode.split(',')[0]
+	# 	puts "\n#{__LINE__}. fn: #{fn}. driveMode: #{driveMode}. shot_no: #{shot_no}. shootingMode: #{shootingMode}. fileDateStr: #{fileDateStr}. DEBUG"
+	# end
+	
+	# if shot_no.to_i > 0 # photos without subsecs. OM-1 but with shot number.
+	# 	# Getting sequence no. for OM-1. DriveMode is "Single Shot; Electronic shutter" for normal photos
+	# 		 # puts shot_no
+	# 	# End getting seqence no
+	# 	# fileBaseName = fileDateStr + "-" + shot_no.to_s + userCamCode
+	# 	fileBaseName = "#{fileDateStr}-#{shot_no.to_s}#{userCamCode}"
+	# 	puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileBaseName: #{fileBaseName}. fileDateStr: #{fileDateStr}. shot_no: #{shot_no}. userCamCode(fn): #{userCamCode}. NEVER GEY TO HERE" 
+	# else # photos without subsecs, pre GX8 and other OM-1 in same second
 		# puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileDateStr: #{fileDateStr}. sameSec: #{sameSec}. userCamCode(fn): #{userCamCode(fn)}. debug"
 			
 		# FIXME. I think the next 12 or so lines are not being used.
 		# driveMode = fileEXIF.DriveMode # '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'
 		# puts "#{__LINE__}. driveMode: #{driveMode}. driveMode.class: #{driveMode.class} for . " # error if?
-		if driveMode.class == "NilClass"
+		# if driveMode.class == "NilClass" # FIXME delete in time
 			# fileBaseName = fileDateStr + "-" + sameSec.to_s + userCamCode
 			fileBaseName = "#{fileDateStr}-#{sameSec.to_s}#{userCamCode}"
 			puts "#{__LINE__} #{fileBaseName} has sameSec" # debug 
-		elsif driveMode.length > 0
+		# elsif driveMode.length > 0
 			match = driveMode.match(/Shot (\d{1,3})/)
 			if match
-				shot_no = match[1].to_i
+				# shot_no = match[1].to_i
 				puts "#{__LINE__} #{fileDateStr} is shot that contributed to a Focus Stacked image" # debug 
 			else 
 				shot_no = "ss" # Was FS in camera Focus Stacked image, Now ss for same second FIXME. Maybe even just an extra period
 				puts "\n#{__LINE__} #{fileDateStr} Currently picking up images in the same second" # debug
 				# 125 2024.12.15-16.03.29 an in camera Focus Stacked image and the contributing images should not be sent to Mylio. Currently picking up images in the same second
 			end
-			fileBaseName = "#{fileDateStr}-#{shot_no}#{sameSec.to_s}#{userCamCode}"
+			
+			# Using sequence number # old uglier way. Can delete in time
+			# fileBaseName = "#{fileDateStr}-#{shot_no}#{sameSec.to_s}#{userCamCode}"
+			
+			# alphabetic sequence of same seceond
+			fileBaseName = "#{fileDateStr}#{number_to_letter(sameSec)}#{userCamCode}"
 			
 			# fileBaseName = fileDateStr + "-" + sameSec.to_s + ".FS" + userCamCode(fn) # for an in camera Focus Stacked image
-		else
-			puts "#{__LINE__}. driveMode: #{driveMode}. driveMode.class: #{driveMode.class}. NEVER GET TO HERE?" 
-			# fileBaseName = fileDateStr + "-" + sameSec.to_s  + userCamCode
-			fileBaseName = "#{fileDateStr}-#{sameSec.to_s}#{userCamCode}"
-		end
+			
+			# Five lines below old cruft
+		# else
+		# 	puts "#{__LINE__}. driveMode: #{driveMode}. driveMode.class: #{driveMode.class}. NEVER GET TO HERE?" 
+		# 	# fileBaseName = fileDateStr + "-" + sameSec.to_s  + userCamCode
+		# 	fileBaseName = "#{fileDateStr}-#{sameSec.to_s}#{userCamCode}"
+		# end
 		
-		puts "#{__LINE__}. fn: #{fn} in 'if sameSec'.     fileBaseName: #{fileBaseName}."
-	end # subSecExists
+		puts "#{__LINE__}. fn: #{fn} in 'if sameSec'. fileBaseName: #{fileBaseName}."
+	# end # subSecExists
 	return fileBaseName
 end # sameSecondTrue
 
@@ -392,7 +444,8 @@ def renamePhotoFiles(photo_array, src, timeNowWas, photosRenamedTo, unneededBrac
 		destination_dir = File.dirname(fnp)
 		FileUtils.mkdir_p(destination_dir)
 	
-		File.rename(fn,fnp) ## 
+		File.rename(fn,fnp) ## Will replace files if duplicate names which may happen if 
+		# copy_with_mac_renaming(fn, fnp) # Trying to avoid replacing files with same name # Error during file copy: OR stalls
 		# Add the processed file to the array so can move unneeded bracket files below
 		# unneededBracketedFiles << fnp
 
@@ -594,6 +647,6 @@ puts "#{__LINE__}. Time to add coordinates: #{timeNowWas}"
 
 # Before made a list of files and copied. Will change with objects
 # copySD(srcSD, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
-puts "\n#{__LINE__}. #{Dir[File.join(mylioStaging, '**', '*')].count { |file| File.file?(file) }} files in output folder: #{mylioStaging}." # NOT WORKING"
+puts "\n#{__LINE__}. #{Dir[File.join(mylioStaging, '**', '*')].count { |file| File.file?(file) }} files in output folder: #{mylioStaging}." # NOT WORKING" Dir[path].length
 # lineNum = "#{__LINE__} + 1" # What's this?
 timeNowWas = timeStamp(timeNowWas, lineNum)
