@@ -16,7 +16,8 @@ require 'mini_exiftool' # `gem install mini_exiftool` have to update for
 putsArray = false # `true` to print the array in the console
 production = false # false uses /testingDev files. True is for real
 showPuts = false # true showing debugging puts. Search for `if showPuts ==`
-# Line ~189 to put something in front of filename to make sure not overwrittten
+# Line ~300 or search with text below to put something in front of filename to make sure not overwrittten Good for other DEBUGGING
+# fileDateStr = "#{photo.preservedFileName}.#{fileDateStr}"
 
 
 HOME = "/Users/gscar/"
@@ -294,7 +295,9 @@ def renamePhotoFiles(photo_array, src, timeNowWas, photosRenamedTo, unneededBrac
 		fileDateStr = Time.parse(fileDate.to_s).to_s[0..-7].gsub(/-/, '.').gsub(' ', '-').gsub(/:/, '.') # to_s twice? FIXME then chop off time_zone, then change spaces, dashes, and colons to what I want
 		# puts "\n#{__LINE__}. fileDateStr: #{fileDateStr}. But want to look like this `2024.10.30-16.28.54`"
 		# fileDateStr = "#{count}.#{fileDateStr}" # trying to figure out which files are disappearing DEV
-		# fileDateStr = "#{photo.preservedFileName}.#{fileDateStr}" # trying to figure out which files are disappearing DEV
+		
+		# Uncomment to add old basename to basename for output file. Great for DEBUGGING
+		fileDateStr = "#{photo.preservedFileName}.#{fileDateStr}" # trying to figure out which files are disappearing DEV
 			
 		# dateTimeOriginalstr = dateTimeOriginal.to_s[0..-10]		
 		# puts "#{__LINE__}. dateTimeOriginalstr: #{dateTimeOriginalstr}.  dateTimeOriginal: #{dateTimeOriginal}. \n Do I need both of these FIXME" 
@@ -308,20 +311,21 @@ def renamePhotoFiles(photo_array, src, timeNowWas, photosRenamedTo, unneededBrac
 		# Change OM .ORI to .ORI.ORF so Apple apps and others can see them. Can't do before fileEXIF.save because fn is "redefined". Hi-Res creates an .ORI
 		# Focus stacked first image gets renamed somewhere else and loses the .ori at line 555?
 		# But it does get the .ORI.ORF but then gets changed.
-		if fileExt == "ori"
-			f_rename = fn + ".ORF"
-			fn_orig = File.new(fn)
-			# puts "fn.class: #{fn.class}"
-			# puts "\n#{__LINE__}. #{fn_orig} (fn_orig)to\n#{f_rename} (fn)about to happen"
-			File.rename(fn_orig, f_rename)
-			fn = f_rename # since reuse fn
-			# puts "#{__LINE__}. Rename happened and now fn is #{fn}." 
-		end 
+		#  BUT messes as files get different basenanes. Others get HiRes and can't name this with HiRes. Happening without this 
+		# if fileExt == "ori"
+		# 	f_rename = fn + ".ORF"
+		# 	fn_orig = File.new(fn)
+		# 	# puts "fn.class: #{fn.class}"
+		# 	# puts "\n#{__LINE__}. #{fn_orig} (fn_orig)to\n#{f_rename} (fn)about to happen"
+		# 	File.rename(fn_orig, f_rename)
+		# 	fn = f_rename # since reuse fn
+		# 	# puts "#{__LINE__}. Rename happened and now fn is #{fn}." 
+		# end 
 
 		# Add  1. If focused-stacked (stackedImage), get count and confirm next x are Focus Bracketing and set aside and mark as brackets
 		stackedImage = photo.stackedImage
 		driveMode = photo.driveMode # how long does this take? If don't need at highest level check later
-		driveModeFirst = driveModeSemiColon = shootingMode = driveMode.split(';')[0] if !driveMode.nil? #  Change driveModeFb to this. nil needed or errors
+		driveModeFirst = driveModeSemiColon = shootingMode = driveMode.split(';')[0] if !driveMode.nil? #  Change driveModeFb to this. nil needed or errors FIXME too many names
 		# stackedImageBoolean = false # declared below and would be wrong here
 		driveModeFb = driveModeComma = driveMode.split(',')[0] if !driveMode.nil? # driveModeFirst separates on semi-colon, so different results.
 		
@@ -426,7 +430,7 @@ def renamePhotoFiles(photo_array, src, timeNowWas, photosRenamedTo, unneededBrac
 		
 		# specialMode = photo.specialMode # Initially no use for specialMode, but will carry for a while FIXME
 		
-		match, shot_no = "" # FIXME is this being used
+		# match, shot_no = "" # FIXME is this being used 2024.12.20 commented out
 		
 		fileDatePrev = fileDate
 		fileExtPrev = fileExt
@@ -506,6 +510,7 @@ Dir.each_child(src).sort.each do |fn|
 	next if fn == '.DS_Store' # each_child knows about . and .. but not 
 	id += 1
   preservedFileName = fileName = fn # FIXME or maybe I should go with Ruby syntax of basename
+	fileExt = File.extname(fn).strip.downcase[1..-1] # should be faster than fileEXIF.fileType and .ori doesn't get converted to .orf. strip to get rid of period
 	# sameSecond = 1 # resets to zero if previous file not in same second. Was 
 	# redefine fn
   fn  = src + "/" + fn
@@ -514,7 +519,7 @@ Dir.each_child(src).sort.each do |fn|
 	camModel = fileEXIF.model
 	# fileName = fileEXIF.FileName # shows up in exiftool, but not here and can't seem to be forced, but see above:
 	fileType = fileEXIF.fileType # FileType : JPEG. FileTypeExtension yields three letter lower case.
-	fileExt = fileEXIF.FileTypeExtension # three character extension
+	# fileExt = fileEXIF.FileTypeExtension # three character extension. OM EXIF for FileType and FileTypeExt for an .ori is ORF
 	createDate = fileEXIF.CreateDate
 	# timeStamp = fileEXIF.TimeStamp  # doesn't exist? and not using
 	offsetTimeOriginal = fileEXIF.OffsetTimeOriginal # ~ time zone
