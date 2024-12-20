@@ -15,6 +15,8 @@ require 'mini_exiftool' # `gem install mini_exiftool` have to update for
 # Some toggles for testing and development, will 
 putsArray = false # `true` to print the array in the console
 production = false # false uses /testingDev files
+# Line ~189 to put something in front of filename to make sure not overwrittten
+
 
 HOME = "/Users/gscar/"
 thisScript = "#{File.dirname(__FILE__)}/" # needed because the Pashua script calling a file seemed to need the directory. 
@@ -93,9 +95,9 @@ def timeStamp(timeNowWas, fromWhere)
 end
 
 # change name to something like sameSeconds
-def oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
+def sameSecondTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
 	# Some of these fields may not be needed, I was fighting the wrong problem and may have added some that aren't needed
-	puts "\n#{__LINE__}. fn: #{fn}. fnp: #{fnp}. fileDateStr: #{fileDateStr}. driveMode: #{driveMode}.  dupCount: #{dupCount}. in oneBackTrue(). DEBUG"
+	puts "\n#{__LINE__}. fn: #{fn}. fnp: #{fnp}. fileDateStr: #{fileDateStr}. driveMode: #{driveMode}.  dupCount: #{dupCount}. in sameSecondTrue(). DEBUG"
 	# dupCount += 1
 	
 	# This should be screened out before here now.
@@ -130,7 +132,7 @@ def oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camMode
 				shot_no = match[1].to_i
 				puts "#{__LINE__} #{fileDateStr} is shot that contributed to a Focus Stacked image" # debug 
 			else 
-				shot_no = "FS" # for an in camera Focus Stacked image FIXME. This should not be in oneBackTrue
+				shot_no = "FS" # for an in camera Focus Stacked image FIXME. This should not be in sameSecondTrue
 				puts "\n#{__LINE__} #{fileDateStr} an in camera Focus Stacked image and the contributing images should not be sent to Mylio. Currently picking up images in the same second" # debug
 				# 125 2024.12.15-16.03.29 an in camera Focus Stacked image and the contributing images should not be sent to Mylio. Currently picking up images in the same second
 			end
@@ -146,18 +148,17 @@ def oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camMode
 		puts "#{__LINE__}. fn: #{fn} in 'if oneBack'.     fileBaseName: #{fileBaseName}."
 	end # subSecExists
 	return fileBaseName
-end # oneBackTrue
+end # sameSecondTrue
 
 # Add original file name, rename with coding
-def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedTo, unneededStacksFolder)
-		# Use photo_array of all the photos bringing in. Read fields needed to process photos
-	# 1. If focused-stacked (stackedImage), get count and confirm next x are Focus Bracketing and set aside and mark as brackets. ~Line 208
-	# 2. 
+def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedTo, unneededStacksFolder, production)
+	# Uphoto_array of all the photos bringing in from folder. Read fields needed to process photos
 	
 	# src is mylioStaging folder ??
 	# timeZonesFile is my log of which time zones I was in when
 	# timeNowWas used for timing various parts of the script.
-	puts "\n#{__LINE__}. Just entered renamePhotoFiles. timeZonesFile #{timeZonesFile}.  #{timeNowWas}\n" #  src: #{src}. an object? 
+	# puts "\n#{__LINE__}. Just entered renamePhotoFiles. timeZonesFile #{timeZonesFile}.  #{timeNowWas}\n" #  src: #{src}. an object? 
+	puts "\n#{__LINE__}. Just entered renamePhotoFiles. #{timeNowWas}\n"
 	# Until 2017, this assumed camera on UTC, but doesn't work well for cameras with a GPS or set to local time
 	# So have to ascertain what time zone the camera is set to by other means in this script, none of them foolproof
 	# 60 minutes for ~1000 photos to rename TODO ie, very slow
@@ -218,6 +219,7 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 		driveModeFirst = driveModeSemiColon = shootingMode = driveMode.split(';')[0] if !driveMode.nil? #  Change driveModeFb to this. nil needed or errors
 		# stackedImageBoolean = false # declared below and would be wrong here
 		driveModeFb = driveModeComma = driveMode.split(',')[0] if !driveMode.nil? # driveModeFirst separates on semi-colon, so different results.
+		
 		# puts "#{__LINE__}. driveModeFirst: #{driveModeFirst}. fileName: #{fileName}. " # Continuous Shooting, Shot 1. But some have a semi-colon separator
 		# puts "#{__LINE__}. driveModeFb:    #{driveModeFb}." # Continuous Shooting.
 
@@ -252,17 +254,17 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 				# puts "\n#{__LINE__}. #{fn} is a successfully stacked images with #{bracketCount} brackets.\n Now put aside next #{bracketCount} images and rename as brackets"
 				fileBaseName = "#{fileDateStr}.FS#{userCamCode}" # Inconsistent naming FIXME? could be _STK_
 				stackedImageBoolean = true
-				# puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Focus-stacked" # DEV DEBUG
+				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Focus-stacked" if production == false
 			
 			when stackedImage[0..5].to_s == "Tripod" #  Tripod high resolution
 				hiResTripodBoolean = true
 				fileBaseName = "#{fileDateStr}.HiResTripod#{userCamCode}" # period or -
-				# puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Tripod" # DEV DEBUG
+				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Tripod" if production == false
 						
 			when stackedImage[0..24].to_s == "Hand-held high resolution" # Hand-held high resolution
 				hiResHandheldBoolean = true
 				fileBaseName = "#{fileDateStr}HiResHand#{userCamCode}"
-				# puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}.Hand-held high resolution" # DEV DEBUG
+				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}.Hand-held high resolution"  if production == false
 				
 			when driveModeFb.to_s == "Focus Bracketing" # && !driveMode.nil? redundant driveModeFirst doesn't work
 			# FIXME get rid of match as for Continuous Shooting done?
@@ -276,19 +278,22 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 				if stackedImageBoolean
 					# fileBaseName = "#{fileDateStr}_#{shot_no}bkt#{userCamCode}" # could be dash instead of underscore
 					fileBaseName = "#{fileDateStr}.Bkt-#{shot_no}#{userCamCode}" # yet another format
-					# puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which a stack exists"
+					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which a stack exists" if production == false
 					stackedImageBoolean = false if shot_no == "1" # reset after last stacked image
-					# puts "\n{__LINE__}. fileBaseName: #{fileBaseName}. Focus Bracketing" # DEV DEBUG
+					puts "\n{__LINE__}. fileBaseName: #{fileBaseName}. Focus Bracketing" if production == false
 				else
 					fileBaseName = "#{fileDateStr}.Bkt-noStack-#{shot_no}#{userCamCode}" # could be dash instead of underscore
-					# puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which NO stack exists" # DEV DEBUG
+					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Working through bracketed images for which NO stack exists"  if production == false
 				end # if stackedImageBoolean in 
 				
 			when driveModeFirst == "Single Shot" # Can be manual images in same second
-				if sameSecond # the photo is in the same second as the next or preceding photo and needs to be named accordingly by indexing dupCount
-					dupCount += 1
-					fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
-					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Entered case sameSecond in Single Shot"
+				# if sameSecond # the photo is in the same second as the next or preceding photo and needs to be named accordingly by indexing dupCount NO, indexing done when creating photo_array
+				if sameSecond > 0
+					# dupCount += 1
+					dupCount = sameSecond # FIXME rename
+					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. sameSecond: #{sameSecond}. Entered case sameSecond in Single Shot"
+					fileBaseName = sameSecondTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, sameSecond, camModel, userCamCode)
+					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. sameSecond: #{sameSecond}. Entered case sameSecond in Single Shot"
 				else
 					fileBaseName = "#{fileDateStr}.SS#{userCamCode}" # DEV SS until sort out what all the cases are
 					puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Single Shot."
@@ -299,17 +304,17 @@ def renamePhotoFiles(photo_array, src, timeZonesFile, timeNowWas, photosRenamedT
 				shot_no = driveMode.match(/(\d{1,3})/)[1]
 				fileBaseName = "#{fileDateStr}.ProCap-#{shot_no}#{userCamCode}" # putting shot_no after which
 			# The above are OK if in the same second since will get shot-no or the three immediately above, they won't be in same second since takes too long
-				# puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Continuous Shooting" # DEV DEBUG
+				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Continuous Shooting" if production == false
 				
 			# But must check for photos in same second. This should be picked up or handled above but JIC
-			when sameSecond
+			when sameSecond > 0
 				dupCount += 1
-				fileBaseName = oneBackTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
-				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. Entered case oneBack"			
+				puts "\n#{__LINE__}. fileBaseName: #{fileBaseName}. sameSecond: #{sameSecond}. Entered case oneBack"			
+				fileBaseName = sameSecondTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
 			else
 				fileBaseName = "#{fileDateStr}#{userCamCode}"
 				countDev += 1
-				puts "#{__LINE__}.  countDev: #{countDev}. NOT handled by any cases above.  fileName: #{fileName}. fileExt: #{fileExt}. stackedImage: #{stackedImage}.  driveMode: #{driveMode} "
+				puts "#{__LINE__}.  countDev: #{countDev}. sameSecond: #{sameSecond}. NOT handled by any cases above.  fileName: #{fileName}. fileExt: #{fileExt}. stackedImage: #{stackedImage}.  driveMode: #{driveMode} "
 
 			end # case
 		end	# unless
@@ -382,6 +387,7 @@ photo_array = []
 lastPhotoFilename = "OB305994" # use later as starting point
 createDatePrev = Time.now # impossible that first photo processes will in comflict, but need an intial value
 photo_id_prev = "" # so defined for first round
+sameSecond = 1
 
 puts "#{__LINE__}. Start of photo processing. First read EXIF info and write to instructions and optionally to caption for viewing in Mylio
 Also for later use in naming photos and putting aside sequence (bracketed) shots contributing to stacked image
@@ -395,6 +401,7 @@ Dir.each_child(src).sort.each do |fn|
 	next if fn == '.DS_Store' # each_child knows about . and .. but not 
 	id += 1
   preservedFileName = fileName = fn # FIXME or maybe I should go with Ruby syntax of basename
+	# sameSecond = 1 # resets to zero if previous file not in same second. Was 
 	# redefine fn
   fn  = src + "/" + fn
 	# Request FileName explicitly. FileName is a system tag, not in EXIF. 
@@ -433,7 +440,7 @@ Dir.each_child(src).sort.each do |fn|
 	specialMode = fileEXIF.specialMode # Not sure what's in here, but is OM specific and maybe useful?
 	
 	# Intermediate values and .mov has to be handled differently. I think this is handled above
-	# if fileType == "MOV" # driveMode == "" # nil doesn't work, niether does blank
+	# if fileType == "MOV" # driveMode == "" # nil doesn't work, neither does blank
 	# 	shootingMode = "MOV" 
 	# 	shotNo = ""
 	# 	dateTimeOriginal = fileEXIF.CreateDate # Not necessary since OM mov has a createDate and dateTimeOriginal
@@ -483,17 +490,26 @@ Dir.each_child(src).sort.each do |fn|
 	fileEXIF.save # only change so far is imageDescription and instructions
 	
 	# Mark photos in same second. Can I avoid checking for >1 since only needed for first round FIXME
-	if id > 1 && createDate == createDatePrev # comparison not possible with Prev and will revise sameSecond in next round if needed
-		sameSecond = true
-		# and write same second true for previous photo		
-		photo = photo_array.find { |p| p.id == photo_id_prev }
-		photo.sameSecond = true
-	else
-		sameSecond = false
-	end
+	if createDate == createDatePrev # comparison not possible with Prev and will revise sameSecond in next round if needed
+		puts "\n#{__LINE__}. #{id}.  sameSecond: #{sameSecond}. #{fileName}. #{createDate}." if production == false
+	  if sameSecond >= 2 # now dealing with the third since sameSecond was set for the previous
+			sameSecond += 1
+			puts "#{__LINE__}. #{id}.  sameSecond: #{sameSecond}. #{fileName}. #{createDate}." if production == false
+		else # the first pair identified, but haven't noted that the one before this needs to be given a sequence no
+			# and write same second true for previous photo		
+			photo = photo_array.find { |p| p.id == photo_id_prev } # getting id for previous photo
+			photo.sameSecond = 1 # setting the previous photo to 1
+			puts "#{__LINE__}. #{id}.  sameSecond: #{sameSecond}. for previous file since it was previous a zero." if production == false
+			sameSecond = 2 # the current photo is the second pair of sameSecond
+			puts "#{__LINE__}. #{id}.  sameSecond: #{sameSecond}. for current file which is the first time a pair has been identified #{fileName}. #{createDate}." if production == false
+		end # 
+	else # if sameSecond # resetting after going through some pairs. Should only have to do this once but seemingly doing it each time
+		sameSecond = 0 # or maybe nil
+		puts "#{__LINE__}. #{id}.  sameSecond: #{sameSecond}. #{fileName}. #{createDate}." if production == false # error if photo_id
+	end # if createDate == createDatePrev
 	createDatePrev = createDate
-	
-	photo_id = photo_id_prev = "photo-" + id.to_s
+	photo_id = photo_id_prev = "photo-" + id.to_s # FIXME. Get rid of `photo-`. was helpful in figuring it all out, but now not needed
+	# puts "#{__LINE__}. #{photo_id}.  sameSecond: #{sameSecond}. #{fileName}. #{createDate}." if production == false
 	photo_array <<	Photo.new(photo_id, fn, fileName, fileExt, camModel, fileType, stackedImage, driveMode, specialMode, afPointDetails, subjectTrackingMode, createDate, sameSecond, dateTimeOriginal, offsetTimeOriginal, preservedFileName)
 	# Checking what is stored in stacked image
 	# puts "#{id}. Stacked Image: `#{stackedImage}`. shotNo: #{shotNo}. driveMode: #{driveMode}.  Original FileName: #{preservedFileName}" # DEV
@@ -506,7 +522,7 @@ puts photo_array.inspect if putsArray # DEV set ib kube 15
 puts "\n#{__LINE__}. Rename [tzoLoc = renamePhotoFiles(…)] the photo files with date and an ID for the camera or photographer (except for the paired jpgs FIXME. #{timeNowWas}\n"
 # tzoLoc = timeZone(dateTimeOriginal, timeZonesFile) # Second time this variable name is used, other is in a method
 # puts "\n#{__LINE__}. photo_array: #{photo_array}\n"
-renameReturn = renamePhotoFiles(photo_array, mylioStaging, timeZonesFile, timeNowWas, photosRenamedTo, unneededStacksFolder) # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
+renameReturn = renamePhotoFiles(photo_array, mylioStaging, timeZonesFile, timeNowWas, photosRenamedTo, unneededStacksFolder, production) # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
 
 
 puts "\n#{__LINE__}.  Demo of retrieving info from array:"
@@ -514,36 +530,6 @@ photo_10 = photo_array.find { |photo| photo.id == "photo-10" }
 puts "   #{__LINE__}. photo_id: photo-10.  Stacked Image: #{photo_10.stackedImage if photo_10}. photo_10.preservedFileName: #{photo_10.preservedFileName}. "
 # puts Photo.count
 # puts photo_id
-# Before made a list of files and copied. Will change with objects
-# copySD(srcSD, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
-
-# 
-# # written
-# fileEXIF.PreservedFileName = "#{File.basename(fn)}" # works but does not show up in Preview, but does in Mylio, so continue to also add to Instructions above
-# fileEXIF.TimeZoneOffset = tzoLoc  
-# unless focusBracketStepSize.nil?
-#   imageDescription << " ." + focusBracketStepSize.to_s + " [FocusBracketStepSize]"
-# end
-# fileEXIF.description = imageDescription
-# 
-# when fileExt == "mov" # OMDS movie
-# dateTimeOriginal = fileEXIF.CreateDate
-# else 
-# dateTimeOriginal = fileEXIF.dateTimeOriginal # The time stamp of the photo file, maybe be UTC or local time (if use Panasonic travel settings). class time, but adds the local time zone to the result
-# end
-# 
-# if camModel ==  "MISC" # MISC is for photos without dateTimeOriginal, e.g., movies
-# # timeChange = 0
-# fileEXIF.OffsetTimeOriginal = tzoLoc.to_s
-# # puts "#{__LINE__}. dateTimeOriginal #{dateTimeOriginal}. timeChange: #{timeChange} for #{camModel} meaning movies. DEBUG"
-# elsif camModel == "iPhone X"  # DateTimeOriginal is in local time
-# # timeChange = 0
-# # fileEXIF.OffsetTimeOriginal = tzoLoc.to_s # redefined below.
-# timeChange = (3600*tzoLoc) # previously had error capture on this. Maybe for general cases which I'm not longer covering
-# fileEXIF.OffsetTimeOriginal = "GMT" # say what?
-# puts "#{__LINE__}.. dateTimeOriginal #{dateTimeOriginal}. timeChange: #{timeChange} for #{camModel}" if count == 1 # just once is enough
-# end # if camModel
-#   
 
 # Instantiate each file on card
 # 
@@ -553,5 +539,6 @@ puts "   #{__LINE__}. photo_id: photo-10.  Stacked Image: #{photo_10.stackedImag
 
 # Before made a list of files and copied. Will change with objects
 # copySD(srcSD, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
-lineNum = "#{__LINE__} + 1"
+puts "#{Dir[mylioStaging].length} files in output folder: #{mylioStaging}. NOT WORKING"
+# lineNum = "#{__LINE__} + 1" # What's this?
 timeNowWas = timeStamp(timeNowWas, lineNum)
