@@ -96,10 +96,10 @@ def timeStamp(timeNowWas, fromWhere)
 end
 
 # change name to something like sameSeconds
-def sameSecondTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camModel, userCamCode)
+def sameSecondTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, sameSec, camModel, userCamCode)
 	# Some of these fields may not be needed, I was fighting the wrong problem and may have added some that aren't needed
-	puts "\n#{__LINE__}. fn: #{fn}. fnp: #{fnp}. fileDateStr: #{fileDateStr}. driveMode: #{driveMode}.  dupCount: #{dupCount}. in sameSecondTrue(). DEBUG"
-	# dupCount += 1
+	puts "\n#{__LINE__}. fn: #{fn}. fnp: #{fnp}. fileDateStr: #{fileDateStr}. driveMode: #{driveMode}.  sameSec: #{sameSec}. in sameSecondTrue(). DEBUG"
+	# sameSec += 1
 	
 	# This should be screened out before here now.
 	# Getting sequence no./shot no. for OM-1. DriveMode is "Single Shot; Electronic shutter" for normal photos
@@ -116,37 +116,37 @@ def sameSecondTrue(src, fn, fnp, fnpPrev, fileDateStr, driveMode, dupCount, camM
 		# End getting seqence no
 		# fileBaseName = fileDateStr + "-" + shot_no.to_s + userCamCode
 		fileBaseName = "#{fileDateStr}-#{shot_no.to_s}#{userCamCode}"
-		puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileBaseName: #{fileBaseName}. fileDateStr: #{fileDateStr}. shot_no: #{shot_no}. userCamCode(fn): #{userCamCode}. DEBUG" 
+		puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileBaseName: #{fileBaseName}. fileDateStr: #{fileDateStr}. shot_no: #{shot_no}. userCamCode(fn): #{userCamCode}. NEVER GEY TO HERE" 
 	else # photos without subsecs, pre GX8 and other OM-1 in same second
-		# puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileDateStr: #{fileDateStr}. dupCount: #{dupCount}. userCamCode(fn): #{userCamCode(fn)}. debug"
+		# puts "#{__LINE__}. fn: #{fn} in 'if oneBack'. fileDateStr: #{fileDateStr}. sameSec: #{sameSec}. userCamCode(fn): #{userCamCode(fn)}. debug"
 			
 		# FIXME. I think the next 12 or so lines are not being used.
 		# driveMode = fileEXIF.DriveMode # '-DriveMode : Continuous Shooting, Shot 12; Electronic shutter'
 		# puts "#{__LINE__}. driveMode: #{driveMode}. driveMode.class: #{driveMode.class} for . " # error if?
 		if driveMode.class == "NilClass"
-			# fileBaseName = fileDateStr + "-" + dupCount.to_s + userCamCode
-			fileBaseName = "#{fileDateStr}-#{dupCount.to_s}#{userCamCode}"
-			puts "#{__LINE__} #{fileBaseName} has dupCount" # debug 
+			# fileBaseName = fileDateStr + "-" + sameSec.to_s + userCamCode
+			fileBaseName = "#{fileDateStr}-#{sameSec.to_s}#{userCamCode}"
+			puts "#{__LINE__} #{fileBaseName} has sameSec" # debug 
 		elsif driveMode.length > 0
 			match = driveMode.match(/Shot (\d{1,3})/)
 			if match
 				shot_no = match[1].to_i
 				puts "#{__LINE__} #{fileDateStr} is shot that contributed to a Focus Stacked image" # debug 
 			else 
-				shot_no = "FS" # for an in camera Focus Stacked image FIXME. This should not be in sameSecondTrue
-				puts "\n#{__LINE__} #{fileDateStr} an in camera Focus Stacked image and the contributing images should not be sent to Mylio. Currently picking up images in the same second" # debug
+				shot_no = "ss" # Was FS in camera Focus Stacked image, Now ss for same second FIXME. Maybe even just an extra period
+				puts "\n#{__LINE__} #{fileDateStr} Currently picking up images in the same second" # debug
 				# 125 2024.12.15-16.03.29 an in camera Focus Stacked image and the contributing images should not be sent to Mylio. Currently picking up images in the same second
 			end
-			fileBaseName = "#{fileDateStr}-#{dupCount.to_s}(#{shot_no})#{userCamCode}"
+			fileBaseName = "#{fileDateStr}-#{shot_no}#{sameSec.to_s}#{userCamCode}"
 			
-			# fileBaseName = fileDateStr + "-" + dupCount.to_s + ".FS" + userCamCode(fn) # for an in camera Focus Stacked image
+			# fileBaseName = fileDateStr + "-" + sameSec.to_s + ".FS" + userCamCode(fn) # for an in camera Focus Stacked image
 		else
-			puts "#{__LINE__}. driveMode: #{driveMode}. driveMode.class: #{driveMode.class}." 
-			# fileBaseName = fileDateStr + "-" + dupCount.to_s  + userCamCode
-			fileBaseName = "#{fileDateStr}-#{dupCount.to_s}#{userCamCode}"
+			puts "#{__LINE__}. driveMode: #{driveMode}. driveMode.class: #{driveMode.class}. NEVER GET TO HERE?" 
+			# fileBaseName = fileDateStr + "-" + sameSec.to_s  + userCamCode
+			fileBaseName = "#{fileDateStr}-#{sameSec.to_s}#{userCamCode}"
 		end
 		
-		puts "#{__LINE__}. fn: #{fn} in 'if oneBack'.     fileBaseName: #{fileBaseName}."
+		puts "#{__LINE__}. fn: #{fn} in 'if sameSec'.     fileBaseName: #{fileBaseName}."
 	end # subSecExists
 	return fileBaseName
 end # sameSecondTrue
@@ -540,6 +540,6 @@ puts "   #{__LINE__}. photo_id: photo-10.  Stacked Image: #{photo_10.stackedImag
 
 # Before made a list of files and copied. Will change with objects
 # copySD(srcSD, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
-puts "#{Dir[mylioStaging].length} files in output folder: #{mylioStaging}. NOT WORKING"
+puts "\n#{__LINE__}. mylioStaging: #{mylioStaging}." #{Dir[mylioStaging].length} files in output folder: #{mylioStaging}. NOT WORKING"
 # lineNum = "#{__LINE__} + 1" # What's this?
 timeNowWas = timeStamp(timeNowWas, lineNum)

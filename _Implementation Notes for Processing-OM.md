@@ -61,11 +61,12 @@ GUI for keying into GUI options etc
    √ Maybe if `Focus Bracketing` and Shot no >1 and <100 rename as bracket and set aside. In line or as a method?. Set a flag that FS has happened stackedImageBoolean
    Focus-bracketing with no stack
    2. Later realized that using case was the best way to handle the various situations (cases! obviously)
-   102 files in virgin…, 100 in staging 2 not processed.
-   oneBack numbering is missing the first one still. Something wrong with oneBackTrue module? Should I handle Continuous Shooting? What is it?. Is is a ProCapture? So far yes
+   √ 102 files in virgin…, now working
+  dupCount to sameSec, maybe should be seqNo or similar
    fileBaseName = "#{fileDateStr}.ProCap#{shot_no}.#{userCamCode}" put shot_no after to separate from date. See if that's better
    
-   How to make oneBack work even if have better ways to handle them. Photos manually shot in same second aren't tagged. Handle as special case within "Single Shot"
+   sameSecondTrue() probably not doing much, most of it is not being used
+   -2ss sequency for same second would be better off as a, b, c etc
    
 3. add gps coordinates. Can do this before or after renaming, but before moving
 
@@ -75,6 +76,8 @@ GUI for keying into GUI options etc
 Prevent redownloading from the two cards
 dateTimeOriginal replace with createDate. .mov doesn't have dateTimeOriginal
 Look at EXIF filename vs Ruby basename for consistency, but be aware of my `fileBaseName`
+sameSecondTrue() probably not doing much, most of it is not being used
+-2ss sequency for same second would be better off as a, b, c etc
 
 ### Changes
 photosRenamedTo left in as it might be useful for dubugging. But I wasn't using it and maybe it should go into photos.array. Action not implemented, ie, file not written to.
@@ -86,7 +89,7 @@ fileDateTimeOriginal review what this is for FIXME
 DateTimeUTC and DateTimeOriginal and OffsetTime to check that camera was set correctly. These are what the camera thinks is right. Maybe check against the time zones.yml, but ignore for now
 
 #### test images. See file: OM EXIF for different shooting modes.numbers
-virginOMcopy folder
+virginOMcopy folder 102 photos
 OA184727–OA184736 10 photos  "Continuous Shooting Shot xx; Electronic shutter",
 OA184737 "Single Shot; Electronic shutter",
 OA184738–OA184742 5 photos "Continuous Shooting, Shot x; Electronic shutter",
