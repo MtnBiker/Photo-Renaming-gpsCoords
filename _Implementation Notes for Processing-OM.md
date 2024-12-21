@@ -66,7 +66,7 @@ GUI for keying into GUI options etc
    fileBaseName = "#{fileDateStr}.ProCap#{shot_no}.#{userCamCode}" put shot_no after to separate from date. See if that's better
    
    sameSecondTrue() probably not doing much, most of it is not being used
-   -2ss sequency for same second would be better off as a, b, c etc
+  √ -2ss sequency for same second would be better off as a, b, c etc
    
    √ are being made different basenames 2024.12.07-14.10.59 OC076017 Fixed
    
@@ -80,10 +80,7 @@ OB035290.ORI.2024.11.03-08.30.53.SS.gs.O.ori but gets SS label. It is a single s
 
 √ 2024.11.11-10.08.29.SS.gs.O.jpg is a single shot, but not special so .ss should go away it's this way without numbers_to_letters. DONE
 
-2024.12.14-16.58.16.Bkt-noStack-1.gs.O.jpg Why Bkt-noStack and -1 OC146065.JPG ## Should be 2024.12.14-16.58.16.Bkt-1.gs.O.jpg
-Maybe picking up from the noStack just preceding
-
-Added copy_with_mac_renaming(fn, fnp) from ChatGPT to prevent writing over files. Not fully tested. Works with no duplicates. 
+Added copy_with_mac_renaming(fn, fnp) from ChatGPT to prevent writing over files. Not fully tested. Works with no duplicates. But later created errors 
 
 4 Then can sort by where to go: jpg if raw exists, unneeded files for stack, unneeded files from hi res
 

@@ -25,6 +25,8 @@ thisScript = "#{File.dirname(__FILE__)}/" # needed because the Pashua script cal
 # thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory.
 photosRenamedTo = thisScript + "currentData/photosRenamedTo.txt"
 
+
+
 # use to select file locations on Mini (Model Identifier: Mac14,12) and MBA
 model_identifier = `system_profiler SPHardwareDataType | grep "Model Identifier"`.split(':').last.strip
 # puts "Model Identifier: #{model_identifier}"
@@ -34,6 +36,8 @@ if production # set above
 	unneededBrackets = downloadsFolders + "Unneeded brackets/" # on Daguerre
 	srcHD       = downloadsFolders + " Drag Photos HERE/" # 
 	srcHD = "testingDev/incomingTestPhotos"
+	mylioSubFolder = "Mylio Main Library Folder/2020s/2024/"
+	mylioFolder = "/Volumes/Mylio 4TB/Mylio_87103a/#{mylioSubFolder}" # Main Vault, and not on Mini
 	mylioStaging = downloadsFolders + "Latest Processed photos-Import to Mylio/" #  These are relabeled and GPSed files. Will be moved to Mylio after processing.		
 else # development or testing	
 	unneededBrackets = thisScript + "/testingDev/unneededBrackets" # DEV rename to unneededBrackets, but is this the right name
@@ -467,9 +471,13 @@ def renamePhotoFiles(photo_array, src, timeNowWas, photosRenamedTo, unneededBrac
 end # rename  photo files in the downloads folder and writing in original time.
 
 #+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+#+
+
+# GUI to decide which locations are being used
+# copySD(srcSD, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
+
 ###### Beginning of actions ###############
-# 1. Establish Array.photos
-# 2. Rename which may need Array.photos
+# 1. Establish Array.photos- done
+# 2. Rename which may need Array.photos-done
 # 3. Sort and move
 
 if production
@@ -628,15 +636,12 @@ Dir.each_child(src).sort.each do |fn|
 	# puts "#{id}. Stacked Image: `#{stackedImage}`. shotNo: #{shotNo}. driveMode: #{driveMode}.  Original FileName: #{preservedFileName}" # DEV
 end # Dir.each_child(src).sort.each do |fn|
 puts "\n#{__LINE__}. Finished adding EXIF info and establishing photo array. If want to see some data for each photo, uncomment two lines above."
-puts photo_array.inspect if putsArray # DEV set ib kube 15
+puts photo_array.inspect if putsArray # DEV
 # puts "#{__LINE__}. ######## End of Array ##########"
-# Renaming. Look at original, not sure what is going on exactly Line 1253
-# puts "\n{__LINE__}. Rename [tzoLoc = renamePhotoFiles(…)] the photo files with date and an ID for the camera or photographer (except for the paired jpgs in #{tempJpg}). #{timeNowWas}\n"
-puts "\n#{__LINE__}. renamePhotoFiles(…)] the photo files with date and an ID for the camera or photographer. #{timeNowWas}\n"
-# tzoLoc = timeZone(dateTimeOriginal, timeZonesFile) # Second time this variable name is used, other is in a method
-# puts "\n#{__LINE__}. photo_array: #{photo_array}\n"
-renameReturn = renamePhotoFiles(photo_array, mylioStaging, timeNowWas, photosRenamedTo, unneededBrackets, showPuts, addPreservedNameForDebugging) # This also calls rename which processes the photos, but need tzoLoc value. Negative because need to subtract offset to get GMT time. E.g., 10 am PST (-8)  is 18 GMT
 
+# Renaming.
+puts "\n#{__LINE__}. renamePhotoFiles(…)] the photo files with date and an ID for the camera or photographer. #{timeNowWas}\n"
+renameReturn = renamePhotoFiles(photo_array, mylioStaging, timeNowWas, photosRenamedTo, unneededBrackets, showPuts, addPreservedNameForDebugging)
 
 # puts "\n#{__LINE__}.  Demo of retrieving info from array:"
 # photo_10 = photo_array.find { |photo| photo.id == "photo-10" }
@@ -645,14 +650,28 @@ renameReturn = renamePhotoFiles(photo_array, mylioStaging, timeNowWas, photosRen
 timeNowWas = timeStamp(timeNowWas, lineNum)
 
 # Add GPS coordinates.
-puts "\n#{__LINE__}. Using exiftool to add gps coordinates. Will take a while as all the gps files for the year will be processed and then all the photos."
+puts "\n#{__LINE__}. Using exiftool to add gps coordinates. Will take a while for the gps files to be processed and then all the photos getting info added."
 exiftoolAddCoordinates(mylioStaging, folderGPX)
 
 timeNowWas = timeStamp(timeNowWas, lineNum)
 puts "#{__LINE__}. Time to add coordinates: #{timeNowWas}"
 
+# timeNowWas = timeStamp(timeNowWas, lineNum)
+ puts "\n#{__LINE__}.Finished adding coordinates. Now move files to the Mylio folder shown on next line:" # Note that \"Adding location information to photo files\" is commented out, i.e., geographic descriptions not being added, because Mylio finds this info."
+
+# Move to Mylio folder (can't process in this folder or Mylio might import before changes are made)
+# unless Dir.exist?(mylioFolder) # unless is negative of if
+# 	# If main vault not mounted use
+# 	mylioFolder = HOME + "Mylio/" + mylioSubFolder
+# end
+
 # Before made a list of files and copied. Will change with objects
-# copySD(srcSD, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
-puts "\n#{__LINE__}. #{Dir[File.join(mylioStaging, '**', '*')].count { |file| File.file?(file) }} files in output folder: #{mylioStaging}." # NOT WORKING" Dir[path].length
+# puts "\n#{__LINE__}. #{Dir[File.join(mylioStaging, '**', '*')].count { |file| File.file?(file) }} files in output folder: #{mylioStaging}." # NOT WORKING" Dir[path].length
 # lineNum = "#{__LINE__} + 1" # What's this?
 timeNowWas = timeStamp(timeNowWas, lineNum)
+
+# moveToMylio(mylioStaging, mylioFolder, timeNowWas) if production == true # OR maybe set alternate locations earlier
+
+# timeNowWas = timeStamp(timeNowWas, lineNum)
+puts "\n#{__LINE__}.-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - All done\n"
+puts "" # new line above not respected. 
