@@ -59,8 +59,21 @@ end # class Photo
 class	PhotoProcessor
 	include Glimmer
 	
+	
+	attr_accessor :controls_visible, :selected_folder
+	
+	def initialize
+		@controls_visible = false # Initially hide the controls
+		@selected_folder = '' # was the name for the copied script
+		@photo_staging_folder = '/Volumes/Daguerre/_Download folder/ Drag Photos HERE/' #FIXME _Download folder rename to _Photo_processing_folder
+	end
+	
+	mylioStaging = ''       # Initialize selected_file
+	# photo_staging_folder = '/Volumes/Daguerre/_Download folder/ Drag Photos HERE/' #FIXME _Download folder rename to _Photo_processing_folder
+	selected_basename = ''    # Basename of the selected file
+
 	def launch
-		window('Rename and add GPS to Photos', 400, 200) {
+		# window('Rename and add GPS to Photos', 800, 400) { # FIXME should this be moved down to where the window is defined by Glimmer?
 			
 			# Some toggles for testing and development, will 
 			putsArray = true # `true` to print the array in the console
@@ -71,15 +84,14 @@ class	PhotoProcessor
 			
 			thisScript = "#{File.dirname(__FILE__)}/" # needed because the Pashua script calling a file seemed to need the directory. 
 			# thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory.
-			photosRenamedTo = thisScript + "currentData/photosRenamedTo.txt"
-			
-			
+			photosRenamedTo = thisScript + "currentData/photosRenamedTo.txt"						
 			
 			# use to select file locations on Mini (Model Identifier: Mac14,12) and MBA
 			model_identifier = `system_profiler SPHardwareDataType | grep "Model Identifier"`.split(':').last.strip
 			# puts "Model Identifier: #{model_identifier}"
 			
 			
+			#  This might move to initialize
 			if production # set above
 				unneededBrackets = downloadsFolders + "Unneeded brackets/" # on Daguerre
 				srcHD       = downloadsFolders + " Drag Photos HERE/" # 
@@ -504,14 +516,44 @@ class	PhotoProcessor
 				FileUtils.cp_r(virgin_photos, testPhotos, preserve: true, remove_destination: true ) # preserve to keep timestamp (may not be neccessary). cp_r is for directory. This directory has a currated batch of photos
 				# puts "\n#{__LINE__}. Not using full test stack of photos" 
 				# FileUtils.cp_r('testingDev/bracketStackTestPhotos', testPhotos, preserve: true, remove_destination: true ) # just a stack for DEV test
-			end # if production 
+			end # if production
+			
+			# Main GUI Window to make choices opened window just into launch
+		window('Rename and add GPS to Photos', 800, 400) { # FIXME should this be moved down to where the window is defined by Glimmer?
+			margined true
+					
+				button('Select the folder of photos to be processed') {
+					# stretchy false
+					
+					on_clicked do
+						@photo_staging_folder = open_folder # Opens a folder selection dialog photo_staging_folder
+						msg_box('Selected Folder', @photo_staging_folder || 'No folder selected') # Shows the selected folder or a default message
+					end
+				}
+				
+				# label {
+				# 	text 'Selected File:'
+				# }
+				# 
+				# label {
+				# 	text <=> [self, :selected_file] # Displays the selected file path
+				# }
+				# 
+				label {
+					text 'Selected Folder:'
+				}
+				
+				label {
+					text <=> [self, :selected_folder] # Displays the selected folder path
+				}
+			}.show # window
 			
 			lineNum = "#{__LINE__}"
 			timeNowWas = timeStamp(Time.now, lineNum)
 			id = 0
 			photo_array = []
 			lastPhotoFilename = "OB305994" # use later as starting point
-			createDatePrev = Time.now # impossible that first photo processes will in comflict, but need an intial value
+			createDatePrev = Time.now # impossible that first photo processes will in conflict, but need an initial value
 			photo_id_prev = "" # so defined for first round
 			sameSecond = 1
 			fileExtPrev = ""
@@ -684,7 +726,7 @@ class	PhotoProcessor
 			# timeNowWas = timeStamp(timeNowWas, lineNum)
 			puts "\n#{__LINE__}.-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  - All done\n"
 			puts "" # new line above not respected. 
-	}.show # window
+	# }.show # window
   end # def launch
 end # class PhotoRename
 

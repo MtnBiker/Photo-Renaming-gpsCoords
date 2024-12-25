@@ -1171,13 +1171,14 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
 
 # Don't know if this is needed, why not use srcSD directly. src is used in copySD at ~lineNo 880
   src = srcSD
-  prefsPhoto = pPashua2(srcSD,lastPhotoFilename,mylioStaging,archiveFolder) # calling Photo_Naming_Pashua-SD2. (Titled: 2. SD card photo downloading options)
+  prefsPhoto = pPashua2(srcSD,lastPhotoFilename,mylioStaging,archiveFolder) # calling Photo_Naming_Pashua-SD2.rb. (Titled: 2. SD card photo downloading options)
   # to get a value use prefsPhoto("theNameInFileNamingEtcPashua.rb"), nothing to do with the name above
   # puts "Prefs as set by pPashua"
   # prefsPhoto.each {|key,value| puts "#{key}:       #{value}"}
 else # whichOne=="HD", but what
   src = srcHD
   # puts "#{__LINE__}. `srcHD`: #{src}. Does it have a slash?"
+  # pGUI is in Photo_Naming_Pashua-HD2.rb
   prefsPhoto = pGUI(src, mylioStaging, archiveFolder) # is this only sending values in? 
   # to get a value use prefsPhoto("theNameInFileNamingEtcPashue.rb"), nothing to do with the name above
   # puts "Prefs as set by pGUI"

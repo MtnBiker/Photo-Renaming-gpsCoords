@@ -98,6 +98,7 @@ timeNow etc reports are a mess
 
 ## ToDone
 -2ss sequencing for same second would be better with a, b, c etc
+- _Download folder (on Daguerre and elsewhere) rename to _Photo_processing_folder
 
 ### Changes
 photosRenamedTo left in as it might be useful for dubugging. But I wasn't using it and maybe it should go into photos.array. Action not implemented, ie, file not written to.
