@@ -82,7 +82,11 @@ OB035290.ORI.2024.11.03-08.30.53.SS.gs.O.ori but gets SS label. It is a single s
 
 Added copy_with_mac_renaming(fn, fnp) from ChatGPT to prevent writing over files. Not fully tested. Works with no duplicates. But later created errors 
 
+# Added Glimmer and trying to mimic rename with enhancements. Basically ChatGOT to get a basic app
+
 4 Then can sort by where to go: jpg if raw exists, unneeded files for stack, unneeded files from hi res
+
+Should the whole program be Class PhotoProessing and the Array using Class Photo??
 
 ## ToDo
 Prevent redownloading from the two cards
