@@ -60,7 +60,7 @@ class	PhotoProcessor
 	include Glimmer
 	
 	
-	attr_accessor :controls_visible, :selected_folder
+	attr_accessor :controls_visible, :photo_staging_folder, :selected_folder
 	
 	def initialize
 		@controls_visible = false # Initially hide the controls
@@ -518,35 +518,49 @@ class	PhotoProcessor
 				# FileUtils.cp_r('testingDev/bracketStackTestPhotos', testPhotos, preserve: true, remove_destination: true ) # just a stack for DEV test
 			end # if production
 			
+			# font_button.rb for showin it works. Showed me you can have successive windows
+			window('hello world', 300, 200) {
+				font_button {
+					font <=> [self, :font_descriptor, after_write: -> { p font_descriptor }]
+				}
+				
+				on_closing do
+					puts 'Bye Bye' ## Don't see this in console in Nova, but do in iTerm
+				end
+			}.show
+			
 			# Main GUI Window to make choices opened window just into launch
 		window('Rename and add GPS to Photos', 800, 400) { # FIXME should this be moved down to where the window is defined by Glimmer?
 			margined true
+			
+			vertical_box {
 					
-				button('Select the folder of photos to be processed') {
-					# stretchy false
+				button("Select the folder of photos to be processed if it's not shown below [doesn't get refreshed") {
+					stretchy false
 					
 					on_clicked do
 						@photo_staging_folder = open_folder # Opens a folder selection dialog photo_staging_folder
 						msg_box('Selected Folder', @photo_staging_folder || 'No folder selected') # Shows the selected folder or a default message
 					end
-				}
+				} # button()
 				
-				# label {
-				# 	text 'Selected File:'
-				# }
-				# 
-				# label {
-				# 	text <=> [self, :selected_file] # Displays the selected file path
-				# }
-				# 
 				label {
-					text 'Selected Folder:'
+					text 'Selected File:'
 				}
 				
 				label {
-					text <=> [self, :selected_folder] # Displays the selected folder path
+					text <=> [self, :selected_file] # Displays the selected file path
 				}
-			}.show # window
+				
+				label {
+					text 'Folder of photos to be processed. Rechoose if the correct folder is not shown below [not working. Pop up is OK]:'
+				}
+				
+				label {
+					text <=> [self, :photo_staging_folder] # Displays the selected folder path
+				}
+			} # vertical box
+		}.show # window('Rename…)
 			
 			lineNum = "#{__LINE__}"
 			timeNowWas = timeStamp(Time.now, lineNum)
