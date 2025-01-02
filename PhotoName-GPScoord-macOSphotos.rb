@@ -816,6 +816,7 @@ def renamePhotoFiles(src, timeZonesFile, timeNowWas, photosRenamedTo, unneededBr
       # Add the processed file to the array so can move unneeded bracket files below
       unneededBracketedFiles << fnp
 
+      # Error handling doesn't work if error is in module
       begin
         file_prepend(photosRenamedTo, photoRenamed)
         # puts "#{__LINE__}. #{Time.now} #{photoRenamed}"
