@@ -96,7 +96,7 @@ class	PhotoProcessor
 				unneededBrackets = downloadsFolders + "Unneeded brackets/" # on Daguerre
 				srcHD       = downloadsFolders + " Drag Photos HERE/" # 
 				srcHD = "testingDev/incomingTestPhotos"
-				mylioSubFolder = "Mylio Main Library Folder/2020s/2024/"
+				mylioSubFolder = "Mylio Main Library Folder/2020s/2025/"
 				mylioFolder = "/Volumes/Mylio 4TB/Mylio_87103a/#{mylioSubFolder}" # Main Vault, and not on Mini
 				mylioStaging = downloadsFolders + "Latest Processed photos-Import to Mylio/" #  These are relabeled and GPSed files. Will be moved to Mylio after processing.		
 			else # development or testing	
@@ -117,9 +117,9 @@ class	PhotoProcessor
 			# locations of folderGPX, 
 			case model_identifier
 			when "Mac14,12" # Mac mini M2 Pro
-				folderGPX = HOME + "Documents/GPS-Maps-docs/  GPX daily logs/2024 GPX logs/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't.
+				folderGPX = HOME + "Documents/GPS-Maps-docs/  GPX daily logs/2025 GPX logs/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't.
 			when "MacBookAir10,1" # 2020 MBA M1 13"
-				folderGPX = "/Users/gscar/Library/Mobile Documents/com~apple~CloudDocs/Documents/GPS-Maps-docs/  GPX daily logs/2024 GPX logs"
+				folderGPX = "/Users/gscar/Library/Mobile Documents/com~apple~CloudDocs/Documents/GPS-Maps-docs/  GPX daily logs/2025 GPX logs"
 			else
 				puts "#{__LINE__}. Something in the GUI to select the location of the GPX files"	
 			end # case model_identifer

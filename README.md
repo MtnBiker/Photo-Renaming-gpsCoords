@@ -8,11 +8,13 @@ Setup to work with cameras I use or have used. Canon, Panasonic, OMDS
 
 ## Usage
 
+IIRC, this is just a script to process photos from places hard coded and `ruby PhotoProcessing-OM.rb` will run the script
+
 /currentData folder no longer used, since now stored on the SD card because I use more than one camera. But am storing a list of photos processed which at present isn't being used.
 
 The GPS info adding is tricky. All GPS devices (AFAIK) use UTM. Most cameras can be set to any time (zone). I used to just set my camera to UTM, but then one of the more recent one allowed viewing the photos or downloading to an iPhone; but doing so set the time to local time.
 
-I am currently (2024) using the GaiaGPS iOS app to create my gpx track. That means I have the app running all the time (can be detrimental to battery life). And downloading the track is a multi-step process. And to save the script from processing all my tracks I have to move the older tracks to another folder.
+I am currently (2025) using the GaiaGPS iOS app to create my gpx track. That means I try to have the app running all the time (can be detrimental to battery life). And downloading the track is a multi-step process. And to save the script from processing all my tracks I have to move the older tracks to another folder.
 
 ## Dependencies and Requirements
 

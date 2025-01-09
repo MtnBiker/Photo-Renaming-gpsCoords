@@ -31,8 +31,8 @@ class RadioButtonExample
         horizontal_box do
           button('Cancel') do
             on_clicked do
-              puts "Action canceled! [This isn't working at the moment and will crash]"
-              close # Closes the application window
+              puts "Action canceled! [This isn't working at the moment and will crash. May be fixed]"
+              destroy # Closes the current window # Closes the application window
             end
           end
           button('OK') do

@@ -153,8 +153,8 @@ timeZonesFile = thisScript + "currentData/Greg camera time zones.yml"
 # timeZones = YAML.load(File.read(timeZonesFile)) # read in that file now and get it over with. Only use once, so this just confused things
 
 # GPS log files. Will this work from laptop
-folderGPX = HOME + "Documents/GPS-Maps-docs/  GPX daily logs/2024 GPX logs/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't.
-folderGPX = "/Users/gscar/Library/Mobile Documents/com~apple~CloudDocs/Documents/GPS-Maps-docs/  GPX daily logs/2024 GPX logs"
+folderGPX = HOME + "Documents/GPS-Maps-docs/  GPX daily logs/2025 GPX logs/" # Could make it smarter, so it knows which year it is. Massaged contains gpx files from all locations whereas Downloads doesn't.
+folderGPX = "/Users/gscar/Library/Mobile Documents/com~apple~CloudDocs/Documents/GPS-Maps-docs/  GPX daily logs/2025 GPX logs"
 puts "#{__LINE__}. Must manually set folderGPX for GPX file folders. Particularly important at start of new year AND if working on photos not in current year.\n       Using: #{folderGPX}\n"
 
 # MODULES
@@ -1285,10 +1285,10 @@ puts "#{__LINE__}. Time to add coordinates: #{timeNowWas}"
 # Move to Mylio folder (can't process in this folder or Mylio might import before changes are made)
 # mylioFolder = watchedFolderForImport # Used with Photos app
 # Set for OM, can I check for options depending on camera?
-mylioFolder = tmp = "/Volumes/Mylio 4TB/Mylio_87103a/Mylio Main Library Folder/2020s/2024/" # Main Vault
+mylioFolder = tmp = "/Volumes/Mylio 4TB/Mylio_87103a/Mylio Main Library Folder/2020s/2025/" # Main Vault
 unless Dir.exist?(mylioFolder) # unless is negative of if
   # If main vault not mounted use 
-  mylioFolder = HOME + "Mylio/Mylio Main Library Folder/2020s/2024/"
+  mylioFolder = HOME + "Mylio/Mylio Main Library Folder/2020s/2025/"
   puts "#{__LINE__}. "#{tmp} isn't available so files will be moved to #{mylioFolder}. . 
 end
 
@@ -1296,9 +1296,9 @@ puts mylioFolder
 # Can live without this 
 # case camModel
 # when  "OM-1MarkII"
-#   mylioFolder = mylioFolder + "OM-1-2024/" # ANNUALLY: ADD IN MYLIO, NOT IN FINDER. Good on both iMac and MBP M1 although it's not under iCloud, so requires Mylio for syncing. Not being used
+#   mylioFolder = mylioFolder + "OM-1-2025/" # ANNUALLY: ADD IN MYLIO, NOT IN FINDER. Good on both iMac and MBP M1 although it's not under iCloud, so requires Mylio for syncing. Not being used
 # when "DMC-GX8"
-#   mylioFolder = mylioFolder + "GX8-2024/"
+#   mylioFolder = mylioFolder + "GX8-2025/"
 # end
 moveToMylio(mylioStaging, mylioFolder, timeNowWas)
 
