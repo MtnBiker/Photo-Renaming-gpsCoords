@@ -57,7 +57,8 @@ require_relative "class_photo.rb"
 # end # class Photo
 
 class	PhotoProcessor
-	include Glimmer
+	# include Glimmer # I think the following brings this in
+	include Glimmer::LibUI::CustomWindow
 	
 	
 	attr_accessor :controls_visible, :photo_staging_folder, :selected_folder
@@ -519,15 +520,15 @@ class	PhotoProcessor
 			end # if production
 			
 			# font_button.rb for showin it works. Showed me you can have successive windows
-			window('hello world', 300, 200) {
-				font_button {
-					font <=> [self, :font_descriptor, after_write: -> { p font_descriptor }]
-				}
-				
-				on_closing do
-					puts 'Bye Bye' ## Don't see this in console in Nova, but do in iTerm
-				end
-			}.show
+			# window('hello world', 300, 200) {
+			# 	font_button {
+			# 		font <=> [self, :font_descriptor, after_write: -> { p font_descriptor }]
+			# 	}
+			# 	
+			# 	on_closing do
+			# 		puts 'Bye Bye' ## Don't see this in console in Nova, but do in iTerm
+			# 	end
+			# }.show
 			
 			# Main GUI Window to make choices opened window just into launch
 		window('Rename and add GPS to Photos', 800, 400) { # FIXME should this be moved down to where the window is defined by Glimmer?
@@ -558,6 +559,14 @@ class	PhotoProcessor
 				
 				label {
 					text <=> [self, :photo_staging_folder] # Displays the selected folder path
+				}
+				
+				button('Quit') {
+					stretchy false
+					on_clicked do
+						destroy
+						::LibUI.quit
+					end
 				}
 			} # vertical box
 		}.show # window('Rename…)
