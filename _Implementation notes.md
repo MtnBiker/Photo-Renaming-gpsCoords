@@ -118,3 +118,5 @@ gem install solargraph
 ➜ solargraph download-core # The `download-core` command is deprecated. # was on Extension page?
 
 1/11/2025 Current OM numbering scheme is not in ASCII order so script doesn't see new 2025 photos. Because year is not part of the scheme. Hide old (2024) photos on cards. Probably not the best solution as shouldn't be messing with the card. Maybe use dates of files.
+
+Moving last photo downloaded to computer rather than SD card. Not complete as need to check which is the latest and maybe note which card it is.

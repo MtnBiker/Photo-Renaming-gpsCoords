@@ -1,0 +1,93 @@
+OC306371 was the last file read from SD card. 2025-01-11 18:13:04 -0800
+O1106482 manual Sat, Jan 11, 2025 3:00 PM because 
+01016371 manual to account for OM not having years Sat, Jan 11, 2025 1:04 PM
+OC306371 was the last file read from SD card. 2025-01-10 19:04:41 -0800
+OC286349 was the last file read from SD card. 2024-12-28 17:13:29 -0800
+OC076017 was the last file read from SD card. 2024-12-07 21:20:32 -0800
+O9293586 was the last file read from SD card. 2024-09-29 14:11:48 +0800
+O9263176 was the last file read from SD card. 2024-09-26 16:43:13 +0800
+O9179999 was the last file read from SD card. 2024-09-26 16:35:45 +0800
+O9179999 was the last file read from SD card. 2024-09-26 16:32:29 +0800
+O9202184 copied manually from card 2
+O9078292 was the last file read from SD card. 2024-09-07 13:51:38 -0700
+O9058084 was the last file read from SD card. 2024-09-05 13:09:55 -0700
+O9048026 was the last file read from SD card. 2024-09-04 16:20:39 -0700
+O9027948 was the last file read from SD card. 2024-09-02 20:54:23 -0700
+O9017942 was the last file read from SD card. 2024-09-01 18:04:37 -0700
+O8316794 was the last file read from SD card. 2024-08-31 17:13:25 -0700
+O8306761 was the last file read from SD card. 2024-08-30 19:45:03 -0700
+O8296707 was the last file read from SD card. 2024-08-29 09:48:53 -0700
+O8236691 was the last file read from SD card. 2024-08-23 08:03:17 -0700
+O8216690 was the last file read from SD card. 2024-08-22 17:53:41 -0700
+O8116629 was the last file read from SD card. 2024-08-11 17:53:05 -0700
+O7236511 was the last file read from SD card. 2024-07-23 12:10:57 -0700
+O7216429 was the last file read from SD card. 2024-07-21 15:38:39 -0700
+O7176399 was the last file read from SD card. 2024-07-17 09:54:30 -0700
+O7046317 was the last file read from SD card. 2024-07-04 15:25:23 -0700
+O7016250 was the last file read from SD card. 2024-07-01 12:39:05 -0700
+O6196249 was the last file read from SD card. 2024-06-20 21:51:17 -0700
+O6086059 was the last file read from SD card. 2024-06-09 12:42:50 -0700
+O6085980 was the last file read from SD card. 2024-06-08 15:06:52 -0700
+O5205913 was the last file read from SD card. 2024-05-20 19:08:24 -0700
+O5195830 was the last file read from SD card. 2024-05-19 17:12:05 -0700
+O5185794 was the last file read from SD card. 2024-05-18 17:05:32 -0700
+O5175685 was the last file read from SD card. 2024-05-17 16:55:18 -0700
+O5175625 was the last file read from SD card. 2024-05-17 15:58:32 -0700
+O5165597 was the last file read from SD card. 2024-05-17 15:37:37 -0700
+O5165597 was the last file read from SD card. 2024-05-16 17:09:20 -0700
+O5165411 was the last file read from SD card. 2024-05-16 11:45:23 -0700
+O5165382 was the last file read from SD card. 2024-05-16 10:11:02 -0700
+O5155246 was the last file read from SD card. 2024-05-15 14:07:27 -0700
+O5144918 was the last file read from SD card. 2024-05-14 11:50:22 -0700
+O5094808 was the last file read from SD card. 2024-05-09 19:06:45 -0700
+O5064770 was the last file read from SD card. 2024-05-06 21:16:57 -0700
+O5064134 was the last file read from SD card. 2024-05-06 12:09:15 -0700
+O4304070 was the last file read from SD card. 2024-04-30 15:02:17 -0700
+O4263958 was the last file read from SD card. 2024-04-26 16:49:48 -0700
+O4243938 was the last file read from SD card. 2024-04-24 12:37:27 -0700
+O4233937 was the last file read from SD card. 2024-04-24 12:36:01 -0700
+O4233937 was the last file read from SD card. 2024-04-23 18:33:44 -0700
+O4233937 was the last file read from SD card. 2024-04-23 18:09:13 -0700
+O4233931 was the last file read from SD card. 2024-04-23 10:09:15 -0700
+O4223930 was the last file read from SD card. 2024-04-22 10:29:45 -0700
+O4203915 was the last file read from SD card. 2024-04-20 12:28:09 -0700
+O4203914 was the last file read from SD card. 2024-04-20 12:11:43 -0700
+O4203913 was the last file read from SD card. 2024-04-20 10:27:44 -0700
+O4143901 was the last file read from SD card. 2024-04-14 18:45:37 -0700
+O4143849 was the last file read from SD card. 2024-04-14 12:30:28 -0700
+O4143848 was the last file read from SD card. 2024-04-14 12:24:23 -0700
+O4143848 was the last file read from SD card. 2024-04-14 12:18:34 -0700
+O4143846 was the last file read from SD card. 2024-04-14 12:04:21 -0700
+O4143842 was the last file read from SD card. 2024-04-14 11:55:49 -0700
+O4143836 was the last file read from SD card. 2024-04-14 09:30:36 -0700
+O4113819 was the last file read from SD card. 2024-04-11 11:45:28 -0700
+O4113816 was the last file read from SD card. 2024-04-11 11:32:37 -0700
+O4103811 was the last file read from SD card. 2024-04-11 10:54:38 -0700
+O4103811 was the last file read from SD card. 2024-04-10 19:14:55 -0700
+O4063372 was the last file read from SD card. 2024-04-06 18:16:05 -0700
+O4053340 was the last file read from SD card. 2024-04-05 16:49:49 -0700
+O4041877 was the last file read from SD card. 2024-04-04 17:17:06 -0700
+O4021835 was the last file read from SD card. 2024-04-02 10:04:23 -0700
+O3251534was the last file read from SD card. manual
+O4021835 was the last file read from SD card. 2024-04-02 09:46:55 -0700
+O3301598 was the last file read from SD card. 2024-03-30 17:31:17 -0700
+O3301578 was the last file read from SD card. 2024-03-30 13:48:06 -0700
+O3301565 was the last file read from SD card. 2024-03-30 10:05:32 -0700
+O3251534 was the last file read from SD card on 
+O3231047 was the last file read on 2024-03-29 10:13:50 -0700
+O3251531 for testing
+O3231047 manual change
+O1000808 was the last file read on 2024-03-25 18:32:23 -0700
+O1000759 was the last file read on 2024-03-14 16:25:48 -0700
+O1000237 was the last file read on 2024-03-13 19:46:38 -0700
+O1000207 was the last file read on 2024-03-08 16:43:04 -0800
+O1000188 was the last file read on 2024-03-07 17:09:17 -0800
+O1000187 was the last file read on 2024-03-07 16:58:04 -0800
+O1000119 was the last file read on 2024-03-07 16:48:39 -0800 Changed to O manually
+P1000119 was the last file read on 2024-03-04 19:40:28 -0800
+P1000054 was the last file read on 2024-03-04 11:08:09 -0800
+P1000000 was the last file read on 2024-03-03 19:04:48 -0800 Reset to bring in photos with GPS info added by OI app
+P1000053 was the last file read on 2024-03-03 19:04:33 -0800
+P1000000 was the last file read on 2024-03-03 19:01:43 -0800
+P1000052 was the last file read on 2024-03-03 18:54:47 -0800
+P1000052 was the last file read on 2024-03-03 18:44:20 -0800

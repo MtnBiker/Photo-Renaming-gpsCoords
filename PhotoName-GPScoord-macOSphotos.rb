@@ -206,9 +206,12 @@ def whichSource(whichOne,prefsPhoto)
   src
 end
 
-def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript)
+def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoRead_sd_card, lastPhotoRead_file_root, thisScript)
   # some of the above counter variables could be set at the beginning of this script and used locally
-  puts "\n#{__LINE__}. Copying photos from an SD card starting with #{lastPhotoFilename} or from another value manually entered. \n#{Time.now.strftime("%I:%M:%S %p")}. May take a while"
+  # for lastPhotoRead_file_root
+  file_root = File.new(lastPhotoRead_file_root, "r") 
+  lastPhotoRead_root = file_root.gets[4..7]
+  puts "\n#{__LINE__}. Copying photos from an SD card starting with #{lastPhotoFilename} or from another value manually entered or EVENTUALLY:\n#{lastPhotoRead_root}  \n#{Time.now.strftime("%I:%M:%S %p")}. May take a while"
   # OM starts with O and Panasonic with P, used to be hardwired for P
   # OM folder name 100OMSYS
   # Dir.glob I think can select on the beginning characters
@@ -216,6 +219,7 @@ def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, th
   globStart = lastPhotoFilename.slice(0)+"*" # Selected first letter of last file name
   # puts "#{__LINE__}. globStart: #{globStart}. Using to select folder LUMIX, but not OM. #{Time.now.strftime("%I:%M:%S %p")}. "
   lastPhotoSequenceNo = lastPhotoFilename[4..7] # OM first digits are Omdd
+  
   cardCount = 0
   cardCountCopied = 0
   doAgain = true # name isn't great, now means do it. A no doubt crude way to run back through the copy loop if we moved to another folder.
@@ -264,7 +268,9 @@ def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, th
   # Writing which file on the card we ended on
   firstLine = fileSDbasename + " was the last file read from SD card. " + Time.now.to_s # No __LINE__ because used to write this to  lastPhotoReadTextFile
   begin
-    file_prepend(lastPhotoReadTextFile, firstLine)
+    file_prepend(lastPhotoRead_sd_card, firstLine)
+    # Added this without fully checking out the logic
+    file_prepend(lastPhotoRead_file_root, firstLine)
     # Following just puts in the last file and wipes out the rest. Can delete all of this
     # fileNow = File.open(lastPhotoReadTextFile, "w") # must use explicit path, otherwise will use wherever we are are on the SD card
     #   fileNow.puts firstLine
@@ -1137,7 +1143,9 @@ end
 #   # abort if (whichDrive == "R") # break doesn't work, but abort seems to
 # end
 
-lastPhotoReadTextFile = sdCard + "lastPhotoRead.txt"
+# May check which has latest file. Record to both
+lastPhotoReadTextFile = lastPhotoRead_sd_card= sdCard + "lastPhotoRead.txt"
+lastPhotoRead_file_root = "currentData/lastPhotoReadRoot.txt"
 # if File.exist?(lastPhotoReadTextFile) # If SD card not mounted. TODO logic with else to try again
 
 if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner coding
@@ -1149,7 +1157,7 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
     # lastPhotoReadTextFile = sdCard + "/lastPhotoRead.txt" # But this doesn't work if a new card.
     # Are the following variables used outside of copySD. If not should be moved into that module. FIXME
     puts "\n#{__LINE__}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. NEED an error here if card not mounted!!. Have a kludge fix in the next rescue."
-    file = File.new(lastPhotoReadTextFile, "r") # This causes an error when reading from computer
+    file = File.new(lastPhotoRead_sd_card, "r") # This causes an error when reading from computer
     # puts  "\n#{__LINE__}. file: #{file} DEBUG. Are we getting to here?. No so error on above line when reading from camera"
     lastPhotoFilename = file.gets # apparently grabbing a return. maybe not the best reading method. Redefined below
     # lastPhotoFilename  = lastPhotoFilename.chop
@@ -1224,7 +1232,7 @@ timeNowWas = timeStamp(timeNowWas, lineNum)
 #  If working from SD card, copy or move files to " Drag Photos HERE Drag Photos HERE" folder, then will process from there.
 puts "#{__LINE__}. lastPhotoFilename: #{lastPhotoFilename}"
 
-copySD(srcSD, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, thisScript) if whichOne == "SD"
+copySD(srcSD, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoRead_sd_card, thisScript) if whichOne == "SD"
 #  Note that file creation date is the time of copying. May want to fix this. Maybe a mv is a copy and move which is sort of a recreation. 
 
 timeNowWas = timeStamp(timeNowWas, lineNum)
