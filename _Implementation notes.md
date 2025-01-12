@@ -116,3 +116,5 @@ Change .ori to .ori.orf so Mac can open. And fileEXIF.CameraType2 = "OM-1" on .o
 Should have been here anyway, but checked and added some Nova extension, so
 gem install solargraph
 ➜ solargraph download-core # The `download-core` command is deprecated. # was on Extension page?
+
+1/11/2025 Current OM numbering scheme is not in ASCII order so script doesn't see new 2025 photos. Because year is not part of the scheme. Hide old (2024) photos on cards. Probably not the best solution as shouldn't be messing with the card. Maybe use dates of files.

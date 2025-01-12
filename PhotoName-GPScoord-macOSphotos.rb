@@ -124,7 +124,10 @@ laptopTempJpg         = laptopLocation + "Latest Downloads temp jpg/"
 photosRenamedTo       = thisScript + "currentData/photosRenamedTo.txt" #  Had it on the SD card. How about keeping with the script? Was: HOME + "Pictures/photosRenamedTo.txt" # Should keep this on Daguerre, but not always connected.
 
 # Folders on portable drive: Daguerre. This is the normal location with Daguerre plugged into iMac
-downloadsFolders = "/Volumes/Daguerre/_Download folder/"
+# Change to using faster Mini as staging and processing. Backup to Daguerre.
+# Naming on Daguerre different than Mini and not logical anymore. _Download folder is really a processing folder + archive
+# downloadsFolders = "/Volumes/Daguerre/_Download folder/" # Daguerre
+downloadsFolders = "/Users/gscar/Pictures/_Photo Processing Folders/" # Mini and ?
 unneededBracketed = downloadsFolders + "Unneeded brackets/"
 # Maybe should start with what computer I'm on then make decisions about what's plugged in. Also consider the 10GB as a primary?
 # Process in MtnBikerSSD or Daguerre if plugged in, otherwise the computer in use which is decided later?
@@ -138,10 +141,11 @@ else
 end
 # See at approx line 985 where decide where to move files
 srcHD       = downloadsFolders + " Drag Photos HERE/"  # Photos copied from camera, sent by others, etc.
-mylioStaging = downloadsFolders + "Latest Processed photos-Import to Mylio/" #  These are relabeled and GPSed files. Will be moved to Mylio after processing.
+mylioStaging = downloadsFolders + "Processed photos to be imported to Mylio/" #  These are relabeled and GPSed files. Will be moved to Mylio after processing.
 # puts "#{__LINE__}. mylioStaging: #{mylioStaging}. Where the photos are processed before being moved into Mylio folder" # debugging
 tempJpg   = downloadsFolders + "Latest Downloads temp jpg/"
 archiveFolder  = downloadsFolders + "_imported-archive" # folder to move originals to if not done in. No slash because getting double slash with one
+archiveFolder  = "/Volumes/Daguerre/archive_photos_folder/" # as of 2025
 srcRename = "/Volumes/Seagate 8TB Backup/Mylio_87103a/Greg Scarich’s iPhone Library/" # Frequent location to perform this. iPhone photos brought into Mylio
 srcAddLocation  = downloadsFolders + "Latest Processed photos-Import to Mylio/" # = srcRename # Change to another location for convenience. This location picked so don't screw up a bunch of files
 
@@ -211,6 +215,7 @@ def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, th
   # Crud because assumes not changed. If OM goes back to default won't work
   globStart = lastPhotoFilename.slice(0)+"*" # Selected first letter of last file name
   # puts "#{__LINE__}. globStart: #{globStart}. Using to select folder LUMIX, but not OM. #{Time.now.strftime("%I:%M:%S %p")}. "
+  lastPhotoSequenceNo = lastPhotoFilename[4..7] # OM first digits are Omdd
   cardCount = 0
   cardCountCopied = 0
   doAgain = true # name isn't great, now means do it. A no doubt crude way to run back through the copy loop if we moved to another folder.
@@ -230,8 +235,11 @@ def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoReadTextFile, th
       fnp = srcHD + "/" + item # using srcHD as the put files here place, might cause problems later
       # get filename and make select later than already downloaded
       fileSDbasename = File.basename(item,".*")
+      fileSDsequenceNo = fileSDbasename[4..7]
       # puts "#{__LINE__}. #{cardCount}. item: #{item}. fn: #{fn}"
-      next if item == '.' or item == '..' or fileSDbasename <= lastPhotoFilename # don't need the first two with Dir.glob, but doesn't slow things down much overall for this script
+      next if item == '.' or item == '..' or fileSDbasename <= lastPhotoFilename # don't need the first two with Dir.glob, but doesn't slow things down much overall for this script. This skipping files already read if not using my OM naming scheme. Next is for OM with OmddSequence
+      # Could do this using a date of the file (createDate or similar). Would have to change what is written to lastPhotoSequenceNo. Although likely to be slower since have to do a fileEXIF
+      next if item == '.' or item == '..' or fileSDsequenceNo <= lastPhotoSequenceNo
       FileUtils.copy(fn, fnp) # Copy from card to hard drive. , preserve = true gives and error. But preserve also preserves permissions, so that may not be a good thing. If care will have to manually change creation date
       cardCountCopied += 1
     end # Dir.glob("P*") do |item| 
@@ -1139,15 +1147,17 @@ if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner codin
   begin
     # Read from SD card
     # lastPhotoReadTextFile = sdCard + "/lastPhotoRead.txt" # But this doesn't work if a new card.
+    # Are the following variables used outside of copySD. If not should be moved into that module. FIXME
     puts "\n#{__LINE__}. lastPhotoReadTextFile: #{lastPhotoReadTextFile}. NEED an error here if card not mounted!!. Have a kludge fix in the next rescue."
     file = File.new(lastPhotoReadTextFile, "r") # This causes an error when reading from computer
     # puts  "\n#{__LINE__}. file: #{file} DEBUG. Are we getting to here?. No so error on above line when reading from camera"
-    lastPhotoFilename = file.gets # apparently grabbing a return. maybe not the best reading method.
+    lastPhotoFilename = file.gets # apparently grabbing a return. maybe not the best reading method. Redefined below
     # lastPhotoFilename  = lastPhotoFilename.chop
     # puts "\n#{__LINE__}. lastPhotoFilename: #{lastPhotoFilename}. Value can be changed by user, so this may not be the value used. was #lastPhotoFilename.chop"
     # lastPhotoFilename is 8 characters long (P plus 7 digits) - starts with ) for OM (at least I try to remember to set it to that. Default is P (which I liked to think was Panasonic, but maybe it means photo)).
     # Adding date to this line, so will take first 12 characters (would be cleaner if made the write an array or json and worked with that, but this is the quick and dirty)
-    lastPhotoFilename = lastPhotoFilename[0..7]
+    lastPhotoFilename = lastPhotoFilename[0..7] # O m dd 4-digit sequence no. So can use that to know where to start. Well you have to separate the mdd from the sequence and just look at the sequence. Will break when get to 10k photos
+    # lastPhotoSequenceNo = lastPhotoFilename[4..7] # unless needed elsewhere get this in the copySD method
     lastPhotoDateTime = lastPhotoFilename[47..72] # OB035296 was the last file read from SD card. 2024-11-03 08:46:19 -0800
     puts "\n#{__LINE__}. lastPhotoFilename: #{lastPhotoFilename}. at #{lastPhotoDateTime}.  Value can be changed by user, so this may not be the value used. #{timeNowWas = timeStamp(timeNowWas, lineNum)}" # was #lastPhotoFilename.chop
     file.close
