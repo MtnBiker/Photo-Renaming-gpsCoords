@@ -1,0 +1,5 @@
+SanDisk512GB-1 (2024)	Volume UUID:	B9DB7D8C-D7F4-3C2B-ABC2-1209AFD3359A
+OWC512GB-1 (2024)   	Volume UUID:	291BBC66-69CE-38E4-9382-708B81CAEF1C
+
+Assuming will eventually have similarly branded and sizes of card
+() year put in service

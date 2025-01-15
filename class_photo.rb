@@ -1,6 +1,6 @@
 class Photo
    
-  @@count = 0
+  @@count = 0 ## not using, but should figure out how to do this, see commented out below
    
   attr_accessor :id, :fn, :fileName, :fileExt, :camModel, :fileType, :stackedImage, :driveMode, :specialMode, :afPointDetails, :subjectTrackingMode, :createDate, :sameSecond, :dateTimeOriginal, :offsetTimeOriginal, :preservedFileName
   # order by need for sorting and dealing with

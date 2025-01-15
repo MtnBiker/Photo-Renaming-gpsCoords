@@ -93,14 +93,17 @@ Then saw https://github.com/AndyObtiva/glimmer-dsl-libui#scaffold-application
 which led to starting over with a scaffold and also setting up some git credentials on  /Ruby/photo_processing. Scaffold answers questions of organization I was having 
 
 ## ToDo
+Bring in file location changes from original script. Processing on Mini
+Dealing with OM filenaming not having year (file names could repeat)
 Prevent redownloading from the two cards
 dateTimeOriginal replace with createDate. .mov doesn't have dateTimeOriginal
 Look at EXIF filename vs Ruby basename for consistency, but be aware of my `fileBaseName`
 sameSecondTrue() probably not doing much, most of it is not being used
 Add to instructions or somewhere if a bracketed image has a stack
 timeNow etc reports are a mess
+Move lastPhotoFilename determination into copySD as it's not used outside of that module and won't need to bring the results into the module. Only lastPhotoReadTextFile will be needed to be brought in. Double check. Also note that this logic was changed in PhotoName-GPScoord… after starting PhotoProcessing-)M
 
-## ToDone
+## ToDo-Done
 -2ss sequencing for same second would be better with a, b, c etc
 - _Download folder (on Daguerre and elsewhere) rename to _Photo_processing_folder
 

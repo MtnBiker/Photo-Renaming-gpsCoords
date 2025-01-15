@@ -206,6 +206,26 @@ def whichSource(whichOne,prefsPhoto)
   src
 end
 
+def get_uuid()
+  # To be able to identify which SD card for determining where to start downloading photos.
+  volume_name = "/Volumes/OM System"
+  uuid_regex = /\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\b/
+  
+  # Run the `diskutil info` command for the specified volume
+  output = `diskutil info "#{volume_name}"`
+  
+  # Match and extract the UUID
+  uuid = output.match(/Volume UUID:\s+(#{uuid_regex})/i)
+  
+  if uuid
+    puts "Volume UUID[1]: #{uuid[1]}"
+  else
+    puts "UUID not found for volume #{volume_name}"
+  end
+  return uuid[1]
+  # could extend to get my description, e.g., Sandisk 512GB-1
+end
+  
 def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoRead_sd_card, lastPhotoRead_file_root, thisScript)
   # some of the above counter variables could be set at the beginning of this script and used locally
   # for lastPhotoRead_file_root
@@ -241,7 +261,7 @@ def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoRead_sd_card, la
       fileSDbasename = File.basename(item,".*")
       fileSDsequenceNo = fileSDbasename[4..7]
       # puts "#{__LINE__}. #{cardCount}. item: #{item}. fn: #{fn}"
-      next if item == '.' or item == '..' or fileSDbasename <= lastPhotoFilename # don't need the first two with Dir.glob, but doesn't slow things down much overall for this script. This skipping files already read if not using my OM naming scheme. Next is for OM with OmddSequence
+      # next if item == '.' or item == '..' or fileSDbasename <= lastPhotoFilename # don't need the first two with Dir.glob, but doesn't slow things down much overall for this script. This skipping files already read if not using my OM naming scheme. Next is for OM with OmddSequence
       # Could do this using a date of the file (createDate or similar). Would have to change what is written to lastPhotoSequenceNo. Although likely to be slower since have to do a fileEXIF
       next if item == '.' or item == '..' or fileSDsequenceNo <= lastPhotoSequenceNo
       FileUtils.copy(fn, fnp) # Copy from card to hard drive. , preserve = true gives and error. But preserve also preserves permissions, so that may not be a good thing. If care will have to manually change creation date
@@ -267,15 +287,20 @@ def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoRead_sd_card, la
   end # if doAgain…
   # Writing which file on the card we ended on
   firstLine = fileSDbasename + " was the last file read from SD card. " + Time.now.to_s # No __LINE__ because used to write this to  lastPhotoReadTextFile
+  # firstLine was text, last_photo as array
+  # To make the line more human readable, note_. Files have not been renamed yet
+  note_a = "was the last file read from SD card named: "
+  note_b = ""
+  uuid = get_uuid()
+  sd_card = "SanDisk512GB-1" # Need to look this up.
+  # Change all firstLine to first_line when/if this works out
+  # firstLine as hash so can change info added more easily
+  firstLine = [ last_photo: fileSDbasename, note: note_a, sd_card: , uuid: uuid]
   begin
     file_prepend(lastPhotoRead_sd_card, firstLine)
     # Added this without fully checking out the logic
     file_prepend(lastPhotoRead_file_root, firstLine)
-    # Following just puts in the last file and wipes out the rest. Can delete all of this
-    # fileNow = File.open(lastPhotoReadTextFile, "w") # must use explicit path, otherwise will use wherever we are are on the SD card
-    #   fileNow.puts firstLine
-    #   fileNow.close
-      puts "\n#{__LINE__}. The last file processed. fileSDbasename, #{fileSDbasename}, written to #{fnp} ??."
+    puts "\n#{__LINE__}. The last file processed. fileSDbasename, #{fileSDbasename}, written to #{fnp} ??."
   rescue IOError => e
     puts "Something went wrong. Could not write last photo read (#{fileSDbasename}) to #{fileNow}"
   end # begin
