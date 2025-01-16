@@ -22,8 +22,8 @@
 # This may be wrong if those settings aren't updated or even worse if one is right and the other wrong
 
 # Formerly used a Perl script gpsPhoto.pl which has not been available for years, but I had a copy which I used. Changed to using an ExifTool command. I think I did this when I got the OM-1
-puts "#{RUBY_DESCRIPTION} per var RUBY_DESCRIPTION. Ruby version seems to come from .irbrc if run in Nova"
 puts "#{__LINE__}. Top of script. Setting variables and defining methods, and \nat about line no. 860 enter processing. \nSearch for `## The \"PROGRAM\"` to find that point"
+puts "#{RUBY_DESCRIPTION} per var RUBY_DESCRIPTION. ? Ruby version seems to come from .irbrc if run in Nova? At the moment not finding that any .irbrc file in the path has andy Ruby info."
 
 require 'fileutils'
 include FileUtils
@@ -53,6 +53,7 @@ PutsDebuggerer.formatter = -> (data) {
   puts "FOOTER: #{data[:footer]}"
 }
 
+# Can't easily do with what using for modules because some of these require the others which get complicated.
 require_relative 'lib/gpsCoordsPashua' # Dialog for adding GPS coordinates without moving
 require_relative 'lib/gpsYesPashua'
 require_relative 'lib/LatestDownloadsFolderEmpty_Pashua'
@@ -62,13 +63,17 @@ require_relative 'lib/renamePashua' # Dialog for renaming without moving
 require_relative 'lib/SDorHD'
 # require_relative 'lib/gpsAddLocationPashua' # Dialog for adding location information based GPS coordinates in file EXIF without moving. No longer supported
 
+# Require all files in /modules which are the modules spun off to clean up the main script. Could change to /lib, but for time being /lib has Pashua scripts. See above
+Dir[File.join(__dir__, 'modules', '*.rb')].each { |file| require file }
+
+
 # The following lines and require 'logger' create a log file 
 # logger = Logger.new('logfile.log') # ChatGPT to find problems
 # logger.level = Logger::DEBUG
 
 HOME = "/Users/gscar/"
-thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. 
-
+thisScript = File.dirname(__FILE__) +"/" # needed because the Pashua script calling a file seemed to need the directory. And for writing to lastPhotoRead # Remember __FILE__ is the path plus filename
+# puts "\n#{__LINE__}. __FILE__: #{__FILE__}.  File.dirname(__FILE__) +\"/\" : #{thisScript}."
 def lineNum() # Had to move this to above the first call or it didn't work. Didn't think that was necessary. Later discovered __LINE__ and changed most.
   caller_infos = caller.first.split(":")
   # Note caller_infos[0] is file name
@@ -230,7 +235,8 @@ def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoRead_sd_card, la
   # some of the above counter variables could be set at the beginning of this script and used locally
   # for lastPhotoRead_file_root
   file_root = File.new(lastPhotoRead_file_root, "r") 
-  lastPhotoRead_root = file_root.gets[4..7]
+  lastPhotoRead_root = file_root.gets[4..7] # as text file. Below for hash. Didn't work
+  # lastPhotoRead_root = file_root.gets.to_a[:last_photo] 
   puts "\n#{__LINE__}. Copying photos from an SD card starting with #{lastPhotoFilename} or from another value manually entered or EVENTUALLY:\n#{lastPhotoRead_root}  \n#{Time.now.strftime("%I:%M:%S %p")}. May take a while"
   # OM starts with O and Panasonic with P, used to be hardwired for P
   # OM folder name 100OMSYS
@@ -295,10 +301,12 @@ def copySD(src, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoRead_sd_card, la
   sd_card = "SanDisk512GB-1" # Need to look this up.
   # Change all firstLine to first_line when/if this works out
   # firstLine as hash so can change info added more easily
-  firstLine = [ last_photo: fileSDbasename, note: note_a, sd_card: , uuid: uuid]
+  firstLine = { last_photo: fileSDbasename, note: note_a, sd_card: , uuid: uuid }.to_s
+  # [{last_photo: "", note: "was the last file read from SD card named: ", sd_card: "SanDisk512GB-1", uuid: "B9DB7D8C-D7F4-3C2B-ABC2-1209AFD3359A"}]
   begin
-    file_prepend(lastPhotoRead_sd_card, firstLine)
+    file_prepend(lastPhotoRead_sd_card, firstLine) 
     # Added this without fully checking out the logic
+    puts "\n#{__LINE__}. lastPhotoRead_file_root: #{lastPhotoRead_file_root}. Debug" #currentData/lastPhotoReadRoot.txt
     file_prepend(lastPhotoRead_file_root, firstLine)
     puts "\n#{__LINE__}. The last file processed. fileSDbasename, #{fileSDbasename}, written to #{fnp} ??."
   rescue IOError => e
@@ -993,8 +1001,11 @@ end #  Write timeDiff to the photo files
 def file_prepend(file, str)
   # For adding the last photo processed to beginning of file.
   # https://stackoverflow.com/questions/8623231/prepend-a-single-line-to-file-with-ruby Copied
+  puts "\n#{__LINE__}. file: #{file}. str: #{str}." 
+  # file: currentData/lastPhotoReadRoot.txt. str: {last_photo: "", note: "was the last file read from SD card named: ", sd_card: "SanDisk512GB-1", uuid: "B9DB7D8C-D7F4-3C2B-ABC2-1209AFD3359A"}.
   new_contents = ""
-  str = str + "\n" # not in original, but needed to put this return in somewhere
+  # str = str + "\n" #   str = str + "\n" # not in original, but needed to put this return in somewhere
+  str = "#{str}\n"
   File.open(file, 'r') do |fd|
     contents = fd.read
     new_contents = str << contents
@@ -1170,8 +1181,8 @@ end
 
 # May check which has latest file. Record to both
 lastPhotoReadTextFile = lastPhotoRead_sd_card= sdCard + "lastPhotoRead.txt"
-lastPhotoRead_file_root = "currentData/lastPhotoReadRoot.txt"
-# if File.exist?(lastPhotoReadTextFile) # If SD card not mounted. TODO logic with else to try again
+lastPhotoRead_file_root = "#{thisScript}/currentData/lastPhotoReadRoot.txt"
+# if File.exist?(lastPhotoReadTextFile) # If SD card not mounted. TODO logic with else to try again. Note thisScript = File.dirname(__FILE__) +"/"
 
 if whichOne=="SD" # otherwise it's HD, probably should be case for cleaner coding
   # if File.exist?(lastPhotoReadTextFile) # If SD card not mounted. TODO logic with else to try again
@@ -1255,9 +1266,9 @@ puts "\n#{__LINE__}. Initialization complete. File renaming and copying/moving b
 timeNowWas = timeStamp(timeNowWas, lineNum)
 
 #  If working from SD card, copy or move files to " Drag Photos HERE Drag Photos HERE" folder, then will process from there.
-puts "#{__LINE__}. lastPhotoFilename: #{lastPhotoFilename}"
+puts "#{__LINE__}. lastPhotoFilename: #{lastPhotoFilename}. About to enter copySD"
 
-copySD(srcSD, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoRead_sd_card, thisScript) if whichOne == "SD"
+copySD(srcSD, srcHD, srcSDfolder, lastPhotoFilename, lastPhotoRead_sd_card, lastPhotoRead_file_root, thisScript) if whichOne == "SD"
 #  Note that file creation date is the time of copying. May want to fix this. Maybe a mv is a copy and move which is sort of a recreation. 
 
 timeNowWas = timeStamp(timeNowWas, lineNum)

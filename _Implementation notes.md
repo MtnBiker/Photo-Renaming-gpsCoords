@@ -121,3 +121,6 @@ gem install solargraph
 Fixed above by using only he sequence no., i.e., OM file naming, Omddxxxx where the last four characters are sequential numbering (not by day). I ignore first four characters. See what happens when hit 9999
 
 Moving last photo downloaded to computer rather than SD card. Not complete as need to check which is the latest and maybe note which card it is. See sentence above
+
+## Maybe don't bother with Glimmer for now. Learn it on an app that needs it more.
+check if any changes in PhotoProcessing-OM.rb (Glimmer) should be brought into the main script.

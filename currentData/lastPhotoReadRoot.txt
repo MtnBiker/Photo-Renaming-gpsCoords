@@ -1,3 +1,5 @@
+OC306504 , note: "was the last file read from SD card named: ", sd_card: "SanDisk512GB-1", uuid: "B9DB7D8C-D7F4-3C2B-ABC2-1209AFD3359A"}
+OC306371 , note: "was the last file read from SD card named: ", sd_card: "SanDisk512GB-1", uuid: "B9DB7D8C-D7F4-3C2B-ABC2-1209AFD3359A"}
 OC306371 was the last file read from SD card. 2025-01-11 18:13:04 -0800
 O1106482 manual Sat, Jan 11, 2025 3:00 PM because 
 01016371 manual to account for OM not having years Sat, Jan 11, 2025 1:04 PM

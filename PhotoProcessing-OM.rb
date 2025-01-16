@@ -67,7 +67,9 @@ class	PhotoProcessor
 		@controls_visible = false # Initially hide the controls
 		@selected_folder = '' # was the name for the copied script
 		@photo_staging_folder = '/Volumes/Daguerre/_Download folder/ Drag Photos HERE/' #FIXME _Download folder rename to _Photo_processing_folder
+		# @selected_file = ''
 	end
+	option :mylio_staging_folder, default: '/Volumes/Daguerre/_Download folder/Latest Processed photos-Import to Mylio/'
 	
 	mylioStaging = ''       # Initialize selected_file
 	# photo_staging_folder = '/Volumes/Daguerre/_Download folder/ Drag Photos HERE/' #FIXME _Download folder rename to _Photo_processing_folder
@@ -540,8 +542,9 @@ class	PhotoProcessor
 					stretchy false
 					
 					on_clicked do
-						@photo_staging_folder = open_folder # Opens a folder selection dialog photo_staging_folder
-						msg_box('Selected Folder', @photo_staging_folder || 'No folder selected') # Shows the selected folder or a default message
+						self.photo_staging_folder = open_folder # is this the same as the following
+						# @photo_staging_folder = open_folder # Opens a folder selection dialog photo_staging_folder
+						msg_box('Selected Photo Staging Folder', @photo_staging_folder || 'No folder selected') # Shows the selected folder or a default message
 					end
 				} # button()
 				
